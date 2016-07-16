@@ -4,16 +4,28 @@ using namespace std;
 namespace utils
 {
 
+///callback impl///
+
+
+
+bool generic_action_function(char* buffer)
+{
+    cout<<"\ngeneric_action_function :: buffer = "<<buffer<<endl;
+    return true;
+}
+
 ///cvector////
+
+
 
 
 cvector* cvector_init()
 {
     cvector* pcvector = (cvector*)(malloc(sizeof(cvector)));
-    pcvector->pcvelement = (cvector_element *) malloc(INIT_VECTOR_SIZE*sizeof(cvector_element));
+    pcvector->pcvelement = (generic_payload *) malloc(INIT_VECTOR_SIZE*sizeof(generic_payload));
     pcvector->allocated_size = INIT_VECTOR_SIZE;
-    pcvector->size = 0;
-    cout<<"\ncvector_init :: size = "<<pcvector->allocated_size<<endl;
+    pcvector->size = 1;
+    cout<<"\ncvector_init :: allocated_size = "<<pcvector->allocated_size<<endl;
     return(pcvector);
 }
 
@@ -39,7 +51,14 @@ void cvector_remove(cvector* pcvector,unsigned int index)
         cout<<"\ncvector_remove :: ERROR_INVALID index = "<<index<<endl;
     }
 }
-void cvector_push_back(cvector* pcvector,cvector_element *pelem)
+
+void register_callback(cvector* pcvector,generic_payload *pelem)
+{
+    cvector_push_back(pcvector,pelem);
+    cout<<"\nregister_callback ::  command_id = "<<pelem->command_id<<endl;
+
+}
+void cvector_push_back(cvector* pcvector,generic_payload *pelem)
 {
     if(CHECK_VALIDITY(pelem) && CHECK_VALIDITY(pcvector))
     {
@@ -47,7 +66,7 @@ void cvector_push_back(cvector* pcvector,cvector_element *pelem)
         if(pcvector->size == prev_alloc_size)
         {
             int new_alloc_size = prev_alloc_size + INIT_VECTOR_SIZE;
-            pcvector->pcvelement = (cvector_element *) realloc(pcvector->pcvelement,(new_alloc_size)*sizeof(cvector_element));
+            pcvector->pcvelement = (generic_payload *) realloc(pcvector->pcvelement,(new_alloc_size)*sizeof(generic_payload));
             pcvector->allocated_size = new_alloc_size;
 
             pcvector->pcvelement[pcvector->size] = *pelem;
@@ -60,6 +79,7 @@ void cvector_push_back(cvector* pcvector,cvector_element *pelem)
         }
         else if(pcvector->size < prev_alloc_size)
         {
+
             pcvector->pcvelement[pcvector->size] = *pelem;
             ++(pcvector->size);
         }
@@ -80,7 +100,7 @@ void cvector_set_def_values(cvector* pcvec)
 
         while(--l >= 0)
         {
-            pcvec->pcvelement[l].int_element = l;
+            pcvec->pcvelement[l].command_id = l;
             ++(pcvec->size);
 
         }
@@ -99,7 +119,7 @@ void cvector_display_values(cvector* pcvec)
         int l = pcvec->size;
         while(--l >= 0)
         {
-            cout<<" "<<pcvec->pcvelement[l].int_element;
+            cout<<" "<<pcvec->pcvelement[l].command_id;
         }
         cout<<endl;
     }

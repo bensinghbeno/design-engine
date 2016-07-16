@@ -10,27 +10,56 @@ using namespace utils;
 using namespace std;
 
 
+
+
+
+//void register_callback(unsigned int callback_id, bool(*action_pointer)(void))
+//{
+//    (*action_pointer)();
+//}
+
+
 int main(int argc,char* argv[])
 {
     cout<<"Program Started"<<endl;
 
-    cvector* pMycvector = cvector_init();
-    cvector_set_def_values(pMycvector);
-    cvector_display_values(pMycvector);
+    bool(*fp)(char* buffer);
+    fp = &generic_action_function;
+
+    generic_payload* pMyPayload = MALLOC(generic_payload);
+    strcpy(pMyPayload->buffer_data,"BUFFERD");
+    pMyPayload->pAction = fp;
+    pMyPayload->pAction(pMyPayload->buffer_data);
 
 
-    cvector_element* pMycvectorlement = MALLOC(cvector_element);
-    pMycvectorlement->int_element = 17;
-    cvector_push_back(pMycvector,pMycvectorlement);
-    cvector_display_values(pMycvector);
+    //(*fp)("BUFFER_DATA");
 
 
-    cvector_remove(pMycvector,7);
-    cvector_display_values(pMycvector);
+//    cvector* callback_vector = cvector_init();
+//    generic_payload* pMyPayload = MALLOC(generic_payload);
+//    pMyPayload->command_id = 100;
+//    register_callback(callback_vector,pMyPayload);
+//    cvector_display_values(callback_vector);
 
 
 
-    cvector_delete(pMycvector);
+//    cvector* pMycvector = cvector_init();
+//    cvector_set_def_values(pMycvector);
+//    cvector_display_values(pMycvector);
+
+
+//    generic_payload* pMycvectorlement = MALLOC(generic_payload);
+//    pMycvectorlement->command_id = 17;
+//    cvector_push_back(pMycvector,pMycvectorlement);
+//    cvector_display_values(pMycvector);
+
+
+//    cvector_remove(pMycvector,7);
+//    cvector_display_values(pMycvector);
+
+
+
+//    cvector_delete(pMycvector);
 
     cout<<"\nProgram Completed "<<endl;
 

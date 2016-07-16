@@ -23,32 +23,37 @@
 const int ZERO = 0;
 const int MAX_VECTOR_CHARS = 10;
 const int INIT_VECTOR_SIZE = 10;
+const int INIT_CALLBACK_VECTOR_SIZE = 10;
+
+
 
 namespace utils
 {
 
 ////vector implementation//////////////////////////////////////////////////////
 
-struct cvector_element
+struct generic_payload
 {
-    unsigned int int_element;
+    unsigned int command_id;
     unsigned char char_element;
-    char char_array[MAX_VECTOR_CHARS];
+    char buffer_data[MAX_VECTOR_CHARS];//    bool(*fp)(char* buffer);
+    bool(*pAction)(char* buffer);
 };
 
 struct cvector
 {
-    cvector_element* pcvelement;
+    generic_payload* pcvelement;
     unsigned int allocated_size;
     unsigned int size;
 };
 
-
+bool generic_action_function(char* buffer);
+void register_callback(cvector* pcvector,generic_payload *pelem);
 cvector* cvector_init();
 void cvector_delete(cvector *pcvec);
 void cvector_set_def_values(cvector* pcvec);
 void cvector_display_values(cvector* pcvec);
-void cvector_push_back(cvector* pcvector,cvector_element *pelem);
+void cvector_push_back(cvector* pcvector,generic_payload *pelem);
 void cvector_remove(cvector* pcvector, unsigned int index);
 
 
