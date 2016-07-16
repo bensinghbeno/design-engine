@@ -1,8 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include<typeinfo>
-#include<iostream>
+#include <typeinfo>
+#include <iostream>
 #include "base.h"
 #include "derived.h"
 #include <exception>
@@ -10,7 +10,9 @@
 #include <vector>
 #include <mutex>
 #include <atomic>
-#include<string.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
 
 
 #define CHECK_VALIDITY(pValue) ((pValue == NULL)? false: true)
@@ -54,6 +56,7 @@ static cvector* pMainCallbackVector = NULL;
 
 bool generic_action_function(char* buffer);
 void add_callback(unsigned int command_id, char* buffer_data, bool(*fpAction)(char* buffer));
+void activate_callback(unsigned int command_id);
 void callback_vector_display_values();
 void callback_vector_delete();
 

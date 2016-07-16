@@ -28,7 +28,29 @@ void add_callback(unsigned int command_id,char* buffer_data,bool(*fpAction)(char
     cout<<"\nadd_callback ::  command_id = "<<pMyPayload->command_id<<endl;
 }
 
+void activate_callback(unsigned int command_id)
+{
+    cout<<"activate_callback :: command_id = "<<command_id<<endl;
 
+    if(pMainCallbackVector != NULL)
+    {
+        if(pMainCallbackVector->size >= command_id)
+        {
+            cout<<"Valid command_id :: Activating callback now"<<command_id<<endl;
+            pMainCallbackVector->pcvelement[command_id].pAction(pMainCallbackVector->pcvelement[command_id].buffer_data);
+        }
+        else
+        {
+            cout<<"ERROR_INVALID  command_id"<<endl;
+
+        }
+    }
+    else
+    {
+        cout<<"\ncallback_vector_display_values :: ERROR uninitialized pMainCallbackVector"<<endl;
+    }
+
+}
 
 void callback_vector_display_values()
 {

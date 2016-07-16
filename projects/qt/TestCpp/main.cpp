@@ -8,16 +8,61 @@
 using namespace utils;
 using namespace std;
 
+void *BusyWork(void *t)
+{
+    int i;
+    long tid;
+    double result=0.0;
+    unsigned int command_id = 1;
+    tid = (long)t;
+
+    while(command_id != 0)
+    {
+        printf("Thread %ld  :: Provide Command_ID...\n",tid);
+        scanf("%d",&command_id);
+        activate_callback(command_id);
+        sleep(1);
+    }
+
+    pthread_exit((void*) t);
+}
 
 int main(int argc,char* argv[])
 {
     cout<<"Program Started"<<endl;
 
-    add_callback(77,"HELLO",&generic_action_function);
-    add_callback(101,"HELLO",&generic_action_function);
+    add_callback(100,"CALL0",&generic_action_function);
+    add_callback(101,"CALL1",&generic_action_function);
+    add_callback(102,"CALL2",&generic_action_function);
     callback_vector_display_values();
-    callback_vector_delete();
 
+    pthread_t thread;
+    pthread_attr_t attr;
+    int rc;
+    long t=0;
+    void *status;
+
+    /* Initialize and set thread detached attribute */
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
+    printf("Main: creating thread %ld\n", t);
+    rc = pthread_create(&thread, &attr, BusyWork, (void *)t);
+    if (rc) {
+        printf("ERROR; return code from pthread_create() is %d\n", rc);
+        exit(-1);
+    }
+
+    pthread_attr_destroy(&attr);
+    rc = pthread_join(thread, &status);
+    if (rc) {
+        printf("ERROR; return code from pthread_join() is %d\n", rc);
+        exit(-1);
+    }
+    printf("Main: completed join with thread %ld having a status of %ld\n",t,(long)status);
+
+
+    callback_vector_delete();
     cout<<"\nProgram Completed "<<endl;
 
 
@@ -46,6 +91,13 @@ int main(int argc,char* argv[])
 /*
 
 //add_callback
+
+
+    add_callback(77,"HELLO",&generic_action_function);
+    add_callback(101,"HELLO",&generic_action_function);
+    callback_vector_display_values();
+    callback_vector_delete();
+
     cvector* pMyCallback_vector = cvector_init();
     for(int l=0;l<10;++l)
     {
