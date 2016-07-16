@@ -9,57 +9,18 @@
 using namespace utils;
 using namespace std;
 
-
-
-
-
-//void register_callback(unsigned int callback_id, bool(*action_pointer)(void))
-//{
-//    (*action_pointer)();
-//}
-
-
 int main(int argc,char* argv[])
 {
     cout<<"Program Started"<<endl;
 
-    bool(*fp)(char* buffer);
-    fp = &generic_action_function;
+    cvector* pMyCallback_vector = cvector_init();
+    for(int l=0;l<10;++l)
+    {
+        add_callback(pMyCallback_vector,l,"HELLO",&generic_action_function);
+    }
+    cvector_display_values(pMyCallback_vector);
+    cvector_delete(pMyCallback_vector);
 
-    generic_payload* pMyPayload = MALLOC(generic_payload);
-    strcpy(pMyPayload->buffer_data,"BUFFERD");
-    pMyPayload->pAction = fp;
-    pMyPayload->pAction(pMyPayload->buffer_data);
-
-
-    //(*fp)("BUFFER_DATA");
-
-
-//    cvector* callback_vector = cvector_init();
-//    generic_payload* pMyPayload = MALLOC(generic_payload);
-//    pMyPayload->command_id = 100;
-//    register_callback(callback_vector,pMyPayload);
-//    cvector_display_values(callback_vector);
-
-
-
-//    cvector* pMycvector = cvector_init();
-//    cvector_set_def_values(pMycvector);
-//    cvector_display_values(pMycvector);
-
-
-//    generic_payload* pMycvectorlement = MALLOC(generic_payload);
-//    pMycvectorlement->command_id = 17;
-//    cvector_push_back(pMycvector,pMycvectorlement);
-//    cvector_display_values(pMycvector);
-
-
-//    cvector_remove(pMycvector,7);
-//    cvector_display_values(pMycvector);
-
-
-
-//    cvector_delete(pMycvector);
 
     cout<<"\nProgram Completed "<<endl;
 
@@ -88,10 +49,19 @@ int main(int argc,char* argv[])
 
 /*
 
-///cvector//
-///
-///
-    cvector* pMycvector = cvector_init();
+//add_callback
+    cvector* pMyCallback_vector = cvector_init();
+    for(int l=0;l<10;++l)
+    {
+        add_callback(pMyCallback_vector,l,"HELLO",&generic_action_function);
+    }
+    cvector_display_values(pMyCallback_vector);
+    cvector_delete(pMyCallback_vector);
+
+
+
+
+cvector* pMycvector = cvector_init();
     //cvector_set_def_values(myVector);
     int i = 0;
     while(i < 32)

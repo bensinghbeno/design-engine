@@ -10,6 +10,7 @@
 #include <vector>
 #include <mutex>
 #include <atomic>
+#include<string.h>
 
 
 #define CHECK_VALIDITY(pValue) ((pValue == NULL)? false: true)
@@ -48,7 +49,7 @@ struct cvector
 };
 
 bool generic_action_function(char* buffer);
-void register_callback(cvector* pcvector,generic_payload *pelem);
+void add_callback(cvector* pcvector,unsigned int command_id,char* buffer_data,bool(*fpAction)(char* buffer));
 cvector* cvector_init();
 void cvector_delete(cvector *pcvec);
 void cvector_set_def_values(cvector* pcvec);

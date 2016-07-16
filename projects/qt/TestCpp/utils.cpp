@@ -24,7 +24,7 @@ cvector* cvector_init()
     cvector* pcvector = (cvector*)(malloc(sizeof(cvector)));
     pcvector->pcvelement = (generic_payload *) malloc(INIT_VECTOR_SIZE*sizeof(generic_payload));
     pcvector->allocated_size = INIT_VECTOR_SIZE;
-    pcvector->size = 1;
+    pcvector->size = 0;
     cout<<"\ncvector_init :: allocated_size = "<<pcvector->allocated_size<<endl;
     return(pcvector);
 }
@@ -52,12 +52,24 @@ void cvector_remove(cvector* pcvector,unsigned int index)
     }
 }
 
-void register_callback(cvector* pcvector,generic_payload *pelem)
-{
-    cvector_push_back(pcvector,pelem);
-    cout<<"\nregister_callback ::  command_id = "<<pelem->command_id<<endl;
 
+
+void add_callback(cvector* pcvector,unsigned int command_id,char* buffer_data,bool(*fpAction)(char* buffer))
+{
+    generic_payload* pMyPayload = MALLOC(generic_payload);
+    pMyPayload->command_id = command_id;
+    strcpy(pMyPayload->buffer_data,buffer_data);
+    pMyPayload->pAction = fpAction;
+    cvector_push_back(pcvector,pMyPayload);
+    cout<<"\nadd_callback ::  command_id = "<<pMyPayload->command_id<<endl;
 }
+
+//void add_callback(cvector* pcvector,generic_payload *pelem)
+//{
+//    cvector_push_back(pcvector,pelem);
+//    cout<<"\nadd_callback ::  command_id = "<<pelem->command_id<<endl;
+
+//}
 void cvector_push_back(cvector* pcvector,generic_payload *pelem)
 {
     if(CHECK_VALIDITY(pelem) && CHECK_VALIDITY(pcvector))
@@ -114,12 +126,12 @@ void cvector_display_values(cvector* pcvec)
 {
     if(CHECK_VALIDITY(pcvec))
     {
-        cout<<"\ncvector_display_values :: size = "<<pcvec->size<<"\n values :: ";
+        cout<<"\ncvector_display_buffer_values :: size = "<<pcvec->size<<" :: ";
 
         int l = pcvec->size;
         while(--l >= 0)
         {
-            cout<<" "<<pcvec->pcvelement[l].command_id;
+            cout<<" cmd_"<<pcvec->pcvelement[l].command_id<<"="<<pcvec->pcvelement[l].buffer_data;
         }
         cout<<endl;
     }
