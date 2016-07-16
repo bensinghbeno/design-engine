@@ -13,26 +13,30 @@ cvector* cvector_init()
     pcvector->pcvelement = (cvector_element *) malloc(INIT_VECTOR_SIZE*sizeof(cvector_element));
     pcvector->allocated_size = INIT_VECTOR_SIZE;
     pcvector->size = 0;
+    cout<<"\ncvector_init :: size = "<<pcvector->allocated_size<<endl;
     return(pcvector);
 }
 
-void cvector_remove(cvector* pcvector,int index)
+void cvector_remove(cvector* pcvector,unsigned int index)
 {
-    cout<<"\ncvector_remove :: "<<endl;
     if(CHECK_VALIDITY(pcvector) && CHECK_VALIDITY(pcvector->pcvelement) && (pcvector->size > index))
     {
-        cout<<"l = "<<0<<"int = "<<pcvector->pcvelement[0].int_element<<endl;
+        //cout<<"l = "<<0<<"int = "<<pcvector->pcvelement[0].int_element<<endl;
 
         int l = index;
         while ( (l < (pcvector->size-1)) && ( ((pcvector->pcvelement)+l) != NULL))
         {
             pcvector->pcvelement[l] = pcvector->pcvelement[l+1];
-            cout<<"l = "<<l<<"int = "<<pcvector->pcvelement[l].int_element<<endl;
+            //cout<<"l = "<<l<<"int = "<<pcvector->pcvelement[l].int_element<<endl;
             ++l;
         }
         --(pcvector->size);
-        //((pcvector->pcvelement) += pcvector->size);
-        //pcvector->pcvelement = NULL;
+        cout<<"\ncvector_remove :: index = "<<index<<endl;
+
+    }
+    else
+    {
+        cout<<"\ncvector_remove :: ERROR_INVALID index = "<<index<<endl;
     }
 }
 void cvector_push_back(cvector* pcvector,cvector_element *pelem)
@@ -63,6 +67,8 @@ void cvector_push_back(cvector* pcvector,cvector_element *pelem)
         {
             return;
         }
+        cout<<"\ncvector_push_back, size :: "<<pcvector->size<<endl;
+
     }
 }
 
@@ -70,13 +76,16 @@ void cvector_set_def_values(cvector* pcvec)
 {
     if(CHECK_VALIDITY(pcvec))
     {
-        int l = pcvec->size;
+        int l = pcvec->allocated_size;
 
         while(--l >= 0)
         {
             pcvec->pcvelement[l].int_element = l;
+            ++(pcvec->size);
 
         }
+        cout<<"\ncvector_set_def_values:: size = "<<pcvec->size<<endl;
+
     }
 
 }
@@ -85,13 +94,14 @@ void cvector_display_values(cvector* pcvec)
 {
     if(CHECK_VALIDITY(pcvec))
     {
-        cout<<"cvector.size = "<<pcvec->size<<", values :: ";
+        cout<<"\ncvector_display_values :: size = "<<pcvec->size<<"\n values :: ";
 
         int l = pcvec->size;
         while(--l >= 0)
         {
             cout<<" "<<pcvec->pcvelement[l].int_element;
         }
+        cout<<endl;
     }
 }
 
@@ -101,6 +111,7 @@ void cvector_delete(cvector* pcvec)
     {
         SAFE_FREE_PURGE(pcvec->pcvelement);
         SAFE_FREE_PURGE(pcvec);
+        cout<<"\ncvector_delete:: res = "<<(CHECK_VALIDITY(pcvec))<<endl;
     }
 }
 

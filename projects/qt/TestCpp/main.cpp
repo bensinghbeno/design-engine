@@ -15,20 +15,17 @@ int main(int argc,char* argv[])
     cout<<"Program Started"<<endl;
 
     cvector* pMycvector = cvector_init();
-    //cvector_set_def_values(myVector);
-    int i = 0;
-    while(i < 32)
-    {
-        cvector_element* pMycvectorlement = MALLOC(cvector_element);
-        pMycvectorlement->int_element = i;
-        cvector_push_back(pMycvector,pMycvectorlement);
-        ++i;
-    }
-
+    cvector_set_def_values(pMycvector);
     cvector_display_values(pMycvector);
 
-    cvector_remove(pMycvector,0);
 
+    cvector_element* pMycvectorlement = MALLOC(cvector_element);
+    pMycvectorlement->int_element = 17;
+    cvector_push_back(pMycvector,pMycvectorlement);
+    cvector_display_values(pMycvector);
+
+
+    cvector_remove(pMycvector,7);
     cvector_display_values(pMycvector);
 
 
@@ -61,7 +58,32 @@ int main(int argc,char* argv[])
 
 
 /*
- * ///NODE/////
+
+///cvector//
+///
+///
+    cvector* pMycvector = cvector_init();
+    //cvector_set_def_values(myVector);
+    int i = 0;
+    while(i < 32)
+    {
+        cvector_element* pMycvectorlement = MALLOC(cvector_element);
+        pMycvectorlement->int_element = i;
+        cvector_push_back(pMycvector,pMycvectorlement);
+        ++i;
+    }
+
+    cvector_display_values(pMycvector);
+
+    cvector_remove(pMycvector,0);
+
+    cvector_display_values(pMycvector);
+
+
+
+    cvector_delete(pMycvector);
+
+* ///NODE/////
 
 
 class student

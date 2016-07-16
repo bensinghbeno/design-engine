@@ -49,7 +49,7 @@ void cvector_delete(cvector *pcvec);
 void cvector_set_def_values(cvector* pcvec);
 void cvector_display_values(cvector* pcvec);
 void cvector_push_back(cvector* pcvector,cvector_element *pelem);
-void cvector_remove(cvector* pcvector,int index);
+void cvector_remove(cvector* pcvector, unsigned int index);
 
 
 ///Singleton///////////////////////////////////////////////////////////////////
