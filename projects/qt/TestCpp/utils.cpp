@@ -56,12 +56,20 @@ void cvector_remove(cvector* pcvector,unsigned int index)
 
 void add_callback(cvector* pcvector,unsigned int command_id,char* buffer_data,bool(*fpAction)(char* buffer))
 {
-    generic_payload* pMyPayload = MALLOC(generic_payload);
-    pMyPayload->command_id = command_id;
-    strcpy(pMyPayload->buffer_data,buffer_data);
-    pMyPayload->pAction = fpAction;
-    cvector_push_back(pcvector,pMyPayload);
-    cout<<"\nadd_callback ::  command_id = "<<pMyPayload->command_id<<endl;
+    if(CHECK_VALIDITY(pcvector))
+    {
+
+        generic_payload* pMyPayload = MALLOC(generic_payload);
+        pMyPayload->command_id = command_id;
+        strcpy(pMyPayload->buffer_data,buffer_data);
+        pMyPayload->pAction = fpAction;
+        cvector_push_back(pcvector,pMyPayload);
+        cout<<"\nadd_callback ::  command_id = "<<pMyPayload->command_id<<endl;
+    }
+    else
+    {
+        cout<<"\nadd_callback :: ERROR uninitialized cvector* provided"<<endl;
+    }
 }
 
 //void add_callback(cvector* pcvector,generic_payload *pelem)

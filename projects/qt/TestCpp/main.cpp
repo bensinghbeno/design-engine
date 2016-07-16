@@ -9,17 +9,15 @@
 using namespace utils;
 using namespace std;
 
+
 int main(int argc,char* argv[])
 {
     cout<<"Program Started"<<endl;
 
-    cvector* pMyCallback_vector = cvector_init();
-    for(int l=0;l<10;++l)
-    {
-        add_callback(pMyCallback_vector,l,"HELLO",&generic_action_function);
-    }
-    cvector_display_values(pMyCallback_vector);
-    cvector_delete(pMyCallback_vector);
+    pMainCallbackVector = cvector_init();
+    add_callback(pMainCallbackVector,77,"HELLO",&generic_action_function);
+    cvector_display_values(pMainCallbackVector);
+    cvector_delete(pMainCallbackVector);
 
 
     cout<<"\nProgram Completed "<<endl;

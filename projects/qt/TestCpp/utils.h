@@ -28,6 +28,7 @@ const int INIT_CALLBACK_VECTOR_SIZE = 10;
 
 
 
+
 namespace utils
 {
 
@@ -47,6 +48,9 @@ struct cvector
     unsigned int allocated_size;
     unsigned int size;
 };
+
+static cvector* pMainCallbackVector = NULL;
+
 
 bool generic_action_function(char* buffer);
 void add_callback(cvector* pcvector,unsigned int command_id,char* buffer_data,bool(*fpAction)(char* buffer));

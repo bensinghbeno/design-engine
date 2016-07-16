@@ -17,7 +17,7 @@ SOURCES += main.cpp \
     base.cpp \
     derived.cpp \
     mainapplication.cpp \
-    eventengine.cpp
+    eventengine.c
 
 HEADERS += \
     utils.h \
