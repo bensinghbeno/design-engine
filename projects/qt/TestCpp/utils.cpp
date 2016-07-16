@@ -4,9 +4,7 @@ using namespace std;
 namespace utils
 {
 
-///callback impl///
-
-
+///callback impl//////////////////////////
 
 bool generic_action_function(char* buffer)
 {
@@ -14,9 +12,50 @@ bool generic_action_function(char* buffer)
     return true;
 }
 
-///cvector////
+void add_callback(unsigned int command_id,char* buffer_data,bool(*fpAction)(char* buffer))
+{
+    if(pMainCallbackVector == NULL)
+    {
+        pMainCallbackVector = cvector_init();
+        cout<<"main_callback_vector_init ::"<<endl;
+    }
+
+    generic_payload* pMyPayload = MALLOC(generic_payload);
+    pMyPayload->command_id = command_id;
+    strncpy(pMyPayload->buffer_data,buffer_data,MAX_VECTOR_CHARS);
+    pMyPayload->pAction = fpAction;
+    cvector_push_back(pMainCallbackVector,pMyPayload);
+    cout<<"\nadd_callback ::  command_id = "<<pMyPayload->command_id<<endl;
+}
 
 
+
+void callback_vector_display_values()
+{
+    if(pMainCallbackVector != NULL)
+    {
+        cvector_display_values(pMainCallbackVector);
+    }
+    else
+    {
+        cout<<"\ncallback_vector_display_values :: ERROR uninitialized pMainCallbackVector"<<endl;
+    }
+}
+
+void callback_vector_delete()
+{
+    if(pMainCallbackVector != NULL)
+    {
+        cvector_delete(pMainCallbackVector);
+    }
+    else
+    {
+        cout<<"\ncallback_vector_display_values :: ERROR uninitialized pMainCallbackVector"<<endl;
+    }
+}
+
+
+///cvector/////////////////////////////
 
 
 cvector* cvector_init()
@@ -52,32 +91,6 @@ void cvector_remove(cvector* pcvector,unsigned int index)
     }
 }
 
-
-
-void add_callback(cvector* pcvector,unsigned int command_id,char* buffer_data,bool(*fpAction)(char* buffer))
-{
-    if(CHECK_VALIDITY(pcvector))
-    {
-
-        generic_payload* pMyPayload = MALLOC(generic_payload);
-        pMyPayload->command_id = command_id;
-        strcpy(pMyPayload->buffer_data,buffer_data);
-        pMyPayload->pAction = fpAction;
-        cvector_push_back(pcvector,pMyPayload);
-        cout<<"\nadd_callback ::  command_id = "<<pMyPayload->command_id<<endl;
-    }
-    else
-    {
-        cout<<"\nadd_callback :: ERROR uninitialized cvector* provided"<<endl;
-    }
-}
-
-//void add_callback(cvector* pcvector,generic_payload *pelem)
-//{
-//    cvector_push_back(pcvector,pelem);
-//    cout<<"\nadd_callback ::  command_id = "<<pelem->command_id<<endl;
-
-//}
 void cvector_push_back(cvector* pcvector,generic_payload *pelem)
 {
     if(CHECK_VALIDITY(pelem) && CHECK_VALIDITY(pcvector))

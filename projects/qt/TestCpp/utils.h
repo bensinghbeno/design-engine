@@ -53,7 +53,11 @@ static cvector* pMainCallbackVector = NULL;
 
 
 bool generic_action_function(char* buffer);
-void add_callback(cvector* pcvector,unsigned int command_id,char* buffer_data,bool(*fpAction)(char* buffer));
+void add_callback(unsigned int command_id, char* buffer_data, bool(*fpAction)(char* buffer));
+void callback_vector_display_values();
+void callback_vector_delete();
+
+
 cvector* cvector_init();
 void cvector_delete(cvector *pcvec);
 void cvector_set_def_values(cvector* pcvec);

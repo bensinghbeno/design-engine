@@ -2,9 +2,8 @@
     \brief This source file contains the main() function
 */
 
-#include"mainapplication.h"
+#include "mainapplication.h"
 #include "myclass.h"
-#include<string.h>
 
 using namespace utils;
 using namespace std;
@@ -14,11 +13,10 @@ int main(int argc,char* argv[])
 {
     cout<<"Program Started"<<endl;
 
-    pMainCallbackVector = cvector_init();
-    add_callback(pMainCallbackVector,77,"HELLO",&generic_action_function);
-    cvector_display_values(pMainCallbackVector);
-    cvector_delete(pMainCallbackVector);
-
+    add_callback(77,"HELLO",&generic_action_function);
+    add_callback(101,"HELLO",&generic_action_function);
+    callback_vector_display_values();
+    callback_vector_delete();
 
     cout<<"\nProgram Completed "<<endl;
 
