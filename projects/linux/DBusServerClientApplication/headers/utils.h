@@ -12,12 +12,12 @@
 
 #ifdef _C_UTIL
 
-#include <thread>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 
 #endif
 
@@ -25,6 +25,7 @@
 */
 #ifdef _CPP_UTIL
 
+#include <thread>
 #include <iostream>
 #include <exception>
 #include <thread>
@@ -40,6 +41,8 @@
 /*! \brief Following section contains the macro utilities
 */
 
+#define CHECK_VALIDITY(pValue) ((pValue == NULL)? FALSE: TRUE)
+
 #ifdef _C_UTIL
 
 #define MALLOC(type) (type*)malloc(sizeof(type));
@@ -47,42 +50,43 @@
 
 #endif
 
-#define CHECK_VALIDITY(pValue) ((pValue == NULL)? false: true)
+#ifdef _CPP_UTIL
+
 #define SAFE_CREATE(classType) (new (std::nothrow)classType())
 #define SAFE_DELETE_PURGE(pObj) {if(pObj != NULL) {delete(pObj);pObj=NULL;}}
 #define SAFE_DELETE_ARRAY(pObj) (delete[] pObj)
 #define SAFE_PURGE(pObj) (pObj = NULL)
 
+#endif
+
 const int ZERO = 0;
+const int FALSE = 0;
+const int TRUE  = 1;
 const int MAX_VECTOR_CHARS = 10;
 const int INIT_VECTOR_SIZE = 10;
 const int INIT_CALLBACK_VECTOR_SIZE = 10;
 
 
 
-
-namespace utils
-{
-
 #ifdef _C_UTIL
 
 /*! \brief Following section contains the struct utilities for a c-style vector implementation
 */
 
-struct generic_payload
+typedef struct generic_payload
 {
     unsigned int command_index;
     unsigned char char_element;
-    char buffer_data[MAX_VECTOR_CHARS];
-    bool(*pAction)(char* buffer);
-};
+    char buffer_data[10];
+    unsigned int (*pAction)(char* buffer);
+}generic_payload;
 
-struct cvector
+typedef struct cvector
 {
     generic_payload* pcvelement;
     unsigned int allocated_size;
     unsigned int size;
-};
+}cvector;
 
 /*! \brief Following section contains the function utilities for a C-STYLE VECTOR implementation
 */
@@ -96,8 +100,8 @@ void cvector_remove(cvector* pcvector, unsigned int index);
 /*! \brief Following section contains the function utilities for a FUNCTION CALLBACK implementation based on c-style vector
 */
 static cvector* pMainCallbackVector = NULL;
-bool generic_action_function(char* buffer);
-unsigned int add_callback(char* buffer_data, bool(*fpAction)(char* buffer));
+unsigned int generic_action_function(char* buffer);
+unsigned int add_callback(char* buffer_data, unsigned int(*fpAction)(char* buffer));
 void activate_callback(unsigned int command_id);
 void callback_vector_display_values();
 void callback_vector_delete();
@@ -105,11 +109,11 @@ void callback_vector_delete();
 /*! \brief Following section contains the struct utilities for a C-STYLE LINKED LIST implementation
 */
 
-struct Node
+typedef struct Node
 {
     int data;
-    Node* next;
-};
+    struct Node* next;
+}Node;
 
 /*! \brief Following section contains the function utilities for a C-STYLE LINKED LIST implementation
 */
@@ -117,7 +121,7 @@ struct Node
 void initNode(Node *head,int n);
 void appendNode(struct Node *head, int n);
 void insertAtBeginning(struct Node **head, int n);
-bool deleteNode(struct Node **head, Node *ptrDel);
+unsigned int deleteNode(struct Node **head, Node *ptrDel);
 struct Node* reverse_list(struct Node** head);
 void copyList(struct Node *node, struct Node **pNew);
 int compareLists(struct Node *node1, struct Node *node2);
@@ -204,7 +208,6 @@ bool validatePointer(T* genericType)
     }
 }
 
-}
 
 #endif
 
