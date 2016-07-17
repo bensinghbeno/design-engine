@@ -1,5 +1,8 @@
 #include "utils.h"
 
+static cvector* pMainCallbackVector = NULL;
+
+
 #ifdef _CPP_UTIL
 
 using namespace std;
@@ -11,7 +14,7 @@ using namespace std;
 unsigned int generic_action_function(char* buffer)
 {
     printf("\ngeneric_action_function :: buffer %s",buffer);
-    return TRUE;
+    return UTIL_TRUE;
 }
 
 unsigned int add_callback(char* buffer_data,unsigned int(*fpAction)(char *))
@@ -138,7 +141,7 @@ unsigned int cvector_push_back(cvector* pcvector,generic_payload *pelem)
     else
     {
         printf("\ncvector_push_back :: ERROR_INVALID_POINTERS ");
-        return FALSE;
+        return UTIL_FALSE;
     }
 }
 
@@ -277,7 +280,7 @@ unsigned int deleteNode(struct Node **head, Node *ptrDel)
     {
         *head = cur->next;
         SAFE_FREE_PURGE(ptrDel);
-        return TRUE;
+        return UTIL_TRUE;
     }
 
     while(cur) {
@@ -285,11 +288,11 @@ unsigned int deleteNode(struct Node **head, Node *ptrDel)
         {
             cur->next = ptrDel->next;
             SAFE_FREE_PURGE( ptrDel);
-            return TRUE;
+            return UTIL_TRUE;
         }
         cur = cur->next;
     }
-    return FALSE;
+    return UTIL_FALSE;
 }
 
 struct Node* reverse_list(struct Node** head)

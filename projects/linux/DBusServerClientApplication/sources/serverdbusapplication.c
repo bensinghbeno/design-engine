@@ -1,9 +1,15 @@
 #include"dbusinterface.h"
 #include <time.h>
-
+#include "utils.h"
 
 int main(int argc,char* argv[])
 {
+
+    add_callback("CALL0",&generic_action_function);
+    add_callback("CALL1",&generic_action_function);
+    add_callback("CALL2",&generic_action_function);
+    callback_vector_display_values();
+
     DBusError dbusErrorStructure;
     DBusConnection* dbusConnection;
     DBusMessage* dbusMsg;

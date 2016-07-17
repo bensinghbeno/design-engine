@@ -41,7 +41,7 @@
 /*! \brief Following section contains the macro utilities
 */
 
-#define CHECK_VALIDITY(pValue) ((pValue == NULL)? FALSE: TRUE)
+#define CHECK_VALIDITY(pValue) ((pValue == NULL)? UTIL_FALSE: UTIL_TRUE)
 
 #ifdef _C_UTIL
 
@@ -60,8 +60,8 @@
 #endif
 
 const int ZERO = 0;
-const int FALSE = 0;
-const int TRUE  = 1;
+const int UTIL_FALSE = 0;
+const int UTIL_TRUE  = 1;
 const int MAX_VECTOR_CHARS = 10;
 const int INIT_VECTOR_SIZE = 10;
 const int INIT_CALLBACK_VECTOR_SIZE = 10;
@@ -99,7 +99,6 @@ void cvector_remove(cvector* pcvector, unsigned int index);
 
 /*! \brief Following section contains the function utilities for a FUNCTION CALLBACK implementation based on c-style vector
 */
-static cvector* pMainCallbackVector = NULL;
 unsigned int generic_action_function(char* buffer);
 unsigned int add_callback(char* buffer_data, unsigned int(*fpAction)(char* buffer));
 void activate_callback(unsigned int command_id);

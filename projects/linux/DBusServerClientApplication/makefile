@@ -10,13 +10,14 @@ utils: sources/utils.c headers/utils.h
 	mv utils.o bin/utils.o
 
 lutils: utils
-	gcc -shared -o libs/utils.so bin/utils.o
+	gcc -shared -o libs/libutils.so bin/utils.o
 
 serverdbusapplication: sources/serverdbusapplication.c ldbusinterface lutils
-	LD_LIBRARY_PATH=. gcc -I./sources/ -I./headers/ -I/usr/include/dbus-1.0/  -I /usr/lib/x86_64-linux-gnu/dbus-1.0/include/ -I /usr/include/glib-2.0/ -I /usr/lib/x86_64-linux-gnu/glib-2.0/include/ -L./libs/ -Wall -o bin/serverdbusapplication.out sources/serverdbusapplication.c sources/dbusinterface.c -ldbus-1 -ldbusinterface -lutils
+	gcc -D_C_UTIL -I./sources/ -I./headers/ -I/usr/include/dbus-1.0/  -I /usr/lib/x86_64-linux-gnu/dbus-1.0/include/ -I /usr/include/glib-2.0/ -I /usr/lib/x86_64-linux-gnu/glib-2.0/include/ -L./libs/ -Wall -o bin/serverdbusapplication.out sources/serverdbusapplication.c sources/dbusinterface.c  -lutils -ldbus-1 -ldbusinterface
+	export LD_LIBRARY_PATH=../libs/
 
 clientdbusapplication: sources/clientdbusapplication.c ldbusinterface
-	LD_LIBRARY_PATH=. gcc -I./sources/ -I./headers/ -I/usr/include/dbus-1.0/  -I /usr/lib/x86_64-linux-gnu/dbus-1.0/include/ -I /usr/include/glib-2.0/ -I /usr/lib/x86_64-linux-gnu/glib-2.0/include/ -L./libs/ -Wall -o bin/clientdbusapplication.out         sources/clientdbusapplication.c sources/dbusinterface.c -ldbus-1 -ldbusinterface
+	LD_LIBRARY_PATH=. gcc -D_C_UTIL -I./sources/ -I./headers/ -I/usr/include/dbus-1.0/  -I /usr/lib/x86_64-linux-gnu/dbus-1.0/include/ -I /usr/include/glib-2.0/ -I /usr/lib/x86_64-linux-gnu/glib-2.0/include/ -L./libs/ -Wall -o bin/clientdbusapplication.out         sources/clientdbusapplication.c sources/dbusinterface.c -ldbus-1 -ldbusinterface
 
 all: clientdbusapplication serverdbusapplication
 
