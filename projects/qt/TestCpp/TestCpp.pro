@@ -29,6 +29,9 @@ HEADERS += \
     mainapplication.h \
     eventengine.h
 
+DEFINES +=  _C_UTIL \
+            _CPP_UTIL
+
 INCLUDEPATH += /usr/include/dbus-1.0/
 INCLUDEPATH += /usr/lib/x86_64-linux-gnu/dbus-1.0/include/
 INCLUDEPATH += /usr/include/glib-2.0/

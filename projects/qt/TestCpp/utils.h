@@ -1,3 +1,8 @@
+/*! \file utils.h
+    \brief This source file contains the helper utilities - functions / macros / consts / structs
+    \brief Compiler flags for conditional C/C++ based utilities are available.
+*/
+
 #ifndef UTILS_H
 #define UTILS_H
 
@@ -15,13 +20,21 @@
 #include <unistd.h>
 
 
+/*! \brief Following section contains the macro utilities
+*/
+
+#ifdef _C_UTIL
+
+#define MALLOC(type) (type*)malloc(sizeof(type));
+#define SAFE_FREE_PURGE(pObj) {if(pObj != NULL) {free(pObj);pObj=NULL;}}
+
+#endif
+
 #define CHECK_VALIDITY(pValue) ((pValue == NULL)? false: true)
 #define SAFE_CREATE(classType) (new (std::nothrow)classType())
-#define SAFE_DELETE(pObj) {if(pObj != NULL) delete pObj;}
-#define SAFE_FREE_PURGE(pObj) {if(pObj != NULL) {free(pObj);pObj=NULL;}}
+#define SAFE_DELETE_PURGE(pObj) {if(pObj != NULL) {delete(pObj);pObj=NULL;}}
 #define SAFE_DELETE_ARRAY(pObj) (delete[] pObj)
 #define SAFE_PURGE(pObj) (pObj = NULL)
-#define MALLOC(type) (type*)malloc(sizeof(type));
 
 const int ZERO = 0;
 const int MAX_VECTOR_CHARS = 10;
@@ -34,13 +47,16 @@ const int INIT_CALLBACK_VECTOR_SIZE = 10;
 namespace utils
 {
 
-////vector implementation//////////////////////////////////////////////////////
+#ifdef _C_UTIL
+
+/*! \brief Following section contains the struct utilities for a c-style vector implementation
+*/
 
 struct generic_payload
 {
     unsigned int command_index;
     unsigned char char_element;
-    char buffer_data[MAX_VECTOR_CHARS];//    bool(*fp)(char* buffer);
+    char buffer_data[MAX_VECTOR_CHARS];
     bool(*pAction)(char* buffer);
 };
 
@@ -51,16 +67,8 @@ struct cvector
     unsigned int size;
 };
 
-static cvector* pMainCallbackVector = NULL;
-
-
-bool generic_action_function(char* buffer);
-unsigned int add_callback(char* buffer_data, bool(*fpAction)(char* buffer));
-void activate_callback(unsigned int command_id);
-void callback_vector_display_values();
-void callback_vector_delete();
-
-
+/*! \brief Following section contains the function utilities for a C-STYLE VECTOR implementation
+*/
 cvector* cvector_init();
 void cvector_delete(cvector *pcvec);
 void cvector_set_def_values(cvector* pcvec);
@@ -68,26 +76,17 @@ void cvector_display_values(cvector* pcvec);
 unsigned int cvector_push_back(cvector* pcvector,generic_payload *pelem);
 void cvector_remove(cvector* pcvector, unsigned int index);
 
+/*! \brief Following section contains the function utilities for a FUNCTION CALLBACK implementation based on c-style vector
+*/
+static cvector* pMainCallbackVector = NULL;
+bool generic_action_function(char* buffer);
+unsigned int add_callback(char* buffer_data, bool(*fpAction)(char* buffer));
+void activate_callback(unsigned int command_id);
+void callback_vector_display_values();
+void callback_vector_delete();
 
-///Singleton///////////////////////////////////////////////////////////////////
-
-class Singleton
-{
-public:
-    static Singleton* Instance();
-private:
-    Singleton() {}
-    static std::atomic<Singleton*> pinstance;
-    static std::mutex m_;
-    Singleton(const Singleton&);
-    Singleton& operator= (const Singleton& other);
-};
-
-
-
-///////////////Thread Callables////////////////////////////////////////////////
-
-void buzzer(unsigned int loopCount);
+/*! \brief Following section contains the struct utilities for a C-STYLE LINKED LIST implementation
+*/
 
 struct Node
 {
@@ -95,82 +94,83 @@ struct Node
     Node* next;
 };
 
-
-class NodeSearch
-{
-public:
-    NodeSearch();
-    ~NodeSearch();
-    void operator() ();
-    static struct Node *searchNode(struct Node *head, int n);
-    static void display(struct Node *head);
-};
-
-
-///////List Utils///////////////////////////////////////////////////////////////
-
+/*! \brief Following section contains the function utilities for a C-STYLE LINKED LIST implementation
+*/
 
 void initNode(Node *head,int n);
-void addNode(struct Node *head, int n);
-void insertFront(struct Node **head, int n);
+void appendNode(struct Node *head, int n);
+void insertAtBeginning(struct Node **head, int n);
 bool deleteNode(struct Node **head, Node *ptrDel);
-struct Node* reverse(struct Node** head);
-void copyLinkedList(struct Node *node, struct Node **pNew);
-int compareLinkedList(struct Node *node1, struct Node *node2);
-void deleteLinkedList(struct Node **node);
+struct Node* reverse_list(struct Node** head);
+void copyList(struct Node *node, struct Node **pNew);
+int compareLists(struct Node *node1, struct Node *node2);
+void deleteList(struct Node **node);
+struct Node *searchNode(struct Node *head, int n);
+void display_list(struct Node *head);
 
 
+/*! \brief delay_loop function for introducing delays
+*/
 
-class DataShare
+void delay_loop(unsigned int loopCount);
+
+
+#endif
+
+#ifdef _CPP_UTIL
+
+/*! \brief Following section contains the class utilities for a RE-ENTRANT, THREAD-SAFE  Singleton class implementation using atomic type
+*/
+
+class Singleton
 {
 public:
-    DataShare();
-    static int m_data;
+    static Singleton* getSingletonInstance();
 private:
-
+    Singleton() {}
+    static std::atomic<Singleton*> _pInstance;
+    static std::mutex _mutexSingleton;
+    Singleton(const Singleton&);
+    Singleton& operator= (const Singleton& other);
 };
 
-/////////////////////////////Template Class Validator////////////////////////////////
+
+
+
+/*! \brief Following section contains the static class utilities for a GENERIC POINTER VALIDATOR
+*/
 
 template <class U>
 class Validator
 {
 public:
-    Validator();
-    static bool validatePointer(U* pUObj);
-    ~Validator();
+    Validator()
+    {
+        std::cout<<"Class Validator Constructor"<<std::endl;
+    }
+    static bool validatePointer(U* pUObj)
+    {
+        if(pUObj ==  NULL)
+        {
+            std::cout<<"ERROR_POINTER_IS_INVALID"<<std::endl;
+            return false;
+        }
+        else
+        {
+            std::cout<<"POINTER_IS_VALID"<<std::endl;
+            return true;
+        }
+
+    }
+
+    ~Validator()
+    {}
 
 };
 
-template <class U>
-Validator<U>::Validator()
-{
-    std::cout<<"Class Validator Constructor"<<std::endl;
-}
 
-template<class U>
-Validator<U>::~Validator()
-{
-    std::cout<<"Class Validator Constructor"<<std::endl;
-}
-
-template<class U>
-bool Validator<U>::validatePointer(U* pUObj)
-{
-    if(pUObj ==  NULL)
-    {
-        std::cout<<"ERROR_POINTER_IS_INVALID"<<std::endl;
-        return false;
-    }
-    else
-    {
-        std::cout<<"POINTER_IS_VALID"<<std::endl;
-        return true;
-    }
-
-}
-
-/////////////////////////////Template Function Validator////////////////////////////////
+/*! \brief Following section contains the function utilities for a GENERIC POINTER VALIDATOR
+*/
 
 template <typename T>
 bool validatePointer(T* genericType)
@@ -188,5 +188,7 @@ bool validatePointer(T* genericType)
 }
 
 }
+
+#endif
 
 #endif // UTILS_H

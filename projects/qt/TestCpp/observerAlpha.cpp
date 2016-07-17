@@ -4,6 +4,6 @@ using namespace std;
 
 ObserverAlpha::ObserverAlpha()
 {
-    cout<<"ObserverAlpha sharedData = "<<DataShare::m_data<<endl;
+    //cout<<"ObserverAlpha sharedData = "<<DataShare::m_data<<endl;
 
 }

@@ -64,8 +64,7 @@ int main(int argc,char* argv[])
 
     callback_vector_delete();
     cout<<"\nProgram Completed "<<endl;
-
-
+    return 0;
 }
 
 

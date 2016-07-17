@@ -3,7 +3,7 @@
 
 #include"utils.h"
 
-class ObserverAlpha: public utils::DataShare
+class ObserverAlpha
 {
 public:
     ObserverAlpha();

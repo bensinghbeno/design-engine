@@ -4,7 +4,7 @@ using namespace std;
 namespace utils
 {
 
-///callback impl//////////////////////////
+#ifdef _C_UTIL
 
 bool generic_action_function(char* buffer)
 {
@@ -77,8 +77,6 @@ void callback_vector_delete()
     }
 }
 
-
-///cvector/////////////////////////////
 
 
 cvector* cvector_init()
@@ -184,60 +182,7 @@ void cvector_delete(cvector* pcvec)
 }
 
 
-///Singleton/////
-
-std::atomic<Singleton*> Singleton::pinstance
-{
-    nullptr
-};
-
-std::mutex Singleton::m_;
-
-Singleton* Singleton::Instance()
-{
-    if(pinstance == nullptr)
-    {
-        std::lock_guard<std::mutex> lock(m_);
-        if(pinstance == nullptr)
-        {
-            pinstance = new Singleton();
-        }
-    }
-    std::cout<<"Singleton::Instance()"<<std::endl;
-
-    return pinstance;
-}
-
-
-//////////////////////Thread Callables///////////////////////////////////
-
-
-void buzzer(unsigned int loopCount)
-{
-    while(--loopCount)
-    {
-        cout<<"Z";
-    }
-    cout<<endl;
-}
-
-NodeSearch::NodeSearch()
-{
-    cout<<"NodeSearch::NodeSearch()"<<endl;
-}
-
-void NodeSearch::operator() ()
-{
-    cout<<"NodeSearch::operator()"<<endl;
-}
-
-
-NodeSearch::~NodeSearch()
-{
-    cout<<"NodeSearch::~NodeSearch()"<<endl;
-}
-
-struct Node* NodeSearch::searchNode(struct Node *head, int n)
+struct Node* searchNode(struct Node *head, int n)
 {
     cout<<"NodeSearch::searchNode()"<<endl;
 
@@ -247,7 +192,7 @@ struct Node* NodeSearch::searchNode(struct Node *head, int n)
         while(cur) {
             if(cur->data == n)
             {
-                display(cur);
+                display_list(cur);
                 return cur;
             }
             cur = cur->next;
@@ -263,7 +208,7 @@ struct Node* NodeSearch::searchNode(struct Node *head, int n)
     }
 }
 
-void NodeSearch::display(struct Node *head)
+void display_list(struct Node *head)
 {
     cout<<"Display Node:: ";
     if(NULL != head )
@@ -279,18 +224,15 @@ void NodeSearch::display(struct Node *head)
     cout << endl;
 }
 
-//////////////////////List Utils///////////////////////////////////
 
 
-// Create the 1st Node
 void initNode(Node *head,int n)
 {
     head->data = n;
     head->next =NULL;
 }
 
-// apending
-void addNode(struct Node *head, int n)
+void appendNode(struct Node *head, int n)
 {
     Node *newNode = SAFE_CREATE(Node);
     if(CHECK_VALIDITY(newNode))
@@ -310,7 +252,7 @@ void addNode(struct Node *head, int n)
     }
 }
 
-void insertFront(struct Node **head, int n)
+void insertAtBeginning(struct Node **head, int n)
 {
     Node *newNode = SAFE_CREATE(Node);
     if(CHECK_VALIDITY(newNode))
@@ -345,36 +287,33 @@ bool deleteNode(struct Node **head, Node *ptrDel)
     return false;
 }
 
-// reverse the list
-struct Node* reverse(struct Node** head)
+struct Node* reverse_list(struct Node** head)
 {
-    Node *parent = *head;
-    Node *me = parent->next;
+    Node *par_node = *head;
+    Node *me = par_node->next;
     Node *child = me->next;
 
-    //make parent as tail
-    parent->next = NULL;
+    par_node->next = NULL;
     while(child)
     {
-        me->next = parent;
-        parent = me;
+        me->next = par_node;
+        par_node = me;
         me = child;
         child = child->next;
     }
-    me->next = parent;
+    me->next = par_node;
     *head = me;
     return *head;
 }
 
-// Creating a copy of a linked list //
-void copyLinkedList(struct Node *node, struct Node **pNew)
+void copyList(struct Node *node, struct Node **pNew)
 {
     if(node != NULL)
     {
         *pNew = SAFE_CREATE(Node);
         (*pNew)->data = node->data;
         (*pNew)->next = NULL;
-        copyLinkedList(node->next, &((*pNew)->next));
+        copyList(node->next, &((*pNew)->next));
     }
     else
     {
@@ -383,13 +322,10 @@ void copyLinkedList(struct Node *node, struct Node **pNew)
 
 }
 
-// Compare two linked list //
-// return value: same(1), different(0) //
-int compareLinkedList(struct Node *node1, struct Node *node2)
+int compareLists(struct Node *node1, struct Node *node2)
 {
     static int flag;
 
-    // both lists are NULL //
     if(node1 == NULL && node2 == NULL)
     {
         flag = 1;
@@ -400,13 +336,13 @@ int compareLinkedList(struct Node *node1, struct Node *node2)
         else if(node1->data != node2->data)
             flag = 0;
         else
-            compareLinkedList(node1->next, node2->next);
+            compareLists(node1->next, node2->next);
     }
 
     return flag;
 }
 
-void deleteLinkedList(struct Node **node)
+void deleteList(struct Node **node)
 {
     cout<<"Deletion:: "<<endl;
 
@@ -416,21 +352,49 @@ void deleteLinkedList(struct Node **node)
         tmpNode = *node;
         *node = tmpNode->next;
         cout<<"D-"<<tmpNode->data<<" ";
-        SAFE_DELETE(tmpNode);
+        SAFE_DELETE_PURGE(tmpNode);
         SAFE_PURGE(tmpNode);
     }
     cout<<"\nList is Deleted"<<endl;
 
 }
 
-
-///////////////////////////////////////////////////////////////////
-
-
-DataShare::DataShare()
+void delay_loop(unsigned int loopCount)
 {
+    while(--loopCount)
+    {
+    }
+    cout<<endl;
 }
-int DataShare::m_data = 777;
+
+
+#endif
+
+#ifdef _CPP_UTIL
+
+std::atomic<Singleton*> Singleton::_pInstance
+{
+    NULL
+};
+
+std::mutex Singleton::_mutexSingleton;
+
+Singleton* Singleton::getSingletonInstance()
+{
+    if(_pInstance == nullptr)
+    {
+        std::lock_guard<std::mutex> lock(_mutexSingleton);
+        if(_pInstance == nullptr)
+        {
+            _pInstance = new Singleton();
+        }
+    }
+    std::cout<<"Singleton::Instance()"<<std::endl;
+
+    return _pInstance;
+}
+
+#endif
 
 
 }//Namespace Utils
