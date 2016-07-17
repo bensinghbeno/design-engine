@@ -38,7 +38,7 @@ namespace utils
 
 struct generic_payload
 {
-    unsigned int command_id;
+    unsigned int command_index;
     unsigned char char_element;
     char buffer_data[MAX_VECTOR_CHARS];//    bool(*fp)(char* buffer);
     bool(*pAction)(char* buffer);
@@ -55,7 +55,7 @@ static cvector* pMainCallbackVector = NULL;
 
 
 bool generic_action_function(char* buffer);
-void add_callback(unsigned int command_id, char* buffer_data, bool(*fpAction)(char* buffer));
+unsigned int add_callback(char* buffer_data, bool(*fpAction)(char* buffer));
 void activate_callback(unsigned int command_id);
 void callback_vector_display_values();
 void callback_vector_delete();
@@ -65,7 +65,7 @@ cvector* cvector_init();
 void cvector_delete(cvector *pcvec);
 void cvector_set_def_values(cvector* pcvec);
 void cvector_display_values(cvector* pcvec);
-void cvector_push_back(cvector* pcvector,generic_payload *pelem);
+unsigned int cvector_push_back(cvector* pcvector,generic_payload *pelem);
 void cvector_remove(cvector* pcvector, unsigned int index);
 
 

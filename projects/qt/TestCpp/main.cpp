@@ -31,35 +31,35 @@ int main(int argc,char* argv[])
 {
     cout<<"Program Started"<<endl;
 
-    add_callback(100,"CALL0",&generic_action_function);
-    add_callback(101,"CALL1",&generic_action_function);
-    add_callback(102,"CALL2",&generic_action_function);
+    add_callback("CALL0",&generic_action_function);
+    add_callback("CALL1",&generic_action_function);
+    add_callback("CALL2",&generic_action_function);
     callback_vector_display_values();
 
-    pthread_t thread;
-    pthread_attr_t attr;
-    int rc;
-    long t=0;
-    void *status;
+//    pthread_t thread;
+//    pthread_attr_t attr;
+//    int rc;
+//    long t=0;
+//    void *status;
 
-    /* Initialize and set thread detached attribute */
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+//    /* Initialize and set thread detached attribute */
+//    pthread_attr_init(&attr);
+//    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-    printf("Main: creating thread %ld\n", t);
-    rc = pthread_create(&thread, &attr, BusyWork, (void *)t);
-    if (rc) {
-        printf("ERROR; return code from pthread_create() is %d\n", rc);
-        exit(-1);
-    }
+//    printf("Main: creating thread %ld\n", t);
+//    rc = pthread_create(&thread, &attr, BusyWork, (void *)t);
+//    if (rc) {
+//        printf("ERROR; return code from pthread_create() is %d\n", rc);
+//        exit(-1);
+//    }
 
-    pthread_attr_destroy(&attr);
-    rc = pthread_join(thread, &status);
-    if (rc) {
-        printf("ERROR; return code from pthread_join() is %d\n", rc);
-        exit(-1);
-    }
-    printf("Main: completed join with thread %ld having a status of %ld\n",t,(long)status);
+//    pthread_attr_destroy(&attr);
+//    rc = pthread_join(thread, &status);
+//    if (rc) {
+//        printf("ERROR; return code from pthread_join() is %d\n", rc);
+//        exit(-1);
+//    }
+//    printf("Main: completed join with thread %ld having a status of %ld\n",t,(long)status);
 
 
     callback_vector_delete();
