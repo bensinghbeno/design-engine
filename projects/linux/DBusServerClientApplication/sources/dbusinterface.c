@@ -1,4 +1,5 @@
 #include "dbusinterface.h"
+#include "utils.h"
 
 const int RET_ERROR = -1;
 const int MIN_OCTETS = 3;
@@ -124,12 +125,15 @@ void listen_to_method_requests(DBusMessage* msg, const char* iface, DBusConnecti
 
     if ( dbus_message_is_method_call( msg, iface, "Method" ) )
     {
-        if(requestID == 1001)
+        response = activate_callback(requestID);
+
+        if(response != RET_ERROR)
         {
-            time_t now = time(NULL);
-            struct tm *t = localtime(&now);
-            response = t->tm_year+1900;
-            printf( "The Year is %d\n", response);
+
+//            time_t now = time(NULL);
+//            struct tm *t = localtime(&now);
+//            response = t->tm_year+1900;
+//            printf( "The Year is %d\n", response);
         }
         else
         {

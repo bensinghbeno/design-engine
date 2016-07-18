@@ -17,6 +17,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <dbus/dbus-glib.h>
+#include <dbus-1.0/dbus/dbus.h>
+#include <math.h>
 
 
 #endif
@@ -60,6 +63,7 @@
 #endif
 
 const int ZERO = 0;
+const int INVALID_RET = 5555;
 const int UTIL_FALSE = 0;
 const int UTIL_TRUE  = 1;
 const int MAX_VECTOR_CHARS = 10;
@@ -99,9 +103,9 @@ void cvector_remove(cvector* pcvector, unsigned int index);
 
 /*! \brief Following section contains the function utilities for a FUNCTION CALLBACK implementation based on c-style vector
 */
-unsigned int generic_action_function(char* buffer);
+unsigned int action_function_get_year(char* buffer);
 unsigned int add_callback(char* buffer_data, unsigned int(*fpAction)(char* buffer));
-void activate_callback(unsigned int command_id);
+unsigned int activate_callback(unsigned int command_id);
 void callback_vector_display_values();
 void callback_vector_delete();
 
@@ -113,6 +117,13 @@ typedef struct Node
     int data;
     struct Node* next;
 }Node;
+
+typedef struct worker_thread_args
+{
+    char* interface;
+    long task_id;
+    DBusConnection* dbusConnection;
+}worker_thread_args;
 
 /*! \brief Following section contains the function utilities for a C-STYLE LINKED LIST implementation
 */

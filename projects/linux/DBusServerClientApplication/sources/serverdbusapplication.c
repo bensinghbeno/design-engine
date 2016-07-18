@@ -1,24 +1,51 @@
 #include"dbusinterface.h"
-#include <time.h>
 #include "utils.h"
+#include "pthread.h"
+
+void task_listen_dbus_message(void* _thread_arg)
+{
+    printf("thread - task_listen_dbus_message started\n");
+    worker_thread_args  thread_arg = *((worker_thread_args*) _thread_arg);
+    DBusConnection* dbusConnection = thread_arg.dbusConnection;
+
+    while (true)
+    {
+        // Acquire R/W access to Bus
+        dbus_connection_read_write(dbusConnection, 0);
+        DBusMessage* dbusMsg = dbus_connection_pop_message(dbusConnection);
+
+        if (NULL == dbusMsg)
+        {
+            sleep(1);
+            continue;
+        }
+
+        if ( dbus_message_has_interface(dbusMsg, thread_arg.interface) )
+        {
+            listen_to_method_requests( dbusMsg, thread_arg.interface, dbusConnection );
+        }
+        // Unref the message
+        dbus_message_unref(dbusMsg);
+    }
+}
 
 int main(int argc,char* argv[])
 {
+    printf("Launched DBusServer Application\n");
 
-    add_callback("CALL0",&generic_action_function);
-    add_callback("CALL1",&generic_action_function);
-    add_callback("CALL2",&generic_action_function);
-    callback_vector_display_values();
-
-    DBusError dbusErrorStructure;
-    DBusConnection* dbusConnection;
-    DBusMessage* dbusMsg;
-    int resultBusNameReg;
 
     if(check_server_arguments(argc,argv))
     {
 
-        printf("Launched DBusServer Application\n");
+        printf("DBusServer Application server arguments validated\n");
+
+        add_callback("ACTION_0",&action_function_get_year);
+        callback_vector_display_values();
+
+
+        DBusError dbusErrorStructure;
+        DBusConnection* dbusConnection;
+        int resultBusNameReg;
 
         // init the dbus error structure
         dbus_error_init(&dbusErrorStructure);
@@ -49,26 +76,39 @@ int main(int argc,char* argv[])
             return resultBusNameReg;
         }
 
-        printf("Start Main DBus Server Loop to listen & respond to messages\n");
-        while (true)
-        {
-            // Acquire R/W access to Bus
-            dbus_connection_read_write(dbusConnection, 0);
-            dbusMsg = dbus_connection_pop_message(dbusConnection);
+        printf("Start Main DBus Server Loop as a worker thread to listen & respond to messages\n");
 
-            if (NULL == dbusMsg)
-            {
-                sleep(1);
-                continue;
-            }
 
-            if ( dbus_message_has_interface(dbusMsg, argv[2]) )
-            {
-                listen_to_method_requests( dbusMsg, argv[2], dbusConnection );
-            }
-            // Unref the message
-            dbus_message_unref(dbusMsg);
+        pthread_t thread;
+        pthread_attr_t attr;
+        int rc;
+        long t=0;
+        void *status;
+        worker_thread_args thread_arg;
+        thread_arg.task_id = t;
+        thread_arg.interface = argv[2];
+        thread_arg.dbusConnection = dbusConnection;
+
+
+        /* Initialize and set thread detached attribute */
+        pthread_attr_init(&attr);
+        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
+        printf("Main: creating thread %ld\n", t);
+        rc = pthread_create(&thread, &attr, (void*)&task_listen_dbus_message, (void *)(&thread_arg));
+        if (rc) {
+            printf("ERROR; return code from pthread_create() is %d\n", rc);
+            exit(-1);
         }
+
+        pthread_attr_destroy(&attr);
+        rc = pthread_join(thread, &status);
+        if (rc) {
+            printf("ERROR; return code from pthread_join() is %d\n", rc);
+            exit(-1);
+        }
+        printf("Main Thread: completed join with thread %ld having a status of %ld\n",t,(long)status);
+
     }
     else
     {

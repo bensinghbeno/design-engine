@@ -11,10 +11,14 @@ using namespace std;
 
 #ifdef _C_UTIL
 
-unsigned int generic_action_function(char* buffer)
+unsigned int action_function_get_year(char* buffer)
 {
-    printf("\ngeneric_action_function :: buffer %s",buffer);
-    return UTIL_TRUE;
+    printf("\ngeneric_action_function :: buffer %s :: ",buffer);
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    unsigned int response = t->tm_year+1900;
+    printf( "The Year is %d\n", response);
+    return response;
 }
 
 unsigned int add_callback(char* buffer_data,unsigned int(*fpAction)(char *))
@@ -34,7 +38,7 @@ unsigned int add_callback(char* buffer_data,unsigned int(*fpAction)(char *))
     return cmd_index;
 }
 
-void activate_callback(unsigned int command_id)
+unsigned int activate_callback(unsigned int command_id)
 {
     printf("activate_callback :: command_id %d",command_id);
 
@@ -43,17 +47,20 @@ void activate_callback(unsigned int command_id)
         if(pMainCallbackVector->size >= command_id)
         {
             printf("Valid command_id = %d :: Activating callback now",command_id);
-            pMainCallbackVector->pcvelement[command_id].pAction(pMainCallbackVector->pcvelement[command_id].buffer_data);
+            return(pMainCallbackVector->pcvelement[command_id].pAction(pMainCallbackVector->pcvelement[command_id].buffer_data));
         }
         else
         {
             printf("ERROR_INVALID  command_id");
+            return (INVALID_RET);
 
         }
     }
     else
     {
         printf("\ncallback_vector_display_values :: ERROR uninitialized pMainCallbackVector");
+        return (INVALID_RET);
+
     }
 
 }
