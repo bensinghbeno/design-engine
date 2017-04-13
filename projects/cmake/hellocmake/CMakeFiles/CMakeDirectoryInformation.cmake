@@ -3,7 +3,7 @@
 
 # Relative path conversion top directories.
 SET(CMAKE_RELATIVE_PATH_TOP_SOURCE "/home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake")
-SET(CMAKE_RELATIVE_PATH_TOP_BINARY "/home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake")
+SET(CMAKE_RELATIVE_PATH_TOP_BINARY "/media/bensingh/root/home/bensingh/my/dev/design-engine/projects/cmake/hellocmake")
 
 # Force unix paths in dependencies.
 SET(CMAKE_FORCE_UNIX_PATHS 1)

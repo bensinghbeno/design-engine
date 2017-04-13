@@ -30,22 +30,22 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/bensingh/bensingh_bkp/Perforce/ct-devenv-bensingh/depot/ct/devenv/main/Linux/Build/cmake/bin/cmake
+CMAKE_COMMAND = /media/bensingh/root/home/bensingh/Perforce/ct-devenv-bensingh/depot/ct/devenv/main/Linux/Build/cmake/bin/cmake
 
 # The command to remove a file.
-RM = /home/bensingh/bensingh_bkp/Perforce/ct-devenv-bensingh/depot/ct/devenv/main/Linux/Build/cmake/bin/cmake -E remove -f
+RM = /media/bensingh/root/home/bensingh/Perforce/ct-devenv-bensingh/depot/ct/devenv/main/Linux/Build/cmake/bin/cmake -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The program to use to edit the cache.
-CMAKE_EDIT_COMMAND = /home/bensingh/bensingh_bkp/Perforce/ct-devenv-bensingh/depot/ct/devenv/main/Linux/Build/cmake/bin/ccmake
+CMAKE_EDIT_COMMAND = /media/bensingh/root/home/bensingh/Perforce/ct-devenv-bensingh/depot/ct/devenv/main/Linux/Build/cmake/bin/ccmake
 
 # The top-level source directory on which CMake was run.
 CMAKE_SOURCE_DIR = /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake
+CMAKE_BINARY_DIR = /media/bensingh/root/home/bensingh/my/dev/design-engine/projects/cmake/hellocmake
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -72,9 +72,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake/CMakeFiles /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /media/bensingh/root/home/bensingh/my/dev/design-engine/projects/cmake/hellocmake/CMakeFiles /media/bensingh/root/home/bensingh/my/dev/design-engine/projects/cmake/hellocmake/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /media/bensingh/root/home/bensingh/my/dev/design-engine/projects/cmake/hellocmake/CMakeFiles 0
 .PHONY : all
 
 # The main clean target

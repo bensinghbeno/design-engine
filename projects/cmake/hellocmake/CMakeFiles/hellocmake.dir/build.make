@@ -26,22 +26,22 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/bensingh/bensingh_bkp/Perforce/ct-devenv-bensingh/depot/ct/devenv/main/Linux/Build/cmake/bin/cmake
+CMAKE_COMMAND = /media/bensingh/root/home/bensingh/Perforce/ct-devenv-bensingh/depot/ct/devenv/main/Linux/Build/cmake/bin/cmake
 
 # The command to remove a file.
-RM = /home/bensingh/bensingh_bkp/Perforce/ct-devenv-bensingh/depot/ct/devenv/main/Linux/Build/cmake/bin/cmake -E remove -f
+RM = /media/bensingh/root/home/bensingh/Perforce/ct-devenv-bensingh/depot/ct/devenv/main/Linux/Build/cmake/bin/cmake -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The program to use to edit the cache.
-CMAKE_EDIT_COMMAND = /home/bensingh/bensingh_bkp/Perforce/ct-devenv-bensingh/depot/ct/devenv/main/Linux/Build/cmake/bin/ccmake
+CMAKE_EDIT_COMMAND = /media/bensingh/root/home/bensingh/Perforce/ct-devenv-bensingh/depot/ct/devenv/main/Linux/Build/cmake/bin/ccmake
 
 # The top-level source directory on which CMake was run.
 CMAKE_SOURCE_DIR = /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake
+CMAKE_BINARY_DIR = /media/bensingh/root/home/bensingh/my/dev/design-engine/projects/cmake/hellocmake
 
 # Include any dependencies generated for this target.
 include CMakeFiles/hellocmake.dir/depend.make
@@ -53,8 +53,8 @@ include CMakeFiles/hellocmake.dir/progress.make
 include CMakeFiles/hellocmake.dir/flags.make
 
 CMakeFiles/hellocmake.dir/hellocmake.cpp.o: CMakeFiles/hellocmake.dir/flags.make
-CMakeFiles/hellocmake.dir/hellocmake.cpp.o: hellocmake.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake/CMakeFiles $(CMAKE_PROGRESS_1)
+CMakeFiles/hellocmake.dir/hellocmake.cpp.o: /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake/hellocmake.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /media/bensingh/root/home/bensingh/my/dev/design-engine/projects/cmake/hellocmake/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/hellocmake.dir/hellocmake.cpp.o"
 	/usr/lib/ccache/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/hellocmake.dir/hellocmake.cpp.o -c /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake/hellocmake.cpp
 
@@ -100,6 +100,6 @@ CMakeFiles/hellocmake.dir/clean:
 .PHONY : CMakeFiles/hellocmake.dir/clean
 
 CMakeFiles/hellocmake.dir/depend:
-	cd /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake/CMakeFiles/hellocmake.dir/DependInfo.cmake --color=$(COLOR)
+	cd /media/bensingh/root/home/bensingh/my/dev/design-engine/projects/cmake/hellocmake && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake /home/bensingh/bensingh_bkp/my/dev/design-engine/projects/cmake/hellocmake /media/bensingh/root/home/bensingh/my/dev/design-engine/projects/cmake/hellocmake /media/bensingh/root/home/bensingh/my/dev/design-engine/projects/cmake/hellocmake /media/bensingh/root/home/bensingh/my/dev/design-engine/projects/cmake/hellocmake/CMakeFiles/hellocmake.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/hellocmake.dir/depend
 
