@@ -1,1 +1,0 @@
-/usr/lib/ccache/c++   -O3 -DNDEBUG    CMakeFiles/hellocmake.dir/hellocmake.cpp.o  -o hellocmake -rdynamic 

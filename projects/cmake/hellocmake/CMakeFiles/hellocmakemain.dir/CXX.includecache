@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ben/engine/design-engine/projects/cmake/hellocmake/sources/components/hellocmakemain/HelloCmakeMain.cpp
+HelloCmakeMain.h
+/home/ben/engine/design-engine/projects/cmake/hellocmake/sources/components/hellocmakemain/HelloCmakeMain.h
+
+/home/ben/engine/design-engine/projects/cmake/hellocmake/sources/components/hellocmakemain/HelloCmakeMain.h
+iostream
+-
+
