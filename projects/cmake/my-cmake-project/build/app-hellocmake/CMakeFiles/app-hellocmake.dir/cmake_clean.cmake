@@ -1,10 +1,8 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/app-hellocmake.dir/src/hellocmakemain/HelloCmakeMain.cpp.obj"
-  "CMakeFiles/app-hellocmake.dir/src/hellocmakemainapplication/HelloCmakeMainApplication.cpp.obj"
+  "CMakeFiles/app-hellocmake.dir/src/hellocmakemain/HelloCmakeMain.cpp.o"
+  "CMakeFiles/app-hellocmake.dir/src/hellocmakemainapplication/HelloCmakeMainApplication.cpp.o"
   "app-hellocmake.pdb"
-  "app-hellocmake.exe"
-  "app-hellocmake.exe.manifest"
-  "libapp-hellocmake.dll.a"
+  "app-hellocmake"
 )
 
 # Per-language clean rules from dependency scanning.
