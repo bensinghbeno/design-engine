@@ -11,20 +11,15 @@ import sys
 import shutil
 from sys import platform
 
-## declare global variables
-global CMD_CMAKE
-global CMAKE_GEN_FLAG
-global MAKE_GEN_TYPE
-global CMD_MAKE
-
 ## define the Build function blocks
+		
 def find_platform():
+	global CMD_CMAKE
+	global CMAKE_GEN_FLAG
+	global CMAKE_GEN_TYPE
+	global CMD_MAKE
 	if platform == "linux" or platform == "linux2":
 		print("\n OS = Linux")
-		#global CMD_CMAKE
-		#global CMAKE_GEN_FLAG
-		#global MAKE_GEN_TYPE
-		#global CMD_MAKE
 		CMD_CMAKE="cmake "
 		CMAKE_GEN_FLAG=""
 		CMAKE_GEN_TYPE=""
@@ -33,15 +28,10 @@ def find_platform():
 		print("\n OS = OS X")
 	elif platform == "win32":
 		print("\n OS = win32")
-		#global CMD_CMAKE
-		#global CMAKE_GEN_FLAG
-		#global MAKE_GEN_TYPE
-		#global CMD_MAKE
+		CMD_CMAKE="cmake "
 		CMAKE_GEN_FLAG="-G "
 		CMAKE_GEN_TYPE='"MinGW Makefiles" '
 		CMD_MAKE="mingw32-make "
-		CMD_CMAKE="cmake "
-
 	
 def build_default():
 	print " build_default().\n"
