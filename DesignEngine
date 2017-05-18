@@ -1,0 +1,46 @@
+My Design Engine User Guide
+===========================
+Bensingh Beno <igenartist@gmail.com>
+:Author Initials: BB
+:toc:
+:icons:
+:numbered:
+:website: http://asciidoc.org/
+
+Introduction
+------------
+Design Engine is my most fruitful contribution to the Internet Community of Software and Embedded Linux System Lovers.
+
+In this site you may find some useful pieces of information for you to kick start your understanding of becoming a good Embedded System Architect.
+
+Tools that can ignite you to start in the right postion and move forward in the right direction.
+
+All of it comes from my personal experience in Embedded Linux Software and Hardware development for around 9 years since my high school.
+
+.My Motivation
+**********************************************************************
+ A spark of light that ignites a fire in you..
+
+ Let it glow, let it show your passion so true..
+ 
+ Start it may with tiny little actions..
+ 
+ Acheive it may, In stellar proportions!!
+**********************************************************************
+
+
+[[X6]]
+Getting Started
+---------------
+
+Will be added soon.. Promise :)
+
+
+[[X6]]
+Making void main() work with GCC 
+--------------------------------
+
+void main() in *.cpp files can only be compiled with gcc compiler in the command line by the flag "-xc"
+This tells the compiler not to use the "cplusplus backend". cplusplus backend or c++ compiler requires int main() as standard.
+
+ gcc -xc -std=c89  main.cpp

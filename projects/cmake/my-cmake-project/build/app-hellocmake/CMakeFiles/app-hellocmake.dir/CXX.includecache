@@ -6,21 +6,21 @@
 
 #IncludeRegexTransform: 
 
-D:/Engine/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemain/HelloCmakeMain.cpp
+/home/bensingh/my/dev/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemain/HelloCmakeMain.cpp
 HelloCmakeMain.h
-D:/Engine/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemain/HelloCmakeMain.h
+/home/bensingh/my/dev/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemain/HelloCmakeMain.h
 HelloCmakeMainApplication.h
-D:/Engine/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemain/HelloCmakeMainApplication.h
+/home/bensingh/my/dev/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemain/HelloCmakeMainApplication.h
 
-D:/Engine/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemain/HelloCmakeMain.h
+/home/bensingh/my/dev/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemain/HelloCmakeMain.h
 iostream
 -
 
-D:/Engine/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemainapplication/HelloCmakeMainApplication.cpp
+/home/bensingh/my/dev/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemainapplication/HelloCmakeMainApplication.cpp
 HelloCmakeMainApplication.h
-D:/Engine/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemainapplication/HelloCmakeMainApplication.h
+/home/bensingh/my/dev/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemainapplication/HelloCmakeMainApplication.h
 
-D:/Engine/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemainapplication/HelloCmakeMainApplication.h
+/home/bensingh/my/dev/design-engine/projects/cmake/my-cmake-project/modules/app-hellocmake/src/hellocmakemainapplication/HelloCmakeMainApplication.h
 iostream
 -
 

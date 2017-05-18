@@ -2,6 +2,6 @@
 
 void main(int argc, char *argv[])
 {
-    printf("Qt Console : Hello NAC\n");
-    return 0;
+    printf("gcc legacy c code : Hello NAC\n");
 }
+
