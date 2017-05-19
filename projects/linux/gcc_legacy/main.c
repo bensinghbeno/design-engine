@@ -1,7 +1,7 @@
-#include <stdio.h>
+#include "displayconsole.h"
 
 void main(int argc, char *argv[])
 {
-    printf("gcc legacy c code : Hello NAC\n");
+    displayOnConsole("Hello gcc legacy c code \n");
 }
 
