@@ -37,6 +37,7 @@ Will be added soon.. Promise :)
 
 
 [[X6]]
+[[X6]]
 Making void main() work with GCC 
 --------------------------------
 
@@ -44,6 +45,7 @@ void main() in *.cpp files can only be compiled with gcc compiler in the command
 This tells the compiler not to use the "cplusplus backend". cplusplus backend or c++ compiler requires int main() as standard.
 
  gcc -xc -std=c89  main.cpp
+
  
 [[X6]]
 Legacy C Shared library Build & Run
@@ -51,10 +53,11 @@ Legacy C Shared library Build & Run
 
  cd design-engine/projects/linux/gcc_legacy
  
+ gcc -c -fpic  displayconsole.c
+ 
  gcc -shared -o libdisplayconsole.so displayconsole.o
  
  gcc -o gcclegacyapp.out main.c -L. -ldisplayconsole
  
  ./gcclegacyapp.out 
  displayOnConsole = Hello gcc legacy c code 
-
