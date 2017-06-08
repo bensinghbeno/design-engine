@@ -3,6 +3,8 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <cxxabi.h>
+#include <iostream>
 
 
 void handler(int sig) {
@@ -15,6 +17,16 @@ void handler(int sig) {
   // print out all the frames to stderr
   fprintf(stderr, "Error: signal %d:\n", sig);
   backtrace_symbols_fd(array, size, STDERR_FILENO);
+
+  int status = -1;
+  char *demangledName = abi::__cxa_demangle( "_Z7handleri", NULL, NULL, &status );
+  if ( status == 0 )
+  {
+    std::cout << "!!! DemangledName = "<< demangledName  << std::endl;
+  }
+  free( demangledName );
+
+
   exit(1);
 }
 
