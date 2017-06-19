@@ -1,47 +1,64 @@
-#include <stdio.h>
-#include <execinfo.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <cxxabi.h>
 #include <iostream>
+using namespace std;
+#include <QtCore>
 
-
-void handler(int sig) {
-  void *array[10];
-  size_t size;
-
-  // get void*'s for all entries on the stack
-  size = backtrace(array, 10);
-
-  // print out all the frames to stderr
-  fprintf(stderr, "Error: signal %d:\n", sig);
-  backtrace_symbols_fd(array, size, STDERR_FILENO);
-
-  int status = -1;
-  char *demangledName = abi::__cxa_demangle( "_Z7handleri", NULL, NULL, &status );
-  if ( status == 0 )
+class Base
+{
+public:
+  Base(){}
+  virtual ~Base(){}
+  void call()
   {
-    std::cout << "!!! DemangledName = "<< demangledName  << std::endl;
+    cout<<"Base"<<endl;
   }
-  free( demangledName );
 
+};
 
-  exit(1);
-}
+class IBase
+{
+public:
+  virtual ~IBase(){}
+  virtual void call() = 0;
+};
 
-void baz() {
- int *foo = (int*)-1; // make a bad pointer
-  printf("%d\n", *foo);       // causes segfault
-}
+class Child : public IBase
+{
+public:
+  Child():val(0){}
+  virtual ~Child(){}
+  void call()
+  {
+    cout<<"val = "<<val<<endl;
+  }
+  quint32 val;
+  void setval(quint32 aval)
+  {
+    val = aval;
+  }
+};
 
-void bar() { baz(); }
-void foo() { bar(); }
+class Other
+{
+public:
+  IBase* bp;
+  void set(IBase* abp)
+  {
+    bp = abp;
+  }
+  void call()
+  {
+    bp->call();
+  }
+};
 
 
 int main(int argc, char **argv)
 {
-  printf("Hello Backtracer!!\n");
-  signal(SIGSEGV, handler);   // install our handler
-  foo(); // this will call foo, bar, and baz.  baz segfaults.
+  cout<<"Hello MyConsole!!"<<endl;
+  Child* cp = new Child;
+  const quint32 v = 10;
+  cp->setval(v);
+  Other otherObj;
+  otherObj.set(cp);
+  otherObj.call();
 }
