@@ -20,7 +20,8 @@ SOURCES += main.cpp
 INCLUDEPATH += /media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/
 #DEPENDPATH += /usr/lib/i386-linux-gnu/
 
-HEADERS +=
+HEADERS += \
+    backtracelogger.h
 
 QMAKE_CXXFLAGS += -rdynamic
 QMAKE_LFLAGS   += -g -rdynamic
