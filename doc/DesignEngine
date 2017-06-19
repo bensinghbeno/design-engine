@@ -35,6 +35,25 @@ Getting Started
 
 Will be added soon.. Promise :)
 
+[[X6]]
+Making GUI Application work with Docker Container
+-------------------------------------------------
+
+If you are using my git design-engine repository & my docker workbook : benubuntuworkbook,
+
+Step1 - Start container with port forwarding to host,
+    docker run -p 5905:5901 -it -w '/home/ben' bensinghbeno/benubuntuworkbook bash
+
+Step2 - Set display variable as,
+    export DISPLAY=:1
+    
+Step3 - Start vncserver & run any app (eg: Firefox) as,
+    vncserver :1
+    
+Step4 - Connect any vnc client and see the result
+    ip   : 127.0.0.1
+    port : 5905
+
 
 [[X6]]
 [[X6]]
