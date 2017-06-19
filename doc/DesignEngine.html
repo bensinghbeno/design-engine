@@ -430,8 +430,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel1">
 <li><a href="#trueintroduction">1. Introduction</a></li>
 <li><a href="#X6">2. Getting Started</a></li>
-<li><a href="#X6">3. Making void main() work with GCC</a></li>
-<li><a href="#X6">4. Legacy C Shared library Build &amp; Run</a></li>
+<li><a href="#X6">3. Making GUI Application work with Docker Container</a></li>
+<li><a href="#X6">4. Making void main() work with GCC</a></li>
+<li><a href="#X6">5. Legacy C Shared library Build &amp; Run</a></li>
 </ul>
 </div>
 </div>
@@ -487,7 +488,32 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="X6"><a class="anchor" href="#X6"></a>3. Making void main() work with GCC</h2>
+<h2 id="X6"><a class="anchor" href="#X6"></a>3. Making GUI Application work with Docker Container</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you are using my git design-engine repository &amp; my docker workbook : benubuntuworkbook,</p>
+</div>
+<div class="paragraph">
+<p>Step1 - Start container with port forwarding to host,
+    docker run -p 5905:5901 -it -w <em>/home/ben</em> bensinghbeno/benubuntuworkbook bash</p>
+</div>
+<div class="paragraph">
+<p>Step2 - Set display variable as,
+    export DISPLAY=:1</p>
+</div>
+<div class="paragraph">
+<p>Step3 - Start vncserver &amp; run any app (eg: Firefox) as,
+    vncserver :1</p>
+</div>
+<div class="paragraph">
+<p>Step4 - Connect any vnc client and see the result
+    ip   : 127.0.0.1
+    port : 5905</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="X6"><a class="anchor" href="#X6"></a>4. Making void main() work with GCC</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>void main() in *.cpp files can only be compiled with gcc compiler in the command line by the flag "-xc"
@@ -501,7 +527,7 @@ This tells the compiler not to use the "cplusplus backend". cplusplus backend or
 </div>
 </div>
 <div class="sect1">
-<h2 id="X6"><a class="anchor" href="#X6"></a>4. Legacy C Shared library Build &amp; Run</h2>
+<h2 id="X6"><a class="anchor" href="#X6"></a>5. Legacy C Shared library Build &amp; Run</h2>
 <div class="sectionbody">
 <div class="literalblock">
 <div class="content">
@@ -534,7 +560,7 @@ displayOnConsole = Hello gcc legacy c code</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2017-05-22 09:50:30 CEST
+Last updated 2017-06-19 17:10:53 CEST
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/github.min.css">
