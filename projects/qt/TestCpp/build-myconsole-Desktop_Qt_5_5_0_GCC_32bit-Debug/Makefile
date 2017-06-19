@@ -184,7 +184,7 @@ DIST          = /media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/mkspecs/features/exceptions.prf \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/mkspecs/features/yacc.prf \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/mkspecs/features/lex.prf \
-		../myconsole/myconsole.pro  ../myconsole/main.cpp
+		../myconsole/myconsole.pro ../myconsole/backtracelogger.h ../myconsole/main.cpp
 QMAKE_TARGET  = myconsole
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = myconsole
@@ -502,6 +502,7 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
+	$(COPY_FILE) --parents ../myconsole/backtracelogger.h $(DISTDIR)/
 	$(COPY_FILE) --parents ../myconsole/main.cpp $(DISTDIR)/
 
 
@@ -539,7 +540,47 @@ compiler_clean:
 
 ####### Compile
 
-main.o: ../myconsole/main.cpp /media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/stdio.h \
+main.o: ../myconsole/main.cpp /media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/QtCore \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/QtCoreDepends \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qabstractanimation.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qobject.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qobjectdefs.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qnamespace.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qglobal.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qconfig.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qfeatures.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsystemdetection.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qprocessordetection.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qcompilerdetection.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qtypeinfo.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qtypetraits.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsysinfo.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qlogging.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qflags.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qatomic.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qbasicatomic.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qatomic_bootstrap.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qgenericatomic.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qatomic_cxx11.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qatomic_gcc.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qatomic_msvc.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qatomic_armv7.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qatomic_armv6.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qatomic_armv5.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qatomic_ia64.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qatomic_mips.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qatomic_x86.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qatomic_unix.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qglobalstatic.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qmutex.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qnumeric.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qobjectdefs_impl.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qstring.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qchar.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qbytearray.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qrefcount.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qarraydata.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/string.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/features.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/stdc-predef.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/predefs.h \
@@ -548,18 +589,79 @@ main.o: ../myconsole/main.cpp /media/bensingh/root/home/bensingh/Perforce/dea-de
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/gnu/stubs.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/gnu/stubs-soft.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/gnu/stubs-hard.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/xlocale.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/string.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/string2.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/endian.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/endian.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/byteswap.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/types.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/typesizes.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/byteswap-16.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/stdlib.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/waitflags.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/waitstatus.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/sys/types.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/time.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/time.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/timex.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/sys/select.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/select.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/sigset.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/select2.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/sys/sysmacros.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/pthreadtypes.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/alloca.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/stdlib-bsearch.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/stdlib-float.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/stdlib.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/stdlib-ldbl.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/string3.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qstringbuilder.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qlist.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qalgorithms.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qiterator.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/limits.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/posix1_lim.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/local_lim.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/linux/limits.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/posix2_lim.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/xopen_lim.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/stdio_lim.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qbytearraylist.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qstringlist.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qregexp.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qstringmatcher.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qcoreevent.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qscopedpointer.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qmetatype.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qvarlengtharray.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qcontainerfwd.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qisenum.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qobject_impl.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qanimationgroup.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qparallelanimationgroup.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qpauseanimation.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qpropertyanimation.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qvariantanimation.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qeasingcurve.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qvector.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qpoint.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qvariant.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qmap.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qpair.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qdebug.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qhash.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qtextstream.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qiodevice.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qlocale.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qshareddata.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/stdio.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/libio.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/_G_config.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/wchar.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/wchar.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/wctype.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/endian.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/endian.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/byteswap.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/byteswap-16.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/xlocale.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/wchar2.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/wchar-ldbl.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/gconv.h \
@@ -567,11 +669,7 @@ main.o: ../myconsole/main.cpp /media/bensingh/root/home/bensingh/Perforce/dea-de
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/libc-lock.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/pthread.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/sched.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/time.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/time.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/timex.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/sched.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/pthreadtypes.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/setjmp.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/errno.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/errno.h \
@@ -581,42 +679,125 @@ main.o: ../myconsole/main.cpp /media/bensingh/root/home/bensingh/Perforce/dea-de
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/asm-generic/errno-base.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/gnu/option-groups.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/libio-ldbl.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/stdio_lim.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/sys_errlist.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/getopt.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/ctype.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/stdio.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/stdio2.h \
 		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/stdio-ldbl.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/execinfo.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/signal.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/sigset.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/signum.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/siginfo.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/sigaction.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/sigcontext.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/asm/sigcontext.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/sigstack.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/sys/ucontext.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/sigthread.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/stdlib.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/waitflags.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/waitstatus.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/sys/types.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/sys/select.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/select.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/select2.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/sys/sysmacros.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/alloca.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/stdlib-bsearch.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/stdlib-float.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/stdlib.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/stdlib-ldbl.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/unistd.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/posix_opt.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/environments.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/confname.h \
-		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/bits/unistd.h
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qset.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qcontiguouscache.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsequentialanimationgroup.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qtextcodec.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qendian.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qlibraryinfo.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qdatetime.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qbuffer.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qdatastream.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qdir.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qfileinfo.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qfile.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qfiledevice.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qdiriterator.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qfileselector.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/QObject \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/QStringList \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qfilesystemwatcher.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qlockfile.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qloggingcategory.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qprocess.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qresource.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsavefile.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsettings.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qstandardpaths.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qstorageinfo.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qtemporarydir.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/QScopedPointer \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qtemporaryfile.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qurl.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qurlquery.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qabstractitemmodel.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qabstractproxymodel.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qidentityproxymodel.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qitemselectionmodel.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsortfilterproxymodel.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qstringlistmodel.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qjsonarray.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qjsonvalue.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qjsondocument.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qjsonobject.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qabstracteventdispatcher.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qeventloop.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qabstractnativeeventfilter.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qbasictimer.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qcoreapplication.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qmath.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qmetaobject.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qmimedata.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qobjectcleanuphandler.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qpointer.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsharedpointer.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsharedpointer_impl.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsharedmemory.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsignalmapper.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsocketnotifier.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsystemsemaphore.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qtimer.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qtranslator.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qwineventnotifier.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qmimedatabase.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qmimetype.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qfactoryinterface.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qlibrary.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qplugin.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qpluginloader.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/quuid.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qabstractstate.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qabstracttransition.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qeventtransition.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qfinalstate.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qhistorystate.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsignaltransition.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qstate.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qstatemachine.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qexception.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qfuture.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qfutureinterface.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qrunnable.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qresultstore.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qfuturesynchronizer.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qfuturewatcher.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qreadwritelock.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsemaphore.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qthread.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qthreadpool.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qthreadstorage.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qwaitcondition.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qarraydataops.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qarraydatapointer.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qbitarray.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qbytearraymatcher.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qcache.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qcollator.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qcommandlineoption.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qcommandlineparser.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qcryptographichash.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qelapsedtimer.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qline.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qlinkedlist.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qmargins.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qmessageauthenticationcode.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qqueue.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qrect.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qsize.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qregularexpression.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qscopedvaluerollback.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qstack.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qtextboundaryfinder.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qtimeline.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qtimezone.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qxmlstream.h \
+		/media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/Qt_Wave3/Qt5.5.0/5.5.0/gcc/include/QtCore/qtcoreversion.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../myconsole/main.cpp
 
 ####### Install
