@@ -1,64 +1,83 @@
+
 #include <iostream>
 using namespace std;
-#include <QtCore>
+#include<stdio.h>
+#include<string.h>
 
-class Base
+#define SIZE 1
+#define NUMELEM 5
+
+int main(int argc, char* argv[])
 {
-public:
-  Base(){}
-  virtual ~Base(){}
-  void call()
-  {
-    cout<<"Base"<<endl;
-  }
-
-};
-
-class IBase
-{
-public:
-  virtual ~IBase(){}
-  virtual void call() = 0;
-};
-
-class Child : public IBase
-{
-public:
-  Child():val(0){}
-  virtual ~Child(){}
-  void call()
-  {
-    cout<<"val = "<<val<<endl;
-  }
-  quint32 val;
-  void setval(quint32 aval)
-  {
-    val = aval;
-  }
-};
-
-class Other
-{
-public:
-  IBase* bp;
-  void set(IBase* abp)
-  {
-    bp = abp;
-  }
-  void call()
-  {
-    bp->call();
-  }
-};
+    cout<<"Hello MyApp"<<endl;
 
 
-int main(int argc, char **argv)
-{
-  cout<<"Hello MyConsole!!"<<endl;
-  Child* cp = new Child;
-  const quint32 v = 10;
-  cp->setval(v);
-  Other otherObj;
-  otherObj.set(cp);
-  otherObj.call();
+    FILE* fd = NULL;
+    char buff[100];
+    memset(buff,0,sizeof(buff));
+
+    fd = fopen("./largetextfile.txt","rw+");
+
+    if(NULL == fd)
+    {
+        cout<<"\n fopen() Error!!!\n"<<endl;
+        return 1;
+    }
+
+    cout<<"\n File opened successfully through fopen()\n"<<endl;
+
+    while(1);
+
+
+    if(SIZE*NUMELEM != fread(buff,SIZE,NUMELEM,fd))
+    {
+        cout<<"\n fread() failed\n"<<endl;
+        return 1;
+    }
+
+    cout<<"\n Some bytes successfully read through fread()\n"<<endl;
+
+
+    if(0 != fseek(fd,11,SEEK_CUR))
+    {
+        printf("\n fseek() failed\n");
+        return 1;
+    }
+
+
+    printf("\n fseek() successful\n");
+
+
+
+    if(SIZE*NUMELEM != fwrite(buff,SIZE,strlen(buff),fd))
+    {
+        printf("\n fwrite() failed\n");
+        return 1;
+    }
+
+    printf("\n fwrite() successful, data written to text file\n");
+
+    fclose(fd);
+
+    printf("\n File stream closed through fclose()\n");
+
+    return 0;
 }
+
+//int main(int argc, char* argv[])
+//{
+//  cout<<"Hello MyApp"<<endl;
+//  int fd1;
+//  fd1 = open("/home/bensingh/bensingh_bkp/project/tools/build_scripts/myapp/ltextfile.txt", O_WRONLY, S_IRUSR | S_IWUSR);
+
+//  if (fd1 == (-1))
+//  {
+//    cout<<"largetextfile.txt open FAILURE"<<endl;
+//  }
+//  else
+//  {
+//    cout<<"largetextfile.txt open SUCCESS"<<endl;
+//  }
+//  while(1);
+//  return 0;
+//}

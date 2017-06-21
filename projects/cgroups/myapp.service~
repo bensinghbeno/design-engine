@@ -1,0 +1,16 @@
+[Unit]
+Description=myapp service
+
+[Service]
+Type=notify
+Environment=LC_ALL=C FB_MULTI_BUFFER=3
+NotifyAccess=all
+WorkingDirectory=/home/bensingh/my/dev/design-engine/projects/cgroups
+ExecStart=/home/bensingh/my/dev/design-engine/projects/qt/TestCpp/build-myconsole-Desktop_Qt_5_5_0_GCC_32bit-Debug/myconsole
+StandardOutput=null
+StandardError=null
+Restart=on-failure
+RestartSec=0
+
+[Install]
+WantedBy=unfocussed.target
