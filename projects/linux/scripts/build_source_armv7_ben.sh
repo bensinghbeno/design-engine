@@ -5,7 +5,7 @@
 ####################################
 
 SOURCE_PATH=`pwd`
-ALLOWED_ARCHS="armv7"
+ALLOWED_ARCHS="armv7a"
 PENDING_ARCH="x86"
 KERNEL_VERSION="3.10.53"
 SW_VERSION="${PWD##*/}"
@@ -23,7 +23,7 @@ function show_pending {
 }
 
 ####################################
-# Process Commandline Arguments
+# Start & Process Commandline Arguments
 ####################################
 
 if [ -z "$1" ]
@@ -41,7 +41,7 @@ case $1 in
      ;;
 esac
 
-if [ ${ARCH} == "armv7" ]
+if [ ${ARCH} == "armv7a" ]
 then
   PREFIX=${ARM_HOST}/bin/arm-none-linux-gnueabi-
   HOST=armv7-none-linux-gnueabi
@@ -50,7 +50,7 @@ fi
 DIST=${ARCH}-dist
 
 ####################################
-# Start Script
+# Greeting
 ####################################
 
 echo -e "\n\e[44m           ***********Welcome by Ben's ipk package builder , lets build $SW_VERSION *********\e[0m\n"
@@ -61,12 +61,11 @@ echo -e "\n\e[44m           ***********Welcome by Ben's ipk package builder , le
 ####################################
 
 echo -e "\n\e[32m           *********** Clean old build *********\e[0m\n"
-make clean
 rm -rf ../build
 
 echo -e "\n\e[32m           *********** Configure build *********\e[0m\n"
 
-mkdir -p ${SOURCE_PATH}/../build/version-${SW_VERSION}/${ARCH}/bin_2
+mkdir -p ${SOURCE_PATH}/../build/${SW_VERSION}/${ARCH}/bin
 echo "Build Directory Created"
 cd ${SOURCE_PATH}
 echo "Enter Source Directory - ${SOURCE_PATH}" 
@@ -91,7 +90,7 @@ echo -e "\n\e[32m           *********** make *********\e[0m\n"
 make -j8
 
 echo -e "\n\e[32m           *********** make install *********\e[0m\n"
-make install DESTDIR=${SOURCE_PATH}/../build/version-${SW_VERSION}/${ARCH}/bin
+make install DESTDIR=${SOURCE_PATH}/../build/${SW_VERSION}/${ARCH}/bin
 
 echo -e "\n\e[44m                     ***********Packages are built successfully*********                    \e[0m\n"
 
