@@ -1,3 +1,4 @@
+#!/usr/bin/python
 ## @file hellopython.py
 ##
 ## @brief
