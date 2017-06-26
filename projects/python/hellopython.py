@@ -1,10 +1,30 @@
+#!/usr/bin/python
+## @file hellopython.py
+##
+## @brief
+## A demo script for python dummies.
+##
+## Copyright Bensingh Beno / GNU-GPL
 
+## declare import packages
+import sys
 
-import nltk
-import sklearn
+## declare global variables
+global GLOBAL_VAR
+
+## define functions
+
+def disp_python_version(): 
+  GLOBAL_VAR=sys.version
+  return  GLOBAL_VAR;
+
+  
+
+## Main Script
 
 print('Hello Python')
-print('The nltk version is {}.'.format(nltk.__version__))
-print('The scikit-learn version is {}.'.format(sklearn.__version__))
+print('disp_python_version() = %s' %disp_python_version());
+
+
 
 
