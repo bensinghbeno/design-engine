@@ -80,3 +80,39 @@ Legacy C Shared library Build & Run
  
  ./gcclegacyapp.out 
  displayOnConsole = Hello gcc legacy c code 
+ 
+ 
+[[X6]]
+Building & Installing linux packages from source for arm targets
+----------------------------------------------------------------
+TBC
+ 
+[[X6]]
+System Performance Testing
+--------------------------
+It's an inevitable need for any system to be evaluated for performance under heavy resource load.
+Resources may include CPU/MEMORY/DISK IO e.t.c.
+
+The stress tool  is a very handy one to do that.
+
+
+Download the stress tool from here - https://people.seas.harvard.edu/~apw/stress/ 
+
+Follow "Building linux packages from source for arm targets" & create the package
+
+Copy & install the package using command,
+    TBC
+
+Run command as below:
+
+  stress --cpu 8 --io 4 --vm 2 --vm-bytes 128M --timeout 10s 
+
+Where:
+-c, --cpu N	    spawn N workers spinning on sqrt()
+-i, --io N	    spawn N workers spinning on sync()
+-m, --vm N	    spawn N workers spinning on malloc()/free()
+--vm-bytes B	malloc B bytes per vm worker (default is 256MB)
+-t, --timeout N	timeout after N seconds  
+
+Now perform/test/use any application as desired and observe the impact.
+    
