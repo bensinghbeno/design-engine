@@ -8,7 +8,7 @@ import numpy as np
 clf = joblib.load("digits_cls.pkl")
 
 # Read the input image 
-im = cv2.imread("photo_2.jpg")
+im = cv2.imread("photo_22.jpg")
 
 # Convert to grayscale and apply Gaussian filtering
 im_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)

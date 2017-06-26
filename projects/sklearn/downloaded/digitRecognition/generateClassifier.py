@@ -5,7 +5,7 @@ from skimage.feature import hog
 from sklearn.svm import LinearSVC
 import numpy as np
 from collections import Counter
-import tensorflow.examples.tutorials.mnist.input_data as input_data
+
 
 from sklearn.datasets import fetch_mldata
 
