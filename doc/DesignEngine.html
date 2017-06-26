@@ -433,6 +433,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#X6">3. Making GUI Application work with Docker Container</a></li>
 <li><a href="#X6">4. Making void main() work with GCC</a></li>
 <li><a href="#X6">5. Legacy C Shared library Build &amp; Run</a></li>
+<li><a href="#X6">6. Building &amp; Installing linux packages from source for arm targets</a></li>
+<li><a href="#X6">7. System Performance Testing</a></li>
 </ul>
 </div>
 </div>
@@ -557,10 +559,59 @@ displayOnConsole = Hello gcc legacy c code</pre>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="X6"><a class="anchor" href="#X6"></a>6. Building &amp; Installing linux packages from source for arm targets</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>TBC</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="X6"><a class="anchor" href="#X6"></a>7. System Performance Testing</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It&#8217;s an inevitable need for any system to be evaluated for performance under heavy resource load.
+Resources may include CPU/MEMORY/DISK IO e.t.c.</p>
+</div>
+<div class="paragraph">
+<p>The stress tool  is a very handy one to do that.</p>
+</div>
+<div class="paragraph">
+<p>Download the stress tool from here - <a href="https://people.seas.harvard.edu/~apw/stress/" class="bare">https://people.seas.harvard.edu/~apw/stress/</a></p>
+</div>
+<div class="paragraph">
+<p>Follow "Building linux packages from source for arm targets" &amp; create the package</p>
+</div>
+<div class="paragraph">
+<p>Copy &amp; install the package using command,
+    TBC</p>
+</div>
+<div class="paragraph">
+<p>Run command as below:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>stress --cpu 8 --io 4 --vm 2 --vm-bytes 128M --timeout 10s</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Where:
+-c, --cpu N	    spawn N workers spinning on sqrt()
+-i, --io N	    spawn N workers spinning on sync()
+-m, --vm N	    spawn N workers spinning on malloc()/free()
+--vm-bytes B	malloc B bytes per vm worker (default is 256MB)
+-t, --timeout N	timeout after N seconds</p>
+</div>
+<div class="paragraph">
+<p>Now perform/test/use any application as desired and observe the impact.</p>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2017-06-19 17:10:53 CEST
+Last updated 2017-06-26 14:05:30 CEST
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/github.min.css">
