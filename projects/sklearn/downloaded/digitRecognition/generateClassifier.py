@@ -13,7 +13,7 @@ from sklearn.datasets import fetch_mldata
 # Load the dataset
 #dataset = datasets.fetch_mldata('mnist-original', data_home='/home/ben/design-engine/projects/sklearn/data/mnist-data')
 
-dataset = fetch_mldata('MNIST original', data_home='/home/ben/design-engine/projects/sklearn/data/mnist')
+dataset = fetch_mldata('MNIST original', data_home='../../data/mnist/')
 
 # Extract the features and labels
 features = np.array(dataset.data, 'int16') 
