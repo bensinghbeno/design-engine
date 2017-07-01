@@ -24,26 +24,17 @@ class QVariant;
 QT_END_NAMESPACE
 
 /*
- * Adaptor class for interface local.interfacedescription
+ * Adaptor class for interface ben.interfacedescription
  */
 class ifadapter: public QDBusAbstractAdaptor
 {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "local.interfacedescription")
+    Q_CLASSINFO("D-Bus Interface", "ben.interfacedescription")
     Q_CLASSINFO("D-Bus Introspection", ""
-"  <interface name=\"local.interfacedescription\">\n"
-"    <signal name=\"somethingHappened\">\n"
-"      <arg direction=\"out\" type=\"s\" name=\"signalMessage\"/>\n"
-"    </signal>\n"
-"    <method name=\"read\">\n"
+"  <interface name=\"ben.interfacedescription\">\n"
+"    <method name=\"sendCommand\">\n"
 "      <arg direction=\"out\" type=\"s\"/>\n"
-"    </method>\n"
-"    <method name=\"write\">\n"
-"      <arg direction=\"out\" type=\"s\"/>\n"
-"    </method>\n"
-"    <method name=\"SendMessage\">\n"
-"      <arg direction=\"out\" type=\"s\"/>\n"
-"      <arg direction=\"in\" type=\"s\" name=\"cmd\"/>\n"
+"      <arg direction=\"in\" type=\"s\" name=\"aCommand\"/>\n"
 "    </method>\n"
 "  </interface>\n"
         "")
@@ -53,11 +44,8 @@ public:
 
 public: // PROPERTIES
 public Q_SLOTS: // METHODS
-    QString SendMessage(const QString &cmd);
-    QString read();
-    QString write();
+    QString sendCommand(const QString &aCommand);
 Q_SIGNALS: // SIGNALS
-    void somethingHappened(const QString &signalMessage);
 };
 
 #endif

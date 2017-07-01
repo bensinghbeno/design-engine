@@ -218,6 +218,7 @@ DIST          = /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/spec_pre.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/qt_config.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/spec_post.prf \
+		../dbus-server/.qmake.stash \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/toolchain.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/default_pre.prf \
@@ -412,6 +413,7 @@ Makefile: ../dbus-server/dbus-server.pro /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/qt_config.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/toolchain.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/default_pre.prf \
@@ -595,6 +597,7 @@ Makefile: ../dbus-server/dbus-server.pro /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/
 /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/qt_config.prf:
 /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/linux-g++/qmake.conf:
 /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/exclusive_builds.prf:
 /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/toolchain.prf:
 /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/default_pre.prf:
@@ -991,7 +994,24 @@ main.o: ../dbus-server/main.cpp /home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QC
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qvarlengtharray.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcontainerfwd.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobject_impl.h \
-		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qeventloop.h
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qeventloop.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QDebug \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qdebug.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qhash.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qmap.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qtextstream.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qiodevice.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qlocale.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qvariant.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qshareddata.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qvector.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qpoint.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qset.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcontiguouscache.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsharedpointer.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../dbus-server/interfacedescription.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QObject
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../dbus-server/main.cpp
 
 interfacedescription.o: ../dbus-server/interfacedescription.cpp ../dbus-server/interfacedescription.h \

@@ -1,0 +1,20 @@
+
+How to code generate for dbus-server & dbus-client:
+
+cd ../dbus-server/
+
+Generate Instrospection xml:
+qdbuscpp2xml -M -P -S interfacedescription.h -o com.dbus.example.interface.xml
+
+Generate stub Adapter Class:
+qdbusxml2cpp -c ifadapter -a ifadapter.h:ifadapter.cpp com.dbus.example.interface.xml
+
+cd ../dbus-client/
+
+Generate proxy Interface Class:
+qdbusxml2cpp -v -c clientIf -p clientIf.h:clientIf.cpp ../dbus-server/com.dbus.example.interface.xml 
+
+
+
+
+

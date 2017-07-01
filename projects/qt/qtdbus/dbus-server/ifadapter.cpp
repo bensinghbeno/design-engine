@@ -33,27 +33,11 @@ ifadapter::~ifadapter()
     // destructor
 }
 
-QString ifadapter::SendMessage(const QString &cmd)
+QString ifadapter::sendCommand(const QString &aCommand)
 {
-    // handle method call local.interfacedescription.SendMessage
+    // handle method call ben.interfacedescription.sendCommand
     QString out0;
-    QMetaObject::invokeMethod(parent(), "SendMessage", Q_RETURN_ARG(QString, out0), Q_ARG(QString, cmd));
-    return out0;
-}
-
-QString ifadapter::read()
-{
-    // handle method call local.interfacedescription.read
-    QString out0;
-    QMetaObject::invokeMethod(parent(), "read", Q_RETURN_ARG(QString, out0));
-    return out0;
-}
-
-QString ifadapter::write()
-{
-    // handle method call local.interfacedescription.write
-    QString out0;
-    QMetaObject::invokeMethod(parent(), "write", Q_RETURN_ARG(QString, out0));
+    QMetaObject::invokeMethod(parent(), "sendCommand", Q_RETURN_ARG(QString, out0), Q_ARG(QString, aCommand));
     return out0;
 }
 
