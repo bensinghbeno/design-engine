@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_interfacedescription_t {
-    QByteArrayData data[8];
-    char stringdata0[81];
+    QByteArrayData data[4];
+    char stringdata0[43];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -32,18 +32,13 @@ struct qt_meta_stringdata_interfacedescription_t {
 static const qt_meta_stringdata_interfacedescription_t qt_meta_stringdata_interfacedescription = {
     {
 QT_MOC_LITERAL(0, 0, 20), // "interfacedescription"
-QT_MOC_LITERAL(1, 21, 17), // "somethingHappened"
-QT_MOC_LITERAL(2, 39, 0), // ""
-QT_MOC_LITERAL(3, 40, 13), // "signalMessage"
-QT_MOC_LITERAL(4, 54, 4), // "read"
-QT_MOC_LITERAL(5, 59, 5), // "write"
-QT_MOC_LITERAL(6, 65, 11), // "SendMessage"
-QT_MOC_LITERAL(7, 77, 3) // "cmd"
+QT_MOC_LITERAL(1, 21, 11), // "sendCommand"
+QT_MOC_LITERAL(2, 33, 0), // ""
+QT_MOC_LITERAL(3, 34, 8) // "aCommand"
 
     },
-    "interfacedescription\0somethingHappened\0"
-    "\0signalMessage\0read\0write\0SendMessage\0"
-    "cmd"
+    "interfacedescription\0sendCommand\0\0"
+    "aCommand"
 };
 #undef QT_MOC_LITERAL
 
@@ -53,28 +48,18 @@ static const uint qt_meta_data_interfacedescription[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       4,   14, // methods
+       1,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       1,       // signalCount
-
- // signals: name, argc, parameters, tag, flags
-       1,    1,   34,    2, 0x06 /* Public */,
+       0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       4,    0,   37,    2, 0x0a /* Public */,
-       5,    0,   38,    2, 0x0a /* Public */,
-       6,    1,   39,    2, 0x0a /* Public */,
-
- // signals: parameters
-    QMetaType::Void, QMetaType::QString,    3,
+       1,    1,   19,    2, 0x0a /* Public */,
 
  // slots: parameters
-    QMetaType::QString,
-    QMetaType::QString,
-    QMetaType::QString, QMetaType::QString,    7,
+    QMetaType::QString, QMetaType::QString,    3,
 
        0        // eod
 };
@@ -85,24 +70,9 @@ void interfacedescription::qt_static_metacall(QObject *_o, QMetaObject::Call _c,
         interfacedescription *_t = static_cast<interfacedescription *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->somethingHappened((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 1: { QString _r = _t->read();
-            if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = std::move(_r); }  break;
-        case 2: { QString _r = _t->write();
-            if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = std::move(_r); }  break;
-        case 3: { QString _r = _t->SendMessage((*reinterpret_cast< const QString(*)>(_a[1])));
+        case 0: { QString _r = _t->sendCommand((*reinterpret_cast< const QString(*)>(_a[1])));
             if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = std::move(_r); }  break;
         default: ;
-        }
-    } else if (_c == QMetaObject::IndexOfMethod) {
-        int *result = reinterpret_cast<int *>(_a[0]);
-        void **func = reinterpret_cast<void **>(_a[1]);
-        {
-            typedef void (interfacedescription::*_t)(const QString & );
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&interfacedescription::somethingHappened)) {
-                *result = 0;
-                return;
-            }
         }
     }
 }
@@ -132,22 +102,15 @@ int interfacedescription::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 4)
+        if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 4;
+        _id -= 1;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 4)
+        if (_id < 1)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 4;
+        _id -= 1;
     }
     return _id;
-}
-
-// SIGNAL 0
-void interfacedescription::somethingHappened(const QString & _t1)
-{
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
-    QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 QT_WARNING_POP
 QT_END_MOC_NAMESPACE

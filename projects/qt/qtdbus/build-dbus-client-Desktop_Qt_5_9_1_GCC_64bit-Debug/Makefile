@@ -214,6 +214,7 @@ DIST          = /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/spec_pre.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/qt_config.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/spec_post.prf \
+		../dbus-client/.qmake.stash \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/toolchain.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/default_pre.prf \
@@ -406,6 +407,7 @@ Makefile: ../dbus-client/dbus-client.pro /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/qt_config.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/toolchain.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/default_pre.prf \
@@ -589,6 +591,7 @@ Makefile: ../dbus-client/dbus-client.pro /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/
 /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/qt_config.prf:
 /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/linux-g++/qmake.conf:
 /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/exclusive_builds.prf:
 /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/toolchain.prf:
 /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/default_pre.prf:
@@ -939,14 +942,11 @@ main.o: ../dbus-client/main.cpp /home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QC
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcontainerfwd.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobject_impl.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qeventloop.h \
-		../dbus-client/clientIf.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QObject \
-		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QByteArray \
-		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QList \
-		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QMap \
-		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qmap.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QDebug \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qdebug.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qhash.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qmap.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qtextstream.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qiodevice.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qlocale.h \
@@ -958,6 +958,10 @@ main.o: ../dbus-client/main.cpp /home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QC
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcontiguouscache.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsharedpointer.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../dbus-client/clientIf.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QByteArray \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QList \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QMap \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QString \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QStringList \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QVariant \

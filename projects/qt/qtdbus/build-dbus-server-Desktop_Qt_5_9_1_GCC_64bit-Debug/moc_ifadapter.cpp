@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_ifadapter_t {
-    QByteArrayData data[12];
-    char stringdata0[644];
+    QByteArrayData data[8];
+    char stringdata0[312];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -33,31 +33,21 @@ static const qt_meta_stringdata_ifadapter_t qt_meta_stringdata_ifadapter = {
     {
 QT_MOC_LITERAL(0, 0, 9), // "ifadapter"
 QT_MOC_LITERAL(1, 10, 15), // "D-Bus Interface"
-QT_MOC_LITERAL(2, 26, 26), // "local.interfacedescription"
-QT_MOC_LITERAL(3, 53, 19), // "D-Bus Introspection"
-QT_MOC_LITERAL(4, 73, 510), // "  <interface name=\"local.int..."
-QT_MOC_LITERAL(5, 535, 17), // "somethingHappened"
-QT_MOC_LITERAL(6, 553, 0), // ""
-QT_MOC_LITERAL(7, 554, 13), // "signalMessage"
-QT_MOC_LITERAL(8, 568, 11), // "SendMessage"
-QT_MOC_LITERAL(9, 580, 3), // "cmd"
-QT_MOC_LITERAL(10, 584, 4), // "read"
-QT_MOC_LITERAL(11, 589, 5) // "write"
+QT_MOC_LITERAL(2, 26, 24), // "ben.interfacedescription"
+QT_MOC_LITERAL(3, 51, 19), // "D-Bus Introspection"
+QT_MOC_LITERAL(4, 71, 218), // "  <interface name=\"ben.inter..."
+QT_MOC_LITERAL(5, 270, 11), // "sendCommand"
+QT_MOC_LITERAL(6, 282, 0), // ""
+QT_MOC_LITERAL(7, 283, 8) // "aCommand"
 
     },
     "ifadapter\0D-Bus Interface\0"
-    "local.interfacedescription\0"
-    "D-Bus Introspection\0"
-    "  <interface name=\"local.interfacedescription\">\n    <signal name=\""
-    "somethingHappened\">\n      <arg direction=\"out\" type=\"s\" name=\"s"
-    "ignalMessage\"/>\n    </signal>\n    <method name=\"read\">\n      <ar"
-    "g direction=\"out\" type=\"s\"/>\n    </method>\n    <method name=\"wr"
-    "ite\">\n      <arg direction=\"out\" type=\"s\"/>\n    </method>\n    "
-    "<method name=\"SendMessage\">\n      <arg direction=\"out\" type=\"s\""
-    "/>\n      <arg direction=\"in\" type=\"s\" name=\"cmd\"/>\n    </metho"
-    "d>\n  </interface>\n\0"
-    "somethingHappened\0\0signalMessage\0"
-    "SendMessage\0cmd\0read\0write"
+    "ben.interfacedescription\0D-Bus Introspection\0"
+    "  <interface name=\"ben.interfacedescription\">\n    <method name=\"se"
+    "ndCommand\">\n      <arg direction=\"out\" type=\"s\"/>\n      <arg di"
+    "rection=\"in\" type=\"s\" name=\"aCommand\"/>\n    </method>\n  </inte"
+    "rface>\n\0"
+    "sendCommand\0\0aCommand"
 };
 #undef QT_MOC_LITERAL
 
@@ -67,32 +57,22 @@ static const uint qt_meta_data_ifadapter[] = {
        7,       // revision
        0,       // classname
        2,   14, // classinfo
-       4,   18, // methods
+       1,   18, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       1,       // signalCount
+       0,       // signalCount
 
  // classinfo: key, value
        1,    2,
        3,    4,
 
- // signals: name, argc, parameters, tag, flags
-       5,    1,   38,    6, 0x06 /* Public */,
-
  // slots: name, argc, parameters, tag, flags
-       8,    1,   41,    6, 0x0a /* Public */,
-      10,    0,   44,    6, 0x0a /* Public */,
-      11,    0,   45,    6, 0x0a /* Public */,
-
- // signals: parameters
-    QMetaType::Void, QMetaType::QString,    7,
+       5,    1,   23,    6, 0x0a /* Public */,
 
  // slots: parameters
-    QMetaType::QString, QMetaType::QString,    9,
-    QMetaType::QString,
-    QMetaType::QString,
+    QMetaType::QString, QMetaType::QString,    7,
 
        0        // eod
 };
@@ -103,24 +83,9 @@ void ifadapter::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         ifadapter *_t = static_cast<ifadapter *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->somethingHappened((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 1: { QString _r = _t->SendMessage((*reinterpret_cast< const QString(*)>(_a[1])));
-            if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = std::move(_r); }  break;
-        case 2: { QString _r = _t->read();
-            if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = std::move(_r); }  break;
-        case 3: { QString _r = _t->write();
+        case 0: { QString _r = _t->sendCommand((*reinterpret_cast< const QString(*)>(_a[1])));
             if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = std::move(_r); }  break;
         default: ;
-        }
-    } else if (_c == QMetaObject::IndexOfMethod) {
-        int *result = reinterpret_cast<int *>(_a[0]);
-        void **func = reinterpret_cast<void **>(_a[1]);
-        {
-            typedef void (ifadapter::*_t)(const QString & );
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&ifadapter::somethingHappened)) {
-                *result = 0;
-                return;
-            }
         }
     }
 }
@@ -150,22 +115,15 @@ int ifadapter::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 4)
+        if (_id < 1)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 4;
+        _id -= 1;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 4)
+        if (_id < 1)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 4;
+        _id -= 1;
     }
     return _id;
-}
-
-// SIGNAL 0
-void ifadapter::somethingHappened(const QString & _t1)
-{
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
-    QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 QT_WARNING_POP
 QT_END_MOC_NAMESPACE

@@ -10,16 +10,7 @@ class interfacedescription:public QObject
 public:
   interfacedescription();
 public slots:
-
-   QString read();
-
-   QString write();
-
-   QString SendMessage(const QString &cmd);
-
-Q_SIGNALS:
-
-   void somethingHappened(const QString &signalMessage);
+   QString sendCommand(const QString& aCommand);
 };
 
 #endif // INTERFACEDESCRIPTION_H
