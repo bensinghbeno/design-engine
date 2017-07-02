@@ -1,23 +1,36 @@
 #include <QThread>
 #include <QtCore>
 #include <QDebug>
+#include <QMutex>
+
+namespace WorkerClass
+{
+  static QMutex sQMutexObj;
+}
 
 class MyWorkerClass:public QThread
 {
 public:
-  char* mpCString;
-  void setmpCString(char* apCString)
+
+  void setmpCString(const QString& aQString)
   {
-    mpCString = apCString;
+    WorkerClass::sQMutexObj.lock();
+    mSharedQString = aQString;
+    WorkerClass::sQMutexObj.unlock();
+  }
+  const QString& getmpCString() const
+  {
+    return mSharedQString;
   }
 
   void run()
   {
-    qDebug() << "Worker Thread Tid = " << QThread::currentThreadId() << "mpCString = " << mpCString;
+    qDebug() << "Worker Thread Tid = " << QThread::currentThreadId() << "mSharedQString = " << getmpCString();
     while(1)
     {}
   }
-
+private:
+  QString mSharedQString;
 };
 
 
@@ -25,16 +38,14 @@ int main(int argc, char* argv[])
 {
   QCoreApplication myCoreApp(argc, argv);
 
-  QString str("MYSTRING");
-  char* mCString = new char[10];
-  strncpy(mCString,str.toStdString().c_str(),(str.size()+1));
+  const QString& str = *(new QString("SHARED_QSTRING"));
 
   MyWorkerClass myThreadObj;
-  myThreadObj.setmpCString(mCString);
+  myThreadObj.setmpCString(str);
   myThreadObj.start();
 
   MyWorkerClass myThreadObj2;
-  myThreadObj2.setmpCString(mCString);
+  myThreadObj2.setmpCString(str);
   myThreadObj2.start();
 
 
