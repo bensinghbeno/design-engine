@@ -51,10 +51,16 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = ../dbus-client/main.cpp \
-		../dbus-client/clientIf.cpp moc_clientIf.cpp
+		../dbus-client/clientIf.cpp \
+		../dbus-client/MotionCommandAdapter.cpp \
+		../dbus-client/MotionCommandController.cpp moc_clientIf.cpp \
+		moc_MotionCommandAdapter.cpp
 OBJECTS       = main.o \
 		clientIf.o \
-		moc_clientIf.o
+		MotionCommandAdapter.o \
+		MotionCommandController.o \
+		moc_clientIf.o \
+		moc_MotionCommandAdapter.o
 DIST          = /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/spec_pre.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/common/unix.conf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/common/linux.conf \
@@ -235,8 +241,13 @@ DIST          = /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/spec_pre.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/exceptions.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/yacc.prf \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/lex.prf \
-		../dbus-client/dbus-client.pro ../dbus-client/clientIf.h ../dbus-client/main.cpp \
-		../dbus-client/clientIf.cpp
+		../dbus-client/dbus-client.pro ../dbus-client/clientIf.h \
+		../dbus-client/IMotionCommandObserver.h \
+		../dbus-client/MotionCommandAdapter.h \
+		../dbus-client/MotionCommandController.h ../dbus-client/main.cpp \
+		../dbus-client/clientIf.cpp \
+		../dbus-client/MotionCommandAdapter.cpp \
+		../dbus-client/MotionCommandController.cpp
 QMAKE_TARGET  = dbus-client
 DESTDIR       = 
 TARGET        = dbus-client
@@ -630,8 +641,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../dbus-client/clientIf.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../dbus-client/main.cpp ../dbus-client/clientIf.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../dbus-client/clientIf.h ../dbus-client/IMotionCommandObserver.h ../dbus-client/MotionCommandAdapter.h ../dbus-client/MotionCommandController.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../dbus-client/main.cpp ../dbus-client/clientIf.cpp ../dbus-client/MotionCommandAdapter.cpp ../dbus-client/MotionCommandController.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -663,9 +674,9 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -std=gnu++11 -Wall -W -dM -E -o moc_predefs.h /home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_clientIf.cpp
+compiler_moc_header_make_all: moc_clientIf.cpp moc_MotionCommandAdapter.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_clientIf.cpp
+	-$(DEL_FILE) moc_clientIf.cpp moc_MotionCommandAdapter.cpp
 moc_clientIf.cpp: /home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QObject \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobject.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobjectdefs.h \
@@ -881,6 +892,58 @@ moc_clientIf.cpp: /home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QObject \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/bin/moc
 	/home/ben/Qt5.9.1/5.9.1/gcc_64/bin/moc $(DEFINES) --include ./moc_predefs.h -I/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/linux-g++ -I/home/ben/engine/design-engine/projects/qt/qtdbus/dbus-client -I/home/ben/Qt5.9.1/5.9.1/gcc_64/include -I/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtDBus -I/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore -I. -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../dbus-client/clientIf.h -o moc_clientIf.cpp
 
+moc_MotionCommandAdapter.cpp: /home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QObject \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobject.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobjectdefs.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qnamespace.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qglobal.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qconfig.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qtcore-config.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsystemdetection.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qprocessordetection.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qtypeinfo.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsysinfo.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qlogging.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qflags.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qatomic.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qbasicatomic.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qgenericatomic.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qatomic_msvc.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qglobalstatic.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qmutex.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qnumeric.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qversiontagging.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qstring.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qchar.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qbytearray.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qrefcount.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qarraydata.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qstringbuilder.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qlist.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qalgorithms.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qiterator.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qhashfunctions.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qpair.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qbytearraylist.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qstringlist.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qregexp.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qstringmatcher.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcoreevent.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qscopedpointer.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qmetatype.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qvarlengtharray.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcontainerfwd.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobject_impl.h \
+		../dbus-client/MotionCommandAdapter.h \
+		moc_predefs.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/bin/moc
+	/home/ben/Qt5.9.1/5.9.1/gcc_64/bin/moc $(DEFINES) --include ./moc_predefs.h -I/home/ben/Qt5.9.1/5.9.1/gcc_64/mkspecs/linux-g++ -I/home/ben/engine/design-engine/projects/qt/qtdbus/dbus-client -I/home/ben/Qt5.9.1/5.9.1/gcc_64/include -I/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtDBus -I/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore -I. -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../dbus-client/MotionCommandAdapter.h -o moc_MotionCommandAdapter.cpp
+
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
 compiler_yacc_decl_make_all:
@@ -958,11 +1021,11 @@ main.o: ../dbus-client/main.cpp /home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QC
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcontiguouscache.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsharedpointer.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QString \
 		../dbus-client/clientIf.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QByteArray \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QList \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QMap \
-		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QString \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QStringList \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QVariant \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtDBus/QtDBus \
@@ -1105,7 +1168,9 @@ main.o: ../dbus-client/main.cpp /home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QC
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtDBus/qdbusservicewatcher.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtDBus/qdbusunixfiledescriptor.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtDBus/qdbusvirtualobject.h \
-		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtDBus/qtdbusversion.h
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtDBus/qtdbusversion.h \
+		../dbus-client/MotionCommandAdapter.h \
+		../dbus-client/MotionCommandController.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../dbus-client/main.cpp
 
 clientIf.o: ../dbus-client/clientIf.cpp ../dbus-client/clientIf.h \
@@ -1321,8 +1386,141 @@ clientIf.o: ../dbus-client/clientIf.cpp ../dbus-client/clientIf.h \
 		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtDBus/qtdbusversion.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o clientIf.o ../dbus-client/clientIf.cpp
 
+MotionCommandAdapter.o: ../dbus-client/MotionCommandAdapter.cpp ../dbus-client/MotionCommandAdapter.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QObject \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobject.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobjectdefs.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qnamespace.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qglobal.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qconfig.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qtcore-config.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsystemdetection.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qprocessordetection.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qtypeinfo.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsysinfo.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qlogging.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qflags.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qatomic.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qbasicatomic.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qgenericatomic.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qatomic_msvc.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qglobalstatic.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qmutex.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qnumeric.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qversiontagging.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qstring.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qchar.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qbytearray.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qrefcount.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qarraydata.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qstringbuilder.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qlist.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qalgorithms.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qiterator.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qhashfunctions.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qpair.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qbytearraylist.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qstringlist.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qregexp.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qstringmatcher.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcoreevent.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qscopedpointer.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qmetatype.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qvarlengtharray.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcontainerfwd.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobject_impl.h \
+		../dbus-client/IMotionCommandObserver.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QtDebug \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qdebug.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qhash.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qmap.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qtextstream.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qiodevice.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qlocale.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qvariant.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qshareddata.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qvector.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qpoint.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qset.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcontiguouscache.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsharedpointer.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsharedpointer_impl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o MotionCommandAdapter.o ../dbus-client/MotionCommandAdapter.cpp
+
+MotionCommandController.o: ../dbus-client/MotionCommandController.cpp ../dbus-client/MotionCommandController.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/QDebug \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qdebug.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qalgorithms.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qglobal.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qconfig.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qtcore-config.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsystemdetection.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qprocessordetection.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qtypeinfo.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsysinfo.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qlogging.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qflags.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qatomic.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qbasicatomic.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qgenericatomic.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qatomic_msvc.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qglobalstatic.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qmutex.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qnumeric.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qversiontagging.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qhash.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qchar.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qiterator.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qlist.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qrefcount.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qarraydata.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qhashfunctions.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qpair.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qbytearraylist.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qbytearray.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qnamespace.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qstring.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qstringbuilder.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qstringlist.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qregexp.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qstringmatcher.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qmap.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qtextstream.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qiodevice.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobject.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobjectdefs.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcoreevent.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qscopedpointer.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qmetatype.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qvarlengtharray.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcontainerfwd.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qobject_impl.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qlocale.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qvariant.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qshareddata.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qvector.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qpoint.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qset.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qcontiguouscache.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsharedpointer.h \
+		/home/ben/Qt5.9.1/5.9.1/gcc_64/include/QtCore/qsharedpointer_impl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o MotionCommandController.o ../dbus-client/MotionCommandController.cpp
+
 moc_clientIf.o: moc_clientIf.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_clientIf.o moc_clientIf.cpp
+
+moc_MotionCommandAdapter.o: moc_MotionCommandAdapter.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_MotionCommandAdapter.o moc_MotionCommandAdapter.cpp
 
 ####### Install
 

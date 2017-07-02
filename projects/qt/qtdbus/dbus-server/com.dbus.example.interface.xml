@@ -1,9 +1,15 @@
 <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<!-- This xml is generated using command : qdbuscpp2xml -M -P -S interfacedescription.h -o com.dbus.example.interface.xml -->
 <node>
-  <interface name="ben.interfacedescription">
+  <interface name="local.interfacedescription">
+    <signal name="BroadcastCommandSignal">
+      <arg name="aCommandMessage" type="s" direction="out"/>
+    </signal>
     <method name="sendCommand">
-      <arg type="s" direction="out"/>
       <arg name="aCommand" type="s" direction="in"/>
+    </method>
+    <method name="RequestBroadcastSignal">
+      <arg name="aMessage" type="s" direction="in"/>
     </method>
   </interface>
 </node>

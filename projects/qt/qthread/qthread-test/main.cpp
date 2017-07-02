@@ -26,11 +26,15 @@ public:
   void run()
   {
     qDebug() << "Worker Thread Tid = " << QThread::currentThreadId() << "mSharedQString = " << getmpCString();
+    if (mSharedQString == "SHARED_QSTRING")
+    {
+      mSharedQString = "THREAD1STRING";
+    }
     while(1)
     {}
   }
 private:
-  QString mSharedQString;
+  QString& mSharedQString;
 };
 
 

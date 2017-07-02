@@ -33,11 +33,15 @@ ifadapter::~ifadapter()
     // destructor
 }
 
-QString ifadapter::sendCommand(const QString &aCommand)
+void ifadapter::RequestBroadcastSignal(const QString &aMessage)
 {
-    // handle method call ben.interfacedescription.sendCommand
-    QString out0;
-    QMetaObject::invokeMethod(parent(), "sendCommand", Q_RETURN_ARG(QString, out0), Q_ARG(QString, aCommand));
-    return out0;
+    // handle method call local.interfacedescription.RequestBroadcastSignal
+    QMetaObject::invokeMethod(parent(), "RequestBroadcastSignal", Q_ARG(QString, aMessage));
+}
+
+void ifadapter::sendCommand(const QString &aCommand)
+{
+    // handle method call local.interfacedescription.sendCommand
+    QMetaObject::invokeMethod(parent(), "sendCommand", Q_ARG(QString, aCommand));
 }
 

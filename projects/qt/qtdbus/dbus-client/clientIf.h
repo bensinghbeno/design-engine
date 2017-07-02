@@ -21,14 +21,14 @@
 #include <QtDBus/QtDBus>
 
 /*
- * Proxy class for interface ben.interfacedescription
+ * Proxy class for interface local.interfacedescription
  */
 class clientIf: public QDBusAbstractInterface
 {
     Q_OBJECT
 public:
     static inline const char *staticInterfaceName()
-    { return "ben.interfacedescription"; }
+    { return "local.interfacedescription"; }
 
 public:
     clientIf(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
@@ -36,7 +36,14 @@ public:
     ~clientIf();
 
 public Q_SLOTS: // METHODS
-    inline QDBusPendingReply<QString> sendCommand(const QString &aCommand)
+    inline QDBusPendingReply<> RequestBroadcastSignal(const QString &aMessage)
+    {
+        QList<QVariant> argumentList;
+        argumentList << QVariant::fromValue(aMessage);
+        return asyncCallWithArgumentList(QStringLiteral("RequestBroadcastSignal"), argumentList);
+    }
+
+    inline QDBusPendingReply<> sendCommand(const QString &aCommand)
     {
         QList<QVariant> argumentList;
         argumentList << QVariant::fromValue(aCommand);
@@ -44,9 +51,10 @@ public Q_SLOTS: // METHODS
     }
 
 Q_SIGNALS: // SIGNALS
+    void BroadcastCommandSignal(const QString &aCommandMessage);
 };
 
-namespace ben {
+namespace local {
   typedef ::clientIf interfacedescription;
 }
 #endif

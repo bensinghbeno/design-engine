@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_ifadapter_t {
-    QByteArrayData data[8];
-    char stringdata0[312];
+    QByteArrayData data[12];
+    char stringdata0[594];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -33,21 +33,31 @@ static const qt_meta_stringdata_ifadapter_t qt_meta_stringdata_ifadapter = {
     {
 QT_MOC_LITERAL(0, 0, 9), // "ifadapter"
 QT_MOC_LITERAL(1, 10, 15), // "D-Bus Interface"
-QT_MOC_LITERAL(2, 26, 24), // "ben.interfacedescription"
-QT_MOC_LITERAL(3, 51, 19), // "D-Bus Introspection"
-QT_MOC_LITERAL(4, 71, 218), // "  <interface name=\"ben.inter..."
-QT_MOC_LITERAL(5, 270, 11), // "sendCommand"
-QT_MOC_LITERAL(6, 282, 0), // ""
-QT_MOC_LITERAL(7, 283, 8) // "aCommand"
+QT_MOC_LITERAL(2, 26, 26), // "local.interfacedescription"
+QT_MOC_LITERAL(3, 53, 19), // "D-Bus Introspection"
+QT_MOC_LITERAL(4, 73, 427), // "  <interface name=\"local.int..."
+QT_MOC_LITERAL(5, 464, 22), // "BroadcastCommandSignal"
+QT_MOC_LITERAL(6, 487, 0), // ""
+QT_MOC_LITERAL(7, 488, 15), // "aCommandMessage"
+QT_MOC_LITERAL(8, 504, 22), // "RequestBroadcastSignal"
+QT_MOC_LITERAL(9, 527, 8), // "aMessage"
+QT_MOC_LITERAL(10, 536, 11), // "sendCommand"
+QT_MOC_LITERAL(11, 548, 8) // "aCommand"
 
     },
     "ifadapter\0D-Bus Interface\0"
-    "ben.interfacedescription\0D-Bus Introspection\0"
-    "  <interface name=\"ben.interfacedescription\">\n    <method name=\"se"
-    "ndCommand\">\n      <arg direction=\"out\" type=\"s\"/>\n      <arg di"
-    "rection=\"in\" type=\"s\" name=\"aCommand\"/>\n    </method>\n  </inte"
-    "rface>\n\0"
-    "sendCommand\0\0aCommand"
+    "local.interfacedescription\0"
+    "D-Bus Introspection\0"
+    "  <interface name=\"local.interfacedescription\">\n    <signal name=\""
+    "BroadcastCommandSignal\">\n      <arg direction=\"out\" type=\"s\" nam"
+    "e=\"aCommandMessage\"/>\n    </signal>\n    <method name=\"sendCommand"
+    "\">\n      <arg direction=\"in\" type=\"s\" name=\"aCommand\"/>\n    <"
+    "/method>\n    <method name=\"RequestBroadcastSignal\">\n      <arg dir"
+    "ection=\"in\" type=\"s\" name=\"aMessage\"/>\n    </method>\n  </inter"
+    "face>\n\0"
+    "BroadcastCommandSignal\0\0aCommandMessage\0"
+    "RequestBroadcastSignal\0aMessage\0"
+    "sendCommand\0aCommand"
 };
 #undef QT_MOC_LITERAL
 
@@ -57,22 +67,30 @@ static const uint qt_meta_data_ifadapter[] = {
        7,       // revision
        0,       // classname
        2,   14, // classinfo
-       1,   18, // methods
+       3,   18, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       0,       // signalCount
+       1,       // signalCount
 
  // classinfo: key, value
        1,    2,
        3,    4,
 
+ // signals: name, argc, parameters, tag, flags
+       5,    1,   33,    6, 0x06 /* Public */,
+
  // slots: name, argc, parameters, tag, flags
-       5,    1,   23,    6, 0x0a /* Public */,
+       8,    1,   36,    6, 0x0a /* Public */,
+      10,    1,   39,    6, 0x0a /* Public */,
+
+ // signals: parameters
+    QMetaType::Void, QMetaType::QString,    7,
 
  // slots: parameters
-    QMetaType::QString, QMetaType::QString,    7,
+    QMetaType::Void, QMetaType::QString,    9,
+    QMetaType::Void, QMetaType::QString,   11,
 
        0        // eod
 };
@@ -83,9 +101,20 @@ void ifadapter::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         ifadapter *_t = static_cast<ifadapter *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: { QString _r = _t->sendCommand((*reinterpret_cast< const QString(*)>(_a[1])));
-            if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = std::move(_r); }  break;
+        case 0: _t->BroadcastCommandSignal((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 1: _t->RequestBroadcastSignal((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 2: _t->sendCommand((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         default: ;
+        }
+    } else if (_c == QMetaObject::IndexOfMethod) {
+        int *result = reinterpret_cast<int *>(_a[0]);
+        void **func = reinterpret_cast<void **>(_a[1]);
+        {
+            typedef void (ifadapter::*_t)(const QString & );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&ifadapter::BroadcastCommandSignal)) {
+                *result = 0;
+                return;
+            }
         }
     }
 }
@@ -115,15 +144,22 @@ int ifadapter::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 1)
+        if (_id < 3)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 1;
+        _id -= 3;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 1)
+        if (_id < 3)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 1;
+        _id -= 3;
     }
     return _id;
+}
+
+// SIGNAL 0
+void ifadapter::BroadcastCommandSignal(const QString & _t1)
+{
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 QT_WARNING_POP
 QT_END_MOC_NAMESPACE
