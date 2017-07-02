@@ -2,6 +2,7 @@
 #define INTERFACEDESCRIPTION_H
 
 #include <QObject>
+#include <QTimer>
 
 class interfacedescription:public QObject
 {
@@ -9,8 +10,18 @@ class interfacedescription:public QObject
 
 public:
   interfacedescription();
+
 public slots:
-   QString sendCommand(const QString& aCommand);
+   void sendCommand(const QString& aCommand);
+   void RequestBroadcastSignal(const QString& aMessage);
+   void SendBroadcastSignal();
+
+Q_SIGNALS:
+   void BroadcastCommandSignal(const QString& aCommandMessage);
+
+private:
+   qint32 mTime;
+   QTimer* mBroadcastSignalTimer;
 };
 
 #endif // INTERFACEDESCRIPTION_H

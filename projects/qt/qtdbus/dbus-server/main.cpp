@@ -1,6 +1,10 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include "interfacedescription.h"
+#include <QTimer>
+#include <QObject>
+
+
 
 int main(int argc, char *argv[])
 {
@@ -19,6 +23,7 @@ int main(int argc, char *argv[])
   qDebug() << "Done creating interface...";
 
   qDebug() << "Waiting for messages...";
+
 
   return a.exec();
 }

@@ -1,7 +1,10 @@
 #include <QCoreApplication>
 #include <QObject>
 #include <QDebug>
+#include <QString>
 #include "clientIf.h"
+#include "MotionCommandAdapter.h"
+#include "MotionCommandController.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,7 +14,22 @@ int main(int argc, char *argv[])
 
   qDebug() << "Calling sendCommand() on Dbus to server...";
 
-  client->sendCommand("CMD_START");
+  CMotionCommandAdapter*     pMotionCommandAdapter    = new CMotionCommandAdapter();
+  CMotionCommandController*  pMotionCommandController = new CMotionCommandController();
+
+  if ( (pMotionCommandController!= NULL) && (pMotionCommandAdapter != NULL))
+  {
+    pMotionCommandAdapter->RegisterMotionCommandObserver(*pMotionCommandController);
+  }
+
+  if ( (pMotionCommandAdapter != NULL) && (client != NULL) )
+  {
+    QObject::connect(client,                SIGNAL(BroadcastCommandSignal(QString)),
+                     pMotionCommandAdapter, SLOT(sltOnDbusCommandSignal(QString)));
+  }
+
+
+  client->RequestBroadcastSignal(QString("CMD_SIGNAL"));
 
   return a.exec();
 }

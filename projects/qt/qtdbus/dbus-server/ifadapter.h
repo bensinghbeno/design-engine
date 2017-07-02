@@ -24,17 +24,22 @@ class QVariant;
 QT_END_NAMESPACE
 
 /*
- * Adaptor class for interface ben.interfacedescription
+ * Adaptor class for interface local.interfacedescription
  */
 class ifadapter: public QDBusAbstractAdaptor
 {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "ben.interfacedescription")
+    Q_CLASSINFO("D-Bus Interface", "local.interfacedescription")
     Q_CLASSINFO("D-Bus Introspection", ""
-"  <interface name=\"ben.interfacedescription\">\n"
+"  <interface name=\"local.interfacedescription\">\n"
+"    <signal name=\"BroadcastCommandSignal\">\n"
+"      <arg direction=\"out\" type=\"s\" name=\"aCommandMessage\"/>\n"
+"    </signal>\n"
 "    <method name=\"sendCommand\">\n"
-"      <arg direction=\"out\" type=\"s\"/>\n"
 "      <arg direction=\"in\" type=\"s\" name=\"aCommand\"/>\n"
+"    </method>\n"
+"    <method name=\"RequestBroadcastSignal\">\n"
+"      <arg direction=\"in\" type=\"s\" name=\"aMessage\"/>\n"
 "    </method>\n"
 "  </interface>\n"
         "")
@@ -44,8 +49,10 @@ public:
 
 public: // PROPERTIES
 public Q_SLOTS: // METHODS
-    QString sendCommand(const QString &aCommand);
+    void RequestBroadcastSignal(const QString &aMessage);
+    void sendCommand(const QString &aCommand);
 Q_SIGNALS: // SIGNALS
+    void BroadcastCommandSignal(const QString &aCommandMessage);
 };
 
 #endif
