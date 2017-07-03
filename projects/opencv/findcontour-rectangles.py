@@ -3,6 +3,7 @@
 # Import the modules
 import sys
 import cv2
+import numpy as np
 from matplotlib import pyplot as plt
 
 # Define Methods
@@ -23,25 +24,50 @@ def process_commandline():
     image_path = sys.argv[1];
     print('  image path = %s'%image_path);
 
+# Display image
+
+def display_image(image_path, image_mode):
+    cv2.imshow("Image_mode :: %s"%image_mode, image_path)
+    cv2.waitKey()
+    #cv2.destroyAllWindows()
 
 # Main Script
 
 display_greeting()
 process_commandline()
 
-# Grayscale the image with Gaussian filter
+# create blank image
+
+blank_image = np.ones((500,800,3), np.uint8)
+blank_image[:] = (255, 255, 255)
+image=cv2.cv.fromarray(blank_image)
+#display_image(blank_image,"blank_image : ")
+
 im = cv2.imread(image_path)
-im_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+display_image(im, "normal")
+
+# Grayscale the image with Gaussian filter
+im_gray = cv2.cvtColor(im, cv2.COLOR_RGB2GRAY)
 im_gray = cv2.GaussianBlur(im_gray, (5, 5), 0)
+display_image(im_gray, "Grayscale the image with Gaussian filter")
 
 # Perform THRESH_BINARY_INV
 ret, im_th = cv2.threshold(im_gray, 90, 255, cv2.THRESH_BINARY_INV)
+display_image(im_th, "Perform THRESH_BINARY_INV")
+
 
 # Find contours
-ctrs, hier = cv2.findContours(im_th.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+ctrs, _ = cv2.findContours(im_th.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+contours1, _ = cv2.findContours(im_th.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
+
+cv2.drawContours(blank_image, contours1, 2, (0, 0, 0), 3)
+cv2.imshow("my contour1", blank_image)
+cv2.waitKey()
+
 
 # Find the rectangles of each contour
 rects = [cv2.boundingRect(ctr) for ctr in ctrs]
+
 
 for rect in rects:
     # Draw rectangles
