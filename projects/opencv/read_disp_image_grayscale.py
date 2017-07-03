@@ -8,7 +8,7 @@ if (len(sys.argv) == 1):
 else:	
 	image_path = sys.argv[1];
 
-print('  image path = %s'%image_path);
+print('  image dir path = %s'%image_path);
 
 img = cv2.imread(image_path,0)
 plt.imshow(img, cmap = 'gray', interpolation = 'bicubic')
