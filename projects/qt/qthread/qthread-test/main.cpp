@@ -1,3 +1,5 @@
+#include <iostream>
+using namespace std;
 #include <QThread>
 #include <QtCore>
 #include <QDebug>
@@ -10,31 +12,25 @@ namespace WorkerClass
 
 class MyWorkerClass:public QThread
 {
-public:
-
-  void setmpCString(const QString& aQString)
-  {
-    WorkerClass::sQMutexObj.lock();
-    mSharedQString = aQString;
-    WorkerClass::sQMutexObj.unlock();
-  }
-  const QString& getmpCString() const
-  {
-    return mSharedQString;
-  }
-
+public:  
+  MyWorkerClass(char* aSharedData)
+    : mSharedData(aSharedData)
+    , mIsSet(false)
+  {}
   void run()
   {
-    qDebug() << "Worker Thread Tid = " << QThread::currentThreadId() << "mSharedQString = " << getmpCString();
-    if (mSharedQString == "SHARED_QSTRING")
-    {
-      mSharedQString = "THREAD1STRING";
-    }
+    qDebug() << "Worker Thread Tid = " << QThread::currentThreadId() << "mSharedData = " << mSharedData;
     while(1)
-    {}
+    {
+      if (mIsSet)
+      {
+        qDebug() << "Worker Thread Tid = " << QThread::currentThreadId() << "mSharedData = " << mSharedData;
+        mIsSet = false;
+      }
+    }
   }
-private:
-  QString& mSharedQString;
+  char* mSharedData;
+  bool  mIsSet;
 };
 
 
@@ -42,22 +38,25 @@ int main(int argc, char* argv[])
 {
   QCoreApplication myCoreApp(argc, argv);
 
-  const QString& str = *(new QString("SHARED_QSTRING"));
+  char* sharedData = new char[10];
+  strcpy(sharedData,"DATA");
 
-  MyWorkerClass myThreadObj;
-  myThreadObj.setmpCString(str);
+  MyWorkerClass myThreadObj(sharedData);
   myThreadObj.start();
 
-  MyWorkerClass myThreadObj2;
-  myThreadObj2.setmpCString(str);
-  myThreadObj2.start();
+
+  strcpy(sharedData,"DATA2");
+  myThreadObj.mIsSet = true;
+
+//  MyWorkerClass myThreadObj2;
+//  myThreadObj2.setmpCString(str);
+//  myThreadObj2.start();
 
 
-  qDebug() << "Main Thread Id = " << QThread::currentThreadId();
+  //qDebug() << "Main Thread Id = " << QThread::currentThreadId();
 
   //QObject::connect(&myThreadObj,SIGNAL(finished()),&myCoreApp,SLOT(quit()));
 
 
   return (myCoreApp.exec());
-
 }
