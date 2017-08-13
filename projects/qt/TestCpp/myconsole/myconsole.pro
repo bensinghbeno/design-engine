@@ -15,14 +15,17 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    cmyclass.cpp
 
-INCLUDEPATH += /media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/depot-deauville/dea-devenv/ADK_Wave3/MV_Tools/arm-none-linux-gnueabi/libc/usr/include/
-#DEPENDPATH += /usr/lib/i386-linux-gnu/
+INCLUDEPATH += /home/ben/engine/design-engine/projects/qt/TestCpp
 
 HEADERS += \
-    backtracelogger.h
+    backtracelogger.h \
+    cmyclass.h \
+    ../utils.h
 
-//QMAKE_CXXFLAGS += -rdynamic
-//QMAKE_LFLAGS   += -g -rdynamic
+#QMAKE_CXXFLAGS += -rdynamic
+#QMAKE_LFLAGS   += -g -rdynamic
+DEFINES += _CPP_UTIL_GENERIC
 

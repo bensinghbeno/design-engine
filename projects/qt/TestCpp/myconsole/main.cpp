@@ -2,13 +2,12 @@
  * author: bensinghbeno
 */
 
+#include "cmyclass.h"
 #include <iostream>
 using namespace std;
 
 int main(int argc, char* argv[])
 {
-  cout<<"Hello myconsole tesapp"<<endl;
-
     #if __cplusplus==201402L
     std::cout << "C++14" << std::endl;
     #elif __cplusplus==201103L
@@ -17,6 +16,9 @@ int main(int argc, char* argv[])
     std::cout << "C++" << std::endl;
     #endif
 
+  CMyClass* pCMyClass = new CMyClass;
+  pCMyClass->processInput(argc, argv);
+  delete pCMyClass;
 
   return 0;
 }
