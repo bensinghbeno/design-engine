@@ -45,7 +45,6 @@
 #define MALLOC(type) (type*)malloc(sizeof(type));
 #define SAFE_FREE_PURGE(pObj) {if(pObj != NULL) {free(pObj);pObj=NULL;}}
 
-#endif
 
 #define CHECK_VALIDITY(pValue) ((pValue == NULL)? false: true)
 #define SAFE_CREATE(classType) (new (std::nothrow)classType())
@@ -58,6 +57,7 @@ const int MAX_VECTOR_CHARS = 10;
 const int INIT_VECTOR_SIZE = 10;
 const int INIT_CALLBACK_VECTOR_SIZE = 10;
 
+#endif
 
 
 
@@ -133,8 +133,20 @@ void delay_loop(unsigned int loopCount);
 
 
 #endif
+}
+
+#ifdef _CPP_UTIL_GENERIC
+
+/*! \brief The macro MY_UNUSED can be used to avoid compiler warnings for unused variables/objects/arguments
+*/
+
+#define MY_UNUSED(X) (void)(X)
+
+#endif
+
 
 #ifdef _CPP_UTIL
+
 
 /*! \brief Following section contains the class utilities for a RE-ENTRANT, THREAD-SAFE  Singleton class implementation using atomic type
 */
