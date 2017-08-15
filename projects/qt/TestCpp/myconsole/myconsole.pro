@@ -23,6 +23,6 @@ INCLUDEPATH += /media/bensingh/root/home/bensingh/Perforce/dea-devenv-bensingh/d
 HEADERS += \
     backtracelogger.h
 
-QMAKE_CXXFLAGS += -rdynamic
-QMAKE_LFLAGS   += -g -rdynamic
+//QMAKE_CXXFLAGS += -rdynamic
+//QMAKE_LFLAGS   += -g -rdynamic
 
