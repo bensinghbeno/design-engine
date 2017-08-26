@@ -6,6 +6,16 @@
 #include <iostream>
 using namespace std;
 
+class net
+{
+public:
+
+  net(){}
+
+private:
+
+};
+
 int main(int argc, char* argv[])
 {
     #if __cplusplus==201402L
