@@ -67,13 +67,13 @@ void thresh_callback(int, void* )
   for( int i = 0; i< contours.size(); i++ )
      {
        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-       drawContours( drawing, contours_poly, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
-       rectangle( drawing, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
-       circle( drawing, center[i], (int)radius[i], color, 2, 8, 0 );
+       drawContours( src, contours_poly, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
+       rectangle( src, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
+       //circle( drawing, center[i], (int)radius[i], color, 2, 8, 0 );
      }
 
   /// Show in a window
   namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
-  imshow( "Contours", drawing );
+  imshow( "Contours", src );
 }
 
