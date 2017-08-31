@@ -75,17 +75,20 @@ void thresh_callback(int, void* )
        rectangle( src, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
        //circle( drawing, center[i], (int)radius[i], color, 2, 8, 0 );
 
-       // Copy rec area to seperate image
+       // Copy rec area to seperate image and display in a window
        Mat img1, img2;
        img1 = imread(sourceFile , 1 );
        img2 = img1(Rect(boundRect.at(i).x, boundRect.at(i).y, boundRect.at(i).width, boundRect.at(i).height));
        QString title("Detected No : ");
        title += QString::number(i);
+
+       namedWindow(title.toStdString().c_str(),WINDOW_NORMAL);
+       resizeWindow(title.toStdString().c_str(), 300,300);
        imshow( title.toStdString().c_str(), img2 );
      }
 
   /// Show in a window
-  namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+  //namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
   //imshow( "Contours", src );
 }
 
