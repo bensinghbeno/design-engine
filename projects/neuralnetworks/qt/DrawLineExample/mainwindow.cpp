@@ -35,9 +35,6 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::InputsChanged(QString inputs)
 {
     this->ui->label_Inputs->setText(inputs);
-
-
-    std::for_each(ui->drawWidget->layout()->.begin(), ui->drawWidget->layout()->children().end(), MainWindow::RemoveWidget);
 }
 
 void MainWindow::RemoveWidget(QWidget* pWidget)
