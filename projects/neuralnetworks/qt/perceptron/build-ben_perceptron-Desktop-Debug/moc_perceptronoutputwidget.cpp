@@ -16,7 +16,7 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-static const uint qt_meta_data_PerceptronOutPutWidget[] = {
+static const uint qt_meta_data_PerceptronWidget[] = {
 
  // content:
        6,       // revision
@@ -32,11 +32,11 @@ static const uint qt_meta_data_PerceptronOutPutWidget[] = {
        0        // eod
 };
 
-static const char qt_meta_stringdata_PerceptronOutPutWidget[] = {
-    "PerceptronOutPutWidget\0"
+static const char qt_meta_stringdata_PerceptronWidget[] = {
+    "PerceptronWidget\0"
 };
 
-void PerceptronOutPutWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void PerceptronWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
     Q_UNUSED(_id);
@@ -44,33 +44,33 @@ void PerceptronOutPutWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData PerceptronOutPutWidget::staticMetaObjectExtraData = {
+const QMetaObjectExtraData PerceptronWidget::staticMetaObjectExtraData = {
     0,  qt_static_metacall 
 };
 
-const QMetaObject PerceptronOutPutWidget::staticMetaObject = {
-    { &QWidget::staticMetaObject, qt_meta_stringdata_PerceptronOutPutWidget,
-      qt_meta_data_PerceptronOutPutWidget, &staticMetaObjectExtraData }
+const QMetaObject PerceptronWidget::staticMetaObject = {
+    { &QWidget::staticMetaObject, qt_meta_stringdata_PerceptronWidget,
+      qt_meta_data_PerceptronWidget, &staticMetaObjectExtraData }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &PerceptronOutPutWidget::getStaticMetaObject() { return staticMetaObject; }
+const QMetaObject &PerceptronWidget::getStaticMetaObject() { return staticMetaObject; }
 #endif //Q_NO_DATA_RELOCATION
 
-const QMetaObject *PerceptronOutPutWidget::metaObject() const
+const QMetaObject *PerceptronWidget::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
 }
 
-void *PerceptronOutPutWidget::qt_metacast(const char *_clname)
+void *PerceptronWidget::qt_metacast(const char *_clname)
 {
     if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_PerceptronOutPutWidget))
-        return static_cast<void*>(const_cast< PerceptronOutPutWidget*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_PerceptronWidget))
+        return static_cast<void*>(const_cast< PerceptronWidget*>(this));
     return QWidget::qt_metacast(_clname);
 }
 
-int PerceptronOutPutWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int PerceptronWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QWidget::qt_metacall(_c, _id, _a);
     if (_id < 0)

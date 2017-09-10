@@ -1,50 +1,50 @@
 #include "perceptronoutputwidget.h"
 
-PerceptronOutPutWidget::PerceptronOutPutWidget(QWidget *parent)
+PerceptronWidget::PerceptronWidget(QWidget *parent)
   : QWidget(parent)
-  , m_parent(parent)
-  , outputLabelX(0)
-  , outputLabelY(0)
 {
     qDebug() << "PerceptronOutPutWidget()";
-    //QHBoxLayout* layout = new QHBoxLayout();
-    //pOutputLabel = new QLabel("Output_1");
+    m_pOutputLabel = new QPushButton();
+    m_pOutputLabel->setText("77");
+    m_pOutputLabel->setStyleSheet("QPushButton {"
+                                "background-color: lightgreen;"
+                                "border-style: solid;"
+                                "border-width:3px;"
+                                "border-radius:50px;"
+                                "border-color: black;"
+                                "max-width:100px;"
+                                "max-height:100px;"
+                                "min-width:100px;"
+                                "min-height:100px;"
+                                  "}");
 
-    //layout->addWidget(pOutputLabel);
-    //this->setLayout(layout);
-    installEventFilter(this);
+    QHBoxLayout* pPerceptronLayout = new QHBoxLayout();
+    QLabel* pInputLabel = new QLabel("Input_1");
+    QSpinBox* pInputBox = new QSpinBox();
+    QLabel* WeightLabel= new QLabel("Weight_1");
+    QSpinBox* pWeightBox = new QSpinBox();
 
+
+    QSpacerItem* pPerceptronSpacer1 = new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored);
+    QSpacerItem* pPerceptronSpacer2 = new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored);
+    QSpacerItem* pPerceptronSpacer3 = new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored);
+    pPerceptronLayout->addWidget(pInputLabel);
+    pPerceptronLayout->addWidget(pInputBox);
+    pPerceptronLayout->addSpacerItem(pPerceptronSpacer1);
+    pPerceptronLayout->addWidget(WeightLabel);
+    pPerceptronLayout->addWidget(pWeightBox);
+    pPerceptronLayout->addSpacerItem(pPerceptronSpacer2);
+    pPerceptronLayout->addWidget(m_pOutputLabel);
+    pPerceptronLayout->addSpacerItem(pPerceptronSpacer3);
+    this->setLayout(pPerceptronLayout);
 }
 
-bool PerceptronOutPutWidget::eventFilter(QObject *watched, QEvent *event)
+bool PerceptronWidget::eventFilter(QObject *watched, QEvent *event)
 {
-    if (watched == this && event->type() == QEvent::Paint)
-    {
-        QPainter painter;
-        painter.begin(this);
-        painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setPen(QPen(Qt::black, 12, Qt::DashDotLine, Qt::RoundCap));
-        painter.setBrush(QBrush(Qt::green, Qt::SolidPattern));
-        painter.drawEllipse(50, this->y(), 100, 100);
-        painter.end();
-        return true; // return true if you do not want to have the child widget paint on its own afterwards, otherwise, return false.
-    }
-    return false;
 }
 
 
-void PerceptronOutPutWidget::paintEvent(QPaintEvent *event)
+void PerceptronWidget::paintEvent(QPaintEvent *event)
 {
-   // qDebug() << "pOutputLabel() :: x = "<<this->layout()->geometry().x()<<"y = "<<this->layout()->geometry().y();
-
-
-//    QPainter painter(this);
-//    QPen pen;
-//    pen.setWidth(3);
-//    pen.setColor(Qt::black);
-//    QBrush brush(Qt::yellow);
-//    painter.setPen (pen);
-//    painter.setBrush(brush);
-//    painter.drawEllipse(0, 450, 100, 50);
 }
 
