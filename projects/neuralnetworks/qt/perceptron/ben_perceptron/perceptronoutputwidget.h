@@ -3,24 +3,43 @@
 
 #include <QWidget>
 #include <QtGui>
+#include <QVector>
 
 class PerceptronWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit PerceptronWidget(QWidget *parent = 0);
+    explicit PerceptronWidget(QWidget *parent);
+    bool eventFilter(QObject *object, QEvent *event);
+
     ~PerceptronWidget();
 
 private:
-    QPushButton*    m_pOutputLabel;
-    QHBoxLayout*    m_pPerceptronLayout;
+    //View Objects
     QLabel*         m_pInputLabel;
     QSpinBox*       m_pInputSpinBox;
     QLabel*         m_pWeightLabel;
     QSpinBox*       m_pWeightSpinBox;
+    QPushButton*    m_pOutputLabel;
     QSpacerItem*    m_pPerceptronSpacer1;
     QSpacerItem*    m_pPerceptronSpacer2;
     QSpacerItem*    m_pPerceptronSpacer3;
+    QHBoxLayout*    m_pPerceptronLayout;
+    QHBoxLayout*    m_pWeightBoxLayout;
+    QHash<QString, QVector<QHBoxLayout*> > m_Input2WeightBoxLayouts_HashMap;
+    QVector<QHBoxLayout*> m_VecWeightBoxLayouts;
+
+
+    // Datamodel Objects
+    QVector<QLabel*> m_VecInputLabels;
+    QVector<QLabel*> m_VecOutputLabels;
+    QHash<QString, QString> m_IO2Weights_HashMap;
+
+public:
+    QLabel* getInputLabel()
+    {
+      return m_pInputLabel;
+    }
 
 signals:
 
