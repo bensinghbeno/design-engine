@@ -3,4 +3,5 @@
 # qt build dirs
 
 *.o
+build-*/
 
