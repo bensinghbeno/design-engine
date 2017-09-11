@@ -9,19 +9,18 @@ class PerceptronWidget : public QWidget
     Q_OBJECT
 public:
     explicit PerceptronWidget(QWidget *parent = 0);
-    void paintEvent(QPaintEvent *event);
-    bool eventFilter(QObject *watched, QEvent *event);
+    ~PerceptronWidget();
 
 private:
     QPushButton*    m_pOutputLabel;
-    QHBoxLayout*    pPerceptronLayout;
-    QLabel*         pInputLabel;
-    QSpinBox*       pInputBox;
-    QLabel*         WeightLabel;
-    QSpinBox*       pWeightBox;
-    QSpacerItem*    pPerceptronSpacer1;
-    QSpacerItem*    pPerceptronSpacer2;
-    QSpacerItem*    pPerceptronSpacer3;
+    QHBoxLayout*    m_pPerceptronLayout;
+    QLabel*         m_pInputLabel;
+    QSpinBox*       m_pInputSpinBox;
+    QLabel*         m_pWeightLabel;
+    QSpinBox*       m_pWeightSpinBox;
+    QSpacerItem*    m_pPerceptronSpacer1;
+    QSpacerItem*    m_pPerceptronSpacer2;
+    QSpacerItem*    m_pPerceptronSpacer3;
 
 signals:
 
