@@ -13,7 +13,15 @@ public:
     bool eventFilter(QObject *watched, QEvent *event);
 
 private:
-    QPushButton* m_pOutputLabel;
+    QPushButton*    m_pOutputLabel;
+    QHBoxLayout*    pPerceptronLayout;
+    QLabel*         pInputLabel;
+    QSpinBox*       pInputBox;
+    QLabel*         WeightLabel;
+    QSpinBox*       pWeightBox;
+    QSpacerItem*    pPerceptronSpacer1;
+    QSpacerItem*    pPerceptronSpacer2;
+    QSpacerItem*    pPerceptronSpacer3;
 
 signals:
 

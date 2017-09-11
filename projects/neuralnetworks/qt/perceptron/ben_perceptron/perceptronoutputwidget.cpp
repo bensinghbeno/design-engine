@@ -2,9 +2,17 @@
 
 PerceptronWidget::PerceptronWidget(QWidget *parent)
   : QWidget(parent)
+  , m_pOutputLabel(new QPushButton(parent))
+  , pPerceptronLayout(new QHBoxLayout())
+  , pInputLabel(new QLabel("Input_1"))
+  , pInputBox(new QSpinBox())
+  , WeightLabel(new QLabel("Weight_1"))
+  , pWeightBox(new QSpinBox())
+  , pPerceptronSpacer1(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
+  , pPerceptronSpacer2(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
+  , pPerceptronSpacer3(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
 {
     qDebug() << "PerceptronOutPutWidget()";
-    m_pOutputLabel = new QPushButton();
     m_pOutputLabel->setText("77");
     m_pOutputLabel->setStyleSheet("QPushButton {"
                                 "background-color: lightgreen;"
@@ -18,16 +26,6 @@ PerceptronWidget::PerceptronWidget(QWidget *parent)
                                 "min-height:100px;"
                                   "}");
 
-    QHBoxLayout* pPerceptronLayout = new QHBoxLayout();
-    QLabel* pInputLabel = new QLabel("Input_1");
-    QSpinBox* pInputBox = new QSpinBox();
-    QLabel* WeightLabel= new QLabel("Weight_1");
-    QSpinBox* pWeightBox = new QSpinBox();
-
-
-    QSpacerItem* pPerceptronSpacer1 = new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored);
-    QSpacerItem* pPerceptronSpacer2 = new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored);
-    QSpacerItem* pPerceptronSpacer3 = new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored);
     pPerceptronLayout->addWidget(pInputLabel);
     pPerceptronLayout->addWidget(pInputBox);
     pPerceptronLayout->addSpacerItem(pPerceptronSpacer1);
