@@ -3,14 +3,14 @@
 PerceptronWidget::PerceptronWidget(QWidget *parent)
   : QWidget(parent)
   , m_pOutputLabel(new QPushButton(parent))
-  , pPerceptronLayout(new QHBoxLayout())
-  , pInputLabel(new QLabel("Input_1"))
-  , pInputBox(new QSpinBox())
-  , WeightLabel(new QLabel("Weight_1"))
-  , pWeightBox(new QSpinBox())
-  , pPerceptronSpacer1(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
-  , pPerceptronSpacer2(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
-  , pPerceptronSpacer3(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
+  , m_pPerceptronLayout(new QHBoxLayout())
+  , m_pInputLabel(new QLabel("Input_1"))
+  , m_pInputSpinBox(new QSpinBox())
+  , m_pWeightLabel(new QLabel("Weight_1"))
+  , m_pWeightSpinBox(new QSpinBox())
+  , m_pPerceptronSpacer1(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
+  , m_pPerceptronSpacer2(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
+  , m_pPerceptronSpacer3(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
 {
     qDebug() << "PerceptronOutPutWidget()";
     m_pOutputLabel->setText("77");
@@ -26,23 +26,26 @@ PerceptronWidget::PerceptronWidget(QWidget *parent)
                                 "min-height:100px;"
                                   "}");
 
-    pPerceptronLayout->addWidget(pInputLabel);
-    pPerceptronLayout->addWidget(pInputBox);
-    pPerceptronLayout->addSpacerItem(pPerceptronSpacer1);
-    pPerceptronLayout->addWidget(WeightLabel);
-    pPerceptronLayout->addWidget(pWeightBox);
-    pPerceptronLayout->addSpacerItem(pPerceptronSpacer2);
-    pPerceptronLayout->addWidget(m_pOutputLabel);
-    pPerceptronLayout->addSpacerItem(pPerceptronSpacer3);
-    this->setLayout(pPerceptronLayout);
+    m_pPerceptronLayout->addWidget(m_pInputLabel);
+    m_pPerceptronLayout->addWidget(m_pInputSpinBox);
+    m_pPerceptronLayout->addSpacerItem(m_pPerceptronSpacer1);
+    m_pPerceptronLayout->addWidget(m_pWeightLabel);
+    m_pPerceptronLayout->addWidget(m_pWeightSpinBox);
+    m_pPerceptronLayout->addSpacerItem(m_pPerceptronSpacer2);
+    m_pPerceptronLayout->addWidget(m_pOutputLabel);
+    m_pPerceptronLayout->addSpacerItem(m_pPerceptronSpacer3);
+    this->setLayout(m_pPerceptronLayout);
 }
 
-bool PerceptronWidget::eventFilter(QObject *watched, QEvent *event)
+PerceptronWidget::~PerceptronWidget()
 {
+  delete m_pOutputLabel;
+  delete m_pPerceptronLayout;
+  delete m_pInputLabel;
+  delete m_pInputSpinBox;
+  delete m_pWeightLabel;
+  delete m_pWeightSpinBox;
+  delete m_pPerceptronSpacer1;
+  delete m_pPerceptronSpacer2;
+  delete m_pPerceptronSpacer3;
 }
-
-
-void PerceptronWidget::paintEvent(QPaintEvent *event)
-{
-}
-
