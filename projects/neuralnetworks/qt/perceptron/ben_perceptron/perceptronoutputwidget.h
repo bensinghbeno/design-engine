@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QtGui>
 #include <QVector>
+#include "perceptronconnector.h"
+#include "perceptronconnectors.h"
 
 class PerceptronWidget : public QWidget
 {
@@ -24,10 +26,13 @@ private:
     QSpacerItem*    m_pPerceptronSpacer1;
     QSpacerItem*    m_pPerceptronSpacer2;
     QSpacerItem*    m_pPerceptronSpacer3;
-    QHBoxLayout*    m_pPerceptronLayout;
+    QVBoxLayout*    m_pPerceptronVLayout;
+    QHBoxLayout*    m_pPerceptronHLayout;
     QHBoxLayout*    m_pWeightBoxLayout;
     QHash<QString, QVector<QHBoxLayout*> > m_Input2WeightBoxLayouts_HashMap;
     QVector<QHBoxLayout*> m_VecWeightBoxLayouts;
+    PerceptronConnector* m_pPerceptronConnector;
+    PerceptronConnectors* m_pPerceptronConnectors;
 
 
     // Datamodel Objects

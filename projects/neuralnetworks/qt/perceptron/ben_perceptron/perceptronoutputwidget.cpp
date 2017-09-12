@@ -2,8 +2,11 @@
 
 PerceptronWidget::PerceptronWidget(QWidget *parent)
   : QWidget(parent)
+  , m_pPerceptronConnectors(new PerceptronConnectors(this))
+  , m_pPerceptronConnector(new PerceptronConnector(this))
   , m_pOutputLabel(new QPushButton(parent))
-  , m_pPerceptronLayout(new QHBoxLayout())
+  , m_pPerceptronHLayout(new QHBoxLayout())
+  , m_pPerceptronVLayout(new QVBoxLayout())
   , m_pWeightBoxLayout(new QHBoxLayout())
   , m_pInputLabel(new QLabel("Input_1",parent))
   , m_pInputSpinBox(new QSpinBox())
@@ -26,41 +29,67 @@ PerceptronWidget::PerceptronWidget(QWidget *parent)
                                 "min-height:100px;"
                                   "}");
 
-    m_pPerceptronLayout->addWidget(m_pInputLabel);
+    m_pPerceptronHLayout->addWidget(m_pInputLabel);
     m_pInputLabel->setProperty("index","0");
 
-    m_pPerceptronLayout->addWidget(m_pInputSpinBox);
+    m_pPerceptronHLayout->addWidget(m_pInputSpinBox);
 
     m_pWeightBoxLayout->addSpacerItem(m_pPerceptronSpacer1);
-    m_pWeightBoxLayout->addWidget(m_pWeightLabel);
-    m_pWeightBoxLayout->addWidget(m_pWeightSpinBox);
     m_pWeightBoxLayout->addSpacerItem(m_pPerceptronSpacer2);
-    m_pPerceptronLayout->addLayout(m_pWeightBoxLayout);
+    m_pPerceptronHLayout->addLayout(m_pWeightBoxLayout);
     m_VecWeightBoxLayouts.push_back(m_pWeightBoxLayout);
     m_Input2WeightBoxLayouts_HashMap["0"] = m_VecWeightBoxLayouts;
+    m_pPerceptronHLayout->addWidget(m_pOutputLabel);
+    m_pPerceptronHLayout->addSpacerItem(m_pPerceptronSpacer3);
 
-    m_pPerceptronLayout->addWidget(m_pOutputLabel);
-    m_pPerceptronLayout->addSpacerItem(m_pPerceptronSpacer3);
-    this->setLayout(m_pPerceptronLayout);
+    m_pPerceptronVLayout->addLayout(m_pPerceptronHLayout);
+    this->setLayout(m_pPerceptronVLayout);
     m_pInputLabel->setMouseTracking(true);
-    installEventFilter(m_pInputLabel);
+    installEventFilter(this);
+
+    m_pPerceptronConnectors->m_pConnectorsVLayout->addWidget(m_pPerceptronConnector);
+
+    m_pPerceptronConnectors->setVisible(false);
 }
 
 bool PerceptronWidget::eventFilter(QObject* object, QEvent* event)
 {
-    if(event->type() == QEvent::Enter)
+
+  switch (event->type())
+  {
+    case (QEvent::Enter):
     {
-        //QMouseEvent *mEvent = (QMouseEvent*)event;
-        qDebug() << "PerceptronWidget Event";
+      qDebug() << "PerceptronWidget Enter Event";
+      m_pPerceptronConnectors->setGeometry(m_pInputLabel->geometry().x(), m_pInputLabel->geometry().y() + 70, 200, 140);
+      qDebug() << "ip label x = " << m_pInputLabel->geometry().x();
+      qDebug() << "ip label y = " << m_pInputLabel->geometry().y();
+      m_pPerceptronConnectors->show();
+      break;
     }
-    return true;
+    case (QEvent::Leave):
+    {
+      qDebug() << "PerceptronWidget Leave Event";
+      m_pPerceptronConnectors->hide();
+      break;
+    }
+    case (QEvent::ToolTip):
+    {
+    }
+    default:
+    {
+      //qDebug() << "PerceptronWidget default Event";
+    }
+
+  }
+
+  return true;
 }
 
 
 PerceptronWidget::~PerceptronWidget()
 {
   delete m_pOutputLabel;
-  delete m_pPerceptronLayout;
+  delete m_pPerceptronHLayout;
   delete m_pInputLabel;
   delete m_pInputSpinBox;
   delete m_pWeightLabel;

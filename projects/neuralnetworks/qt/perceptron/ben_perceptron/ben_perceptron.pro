@@ -14,9 +14,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    perceptronoutputwidget.cpp
+    perceptronoutputwidget.cpp \
+    perceptronconnector.cpp \
+    perceptronconnectors.cpp
 
 HEADERS  += mainwindow.h \
-    perceptronoutputwidget.h
+    perceptronoutputwidget.h \
+    perceptronconnector.h \
+    perceptronconnectors.h
 
 FORMS    += mainwindow.ui
