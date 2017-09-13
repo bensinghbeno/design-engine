@@ -60,7 +60,7 @@ bool PerceptronWidget::eventFilter(QObject* object, QEvent* event)
     case (QEvent::Enter):
     {
       qDebug() << "PerceptronWidget Enter Event";
-      m_pPerceptronConnectors->setGeometry(m_pInputLabel->geometry().x(), m_pInputLabel->geometry().y() + 70, 200, 140);
+      m_pPerceptronConnectors->setGeometry(m_pInputLabel->geometry().x(), m_pInputLabel->geometry().y() + m_pInputLabel->geometry().height() + 10, 200, 140);
       qDebug() << "ip label x = " << m_pInputLabel->geometry().x();
       qDebug() << "ip label y = " << m_pInputLabel->geometry().y();
       m_pPerceptronConnectors->show();
