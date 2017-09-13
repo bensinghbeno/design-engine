@@ -2,6 +2,9 @@
 #include <QApplication>
 #include <QtGui>
 #include "perceptronoutputwidget.h"
+#include "datamodel.h"
+#include "controller.h"
+
 
 
 int main(int argc, char *argv[])
@@ -10,6 +13,11 @@ int main(int argc, char *argv[])
 
   MainWindow w;
   w.show();
+
+  DataModel   perceptronDataModel;
+
+  Controller  perceptronController(0, &perceptronDataModel, &w);
+
 
   return a.exec();
 }

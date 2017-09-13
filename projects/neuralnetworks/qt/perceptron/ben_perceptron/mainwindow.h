@@ -15,10 +15,11 @@ class MainWindow : public QMainWindow
 public:
   explicit MainWindow(QWidget *parent = 0);
   bool eventFilter(QObject *object, QEvent *event);
+  Ui::MainWindow *ui;
+
   ~MainWindow();
 
 private:
-  Ui::MainWindow *ui;
   PerceptronWidget* m_pPerceptronOutPutWidget;
 };
 
