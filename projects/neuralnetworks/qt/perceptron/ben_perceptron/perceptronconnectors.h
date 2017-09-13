@@ -3,7 +3,7 @@
 
 #include <QtGui>
 
-class PerceptronConnectors : public QWidget
+class PerceptronConnectors : public QFrame
 {
   Q_OBJECT
 public:
