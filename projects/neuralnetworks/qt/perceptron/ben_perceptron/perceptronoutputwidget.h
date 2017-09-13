@@ -1,5 +1,6 @@
 #ifndef PERCEPTRONOUTPUTWIDGET_H
 #define PERCEPTRONOUTPUTWIDGET_H
+//TBM CHANGE FILENAME
 
 #include <QWidget>
 #include <QtGui>

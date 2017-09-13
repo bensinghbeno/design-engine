@@ -5,13 +5,35 @@
 MainWindow::MainWindow(QWidget *parent)
   :  QMainWindow(parent)
   ,  ui(new Ui::MainWindow)
-  ,  m_pPerceptronOutPutWidget(new PerceptronWidget(this))
 {
   ui->setupUi(this);
-  m_pPerceptronOutPutWidget->setMinimumSize(400,400);
-  this->setGeometry(1300,100,900,1000);
-  ui->verticalLayout->addWidget(m_pPerceptronOutPutWidget);
+  this->setGeometry(300,300,900,1200);
+  //mVecPerceptronWidgets.push_back(m_pPerceptronOutPutWidget);
+  //ui->verticalLayout->addWidget(m_pPerceptronOutPutWidget);
   centralWidget()->setMouseTracking(true);
+  addPerceptron(2);
+}
+
+void MainWindow::addPerceptron(unsigned int aCount)
+{
+  if (!mVecPerceptronWidgets.empty())
+  {
+    std::for_each(mVecPerceptronWidgets.begin(), mVecPerceptronWidgets.end(), [](PerceptronWidget* iter)
+    {
+      (iter)->layout()->removeWidget(iter);
+      delete iter;
+    });
+
+  }
+
+  mVecPerceptronWidgets.clear();
+  for (int i = 1; i <= aCount ; i++)
+  {
+    PerceptronWidget* perceptronWidget = new PerceptronWidget(this);
+    perceptronWidget->setMinimumSize(400,400);
+    mVecPerceptronWidgets.push_back(perceptronWidget);
+    ui->verticalLayout->addWidget(perceptronWidget);
+  }
 }
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event)
@@ -26,5 +48,5 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event)
 MainWindow::~MainWindow()
 {
   delete ui;
-  delete m_pPerceptronOutPutWidget;
+  //TBM remove vector perceptronwidgets
 }
