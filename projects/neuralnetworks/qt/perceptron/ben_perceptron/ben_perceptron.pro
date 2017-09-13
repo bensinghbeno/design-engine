@@ -16,11 +16,16 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     perceptronoutputwidget.cpp \
     perceptronconnector.cpp \
-    perceptronconnectors.cpp
+    perceptronconnectors.cpp \
+    datamodel.cpp \
+    controller.cpp
 
 HEADERS  += mainwindow.h \
     perceptronoutputwidget.h \
     perceptronconnector.h \
-    perceptronconnectors.h
+    perceptronconnectors.h \
+    datamodel.h \
+    controller.h \
+    interfaces/idatamodel.h
 
 FORMS    += mainwindow.ui
