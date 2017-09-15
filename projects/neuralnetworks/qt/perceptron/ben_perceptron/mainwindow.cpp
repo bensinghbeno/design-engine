@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
   ui->setupUi(this);
   s_ui = ui;
-  this->setGeometry(300,300,900,1200);
+  this->setGeometry(600,300,700,1200);
   centralWidget()->setMouseTracking(true);
   addPerceptron(2);
   addPerceptron(3);
@@ -33,7 +33,7 @@ void MainWindow::addPerceptron(unsigned int aCount)
   for (int i = 1; i <= aCount ; i++)
   {
     PerceptronWidget* perceptronWidget = new PerceptronWidget(this);
-    perceptronWidget->setMinimumSize(400,400);
+    perceptronWidget->setMinimumSize(100,400);
     mVecPerceptronWidgets.push_back(perceptronWidget);
     ui->verticalLayout->addWidget(perceptronWidget);
   }
