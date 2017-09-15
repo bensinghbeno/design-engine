@@ -24,7 +24,6 @@ private:
     QPushButton*    m_pOutputLabel;
     QSpacerItem*    m_pPerceptronSpacer1;
     QSpacerItem*    m_pPerceptronSpacer2;
-    QSpacerItem*    m_pPerceptronSpacer3;
     QVBoxLayout*    m_pPerceptronVLayout;
     QHBoxLayout*    m_pPerceptronHLayout;
     QHBoxLayout*    m_pWeightBoxLayout;

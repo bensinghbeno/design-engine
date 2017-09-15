@@ -12,8 +12,6 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setupUi(this);
   s_ui = ui;
   this->setGeometry(300,300,900,1200);
-  //mVecPerceptronWidgets.push_back(m_pPerceptronOutPutWidget);
-  //ui->verticalLayout->addWidget(m_pPerceptronOutPutWidget);
   centralWidget()->setMouseTracking(true);
   addPerceptron(2);
   addPerceptron(3);

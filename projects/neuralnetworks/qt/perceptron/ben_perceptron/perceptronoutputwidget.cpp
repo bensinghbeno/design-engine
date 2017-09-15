@@ -12,7 +12,6 @@ PerceptronWidget::PerceptronWidget(QWidget *parent)
   , m_pInputSpinBox(new QSpinBox(this))
   , m_pPerceptronSpacer1(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
   , m_pPerceptronSpacer2(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
-  , m_pPerceptronSpacer3(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
 {
     m_pOutputLabel->setText("77");
     m_pOutputLabel->setStyleSheet("QPushButton {"
@@ -33,12 +32,11 @@ PerceptronWidget::PerceptronWidget(QWidget *parent)
     m_pPerceptronHLayout->addWidget(m_pInputSpinBox);
 
     m_pWeightBoxLayout->addSpacerItem(m_pPerceptronSpacer1);
-    m_pWeightBoxLayout->addSpacerItem(m_pPerceptronSpacer2);
     m_pPerceptronHLayout->addLayout(m_pWeightBoxLayout);
     m_VecWeightBoxLayouts.push_back(m_pWeightBoxLayout);
     m_Input2WeightBoxLayouts_HashMap["0"] = m_VecWeightBoxLayouts;
     m_pPerceptronHLayout->addWidget(m_pOutputLabel);
-    m_pPerceptronHLayout->addSpacerItem(m_pPerceptronSpacer3);
+    m_pPerceptronHLayout->addSpacerItem(m_pPerceptronSpacer2);
 
     m_pPerceptronVLayout->addLayout(m_pPerceptronHLayout);
     this->setLayout(m_pPerceptronVLayout);
@@ -86,11 +84,4 @@ bool PerceptronWidget::eventFilter(QObject* object, QEvent* event)
 
 PerceptronWidget::~PerceptronWidget()
 {
-  delete m_pOutputLabel;
-  delete m_pPerceptronHLayout;
-  delete m_pInputLabel;
-  delete m_pInputSpinBox;
-  //delete m_pPerceptronSpacer1;
-  //delete m_pPerceptronSpacer2;
-  //delete m_pPerceptronSpacer3;
 }
