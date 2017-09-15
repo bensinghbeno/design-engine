@@ -2,16 +2,21 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 
+static Ui::MainWindow *s_ui;
+
+
 MainWindow::MainWindow(QWidget *parent)
   :  QMainWindow(parent)
   ,  ui(new Ui::MainWindow)
 {
   ui->setupUi(this);
+  s_ui = ui;
   this->setGeometry(300,300,900,1200);
   //mVecPerceptronWidgets.push_back(m_pPerceptronOutPutWidget);
   //ui->verticalLayout->addWidget(m_pPerceptronOutPutWidget);
   centralWidget()->setMouseTracking(true);
   addPerceptron(2);
+  addPerceptron(3);
 }
 
 void MainWindow::addPerceptron(unsigned int aCount)
@@ -20,7 +25,7 @@ void MainWindow::addPerceptron(unsigned int aCount)
   {
     std::for_each(mVecPerceptronWidgets.begin(), mVecPerceptronWidgets.end(), [](PerceptronWidget* iter)
     {
-      (iter)->layout()->removeWidget(iter);
+      s_ui->verticalLayout->removeWidget(iter);
       delete iter;
     });
 
