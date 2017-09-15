@@ -4,14 +4,12 @@ PerceptronWidget::PerceptronWidget(QWidget *parent)
   : QWidget(parent)
   , m_pPerceptronConnectors(new PerceptronConnectors(this))
   , m_pPerceptronConnector(new PerceptronConnector(this))
-  , m_pOutputLabel(new QPushButton(parent))
-  , m_pPerceptronHLayout(new QHBoxLayout())
-  , m_pPerceptronVLayout(new QVBoxLayout())
-  , m_pWeightBoxLayout(new QHBoxLayout())
-  , m_pInputLabel(new QLabel("Input_1",parent))
-  , m_pInputSpinBox(new QSpinBox())
-  , m_pWeightLabel(new QLabel("Weight_1"))
-  , m_pWeightSpinBox(new QSpinBox())
+  , m_pOutputLabel(new QPushButton(this))
+  , m_pPerceptronHLayout(new QHBoxLayout(this))
+  , m_pPerceptronVLayout(new QVBoxLayout(this))
+  , m_pWeightBoxLayout(new QHBoxLayout(this))
+  , m_pInputLabel(new QLabel("Input_1",this))
+  , m_pInputSpinBox(new QSpinBox(this))
   , m_pPerceptronSpacer1(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
   , m_pPerceptronSpacer2(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
   , m_pPerceptronSpacer3(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
@@ -92,8 +90,6 @@ PerceptronWidget::~PerceptronWidget()
   delete m_pPerceptronHLayout;
   delete m_pInputLabel;
   delete m_pInputSpinBox;
-  delete m_pWeightLabel;
-  delete m_pWeightSpinBox;
   delete m_pPerceptronSpacer1;
   delete m_pPerceptronSpacer2;
   delete m_pPerceptronSpacer3;
