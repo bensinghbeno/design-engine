@@ -21,8 +21,6 @@ private:
     //View Objects
     QLabel*         m_pInputLabel;
     QSpinBox*       m_pInputSpinBox;
-    QLabel*         m_pWeightLabel;
-    QSpinBox*       m_pWeightSpinBox;
     QPushButton*    m_pOutputLabel;
     QSpacerItem*    m_pPerceptronSpacer1;
     QSpacerItem*    m_pPerceptronSpacer2;
