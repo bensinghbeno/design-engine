@@ -12,10 +12,10 @@ public:
   unsigned int m_PerceptronCount;
 
 signals:
-  void OnPerceptronCountChanged(int aCount);
+  void SgnOnPerceptronCountChanged(int aCount);
 
 public slots:
-  void OnPerceptronCountSet(int aCount);
+  void SltOnPerceptronCountSet(int aCount);
 };
 
 #endif // DATAMODEL_H

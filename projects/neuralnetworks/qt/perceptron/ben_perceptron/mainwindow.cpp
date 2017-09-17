@@ -4,21 +4,20 @@
 
 static Ui::MainWindow *s_ui;
 
-
 MainWindow::MainWindow(QWidget *parent)
   :  QMainWindow(parent)
   ,  ui(new Ui::MainWindow)
 {
   ui->setupUi(this);
   s_ui = ui;
+  this->setWindowTitle("Ezra's Perceptron .. !!");
   this->setGeometry(600,300,1200,1200);
   centralWidget()->setMouseTracking(true);
-  addPerceptron(2);
-  addPerceptron(3);
 }
 
-void MainWindow::addPerceptron(unsigned int aCount)
+void MainWindow::SltAddPerceptron(int aCount)
 {
+  qDebug() << "SltAddPerceptron aCount = " << aCount;
   if (!mVecPerceptronWidgets.empty())
   {
     std::for_each(mVecPerceptronWidgets.begin(), mVecPerceptronWidgets.end(), [](PerceptronWidget* iter)
@@ -34,8 +33,9 @@ void MainWindow::addPerceptron(unsigned int aCount)
   {
     PerceptronWidget* perceptronWidget = new PerceptronWidget(this);
     perceptronWidget->setMinimumSize(100,400);
-    mVecPerceptronWidgets.push_back(perceptronWidget);
     ui->verticalLayout->addWidget(perceptronWidget);
+    mVecPerceptronWidgets.push_back(perceptronWidget);
+    perceptronWidget->show();
   }
 }
 
