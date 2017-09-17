@@ -43,7 +43,8 @@ PerceptronWidget::PerceptronWidget(QWidget *parent)
     m_pInputLabel->setMouseTracking(true);
     installEventFilter(this);
 
-    m_pPerceptronConnectors->m_pConnectorsVLayout->addWidget(m_pPerceptronConnector);
+    m_pPerceptronConnectors->m_pConnectorsHLayout->addWidget(m_pPerceptronConnector);
+    m_pPerceptronConnectors->m_pConnectorsHLayout->addWidget(new PerceptronConnector(this));
 
     m_pPerceptronConnectors->setVisible(false);
 }
@@ -55,16 +56,12 @@ bool PerceptronWidget::eventFilter(QObject* object, QEvent* event)
   {
     case (QEvent::Enter):
     {
-      qDebug() << "PerceptronWidget Enter Event";
-      m_pPerceptronConnectors->setGeometry(m_pInputLabel->geometry().x(), m_pInputLabel->geometry().y() - m_pInputLabel->geometry().height(), 200, 140);
-      qDebug() << "ip label x = " << m_pInputLabel->geometry().x();
-      qDebug() << "ip label y = " << m_pInputLabel->geometry().y();
+      m_pPerceptronConnectors->setGeometry(m_pInputLabel->geometry().x(), m_pInputLabel->geometry().y() - m_pInputLabel->geometry().height(), 400, 140);
       m_pPerceptronConnectors->show();
       break;
     }
     case (QEvent::Leave):
     {
-      qDebug() << "PerceptronWidget Leave Event";
       m_pPerceptronConnectors->hide();
       break;
     }
@@ -73,7 +70,6 @@ bool PerceptronWidget::eventFilter(QObject* object, QEvent* event)
     }
     default:
     {
-      //qDebug() << "PerceptronWidget default Event";
     }
 
   }

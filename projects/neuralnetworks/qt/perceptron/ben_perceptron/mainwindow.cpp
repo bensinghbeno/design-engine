@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
   ui->setupUi(this);
   s_ui = ui;
-  this->setGeometry(600,300,700,1200);
+  this->setGeometry(600,300,1200,1200);
   centralWidget()->setMouseTracking(true);
   addPerceptron(2);
   addPerceptron(3);
