@@ -12,6 +12,8 @@ MainWindow::MainWindow(QWidget *parent)
   s_ui = ui;
   this->setWindowTitle("Ezra's Perceptron .. !!");
   this->setGeometry(600,300,1200,1200);
+  ui->spinBoxPerceptronCount->setStyleSheet("QSpinBox::up-button { width: 32px; height: 40px}"
+                                            "QSpinBox::down-button { width: 32px; height: 40px }");
   centralWidget()->setMouseTracking(true);
 }
 
