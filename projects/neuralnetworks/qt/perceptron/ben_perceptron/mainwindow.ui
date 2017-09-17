@@ -36,20 +36,20 @@
      </item>
     </layout>
    </widget>
-   <widget class="QSpinBox" name="spinBox">
+   <widget class="QSpinBox" name="spinBoxPerceptronCount">
     <property name="geometry">
      <rect>
-      <x>490</x>
-      <y>20</y>
-      <width>75</width>
-      <height>45</height>
+      <x>444</x>
+      <y>10</y>
+      <width>141</width>
+      <height>71</height>
      </rect>
     </property>
    </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>145</x>
+      <x>120</x>
       <y>20</y>
       <width>301</width>
       <height>41</height>
