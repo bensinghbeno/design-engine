@@ -8,11 +8,11 @@ DataModel::DataModel(QObject *parent)
 
 }
 
-void DataModel::OnPerceptronCountSet(int aCount)
+void DataModel::SltOnPerceptronCountSet(int aCount)
 {
   qDebug() << "DataModel::OnPerceptronCountSet = " << aCount;
   m_PerceptronCount = aCount;
-  emit OnPerceptronCountChanged(m_PerceptronCount);
+  emit SgnOnPerceptronCountChanged(m_PerceptronCount);
 
 }
 

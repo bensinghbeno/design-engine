@@ -15,10 +15,13 @@ class MainWindow : public QMainWindow
 public:
   explicit MainWindow(QWidget *parent = 0);
   bool eventFilter(QObject *object, QEvent *event);
-  void addPerceptron(unsigned int aCount);
   Ui::MainWindow *ui;
 
   ~MainWindow();
+
+public slots:
+  void SltAddPerceptron(int aCount);
+
 
 private:
   std::vector<PerceptronWidget*> mVecPerceptronWidgets;
