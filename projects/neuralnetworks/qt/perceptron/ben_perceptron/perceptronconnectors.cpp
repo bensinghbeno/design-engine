@@ -2,9 +2,9 @@
 
 PerceptronConnectors::PerceptronConnectors(QWidget *parent)
   : QFrame(parent)
-  , m_pConnectorsVLayout(new QVBoxLayout())
+  , m_pConnectorsHLayout(new QHBoxLayout())
 {
-  this->setLayout(m_pConnectorsVLayout);
+  this->setLayout(m_pConnectorsHLayout);
   this->setObjectName("myObject");
   this->setStyleSheet("#myObject { border: 5px solid grey; }");
 }

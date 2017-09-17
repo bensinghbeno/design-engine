@@ -8,7 +8,7 @@ class PerceptronConnectors : public QFrame
   Q_OBJECT
 public:
   explicit PerceptronConnectors(QWidget *parent = 0);
-  QVBoxLayout* m_pConnectorsVLayout;
+  QHBoxLayout* m_pConnectorsHLayout;
 
 signals:
 
