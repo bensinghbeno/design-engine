@@ -12,13 +12,14 @@ class PerceptronWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit PerceptronWidget(QWidget *parent);
+    explicit PerceptronWidget(QWidget *parent, uint aIndex);
     bool eventFilter(QObject *object, QEvent *event);
 
     ~PerceptronWidget();
 
 private:
     //View Objects
+    uint            m_Index;
     QLabel*         m_pInputLabel;
     QSpinBox*       m_pInputSpinBox;
     QPushButton*    m_pOutputLabel;

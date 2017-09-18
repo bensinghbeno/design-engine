@@ -1,14 +1,15 @@
 #include "perceptronoutputwidget.h"
 
-PerceptronWidget::PerceptronWidget(QWidget *parent)
+PerceptronWidget::PerceptronWidget(QWidget *parent, uint aIndex)
   : QWidget(parent)
+  , m_Index(aIndex)
   , m_pPerceptronConnectors(new PerceptronConnectors(this))
   , m_pPerceptronConnector(new PerceptronConnector(this))
   , m_pOutputLabel(new QPushButton(parent))
   , m_pPerceptronHLayout(new QHBoxLayout())
   , m_pPerceptronVLayout(new QVBoxLayout())
   , m_pWeightBoxLayout(new QHBoxLayout())
-  , m_pInputLabel(new QLabel("Input_1",this))
+  , m_pInputLabel(new QLabel(QString("Input_") + QString::number(m_Index), this))
   , m_pInputSpinBox(new QSpinBox(this))
   , m_pPerceptronSpacer1(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
   , m_pPerceptronSpacer2(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
