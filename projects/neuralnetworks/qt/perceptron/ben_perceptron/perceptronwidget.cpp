@@ -17,7 +17,7 @@ PerceptronWidget::PerceptronWidget(QWidget *parent, uint aIndex)
   , m_pPerceptronSpacer2(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
 {
     m_pInputSpinBox->setProperty(PropertyIndex, QString::number(m_Index));
-    m_pOutputLabel->setText("77");
+    m_pOutputLabel->setText("");
     m_pOutputLabel->setStyleSheet("QPushButton {"
                                 "background-color: lightgreen;"
                                 "border-style: solid;"

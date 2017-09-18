@@ -27,7 +27,7 @@ void MainWindow::SltInputSet(int aInputVal)
 
 void MainWindow::SltPerceptronOutputSet(int aIndex, int aOutputVal)
 {
-   mVecPerceptronWidgets.at(--aIndex)->m_pOutputLabel->setText(QString::number(aOutputVal));
+   mVecPerceptronWidgets[aIndex]->m_pOutputLabel->setText(QString::number(aOutputVal));
 }
 
 void MainWindow::SltAddPerceptron(int aCount)
@@ -44,7 +44,7 @@ void MainWindow::SltAddPerceptron(int aCount)
   }
 
   mVecPerceptronWidgets.clear();
-  for (uint i = 1; i <= aCount ; i++)
+  for (uint i = 0; i < aCount ; i++)
   {
     PerceptronWidget* perceptronWidget = new PerceptronWidget(this, i);
     perceptronWidget->setMinimumSize(100,400);
