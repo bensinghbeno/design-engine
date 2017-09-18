@@ -3,6 +3,7 @@
 #include <QDebug>
 
 static Ui::MainWindow *s_ui;
+static const char* PropertyIndex = "PropertyIndex"; //TBM
 
 MainWindow::MainWindow(QWidget *parent)
   :  QMainWindow(parent)
@@ -16,6 +17,14 @@ MainWindow::MainWindow(QWidget *parent)
                                             "QSpinBox::down-button { width: 32px; height: 40px }");
   centralWidget()->setMouseTracking(true);
 }
+
+void MainWindow::SltInputSet(int aInputVal)
+{
+  //qDebug() << "SltInputSet , PropertyIndex = " << sender()->property(PropertyIndex) << " aInputVal = " << aInputVal;
+  QVariant index = sender()->property(PropertyIndex);
+  emit SigInputSet(index.toString().toInt(), aInputVal);
+}
+
 
 void MainWindow::SltAddPerceptron(int aCount)
 {
@@ -36,6 +45,7 @@ void MainWindow::SltAddPerceptron(int aCount)
     PerceptronWidget* perceptronWidget = new PerceptronWidget(this, i);
     perceptronWidget->setMinimumSize(100,400);
     ui->verticalLayout->addWidget(perceptronWidget);
+    connect(perceptronWidget->m_pInputSpinBox,SIGNAL(valueChanged(int)),this,SLOT(SltInputSet(int)));
     mVecPerceptronWidgets.push_back(perceptronWidget);
     perceptronWidget->show();
   }

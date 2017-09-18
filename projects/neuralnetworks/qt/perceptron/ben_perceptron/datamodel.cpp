@@ -8,6 +8,13 @@ DataModel::DataModel(QObject *parent)
 
 }
 
+void DataModel::SltOnPerceptronInputSet(int aIndex, int aValue)
+{
+  qDebug() << "DataModel::SltOnPerceptronInputSet aIndex = " << aIndex << "aValue = " << aValue;
+
+}
+
+
 void DataModel::SltOnPerceptronCountSet(int aCount)
 {
   qDebug() << "DataModel::OnPerceptronCountSet = " << aCount;

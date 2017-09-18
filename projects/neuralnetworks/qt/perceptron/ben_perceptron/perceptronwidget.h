@@ -17,7 +17,6 @@ public:
 
     ~PerceptronWidget();
 
-private:
     //View Objects
     uint            m_Index;
     QLabel*         m_pInputLabel;

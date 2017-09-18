@@ -16,6 +16,7 @@ signals:
 
 public slots:
   void SltOnPerceptronCountSet(int aCount);
+  void SltOnPerceptronInputSet(int aIndex, int aValue);
 };
 
 #endif // DATAMODEL_H
