@@ -25,6 +25,10 @@ void MainWindow::SltInputSet(int aInputVal)
   emit SigInputSet(index.toString().toInt(), aInputVal);
 }
 
+void MainWindow::SltPerceptronOutputSet(int aIndex, int aOutputVal)
+{
+   mVecPerceptronWidgets.at(--aIndex)->m_pOutputLabel->setText(QString::number(aOutputVal));
+}
 
 void MainWindow::SltAddPerceptron(int aCount)
 {

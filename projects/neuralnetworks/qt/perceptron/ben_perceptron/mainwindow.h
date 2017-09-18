@@ -22,6 +22,7 @@ public:
 public slots:
   void SltAddPerceptron(int aCount);
   void SltInputSet(int aInputVal);
+  void SltPerceptronOutputSet(int aIndex, int aOutputVal);
 
 signals:
   void SigInputSet(int aInputIndex,int aInputVal);
