@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QtGui>
-#include "perceptronoutputwidget.h"
+#include "perceptronwidget.h"
 #include "datamodel.h"
 #include "controller.h"
 

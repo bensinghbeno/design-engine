@@ -14,18 +14,18 @@ QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    perceptronoutputwidget.cpp \
     perceptronconnector.cpp \
     perceptronconnectors.cpp \
     datamodel.cpp \
-    controller.cpp
+    controller.cpp \
+    perceptronwidget.cpp
 
 HEADERS  += mainwindow.h \
-    perceptronoutputwidget.h \
     perceptronconnector.h \
     perceptronconnectors.h \
     datamodel.h \
     controller.h \
-    interfaces/idatamodel.h
+    interfaces/idatamodel.h \
+    perceptronwidget.h
 
 FORMS    += mainwindow.ui
