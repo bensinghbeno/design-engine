@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "perceptronoutputwidget.h"
+#include "perceptronwidget.h"
 
 namespace Ui {
 class MainWindow;

@@ -1,4 +1,4 @@
-#include "perceptronoutputwidget.h"
+#include "perceptronwidget.h"
 
 PerceptronWidget::PerceptronWidget(QWidget *parent, uint aIndex)
   : QWidget(parent)
