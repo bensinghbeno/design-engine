@@ -1,19 +1,22 @@
 #include "perceptronwidget.h"
 
+static const char* PropertyIndex = "PropertyIndex";
+
 PerceptronWidget::PerceptronWidget(QWidget *parent, uint aIndex)
   : QWidget(parent)
   , m_Index(aIndex)
+  , m_pInputLabel(new QLabel(QString("Input_") + QString::number(m_Index), this))
+  , m_pInputSpinBox(new QSpinBox(this))
   , m_pPerceptronConnectors(new PerceptronConnectors(this))
   , m_pPerceptronConnector(new PerceptronConnector(this))
   , m_pOutputLabel(new QPushButton(parent))
   , m_pPerceptronHLayout(new QHBoxLayout())
   , m_pPerceptronVLayout(new QVBoxLayout())
   , m_pWeightBoxLayout(new QHBoxLayout())
-  , m_pInputLabel(new QLabel(QString("Input_") + QString::number(m_Index), this))
-  , m_pInputSpinBox(new QSpinBox(this))
   , m_pPerceptronSpacer1(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
   , m_pPerceptronSpacer2(new QSpacerItem(100,1, QSizePolicy::Expanding, QSizePolicy::Ignored))
 {
+    m_pInputSpinBox->setProperty(PropertyIndex, QString::number(m_Index));
     m_pOutputLabel->setText("77");
     m_pOutputLabel->setStyleSheet("QPushButton {"
                                 "background-color: lightgreen;"
