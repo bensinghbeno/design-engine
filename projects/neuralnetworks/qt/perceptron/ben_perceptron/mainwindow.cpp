@@ -31,9 +31,9 @@ void MainWindow::SltAddPerceptron(int aCount)
   }
 
   mVecPerceptronWidgets.clear();
-  for (int i = 1; i <= aCount ; i++)
+  for (uint i = 1; i <= aCount ; i++)
   {
-    PerceptronWidget* perceptronWidget = new PerceptronWidget(this);
+    PerceptronWidget* perceptronWidget = new PerceptronWidget(this, i);
     perceptronWidget->setMinimumSize(100,400);
     ui->verticalLayout->addWidget(perceptronWidget);
     mVecPerceptronWidgets.push_back(perceptronWidget);
