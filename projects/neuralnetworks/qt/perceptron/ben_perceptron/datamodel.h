@@ -23,10 +23,12 @@ public:
 signals:
   void SgnOnPerceptronCountChanged(int aCount);
   void SgnPerceptronOutPutChanged(int aIndex, int aOutputVal);
+  void SgnPerceptronInputChanged();
 
 public slots:
   void SltOnPerceptronCountSet(int aCount);
   void SltOnPerceptronInputSet(int aIndex, int aValue);
+  void SltStartNetworkComputation();
 };
 
 #endif // DATAMODEL_H
