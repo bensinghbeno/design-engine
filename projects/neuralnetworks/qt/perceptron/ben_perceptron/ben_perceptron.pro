@@ -26,6 +26,7 @@ HEADERS  += mainwindow.h \
     datamodel.h \
     controller.h \
     interfaces/idatamodel.h \
-    perceptronwidget.h
+    perceptronwidget.h \
+    ../../../../qt/MyQtUtils/myqttypes.h
 
 FORMS    += mainwindow.ui
