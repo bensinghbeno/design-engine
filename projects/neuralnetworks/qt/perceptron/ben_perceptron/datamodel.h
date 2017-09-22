@@ -5,10 +5,11 @@
 
 typedef struct
 {
-  uint m_Index;
-  uint m_InputVal;
-  uint m_OutPutVal;
-}PerceptronDataStructure;
+  uint weight;
+  uint input;
+}TPerceptronConnector;
+
+typedef std::vector<TPerceptronConnector*> TVecPerceptronConnectors;
 
 class DataModel : public QObject
 {
@@ -17,7 +18,11 @@ public:
   explicit DataModel(QObject *parent = 0);
   ~DataModel();
   unsigned int m_PerceptronCount;
-  std::vector<PerceptronDataStructure*> m_vecPerceptronDataStructure;
+  typedef std::vector<int> TVecPerceptronInputs;
+  typedef std::vector<int> TVecPerceptronOutputs;
+
+  TVecPerceptronInputs  m_vecInputs;
+  TVecPerceptronOutputs m_vecOutputs;
 
 
 signals:
