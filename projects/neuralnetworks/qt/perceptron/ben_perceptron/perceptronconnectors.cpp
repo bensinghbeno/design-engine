@@ -7,6 +7,6 @@ PerceptronConnectors::PerceptronConnectors(QWidget *parent)
   this->setLayout(m_pConnectorsHLayout);
   this->setObjectName("myObject");
   this->setStyleSheet("#myObject { border: 5px solid grey; }");
-  this->setMaximumHeight(100);
+  //this->setMaximumHeight(60);
 }
 

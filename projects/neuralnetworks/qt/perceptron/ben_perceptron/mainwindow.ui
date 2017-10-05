@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>593</width>
-    <height>1254</height>
+    <height>734</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,10 +17,10 @@
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>-1</x>
-      <y>89</y>
+      <x>10</x>
+      <y>80</y>
       <width>571</width>
-      <height>921</height>
+      <height>601</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -39,8 +39,8 @@
    <widget class="QSpinBox" name="spinBoxPerceptronCount">
     <property name="geometry">
      <rect>
-      <x>444</x>
-      <y>10</y>
+      <x>440</x>
+      <y>0</y>
       <width>141</width>
       <height>71</height>
      </rect>
