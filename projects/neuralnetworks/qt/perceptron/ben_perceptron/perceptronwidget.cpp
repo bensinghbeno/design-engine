@@ -22,12 +22,12 @@ PerceptronWidget::PerceptronWidget(QWidget *parent, uint aIndex)
                                 "background-color: lightgreen;"
                                 "border-style: solid;"
                                 "border-width:3px;"
-                                "border-radius:50px;"
+                                "border-radius:25px;"
                                 "border-color: black;"
-                                "max-width:100px;"
-                                "max-height:100px;"
-                                "min-width:100px;"
-                                "min-height:100px;"
+                                "max-width:50px;"
+                                "max-height:50px;"
+                                "min-width:50px;"
+                                "min-height:50px;"
                                   "}");
 
     m_pPerceptronHLayout->addWidget(m_pInputLabel);
@@ -60,7 +60,7 @@ bool PerceptronWidget::eventFilter(QObject* object, QEvent* event)
   {
     case (QEvent::Enter):
     {
-      m_pPerceptronConnectors->setGeometry(m_pInputLabel->geometry().x(), m_pInputLabel->geometry().y() - m_pInputLabel->geometry().height(), 400, 140);
+      m_pPerceptronConnectors->setGeometry(m_pInputLabel->geometry().x(), m_pInputLabel->geometry().y() - m_pInputLabel->geometry().height() + 5, 400, 65);
       m_pPerceptronConnectors->show();
       break;
     }

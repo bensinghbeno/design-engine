@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setupUi(this);
   s_ui = ui;
   this->setWindowTitle("Ezra's Perceptron .. !!");
-  this->setGeometry(600,300,1200,1200);
+  this->setGeometry(600,300,600,700);
   ui->spinBoxPerceptronCount->setStyleSheet("QSpinBox::up-button { width: 32px; height: 40px}"
                                             "QSpinBox::down-button { width: 32px; height: 40px }");
   centralWidget()->setMouseTracking(true);
@@ -47,7 +47,7 @@ void MainWindow::SltAddPerceptron(int aCount)
   for (uint i = 0; i < aCount ; i++)
   {
     PerceptronWidget* perceptronWidget = new PerceptronWidget(this, i);
-    perceptronWidget->setMinimumSize(100,400);
+    perceptronWidget->setMinimumSize(100,150);
     ui->verticalLayout->addWidget(perceptronWidget);
     connect(perceptronWidget->m_pInputSpinBox,SIGNAL(valueChanged(int)),this,SLOT(SltInputSet(int)));
     mVecPerceptronWidgets.push_back(perceptronWidget);
