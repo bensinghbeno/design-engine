@@ -13,7 +13,7 @@ class PerceptronWidget : public QWidget
     Q_OBJECT
 public:
     explicit PerceptronWidget(QWidget *parent, uint aIndex);
-    bool eventFilter(QObject *object, QEvent *event);
+    bool eventFilter(QObject *, QEvent *event);
 
     ~PerceptronWidget();
 

@@ -20,10 +20,10 @@ public:
   unsigned int m_PerceptronCount;
   typedef std::vector<int> TVecPerceptronInputs;
   typedef std::vector<int> TVecPerceptronOutputs;
+  //typedef std::map<QString,int> TMapPerceptronConnections;
 
   TVecPerceptronInputs  m_vecInputs;
   TVecPerceptronOutputs m_vecOutputs;
-
 
 signals:
   void SgnOnPerceptronCountChanged(int aCount);
