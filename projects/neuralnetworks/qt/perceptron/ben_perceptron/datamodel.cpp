@@ -13,7 +13,7 @@ DataModel::DataModel(QObject *parent)
 void DataModel::SltOnPerceptronInputSet(int aIndex, int aValue)
 {
   qDebug() << "DataModel::SltOnPerceptronInputSet aIndex = " << aIndex << "aValue = " << aValue;
-  m_vecInputs[aIndex]  = aValue;
+  m_vecInputs[--aIndex]  = aValue;
   emit SgnPerceptronInputChanged();
 
 }

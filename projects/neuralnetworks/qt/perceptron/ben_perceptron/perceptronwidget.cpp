@@ -53,7 +53,7 @@ PerceptronWidget::PerceptronWidget(QWidget *parent, uint aIndex)
     m_pPerceptronConnectors->setVisible(false);
 }
 
-bool PerceptronWidget::eventFilter(QObject* object, QEvent* event)
+bool PerceptronWidget::eventFilter(QObject* /*object*/, QEvent* event)
 {
 
   switch (event->type())
