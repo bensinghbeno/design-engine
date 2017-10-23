@@ -2,6 +2,7 @@
 #define DATAMODEL_H
 
 #include <QObject>
+#include <QMap>
 
 typedef struct
 {
@@ -20,10 +21,11 @@ public:
   unsigned int m_PerceptronCount;
   typedef std::vector<int> TVecPerceptronInputs;
   typedef std::vector<int> TVecPerceptronOutputs;
-  //typedef std::map<QString,int> TMapPerceptronConnections;
+  typedef QMap<QString,int> TMapPerceptronConnections;
 
   TVecPerceptronInputs  m_vecInputs;
   TVecPerceptronOutputs m_vecOutputs;
+  TMapPerceptronConnections m_mapConnections;
 
 signals:
   void SgnOnPerceptronCountChanged(int aCount);
