@@ -38,11 +38,13 @@ public:
     QVector<QLabel*> m_VecOutputLabels;
     QHash<QString, QString> m_IO2Weights_HashMap;
 
-public:
     QLabel* getInputLabel()
     {
       return m_pInputLabel;
     }
+
+    void CreateHashIOPerceptronConnectors(int index, int count);
+
 
 signals:
 

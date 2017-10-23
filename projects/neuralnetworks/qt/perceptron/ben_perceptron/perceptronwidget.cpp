@@ -38,7 +38,7 @@ PerceptronWidget::PerceptronWidget(QWidget *parent, uint aIndex)
     m_pWeightBoxLayout->addSpacerItem(m_pPerceptronSpacer1);
     m_pPerceptronHLayout->addLayout(m_pWeightBoxLayout);
     m_VecWeightBoxLayouts.push_back(m_pWeightBoxLayout);
-    m_Input2WeightBoxLayouts_HashMap["0"] = m_VecWeightBoxLayouts;
+    m_Input2WeightBoxLayouts_HashMap["0"] = m_VecWeightBoxLayouts;//TBR
     m_pPerceptronHLayout->addWidget(m_pOutputLabel);
     m_pPerceptronHLayout->addSpacerItem(m_pPerceptronSpacer2);
 
@@ -79,6 +79,16 @@ bool PerceptronWidget::eventFilter(QObject* /*object*/, QEvent* event)
   }
 
   return true;
+}
+
+void PerceptronWidget::CreateHashIOPerceptronConnectors(int index, int count)
+{
+    for (int i=1; i <= count; i++)
+    {
+        m_pPerceptronConnectors
+    }
+
+
 }
 
 
