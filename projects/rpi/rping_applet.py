@@ -56,7 +56,7 @@ def main():
     indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
     indicator.set_menu(build_menu())
     notify.init(APPINDICATOR_ID)
-    gobject.timeout_add(2000, rpi_ping_timer)
+    gobject.timeout_add(4000, rpi_ping_timer)
     gtk.main()
     
 
