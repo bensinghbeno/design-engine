@@ -15,7 +15,7 @@ from gi.repository import Notify as notify
 from gi.repository import GObject as gobject
 
 def check_ping():
-    hostname = "192.168.2.156"
+    hostname = "192.168.2.7"
     response = os.system("ping -c 1 " + hostname)
     # and then check the response...
     if response == 0:
