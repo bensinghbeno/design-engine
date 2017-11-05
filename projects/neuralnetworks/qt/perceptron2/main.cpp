@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 
     PerceptronMainWindow* pPerceptronMainWindow = new PerceptronMainWindow();
 
-    PerceptronWidget* myPerceptronWidget = new PerceptronWidget(10);
+    PerceptronWidget* myPerceptronWidget = new PerceptronWidget();
 
     pPerceptronMainWindow->addPerceptronWidget(*myPerceptronWidget);
 

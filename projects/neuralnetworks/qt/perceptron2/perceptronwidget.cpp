@@ -1,10 +1,9 @@
 #include "perceptronwidget.h"
 
-PerceptronWidget::PerceptronWidget(int rows, QWidget *parent)
+PerceptronWidget::PerceptronWidget(QWidget *parent)
     : QWidget(parent)
-    , mRowSize(rows)
+    , mRowSize(0)
 {
-    sltCreateInputWidgets(mRowSize);
 }
 
 void PerceptronWidget::sltCreateInputWidgets(int rows)
