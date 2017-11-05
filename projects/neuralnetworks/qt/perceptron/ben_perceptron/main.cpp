@@ -11,12 +11,18 @@ int main(int argc, char *argv[])
 {
   QApplication a(argc, argv);
 
-  MainWindow viewMainWindow;
-  viewMainWindow.show();
+  MainWindow* viewMainWindow = new MainWindow();
 
-  DataModel   perceptronDataModel;
+//  DataModel   perceptronDataModel;
 
-  Controller  perceptronController(0, &perceptronDataModel, &viewMainWindow);
+//  Controller  perceptronController(0, &perceptronDataModel, &viewMainWindow);
+
+  PerceptronWidget* perceptronWidget = new PerceptronWidget(viewMainWindow, 1);
+  //perceptronWidget->show();
+
+  viewMainWindow->show();
+
+
 
 
   return a.exec();
