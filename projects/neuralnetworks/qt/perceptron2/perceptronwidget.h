@@ -9,7 +9,7 @@ class PerceptronWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit PerceptronWidget(int rows,QWidget *parent = 0);
+    explicit PerceptronWidget(QWidget *parent = 0);
     ~PerceptronWidget();
     QVector<QSpinBox*> m_VecSpinBoxInputs;
     QVector<QLabel*> m_VecLabelOutputs ;
