@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2017-11-04T19:43:31
+# Project created by QtCreator 2017-11-05T10:47:09
 #
 #-------------------------------------------------
 
@@ -13,8 +13,12 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    perceptronwidget.cpp \
+    perceptronmainwindow.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    perceptronwidget.h \
+    perceptronmainwindow.h
 
 FORMS    += mainwindow.ui

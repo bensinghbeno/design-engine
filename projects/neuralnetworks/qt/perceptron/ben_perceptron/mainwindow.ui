@@ -13,53 +13,7 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="verticalLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>80</y>
-      <width>571</width>
-      <height>601</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <property name="spacing">
-      <number>0</number>
-     </property>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayoutToolBar">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-      </layout>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QSpinBox" name="spinBoxPerceptronCount">
-    <property name="geometry">
-     <rect>
-      <x>440</x>
-      <y>10</y>
-      <width>141</width>
-      <height>61</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>120</x>
-      <y>20</y>
-      <width>301</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>   No of Perceptrons </string>
-    </property>
-   </widget>
-  </widget>
+  <widget class="QWidget" name="centralWidget"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

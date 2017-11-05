@@ -2,16 +2,27 @@
 #define PERCEPTRONWIDGET_H
 
 #include <QWidget>
+#include <QtCore>
+#include <QtGui>
 
-class perceptronwidget : public QWidget
+class PerceptronWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit perceptronwidget(QWidget *parent = 0);
+    explicit PerceptronWidget(int rows,QWidget *parent = 0);
+    ~PerceptronWidget();
+    QVector<QSpinBox*> m_VecSpinBoxInputs;
+    QVector<QLabel*> m_VecLabelOutputs ;
+    QGridLayout m_PerceptronGridLayout;
+    void createInputWidgets(int rows);
+    void PlaceOutputWidgets();
+    QGridLayout& getBoxLayout();
 
-signals:
+    inline void cleanupInputs();
+    inline void cleanupOutputs();
 
-public slots:
+    int mRowSize;
 };
 
-#endif // PERCEPTRONWIDGET_H
+
+#endif
