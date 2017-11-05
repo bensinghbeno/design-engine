@@ -13,12 +13,9 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
     perceptronwidget.cpp \
     perceptronmainwindow.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS  += \
     perceptronwidget.h \
     perceptronmainwindow.h
-
-FORMS    += mainwindow.ui
