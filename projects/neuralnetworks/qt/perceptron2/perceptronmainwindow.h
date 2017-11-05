@@ -15,6 +15,7 @@ public:
     QVector<PerceptronWidget*> m_VecPerceptronWidgets;
     QVBoxLayout m_MainWindowVLayout;
     QHBoxLayout m_MainWindowHToolBarLayout;
+    QSpinBox* m_pQSpinBoxCount;
 
 signals:
 
