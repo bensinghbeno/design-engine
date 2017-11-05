@@ -19,7 +19,7 @@ void PerceptronWidget::createInputWidgets(int rows)
         m_PerceptronGridLayout.addWidget(pSpinBox,it, 0);
     }
 
-    this->setLayout(&m_PerceptronGridLayout);
+    //this->setLayout(&m_PerceptronGridLayout);
 
 }
 

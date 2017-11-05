@@ -22,6 +22,8 @@ public:
     inline void cleanupOutputs();
 
     int mRowSize;
+    QVBoxLayout m_MainWindowVLayout;
+
 };
 
 

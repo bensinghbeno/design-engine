@@ -9,7 +9,7 @@ void PerceptronMainWindow::addPerceptronWidget(PerceptronWidget& pWidget)
 {
     m_VecPerceptronWidgets.push_back(&pWidget);
     m_MainWindowVLayout.addLayout(&pWidget.getBoxLayout());
-    this->show();
+    this->setLayout(&m_MainWindowVLayout);
 }
 
 
