@@ -14,7 +14,6 @@ public:
     QVector<QSpinBox*> m_VecSpinBoxInputs;
     QVector<QLabel*> m_VecLabelOutputs ;
     QGridLayout m_PerceptronGridLayout;
-    void createInputWidgets(int rows);
     void PlaceOutputWidgets();
     QGridLayout& getBoxLayout();
 
@@ -23,6 +22,10 @@ public:
 
     int mRowSize;
     QVBoxLayout m_MainWindowVLayout;
+
+public slots:
+    void sltCreateInputWidgets(int rows);
+
 
 };
 
