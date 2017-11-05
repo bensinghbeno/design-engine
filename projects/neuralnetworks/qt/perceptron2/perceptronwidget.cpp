@@ -4,22 +4,19 @@ PerceptronWidget::PerceptronWidget(int rows, QWidget *parent)
     : QWidget(parent)
     , mRowSize(rows)
 {
-    //m_VecLabelOutputs = new QVector<QLabel>(2);
-    createInputWidgets(mRowSize);
-
-
+    sltCreateInputWidgets(mRowSize);
 }
 
-void PerceptronWidget::createInputWidgets(int rows)
+void PerceptronWidget::sltCreateInputWidgets(int rows)
 {
+    cleanupInputs();
+
     for(int it = 0; it < rows; it++)
     {
         QSpinBox* pSpinBox = new QSpinBox();
         m_VecSpinBoxInputs.push_back(pSpinBox);
         m_PerceptronGridLayout.addWidget(pSpinBox,it, 0);
     }
-
-    //this->setLayout(&m_PerceptronGridLayout);
 
 }
 
