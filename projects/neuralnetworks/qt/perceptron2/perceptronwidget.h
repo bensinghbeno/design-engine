@@ -3,7 +3,9 @@
 
 #include <QWidget>
 #include <QtCore>
-#include <QtGui>
+#include <QLabel>
+#include <QSpinBox>
+#include <QLayout>
 
 class PerceptronWidget : public QWidget
 {
