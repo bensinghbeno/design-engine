@@ -2,6 +2,8 @@
 #include "perceptronwidget.h"
 #include "perceptronmainwindow.h"
 
+#include <QJsonObject>
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -13,6 +15,7 @@ int main(int argc, char *argv[])
     pPerceptronMainWindow->addPerceptronWidget(*myPerceptronWidget);
 
     pPerceptronMainWindow->show();
+
 
     return a.exec();
 }
