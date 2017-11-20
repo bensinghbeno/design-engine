@@ -1,12 +1,27 @@
-#include "jsonload.h"
+#include "jsonhelper.h"
 #include <QDebug>
 #include <QByteArray>
 
 JsonLoad::JsonLoad()
 {
 
+}
 
+void JsonLoad::insertvalue(QString key, QString value)
+{
 
+    m_valweight = value;
+    m_objlayer.insert(key,m_valweight);
+
+    m_docjson.setObject(m_objlayer);
+    m_strdocjson =  m_docjson.toJson();
+    m_docjson = QJsonDocument::fromJson(m_strdocjson.toUtf8());
+    m_objlayer = m_docjson.object();
+}
+
+QString JsonLoad::getvalue(QString key)
+{
+    return m_objlayer.value(key).toString();
 }
 
 void JsonLoad::loadjsonfile(QString filepath)
@@ -41,23 +56,12 @@ void JsonLoad::readJson(QString filepath)
       //qDebug() << "orig2 = " << test2[2].toString();
 
 
-
-      QJsonValue valweight("16");
-      QJsonObject objlayer;
-      objlayer.insert("w00",valweight);
-      valweight = "17";
-      objlayer.insert("w01",valweight);
-      qDebug() << "w00 = " << objlayer.value("w00").toString();
-      qDebug() << "w01 = " << objlayer.value("w01").toString();
-      QJsonDocument docjson;
-      docjson.setObject(objlayer);
+      insertvalue("w00","16");
+      insertvalue("w01","19");
 
 
-      QString strdocjson =  docjson.toJson();
-      QJsonDocument docjson2 = QJsonDocument::fromJson(strdocjson.toUtf8());
-      QJsonObject objlayer2 = docjson2.object();
-      qDebug() << "w00 = " << objlayer2.value("w00").toString();
-      qDebug() << "w01 = " << objlayer2.value("w01").toString();
+      qDebug() << "w00 = " << getvalue("w00");
+      qDebug() << "w01 = " << getvalue("w01");
 
 
 }
