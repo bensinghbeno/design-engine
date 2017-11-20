@@ -28,7 +28,7 @@ void JsonLoad::readJson(QString filepath)
       QJsonValue value = sett.value(QString("appName"));
       QJsonObject item = value.toObject();
       QJsonArray test = item["layer1"].toArray();
-      qDebug() << "orig = " << test[2].toString();
+      //qDebug() << "orig = " << test[2].toString();
 
 
 
@@ -38,5 +38,26 @@ void JsonLoad::readJson(QString filepath)
       QJsonValue value2 = sett2.value(QString("appName"));
       QJsonObject item2 = value2.toObject();
       QJsonArray test2 = item2["layer1"].toArray();
-      qDebug() << "orig2 = " << test2[2].toString();
+      //qDebug() << "orig2 = " << test2[2].toString();
+
+
+
+      QJsonValue valweight("16");
+      QJsonObject objlayer;
+      objlayer.insert("w00",valweight);
+      valweight = "17";
+      objlayer.insert("w01",valweight);
+      qDebug() << "w00 = " << objlayer.value("w00").toString();
+      qDebug() << "w01 = " << objlayer.value("w01").toString();
+      QJsonDocument docjson;
+      docjson.setObject(objlayer);
+
+
+      QString strdocjson =  docjson.toJson();
+      QJsonDocument docjson2 = QJsonDocument::fromJson(strdocjson.toUtf8());
+      QJsonObject objlayer2 = docjson2.object();
+      qDebug() << "w00 = " << objlayer2.value("w00").toString();
+      qDebug() << "w01 = " << objlayer2.value("w01").toString();
+
+
 }
