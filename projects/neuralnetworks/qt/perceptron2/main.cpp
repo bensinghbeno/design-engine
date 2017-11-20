@@ -17,28 +17,10 @@ int main(int argc, char *argv[])
 
 //    pPerceptronMainWindow->show();
 
-//    QJsonObject jsonobj;
-//    jsonobj["w00"] = "77";
-//    jsonobj["w01"] = "100";
-//    qDebug() << "jsonobj[w00] = " << jsonobj["w00"].toString();
-
-
-
-//    QJsonDocument jsonDoc(jsonobj);
-//    QByteArray jsonByteArray = jsonDoc.toBinaryData();
-//    qDebug() << "jsonByteArray1 = " << jsonByteArray;
-
-
-
-////    QByteArray jsonByteArray2 = jsonByteArray;
-//    QJsonDocument jsonDoc2(jsonByteArray);
-//    //jsonDoc2.fromBinaryData(jsonByteArray);
-//    QByteArray jsonByteArray2 = jsonDoc2.toBinaryData();
-//    qDebug() << "jsonByteArray2 = " << jsonByteArray2;
 
 
     JsonLoad jsonloadobj;
-    jsonloadobj.readJson("../perceptron2/neuralnetwork.json");
+    jsonloadobj.demo();
 
 
 
