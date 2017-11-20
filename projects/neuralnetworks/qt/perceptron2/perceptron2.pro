@@ -15,9 +15,9 @@ TEMPLATE = app
 SOURCES += main.cpp\
     perceptronwidget.cpp \
     perceptronmainwindow.cpp \
-    jsonload.cpp
+    jsonhelper.cpp
 
 HEADERS  += \
     perceptronwidget.h \
     perceptronmainwindow.h \
-    jsonload.h
+    jsonhelper.h

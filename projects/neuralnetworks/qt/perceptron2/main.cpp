@@ -3,7 +3,7 @@
 #include "perceptronmainwindow.h"
 
 #include <QDebug>
-#include "jsonload.h"
+#include "jsonhelper.h"
 
 int main(int argc, char *argv[])
 {
