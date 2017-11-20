@@ -16,13 +16,16 @@ public:
     void loadjsonfile(QString filepath);
     void insertvalue(QString key, QString value);
     QString getvalue(QString key);
+    QString& getstringbuffer();
+    void demo();
 
     QFile m_file;
     QString m_fileBuffer;
+    QString m_stringbuffer;
+    QJsonDocument m_docjson;
 
     QJsonValue m_valweight;
     QJsonObject m_objlayer;
-    QJsonDocument m_docjson;
     QString m_strdocjson;
 };
 
