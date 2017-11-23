@@ -3,7 +3,23 @@
 PerceptronWidget::PerceptronWidget(QWidget *parent)
     : QWidget(parent)
     , mRowSize(0)
-{    
+{
+}
+
+void PerceptronWidget::initializeOutputLabelPainter()
+{
+    m_PixmapLayerOutputLabels = new QPixmap(45,45);
+    m_PixmapLayerOutputLabels->fill(Qt::transparent);
+
+    m_PainterLayerOutputLabels = new QPainter(m_PixmapLayerOutputLabels);
+    m_PainterLayerOutputLabels->setRenderHint(QPainter::Antialiasing, true);
+
+    m_PenLabelOutputLabels = new QPen(Qt::blue, 2);
+    m_PainterLayerOutputLabels->setPen(*m_PenLabelOutputLabels);
+
+    m_brushLayerOutputLabels = new QBrush(Qt::green);
+    m_PainterLayerOutputLabels->setBrush(*m_brushLayerOutputLabels);
+    m_PainterLayerOutputLabels->drawEllipse(10, 10, 30, 30);
 }
 
 
@@ -24,21 +40,32 @@ void PerceptronWidget::createControllerConnections()
 
 void PerceptronWidget::initializeUI(int rowcount, QString layername)
 {
+    initializeOutputLabelPainter();
+
+    m_SpinBoxRowCount.setMaximumWidth(70);
     m_SpinBoxRowCount.setValue(rowcount);
     m_labelLayerName.setText(layername);
 }
 
 void PerceptronWidget::sltCreateInputWidgets(int rows)
 {
-    cleanupInputs();
+    cleanupLayerWidgets();
 
     for(int it = 0; it < rows; it++)
     {
         QSpinBox* pSpinBox = new QSpinBox();
         m_VecSpinBoxInputs.push_back(pSpinBox);
         m_layoutgridLayer.addWidget(pSpinBox,it, 0);
-    }
+        pSpinBox->setMaximumWidth(50);
 
+        QLabel* pLabelOutput = new QLabel("00");
+        m_VecLabelOutputs.push_back(pLabelOutput);
+        m_layoutgridLayer.addWidget(pLabelOutput,it, 1);
+        pLabelOutput->setPixmap(*m_PixmapLayerOutputLabels);
+
+
+    }
+    m_layoutgridLayer.setColumnMinimumWidth(0,100);
 }
 
 
@@ -48,13 +75,19 @@ QVBoxLayout& PerceptronWidget::getMainLayout()
 }
 
 
-inline void PerceptronWidget::cleanupInputs()
+inline void PerceptronWidget::cleanupLayerWidgets()
 {
     for (QVector<QSpinBox*>::iterator it = m_VecSpinBoxInputs.begin() ; it != m_VecSpinBoxInputs.end(); ++it)
     {
-      delete (*it);
+        delete (*it);
     }
     m_VecSpinBoxInputs.clear();
+
+    for (QVector<QLabel*>::iterator it = m_VecLabelOutputs.begin() ; it != m_VecLabelOutputs.end(); ++it)
+    {
+        delete (*it);
+    }
+    m_VecLabelOutputs.clear();
 }
 
 inline void PerceptronWidget::cleanupOutputs()
@@ -76,7 +109,7 @@ void PerceptronWidget::PlaceOutputWidgets()
 PerceptronWidget::~PerceptronWidget()
 {
 
-    cleanupInputs();
+    cleanupLayerWidgets();
     cleanupOutputs();
 
 }

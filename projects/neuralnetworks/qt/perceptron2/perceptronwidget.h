@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QSpinBox>
 #include <QLayout>
+#include <QtGui>
 
 class PerceptronWidget : public QWidget
 {
@@ -14,13 +15,20 @@ public:
     explicit PerceptronWidget(QWidget *parent = 0);
     ~PerceptronWidget();
 
+    //Data
+    int mRowSize;
+
     //Widgets
     QSpinBox m_SpinBoxRowCount;
     QLabel m_labelLayerName;
-
-    //IO
     QVector<QSpinBox*> m_VecSpinBoxInputs;
-    QVector<QLabel*> m_VecLabelOutputs ;
+    QVector<QLabel*> m_VecLabelOutputs;
+
+    //Painter
+    QPixmap* m_PixmapLayerOutputLabels;
+    QPainter* m_PainterLayerOutputLabels;
+    QPen* m_PenLabelOutputLabels;
+    QBrush* m_brushLayerOutputLabels;
 
     //Layouts
     QVBoxLayout m_layoutVboxMain;
@@ -32,14 +40,12 @@ public:
     void initializeUI(int rowcount, QString layername);
 
     void PlaceOutputWidgets();
-    inline void cleanupInputs();
+    inline void cleanupLayerWidgets();
     inline void cleanupOutputs();
+    void initializeOutputLabelPainter();
+
 
     QVBoxLayout& getMainLayout();
-
-
-    int mRowSize;
-    QVBoxLayout m_MainWindowVLayout;
 
 public slots:
     void sltCreateInputWidgets(int rows);
