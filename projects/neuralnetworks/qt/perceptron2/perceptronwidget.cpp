@@ -3,7 +3,29 @@
 PerceptronWidget::PerceptronWidget(QWidget *parent)
     : QWidget(parent)
     , mRowSize(0)
+{    
+}
+
+
+void PerceptronWidget::createLayout()
 {
+    m_layoutHboxMenu.addWidget(&m_SpinBoxRowCount);
+    m_layoutHboxMenu.addWidget(&m_labelLayerName);
+
+    m_layoutVboxMain.addLayout(&m_layoutHboxMenu);
+    m_layoutVboxMain.addLayout(&m_layoutgridLayer);
+}
+
+void PerceptronWidget::createControllerConnections()
+{
+    //Controller Connections
+    connect((&m_SpinBoxRowCount), SIGNAL(valueChanged(int)),this,SLOT(sltCreateInputWidgets(int)));
+}
+
+void PerceptronWidget::initializeUI(int rowcount, QString layername)
+{
+    m_SpinBoxRowCount.setValue(rowcount);
+    m_labelLayerName.setText(layername);
 }
 
 void PerceptronWidget::sltCreateInputWidgets(int rows)
@@ -14,14 +36,15 @@ void PerceptronWidget::sltCreateInputWidgets(int rows)
     {
         QSpinBox* pSpinBox = new QSpinBox();
         m_VecSpinBoxInputs.push_back(pSpinBox);
-        m_PerceptronGridLayout.addWidget(pSpinBox,it, 0);
+        m_layoutgridLayer.addWidget(pSpinBox,it, 0);
     }
 
 }
 
-QGridLayout& PerceptronWidget::getBoxLayout()
+
+QVBoxLayout& PerceptronWidget::getMainLayout()
 {
-    return m_PerceptronGridLayout;
+    return m_layoutVboxMain;
 }
 
 

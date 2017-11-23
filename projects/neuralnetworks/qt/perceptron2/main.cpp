@@ -9,13 +9,16 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-//    PerceptronMainWindow* pPerceptronMainWindow = new PerceptronMainWindow();
+    PerceptronMainWindow* pPerceptronMainWindow = new PerceptronMainWindow();
 
-//    PerceptronWidget* myPerceptronWidget = new PerceptronWidget();
+    PerceptronWidget* myPerceptronWidget = new PerceptronWidget();
+    myPerceptronWidget->createLayout();
+    myPerceptronWidget->createControllerConnections();
+    myPerceptronWidget->initializeUI(0, "LAYER1");
 
-//    pPerceptronMainWindow->addPerceptronWidget(*myPerceptronWidget);
+    pPerceptronMainWindow->addPerceptronWidget(*myPerceptronWidget);
 
-//    pPerceptronMainWindow->show();
+    pPerceptronMainWindow->show();
 
 
 
