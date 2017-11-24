@@ -7,6 +7,8 @@
 #include <QSpinBox>
 #include <QLayout>
 #include <QtGui>
+#include <QPushButton>
+
 
 class PerceptronWidget : public QWidget
 {
@@ -22,13 +24,11 @@ public:
     QSpinBox m_SpinBoxRowCount;
     QLabel m_labelLayerName;
     QVector<QSpinBox*> m_VecSpinBoxInputs;
-    QVector<QLabel*> m_VecLabelOutputs;
+    QVector<QPushButton*> m_vecbtnOutputs;
 
-    //Painter
-    QPixmap* m_PixmapLayerOutputLabels;
-    QPainter* m_PainterLayerOutputLabels;
-    QPen* m_PenLabelOutputLabels;
-    QBrush* m_brushLayerOutputLabels;
+    //Stylesheets
+    QString m_strOutputLabelStylesheet;
+
 
     //Layouts
     QVBoxLayout m_layoutVboxMain;
@@ -42,7 +42,6 @@ public:
     void PlaceOutputWidgets();
     inline void cleanupLayerWidgets();
     inline void cleanupOutputs();
-    void initializeOutputLabelPainter();
 
 
     QVBoxLayout& getMainLayout();
