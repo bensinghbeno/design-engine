@@ -6,23 +6,6 @@ PerceptronWidget::PerceptronWidget(QWidget *parent)
 {
 }
 
-void PerceptronWidget::initializeOutputLabelPainter()
-{
-    m_PixmapLayerOutputLabels = new QPixmap(45,45);
-    m_PixmapLayerOutputLabels->fill(Qt::transparent);
-
-    m_PainterLayerOutputLabels = new QPainter(m_PixmapLayerOutputLabels);
-    m_PainterLayerOutputLabels->setRenderHint(QPainter::Antialiasing, true);
-
-    m_PenLabelOutputLabels = new QPen(Qt::blue, 2);
-    m_PainterLayerOutputLabels->setPen(*m_PenLabelOutputLabels);
-
-    m_brushLayerOutputLabels = new QBrush(Qt::green);
-    m_PainterLayerOutputLabels->setBrush(*m_brushLayerOutputLabels);
-    m_PainterLayerOutputLabels->drawEllipse(10, 10, 30, 30);
-}
-
-
 void PerceptronWidget::createLayout()
 {
     m_layoutHboxMenu.addWidget(&m_SpinBoxRowCount);
@@ -40,7 +23,17 @@ void PerceptronWidget::createControllerConnections()
 
 void PerceptronWidget::initializeUI(int rowcount, QString layername)
 {
-    initializeOutputLabelPainter();
+    m_strOutputLabelStylesheet = ("QPushButton {"
+                                 "background-color: lightgreen;"
+                                 "border-style: solid;"
+                                 "border-width:3px;"
+                                 "border-radius:20px;"
+                                 "border-color: black;"
+                                 "max-width:40px;"
+                                 "max-height:40px;"
+                                 "min-width:40px;"
+                                 "min-height:40px;"
+                                   "}");
 
     m_SpinBoxRowCount.setMaximumWidth(70);
     m_SpinBoxRowCount.setValue(rowcount);
@@ -58,10 +51,11 @@ void PerceptronWidget::sltCreateInputWidgets(int rows)
         m_layoutgridLayer.addWidget(pSpinBox,it, 0);
         pSpinBox->setMaximumWidth(50);
 
-        QLabel* pLabelOutput = new QLabel("00");
-        m_VecLabelOutputs.push_back(pLabelOutput);
-        m_layoutgridLayer.addWidget(pLabelOutput,it, 1);
-        pLabelOutput->setPixmap(*m_PixmapLayerOutputLabels);
+        QPushButton* pbtnOutput = new QPushButton();
+        m_vecbtnOutputs.push_back(pbtnOutput);
+        m_layoutgridLayer.addWidget(pbtnOutput,it, 1);
+        pbtnOutput->setText("77");
+        pbtnOutput->setStyleSheet(m_strOutputLabelStylesheet);
 
 
     }
@@ -83,23 +77,13 @@ inline void PerceptronWidget::cleanupLayerWidgets()
     }
     m_VecSpinBoxInputs.clear();
 
-    for (QVector<QLabel*>::iterator it = m_VecLabelOutputs.begin() ; it != m_VecLabelOutputs.end(); ++it)
+    for (QVector<QPushButton*>::iterator it = m_vecbtnOutputs.begin() ; it != m_vecbtnOutputs.end(); ++it)
     {
         delete (*it);
     }
-    m_VecLabelOutputs.clear();
+    m_vecbtnOutputs.clear();
 }
 
-inline void PerceptronWidget::cleanupOutputs()
-{
-
-    for (QVector<QLabel*>::iterator it = m_VecLabelOutputs.begin() ; it != m_VecLabelOutputs.end(); ++it)
-    {
-      delete (*it);
-    }
-    m_VecLabelOutputs.clear();
-
-}
 
 void PerceptronWidget::PlaceOutputWidgets()
 {
@@ -110,6 +94,5 @@ PerceptronWidget::~PerceptronWidget()
 {
 
     cleanupLayerWidgets();
-    cleanupOutputs();
 
 }
