@@ -37,6 +37,7 @@ void PerceptronWidget::initializeUI(int rowcount, QString layername)
 
     m_SpinBoxRowCount.setMaximumWidth(70);
     m_SpinBoxRowCount.setValue(rowcount);
+    m_SpinBoxRowCount.setFocus();
     m_labelLayerName.setText(layername);
 }
 
