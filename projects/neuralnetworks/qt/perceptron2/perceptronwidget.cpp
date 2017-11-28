@@ -13,6 +13,7 @@ void PerceptronWidget::createLayout()
 
     m_layoutVboxMain.addLayout(&m_layoutHboxMenu);
     m_layoutVboxMain.addLayout(&m_layoutgridLayer);
+    this->setLayout(&m_layoutVboxMain);
 }
 
 void PerceptronWidget::createControllerConnections()
@@ -44,6 +45,7 @@ void PerceptronWidget::initializeUI(int rowcount, QString layername)
 void PerceptronWidget::sltCreateInputWidgets(int rows)
 {
     cleanupLayerWidgets();
+    list.clear();
 
     for(int it = 0; it < rows; it++)
     {
@@ -58,6 +60,7 @@ void PerceptronWidget::sltCreateInputWidgets(int rows)
         pbtnOutput->setText("77");
         pbtnOutput->setStyleSheet(m_strOutputLabelStylesheet);
 
+        addWidgets(pSpinBox, pbtnOutput);
 
     }
     m_layoutgridLayer.setColumnMinimumWidth(0,100);
@@ -68,6 +71,41 @@ QVBoxLayout& PerceptronWidget::getMainLayout()
 {
     return m_layoutVboxMain;
 }
+
+void PerceptronWidget::addWidgets(const QWidget * from, const QWidget * to)
+{
+    list.append(WidgetsConnected{from , to});
+    update();
+}
+
+void PerceptronWidget::paintEvent(QPaintEvent *event)
+{
+    qDebug() << "PerceptronWidget::paintEvent()";
+//    QPainter painter(this);
+
+
+
+//        auto from = m_VecSpinBoxInputs.at(0);
+//        auto to = m_vecbtnOutputs.at(0);
+
+//        QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
+//        QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
+
+//        painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
+
+    QPainter painter(this);
+    for(const WidgetsConnected el: list){
+        const QWidget* from = el.from;
+        const QWidget* to = el.to;
+
+        QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
+        QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
+
+        painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
+    }
+
+}
+
 
 
 inline void PerceptronWidget::cleanupLayerWidgets()
