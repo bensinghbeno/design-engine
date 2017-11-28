@@ -21,6 +21,9 @@ signals:
 
 public slots:
 
+protected:
+    void paintEvent(QPaintEvent *event);
+
 };
 
 #endif // PERCEPTRONMAINWINDOW_H

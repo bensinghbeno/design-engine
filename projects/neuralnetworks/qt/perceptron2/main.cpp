@@ -15,9 +15,9 @@ int main(int argc, char *argv[])
     myPerceptronWidget->createLayout();
     myPerceptronWidget->createControllerConnections();
     pPerceptronMainWindow->addPerceptronWidget(*myPerceptronWidget);
-    myPerceptronWidget->initializeUI(0, "LAYER1");
-
-    pPerceptronMainWindow->show();
+    myPerceptronWidget->initializeUI(2, "LAYER1");
+    myPerceptronWidget->show();
+    //pPerceptronMainWindow->show();
 
 
 

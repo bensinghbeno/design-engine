@@ -16,3 +16,8 @@ void PerceptronMainWindow::addPerceptronWidget(PerceptronWidget& pWidget)
     m_MainWindowVLayout.addLayout(&pWidget.getMainLayout());
     this->setLayout(&m_MainWindowVLayout);
 }
+
+void PerceptronMainWindow::paintEvent(QPaintEvent *event)
+{
+    qDebug() << "PerceptronMainWindow::paintEvent()";
+}
