@@ -3,22 +3,34 @@
 PerceptronWidget::PerceptronWidget(QWidget *parent)
     : QWidget(parent)
     , mRowSize(0)
-{
-}
+{}
 
 void PerceptronWidget::createLayout()
 {
-    m_layoutHboxMenu.addWidget(&m_SpinBoxRowCount);
+    m_MainWindowHToolBarLayout.addWidget(new QLabel("   Perceptron Toolbox    "));
+    m_MainWindowHToolBarLayout.addWidget(new QLabel("Total Layers = "));
+    m_MainWindowHToolBarLayout.addWidget(&m_SpinBoxLayerCount);
+    m_layoutVboxMain.addLayout(&m_MainWindowHToolBarLayout);
+
+    m_pFrameLineSepMainToolBox = new QFrame(this);
+    m_pFrameLineSepMainToolBox->setFrameShape(QFrame::HLine);
+    m_pFrameLineSepMainToolBox->setFrameShadow(QFrame::Sunken);
+    m_layoutVboxMain.addWidget(m_pFrameLineSepMainToolBox);
+
     m_layoutHboxMenu.addWidget(&m_labelLayerName);
+    m_layoutHboxMenu.addWidget(&m_SpinBoxRowCount);
+
+    m_pSpacerLayerToolBox = new QSpacerItem(100,50);
+    m_layoutHboxMenu.addSpacerItem(m_pSpacerLayerToolBox);
 
     m_layoutVboxMain.addLayout(&m_layoutHboxMenu);
     m_layoutVboxMain.addLayout(&m_layoutgridLayer);
+
     this->setLayout(&m_layoutVboxMain);
 }
 
 void PerceptronWidget::createControllerConnections()
 {
-    //Controller Connections
     connect((&m_SpinBoxRowCount), SIGNAL(valueChanged(int)),this,SLOT(sltCreateInputWidgets(int)));
 }
 
@@ -74,27 +86,18 @@ QVBoxLayout& PerceptronWidget::getMainLayout()
 
 void PerceptronWidget::addWidgets(const QWidget * from, const QWidget * to)
 {
-    list.append(WidgetsConnected{from , to});
+    list.append(sLayerLineWidgets{from , to});
     update();
 }
 
-void PerceptronWidget::paintEvent(QPaintEvent *event)
+void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
 {
     qDebug() << "PerceptronWidget::paintEvent()";
-//    QPainter painter(this);
 
-
-
-//        auto from = m_VecSpinBoxInputs.at(0);
-//        auto to = m_vecbtnOutputs.at(0);
-
-//        QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
-//        QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
-
-//        painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
 
     QPainter painter(this);
-    for(const WidgetsConnected el: list){
+    for(const sLayerLineWidgets el: list)
+    {
         const QWidget* from = el.from;
         const QWidget* to = el.to;
 
@@ -103,7 +106,6 @@ void PerceptronWidget::paintEvent(QPaintEvent *event)
 
         painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
     }
-
 }
 
 

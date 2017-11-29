@@ -8,14 +8,15 @@
 #include <QLayout>
 #include <QtGui>
 #include <QPushButton>
+#include <QLine>
 
 
 class PerceptronWidget : public QWidget
 {
     Q_OBJECT
 public:
-    //explicit PerceptronWidget(QWidget *parent = 0);
-    explicit PerceptronWidget(QWidget *parent = nullptr);
+    explicit PerceptronWidget(QWidget *parent = 0);
+    //explicit PerceptronWidget(QWidget *parent = nullptr);
 
     ~PerceptronWidget();
 
@@ -27,12 +28,16 @@ public:
     QLabel m_labelLayerName;
     QVector<QSpinBox*> m_VecSpinBoxInputs;
     QVector<QPushButton*> m_vecbtnOutputs;
+    QFrame* m_pFrameLineSepMainToolBox;
+    QSpacerItem* m_pSpacerLayerToolBox;
 
     //Stylesheets
     QString m_strOutputLabelStylesheet;
 
-
     //Layouts
+    QVBoxLayout m_MainWindowVLayout;
+    QHBoxLayout m_MainWindowHToolBarLayout;
+    QSpinBox m_SpinBoxLayerCount;
     QVBoxLayout m_layoutVboxMain;
     QHBoxLayout m_layoutHboxMenu;
     QGridLayout m_layoutgridLayer;
@@ -46,7 +51,6 @@ public:
     inline void cleanupOutputs();
     void addWidgets(const QWidget *from, const QWidget *to);
 
-
     //Getters
     QVBoxLayout& getMainLayout();
 
@@ -54,15 +58,16 @@ public slots:
     void sltCreateInputWidgets(int rows);
 
 protected:
-    void paintEvent(QPaintEvent *event);
+    void paintEvent(QPaintEvent*);
 
 private:
-    struct WidgetsConnected {
+    struct sLayerLineWidgets
+    {
         const QWidget* from;
         const QWidget* to;
     };
 
-    QList<WidgetsConnected> list;
+    QList<sLayerLineWidgets> list;
 
 
 };
