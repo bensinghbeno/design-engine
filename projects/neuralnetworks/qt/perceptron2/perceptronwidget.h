@@ -47,12 +47,11 @@ public:
     void createControllerConnections();
     void initializeUI(int rowcount, QString layername);
     void PlaceOutputWidgets();
-    inline void cleanupLayerWidgets();
+    inline void cleanupDynamicWidgets();
     inline void cleanupOutputs();
     void addWidgets(const QWidget *from, const QWidget *to);
 
     //Getters
-    QVBoxLayout& getMainLayout();
 
 public slots:
     void sltCreateInputWidgets(int rows);
