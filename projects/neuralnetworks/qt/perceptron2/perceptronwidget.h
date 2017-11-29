@@ -22,10 +22,16 @@ public:
 
     //Data
     int mRowSize;
+    int m_magicCount;
 
     //Widgets
-    QSpinBox m_SpinBoxRowCount;
     QLabel m_labelLayerName;
+    QLabel m_labelMagicCount;
+    QSpinBox m_sbLayerMagicCount;
+    QLabel m_labelInputCount;
+    QLabel m_labelOutputCount;
+    QSpinBox m_sbLayerInputCount;
+    QSpinBox m_sbLayerOutputCount;
     QVector<QSpinBox*> m_VecSpinBoxInputs;
     QVector<QPushButton*> m_vecbtnOutputs;
     QFrame* m_pFrameLineSepMainToolBox;
@@ -45,7 +51,7 @@ public:
     //Operations
     void createLayout();
     void createControllerConnections();
-    void initializeUI(int rowcount, QString layername);
+    void initializeUI(int rowcount);
     void PlaceOutputWidgets();
     inline void cleanupDynamicWidgets();
     inline void cleanupOutputs();
@@ -54,7 +60,8 @@ public:
     //Getters
 
 public slots:
-    void sltCreateInputWidgets(int rows);
+    void sltCreateInputWidgets();
+    void sltCreatePerceptronMagicWidgets(int count);
 
 protected:
     void paintEvent(QPaintEvent*);
@@ -67,6 +74,9 @@ private:
     };
 
     QList<sLayerLineWidgets> list;
+
+    QList<const QWidget*> list_inputs;
+    QList<const QWidget*> list_outputs;
 
 
 };
