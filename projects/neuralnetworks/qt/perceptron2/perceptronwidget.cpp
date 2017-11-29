@@ -93,12 +93,16 @@ void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
     for(const sLayerLineWidgets el: list)
     {
         const QWidget* from = el.from;
-        const QWidget* to = el.to;
 
-        QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
-        QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
+        for(const sLayerLineWidgets el2: list)
+        {
+            const QWidget* to = el2.to;
 
-        painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
+            QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
+            QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
+
+            painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
+        }
     }
 }
 
