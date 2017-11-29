@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     PerceptronWidget* myPerceptronWidget = new PerceptronWidget();
     myPerceptronWidget->createLayout();
     myPerceptronWidget->createControllerConnections();
-    myPerceptronWidget->initializeUI(0, "Layer 1 :: Count = ");
+    myPerceptronWidget->initializeUI(0);
     myPerceptronWidget->show();
 
 
