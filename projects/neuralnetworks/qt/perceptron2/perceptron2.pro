@@ -15,10 +15,8 @@ QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES += main.cpp\
     perceptronwidget.cpp \
-    perceptronmainwindow.cpp \
     jsonhelper.cpp
 
 HEADERS  += \
     perceptronwidget.h \
-    perceptronmainwindow.h \
     jsonhelper.h
