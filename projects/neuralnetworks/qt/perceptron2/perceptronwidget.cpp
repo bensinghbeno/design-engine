@@ -56,8 +56,7 @@ void PerceptronWidget::initializeUI(int rowcount, QString layername)
 
 void PerceptronWidget::sltCreateInputWidgets(int rows)
 {
-    cleanupLayerWidgets();
-    list.clear();
+    cleanupDynamicWidgets();
 
     for(int it = 0; it < rows; it++)
     {
@@ -78,11 +77,6 @@ void PerceptronWidget::sltCreateInputWidgets(int rows)
     m_layoutgridLayer.setColumnMinimumWidth(0,100);
 }
 
-
-QVBoxLayout& PerceptronWidget::getMainLayout()
-{
-    return m_layoutVboxMain;
-}
 
 void PerceptronWidget::addWidgets(const QWidget * from, const QWidget * to)
 {
@@ -110,8 +104,10 @@ void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
 
 
 
-inline void PerceptronWidget::cleanupLayerWidgets()
+inline void PerceptronWidget::cleanupDynamicWidgets()
 {
+    list.clear();
+
     for (QVector<QSpinBox*>::iterator it = m_VecSpinBoxInputs.begin() ; it != m_VecSpinBoxInputs.end(); ++it)
     {
         delete (*it);
@@ -134,6 +130,6 @@ void PerceptronWidget::PlaceOutputWidgets()
 PerceptronWidget::~PerceptronWidget()
 {
 
-    cleanupLayerWidgets();
+    cleanupDynamicWidgets();
 
 }
