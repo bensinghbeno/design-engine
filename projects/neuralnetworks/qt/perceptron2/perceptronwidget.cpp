@@ -151,8 +151,11 @@ void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
         {
             QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
             QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
-
             painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
+
+            QPoint start2 = to->mapToGlobal(to->rect().topRight() +  QPoint(0, to->height()/2));
+            QPoint end2 = mp_pbMasterOutput->mapToGlobal(mp_pbMasterOutput->rect().topLeft() +  QPoint(0, to->height()/2));
+            painter.drawLine(mapFromGlobal(start2), mapFromGlobal(end2));
         }
     }
 }
