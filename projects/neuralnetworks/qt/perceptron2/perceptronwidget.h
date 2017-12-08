@@ -14,11 +14,12 @@
 class PerceptronWidget : public QWidget
 {
     Q_OBJECT
+
 public:
     explicit PerceptronWidget(QWidget *parent = 0);
-    //explicit PerceptronWidget(QWidget *parent = nullptr);
-
     ~PerceptronWidget();
+
+    //////////Layer////////////////
 
     //Data
     int mRowSize;
@@ -43,13 +44,14 @@ public:
     //Layouts
     QVBoxLayout m_MainWindowVLayout;
     QHBoxLayout m_MainWindowHToolBarLayout;
+    QHBoxLayout m_LayersHLayout;
     QSpinBox m_SpinBoxLayerCount;
     QVBoxLayout m_layoutVboxMain;
     QHBoxLayout m_layoutHboxMenu;
     QGridLayout m_layoutgridLayer;
 
-    //Operations
-    void createLayout();
+    //UI Operations
+    void createLayerLayout();
     void createControllerConnections();
     void initializeUI(int rowcount);
     void PlaceOutputWidgets();
@@ -57,7 +59,6 @@ public:
     inline void cleanupOutputs();
     void addWidgets(const QWidget *from, const QWidget *to);
 
-    //Getters
 
 public slots:
     void sltCreateInputWidgets();
@@ -78,6 +79,13 @@ private:
     QList<const QWidget*> list_inputs;
     QList<const QWidget*> list_outputs;
 
+    //////////Master Window////////////////
+
+public:
+    QPushButton* mp_pbMasterOutput;
+
+    //UI Operations
+    void createMasterLayout();
 
 };
 

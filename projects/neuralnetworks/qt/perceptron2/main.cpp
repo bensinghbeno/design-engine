@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     PerceptronWidget* myPerceptronWidget = new PerceptronWidget();
-    myPerceptronWidget->createLayout();
+    myPerceptronWidget->createMasterLayout();
     myPerceptronWidget->createControllerConnections();
     myPerceptronWidget->initializeUI(0);
     myPerceptronWidget->show();
