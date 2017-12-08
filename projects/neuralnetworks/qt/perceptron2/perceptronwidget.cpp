@@ -6,7 +6,7 @@ PerceptronWidget::PerceptronWidget(QWidget *parent)
     , m_magicCount(0)
 {}
 
-void PerceptronWidget::createLayout()
+void PerceptronWidget::createLayerLayout()
 {
     //MainToolBox
     m_MainWindowHToolBarLayout.addWidget(new QLabel("   Perceptron Toolbox    "));
@@ -32,10 +32,20 @@ void PerceptronWidget::createLayout()
     m_layoutHboxMenu.addSpacerItem(m_pSpacerLayerToolBox);
 
     m_layoutVboxMain.addLayout(&m_layoutHboxMenu);
-    m_layoutVboxMain.addLayout(&m_layoutgridLayer);
+    m_layoutVboxMain.addLayout(&m_LayersHLayout);
+    m_LayersHLayout.addLayout(&m_layoutgridLayer);
 
     this->setLayout(&m_layoutVboxMain);
 }
+
+void PerceptronWidget::createMasterLayout()
+{
+    createLayerLayout();
+
+    mp_pbMasterOutput = new QPushButton();
+    m_LayersHLayout.addWidget(mp_pbMasterOutput);
+}
+
 
 void PerceptronWidget::createControllerConnections()
 {
@@ -70,6 +80,9 @@ void PerceptronWidget::initializeUI(int rowcount)
     m_labelInputCount.setText(strlayerInputcount);
     m_labelOutputCount.setText(strlayerOutputcount);
     m_sbLayerMagicCount.setFocus();
+
+    mp_pbMasterOutput->setStyleSheet(m_strOutputLabelStylesheet);
+    mp_pbMasterOutput->setText("100");
 }
 
 void PerceptronWidget::sltCreatePerceptronMagicWidgets(int count)
@@ -143,7 +156,6 @@ void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
         }
     }
 }
-
 
 
 inline void PerceptronWidget::cleanupDynamicWidgets()
