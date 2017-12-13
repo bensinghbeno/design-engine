@@ -8,15 +8,17 @@
 #include <QByteArray>
 #include <QJsonValue>
 
-class JsonLoad
+class JsonHelper
 {
 public:
-    JsonLoad();
+    JsonHelper();
     void readJson(QString filepath);
     void loadjsonfile(QString filepath);
     void insertvalue(QString key, QString value);
     QString getvalue(QString key);
     QString& getstringbuffer();
+    void insertJsonStringbuffer(QString strJson);
+
     void demo();
 
     QFile m_file;

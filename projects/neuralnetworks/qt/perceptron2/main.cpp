@@ -15,9 +15,8 @@ int main(int argc, char *argv[])
     myPerceptronWidget->show();
 
 
-
-    JsonLoad jsonloadobj;
-    jsonloadobj.demo();
+    JsonHelper jsonHelperObj;
+    jsonHelperObj.demo();
 
 
     return a.exec();
