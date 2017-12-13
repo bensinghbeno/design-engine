@@ -2,12 +2,12 @@
 #include <QDebug>
 #include <QByteArray>
 
-JsonLoad::JsonLoad()
+JsonHelper::JsonHelper()
 {
 
 }
 
-void JsonLoad::insertvalue(QString key, QString value)
+void JsonHelper::insertvalue(QString key, QString value)
 {
 
     m_valweight = value;
@@ -15,22 +15,26 @@ void JsonLoad::insertvalue(QString key, QString value)
 
 }
 
-QString JsonLoad::getvalue(QString key)
+QString JsonHelper::getvalue(QString key)
 {
     return m_objlayer.value(key).toString();
 }
 
-QString& JsonLoad::getstringbuffer()
+QString& JsonHelper::getstringbuffer()
 {
 
     m_docjson.setObject(m_objlayer);
     m_strdocjson =  m_docjson.toJson();
     return m_strdocjson;
-    //m_docjson = QJsonDocument::fromJson(m_strdocjson.toUtf8());
-    //m_objlayer = m_docjson.object();
 }
 
-void JsonLoad::loadjsonfile(QString filepath)
+void JsonHelper::insertJsonStringbuffer(QString strJson)
+{
+    m_docjson = QJsonDocument::fromJson(strJson.toUtf8());
+    m_objlayer = m_docjson.object();
+}
+
+void JsonHelper::loadjsonfile(QString filepath)
 {
     m_file.setFileName(filepath);
     m_file.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -39,7 +43,7 @@ void JsonLoad::loadjsonfile(QString filepath)
 
 }
 
-void JsonLoad::readJson(QString filepath)
+void JsonHelper::readJson(QString filepath)
 {
     loadjsonfile(filepath);
     //qWarning() << val;
@@ -62,11 +66,15 @@ void JsonLoad::readJson(QString filepath)
     //qDebug() << "orig2 = " << test2[2].toString();
 }
 
-void JsonLoad::demo()
+void JsonHelper::demo()
 {
     insertvalue("w00","1677");
     insertvalue("w01","19");
     insertvalue("w00","77");
+    qDebug() << "json string buffer = " << getstringbuffer();
+
+    insertvalue("w01","55");
+    insertJsonStringbuffer(getstringbuffer());
 
 
     qDebug() << "w00 = " << getvalue("w00");
