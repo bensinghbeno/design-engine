@@ -1,7 +1,7 @@
 #include <QApplication>
-#include "perceptronwidget.h"
-
 #include <QDebug>
+
+#include "perceptronwidget.h"
 #include "jsonhelper.h"
 
 int main(int argc, char *argv[])

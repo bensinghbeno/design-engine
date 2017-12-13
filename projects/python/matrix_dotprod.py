@@ -8,5 +8,12 @@ w = np.array([[ 5, 1 ,3],
 
 x = np.array([1, 2, 3])
 
-print w.dot(x)
+
+x = np.empty((1, 3), dtype=int)
+
+x[0,0] = 1;
+x[0,1] = 2;
+x[0,2] = 3;
+
+print x.dot(w)
 
