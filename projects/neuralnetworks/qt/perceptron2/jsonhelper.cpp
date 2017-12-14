@@ -1,6 +1,7 @@
 #include "jsonhelper.h"
 #include <QDebug>
 #include <QByteArray>
+#include <QProcess>
 
 JsonHelper::JsonHelper()
 {
@@ -71,7 +72,7 @@ void JsonHelper::demo()
     insertvalue("w00","1677");
     insertvalue("w01","19");
     insertvalue("w00","77");
-    qDebug() << "json string buffer = " << getstringbuffer();
+    qDebug() << "json string buffer = " << getstringbuffer().toStdString().c_str();
 
     insertvalue("w01","55");
     insertJsonStringbuffer(getstringbuffer());
@@ -79,5 +80,19 @@ void JsonHelper::demo()
 
     qDebug() << "w00 = " << getvalue("w00");
     qDebug() << "w01 = " << getvalue("w01");
+
+    QString program = "/home/ben/engine/design-engine/projects/python/matrix_dotprod.py";
+    QStringList arguments;
+    arguments  << getstringbuffer().toStdString().c_str();
+
+    QProcess *myProcess = new QProcess(this);
+    myProcess->start(program, arguments);
+
+    myProcess->waitForFinished();
+    QString strOut = myProcess->readAllStandardOutput();
+
+    qDebug() << strOut.toStdString().c_str();
+
+
 }
 

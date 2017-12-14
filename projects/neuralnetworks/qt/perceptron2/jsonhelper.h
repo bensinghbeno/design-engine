@@ -8,7 +8,7 @@
 #include <QByteArray>
 #include <QJsonValue>
 
-class JsonHelper
+class JsonHelper : public QObject
 {
 public:
     JsonHelper();
