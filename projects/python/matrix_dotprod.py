@@ -18,9 +18,11 @@ def displayRawJsonBuffer():
 
 
 ## Main Routine ##
-print "\n\n----Matrix Dot Prod Python Script Launched--\n"
+print "\n----Matrix Dot Prod Python Script Launched--\n"
 processCmdLine()
 displayRawJsonBuffer()
+print "\n----Matrix Dot Prod Python Script Completed--\n"
+sys.exit()
 
 
 #json_string = '{\n    \"w00\": \"77\",\n    \"w01\": \"19\"\n}\n'
