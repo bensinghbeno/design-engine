@@ -141,7 +141,7 @@ void PerceptronWidget::addWidgets(const QWidget * from, const QWidget * to)
 
 void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
 {
-    qDebug() << "PerceptronWidget::paintEvent()";
+    //qDebug() << "PerceptronWidget::paintEvent()";
 
 
     QPainter painter(this);
