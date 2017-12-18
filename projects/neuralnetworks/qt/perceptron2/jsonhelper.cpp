@@ -89,9 +89,10 @@ void JsonHelper::demo()
 //    qDebug() << strOut.toStdString().c_str();
 
     insertvalue("LAYERCOUNT","1");
+    insertvalue("MASTERINPUTCOUNT","2");
     insertvalue("ROWCOUNT_L1","2");
     insertvalue("COLOUMNCOUNT_L1","2");
-    //qDebug() << "w00 = " << getvalue("w00");
+    qDebug() << "w00 = " << getvalue("LAYERCOUNT");
     arguments.clear();
     arguments  << getstringbuffer().toStdString().c_str();
     myProcess->start(program, arguments);
