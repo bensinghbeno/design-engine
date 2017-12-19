@@ -39,11 +39,11 @@ def processRawJsonBuffer():
 def evaluateMatrixComputation():
 	print "START evaluateMatrixComputation()"
 
-	if( (int(gLayerCount) < 1) or (int(gMasterInputCount) < 2)):
-		print "evaluateMatrixComputation() failed, Please provide LAYERCOUNT >1 & MASTERINPUTCOUNT > 2"
-		quitProg()
-	else:
+	if( (int(gLayerCount) > 0) and (int(gMasterInputCount) > 2)):
 		print "evaluateMatrixComputation() success"
+	else:
+		print "evaluateMatrixComputation() failed, Please provide LAYERCOUNT >= 1 & MASTERINPUTCOUNT >= 3"
+		quitProg()
 
 
 

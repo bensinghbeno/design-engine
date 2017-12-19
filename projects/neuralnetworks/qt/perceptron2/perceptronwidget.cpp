@@ -4,7 +4,12 @@ PerceptronWidget::PerceptronWidget(QWidget *parent)
     : QWidget(parent)
     , mRowSize(0)
     , m_magicCount(0)
-{}
+{
+    createMasterLayout();
+    initializeUI(0);
+    createControllerConnections();
+    show();
+}
 
 void PerceptronWidget::createLayerLayout()
 {
