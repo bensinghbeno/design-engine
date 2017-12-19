@@ -2,17 +2,15 @@
 #include <QDebug>
 
 #include "perceptronwidget.h"
+#include "perceptroncontroller.h"
 #include "jsonhelper.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-//    PerceptronWidget* myPerceptronWidget = new PerceptronWidget();
-//    myPerceptronWidget->createMasterLayout();
-//    myPerceptronWidget->createControllerConnections();
-//    myPerceptronWidget->initializeUI(0);
-//    myPerceptronWidget->show();
+    PerceptronWidget* myPerceptronWidget = new PerceptronWidget();
+    PerceptronController myPerceptronController(*myPerceptronWidget);
 
 
     JsonHelper jsonHelperObj;

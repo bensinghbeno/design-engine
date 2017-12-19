@@ -26,6 +26,7 @@ public:
     int m_magicCount;
 
     //Widgets
+    QSpinBox m_SpinBoxLayerCount;
     QLabel m_labelLayerName;
     QLabel m_labelMagicCount;
     QSpinBox m_sbLayerMagicCount;
@@ -45,7 +46,6 @@ public:
     QVBoxLayout m_MainWindowVLayout;
     QHBoxLayout m_MainWindowHToolBarLayout;
     QHBoxLayout m_LayersHLayout;
-    QSpinBox m_SpinBoxLayerCount;
     QVBoxLayout m_layoutVboxMain;
     QHBoxLayout m_layoutHboxMenu;
     QGridLayout m_layoutgridLayer;
