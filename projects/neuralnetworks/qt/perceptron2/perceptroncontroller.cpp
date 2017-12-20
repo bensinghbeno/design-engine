@@ -1,16 +1,18 @@
 #include "perceptroncontroller.h"
 #include "perceptronwidget.h"
+#include "perceptronjsonmodel.h"
 #include <QDebug>
 
-PerceptronController::PerceptronController(PerceptronWidget &perceptronWidget)
+PerceptronController::PerceptronController(PerceptronWidget &perceptronWidget, PerceptronJsonModel& perceptronJsonModel)
     : m_perceptronWidget(perceptronWidget)
+    , m_perceptronJsonModel(perceptronJsonModel)
 {
     createConnections();
 }
 
 void PerceptronController::createConnections()
 {
-    QObject::connect((&m_perceptronWidget.m_SpinBoxLayerCount), SIGNAL(valueChanged(int)),this,SLOT(sltSendLayerCount()));
+    QObject::connect((&m_perceptronWidget.m_SpinBoxLayerCount), SIGNAL(valueChanged(int)),&m_perceptronJsonModel,SLOT(sltLayerCountUpdate(int)));
 }
 
 void PerceptronController::sltSendLayerCount()

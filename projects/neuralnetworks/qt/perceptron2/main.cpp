@@ -2,20 +2,18 @@
 #include <QDebug>
 
 #include "perceptronwidget.h"
+#include "perceptronjsonmodel.h"
 #include "perceptroncontroller.h"
-#include "jsonhelper.h"
+#include "perceptronjsonterminal.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
     PerceptronWidget* myPerceptronWidget = new PerceptronWidget();
-    PerceptronController myPerceptronController(*myPerceptronWidget);
-
-
-    JsonHelper jsonHelperObj;
-    jsonHelperObj.demo();
-
+    PerceptronJsonTerminal myPerceptronJsonTerminal("/home/ben/engine/design-engine/projects/python/matrix_dotprod.py");
+    PerceptronJsonModel myPerceptronJsonModel(myPerceptronJsonTerminal);
+    PerceptronController myPerceptronController(*myPerceptronWidget, myPerceptronJsonModel);
 
     return a.exec();
 }
