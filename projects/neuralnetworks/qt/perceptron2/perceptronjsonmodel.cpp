@@ -6,17 +6,28 @@ PerceptronJsonModel::PerceptronJsonModel(QString pythonEnginePath, QObject *pare
     : QObject(parent)
 {
     m_perceptronJsonTerminal.setPythonEnginePath(pythonEnginePath);
+
+    demo();
+}
+
+void PerceptronJsonModel::demo()
+{
     insertvalue("LAYERCOUNT","1");
     insertvalue("MASTERINPUTCOUNT","3");
     insertvalue("ROWCOUNT_L1","2");
     insertvalue("COLOUMNCOUNT_L1","2");
-    qDebug() << "w00 = " << getvalue("LAYERCOUNT");
+    qDebug() << "LAYERCOUNT = " << getvalue("LAYERCOUNT");
     m_perceptronJsonTerminal.sendJsonBuffer2Engine(getstringbuffer());
+
 }
 
 void PerceptronJsonModel::sltLayerCountUpdate(int layerCount)
 {
     qDebug() << "PerceptronJsonModel::sltLayerCountUpdate() = " << layerCount;
+
+    insertvalue("LAYERCOUNT", QString::number(layerCount));
+    qDebug() << "LAYERCOUNT = " << getvalue("LAYERCOUNT");
+    m_perceptronJsonTerminal.sendJsonBuffer2Engine(getstringbuffer());
 }
 
 void PerceptronJsonModel::insertvalue(QString key, QString value)

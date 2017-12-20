@@ -19,6 +19,8 @@ public:
     QString& getstringbuffer();
     void insertJsonStringbuffer(QString strJson);
 
+    void demo();
+
 
     QFile m_file;
     QString m_fileBuffer;
