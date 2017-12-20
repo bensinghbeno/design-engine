@@ -12,30 +12,30 @@ public:
 
     PerceptronJsonTerminal m_perceptronJsonTerminal;
 
+    //Json Helper
+    QFile m_file;
+    QString m_fileBuffer;
+    QString m_stringbuffer;
+    QJsonDocument m_docjson;
+    QJsonValue m_valweight;
+    QJsonObject m_objlayer;
+    QString m_strdocjson;
     void readJson(QString filepath);
     void loadjsonfile(QString filepath);
     void insertvalue(QString key, QString value);
     QString getvalue(QString key);
     QString& getstringbuffer();
     void insertJsonStringbuffer(QString strJson);
-
     void demo();
 
-
-    QFile m_file;
-    QString m_fileBuffer;
-    QString m_stringbuffer;
-    QJsonDocument m_docjson;
-
-    QJsonValue m_valweight;
-    QJsonObject m_objlayer;
-    QString m_strdocjson;
-
+    //Json Engine
+    void sendJsonBuffer();
 
 signals:
 
 public slots:
     void sltLayerCountUpdate(int layerCount);
+    void sltMasterInputCountUpdate(int masterInputCount);
 
 };
 
