@@ -7,7 +7,7 @@ PerceptronJsonModel::PerceptronJsonModel(QString pythonEnginePath, QObject *pare
 {
     m_perceptronJsonTerminal.setPythonEnginePath(pythonEnginePath);
 
-    demo();
+    //demo();
 }
 
 void PerceptronJsonModel::demo()
@@ -27,6 +27,22 @@ void PerceptronJsonModel::sltLayerCountUpdate(int layerCount)
 
     insertvalue("LAYERCOUNT", QString::number(layerCount));
     qDebug() << "LAYERCOUNT = " << getvalue("LAYERCOUNT");
+
+    sendJsonBuffer();
+}
+
+void PerceptronJsonModel::sltMasterInputCountUpdate(int masterInputCount)
+{
+    qDebug() << "PerceptronJsonModel::sltMasterInputCountUpdate() = " << masterInputCount;
+
+    insertvalue("MASTERINPUTCOUNT", QString::number(masterInputCount));
+    qDebug() << "MASTERINPUTCOUNT = " << getvalue("MASTERINPUTCOUNT");
+
+    sendJsonBuffer();
+}
+
+void PerceptronJsonModel::sendJsonBuffer()
+{
     m_perceptronJsonTerminal.sendJsonBuffer2Engine(getstringbuffer());
 }
 

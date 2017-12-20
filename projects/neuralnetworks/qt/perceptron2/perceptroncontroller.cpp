@@ -13,6 +13,7 @@ PerceptronController::PerceptronController(PerceptronWidget &perceptronWidget, P
 void PerceptronController::createConnections()
 {
     QObject::connect((&m_perceptronWidget.m_SpinBoxLayerCount), SIGNAL(valueChanged(int)),&m_perceptronJsonModel,SLOT(sltLayerCountUpdate(int)));
+    QObject::connect((&m_perceptronWidget.m_sbLayerMagicCount), SIGNAL(valueChanged(int)),&m_perceptronJsonModel,SLOT(sltMasterInputCountUpdate(int)));
 }
 
 void PerceptronController::sltSendLayerCount()
