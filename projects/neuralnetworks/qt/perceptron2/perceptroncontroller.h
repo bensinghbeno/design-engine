@@ -4,16 +4,18 @@
 #include <QObject>
 
 class PerceptronWidget;
+class PerceptronJsonModel;
 
 class PerceptronController : public QObject
 {
     Q_OBJECT
 
 public:
-    PerceptronController(PerceptronWidget& perceptronWidget);
+    PerceptronController(PerceptronWidget& perceptronWidget, PerceptronJsonModel& perceptronJsonModel);
     void createConnections();
 
     PerceptronWidget& m_perceptronWidget;
+    PerceptronJsonModel& m_perceptronJsonModel;
 
 public slots:
     void sltSendLayerCount();

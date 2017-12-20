@@ -8,10 +8,10 @@
 #include <QByteArray>
 #include <QJsonValue>
 
-class JsonHelper : public QObject
+class PerceptronJsonTerminal : public QObject
 {
 public:
-    JsonHelper();
+    PerceptronJsonTerminal(QString pythonEnginePath);
     void readJson(QString filepath);
     void loadjsonfile(QString filepath);
     void insertvalue(QString key, QString value);
@@ -29,6 +29,9 @@ public:
     QJsonValue m_valweight;
     QJsonObject m_objlayer;
     QString m_strdocjson;
+
+    //Perceptron Engine
+    QString m_pythonEnginePath;
 };
 
 #endif // JSONLOAD_H

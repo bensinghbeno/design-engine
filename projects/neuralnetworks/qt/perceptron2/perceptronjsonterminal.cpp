@@ -1,14 +1,15 @@
-#include "jsonhelper.h"
+#include "perceptronjsonterminal.h"
 #include <QDebug>
 #include <QByteArray>
 #include <QProcess>
 
-JsonHelper::JsonHelper()
+PerceptronJsonTerminal::PerceptronJsonTerminal(QString pythonEnginePath)
+    : m_pythonEnginePath(pythonEnginePath)
 {
 
 }
 
-void JsonHelper::insertvalue(QString key, QString value)
+void PerceptronJsonTerminal::insertvalue(QString key, QString value)
 {
 
     m_valweight = value;
@@ -16,12 +17,12 @@ void JsonHelper::insertvalue(QString key, QString value)
 
 }
 
-QString JsonHelper::getvalue(QString key)
+QString PerceptronJsonTerminal::getvalue(QString key)
 {
     return m_objlayer.value(key).toString();
 }
 
-QString& JsonHelper::getstringbuffer()
+QString& PerceptronJsonTerminal::getstringbuffer()
 {
 
     m_docjson.setObject(m_objlayer);
@@ -29,13 +30,13 @@ QString& JsonHelper::getstringbuffer()
     return m_strdocjson;
 }
 
-void JsonHelper::insertJsonStringbuffer(QString strJson)
+void PerceptronJsonTerminal::insertJsonStringbuffer(QString strJson)
 {
     m_docjson = QJsonDocument::fromJson(strJson.toUtf8());
     m_objlayer = m_docjson.object();
 }
 
-void JsonHelper::loadjsonfile(QString filepath)
+void PerceptronJsonTerminal::loadjsonfile(QString filepath)
 {
     m_file.setFileName(filepath);
     m_file.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -44,7 +45,7 @@ void JsonHelper::loadjsonfile(QString filepath)
 
 }
 
-void JsonHelper::readJson(QString filepath)
+void PerceptronJsonTerminal::readJson(QString filepath)
 {
     loadjsonfile(filepath);
     //qWarning() << val;
@@ -67,10 +68,10 @@ void JsonHelper::readJson(QString filepath)
     //qDebug() << "orig2 = " << test2[2].toString();
 }
 
-void JsonHelper::demo()
+void PerceptronJsonTerminal::demo()
 {
     QProcess *myProcess = new QProcess(this);
-    QString program = "/home/ben/engine/design-engine/projects/python/matrix_dotprod.py";
+    //m_pythonEnginePath = "/home/ben/engine/design-engine/projects/python/matrix_dotprod.py";
     QStringList arguments;
     QString strOut;
 
@@ -95,7 +96,7 @@ void JsonHelper::demo()
     qDebug() << "w00 = " << getvalue("LAYERCOUNT");
     arguments.clear();
     arguments  << getstringbuffer().toStdString().c_str();
-    myProcess->start(program, arguments);
+    myProcess->start(m_pythonEnginePath, arguments);
     myProcess->waitForFinished();
     strOut = myProcess->readAllStandardOutput();
     qDebug() << strOut.toStdString().c_str();
