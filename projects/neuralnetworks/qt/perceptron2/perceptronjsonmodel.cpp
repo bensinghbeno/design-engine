@@ -26,9 +26,8 @@ void PerceptronJsonModel::sltLayerCountUpdate(int layerCount)
     qDebug() << "PerceptronJsonModel::sltLayerCountUpdate() = " << layerCount;
 
     insertvalue("LAYERCOUNT", QString::number(layerCount));
-    qDebug() << "LAYERCOUNT = " << getvalue("LAYERCOUNT");
+    //qDebug() << "LAYERCOUNT = " << getvalue("LAYERCOUNT");
 
-    sendJsonBuffer();
 }
 
 void PerceptronJsonModel::sltMasterInputCountUpdate(int masterInputCount)
@@ -37,9 +36,58 @@ void PerceptronJsonModel::sltMasterInputCountUpdate(int masterInputCount)
 
     insertvalue("MASTERINPUTCOUNT", QString::number(masterInputCount));
     qDebug() << "MASTERINPUTCOUNT = " << getvalue("MASTERINPUTCOUNT");
-
-    sendJsonBuffer();
 }
+
+void PerceptronJsonModel::sltRequestPerceptronMatrix()
+{
+    qDebug() << "PerceptronJsonModel::sltRequestPerceptronMatrix()";
+
+    int currentLayerCount =  getvalue("LAYERCOUNT").toInt();
+    int currentMasterInputCount =  getvalue("MASTERINPUTCOUNT").toInt();
+
+    if ((currentLayerCount < 1) || (currentMasterInputCount < 3))
+    {
+        qDebug() << "ERROR : Please provide LAYERCOUNT >= 1 & MASTERINPUTCOUNT >= 3";
+        return;
+    }
+    else
+    {
+        sendJsonBuffer();
+    }
+
+//    if (currentLayerCount != layerCount)
+//    {
+
+//        for (int i = 1; i <= layerCount; i++ )
+//        {
+//            QString layerid = getvalue("L"+ QString::number(i)+"I1");
+//            if (layerid.isEmpty())
+//            {
+//                qDebug() << "PerceptronJsonModel:: layerid - " << layerid << " isEmpty() !!";
+//                break;
+//            }
+//            else
+//            {
+//                qDebug() << "PerceptronJsonModel:: layerid - " << layerid << " isNotEmpty()";
+//            }
+
+//        }
+
+
+
+//        sendJsonBuffer();
+
+//    }
+//    else
+//    {
+//        qDebug() << "LAYERCOUNT Indifferent!! " << currentLayerCount;
+//    }
+
+    //insertvalue("MASTERINPUTCOUNT", QString::number(masterInputCount));
+    //qDebug() << "MASTERINPUTCOUNT = " << getvalue("MASTERINPUTCOUNT");
+
+}
+
 
 void PerceptronJsonModel::sendJsonBuffer()
 {

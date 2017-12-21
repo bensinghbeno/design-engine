@@ -17,6 +17,7 @@ void PerceptronWidget::createLayerLayout()
     m_MainWindowHToolBarLayout.addWidget(new QLabel("   Perceptron Toolbox    "));
     m_MainWindowHToolBarLayout.addWidget(new QLabel("Total Layers = "));
     m_MainWindowHToolBarLayout.addWidget(&m_SpinBoxLayerCount);
+    m_MainWindowHToolBarLayout.addWidget(&m_pbCreateMatrix);
     m_layoutVboxMain.addLayout(&m_MainWindowHToolBarLayout);
 
     m_pFrameLineSepMainToolBox = new QFrame(this);
@@ -88,6 +89,7 @@ void PerceptronWidget::initializeUI(int rowcount)
 
     mp_pbMasterOutput->setStyleSheet(m_strOutputLabelStylesheet);
     mp_pbMasterOutput->setText("100");
+    m_pbCreateMatrix.setText("CreateMatrix");
 }
 
 void PerceptronWidget::sltCreatePerceptronMagicWidgets(int count)
