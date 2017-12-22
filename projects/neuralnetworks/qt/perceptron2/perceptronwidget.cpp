@@ -7,7 +7,7 @@ PerceptronWidget::PerceptronWidget(QWidget *parent)
 {
     createMasterLayout();
     initializeUI(0);
-    createControllerConnections();
+    //createControllerConnections();
     show();
 }
 
@@ -17,6 +17,8 @@ void PerceptronWidget::createLayerLayout()
     m_MainWindowHToolBarLayout.addWidget(new QLabel("   Perceptron Toolbox    "));
     m_MainWindowHToolBarLayout.addWidget(new QLabel("Total Layers = "));
     m_MainWindowHToolBarLayout.addWidget(&m_SpinBoxLayerCount);
+    m_MainWindowHToolBarLayout.addWidget(&m_labelMasterInputCount);
+    m_MainWindowHToolBarLayout.addWidget(&m_sbLayerMasterInputCount);
     m_MainWindowHToolBarLayout.addWidget(&m_pbCreateMatrix);
     m_layoutVboxMain.addLayout(&m_MainWindowHToolBarLayout);
 
@@ -27,12 +29,10 @@ void PerceptronWidget::createLayerLayout()
 
     //LayerToolBox
     m_layoutHboxMenu.addWidget(&m_labelLayerName);
-    m_layoutHboxMenu.addWidget(&m_labelMagicCount);
-    m_layoutHboxMenu.addWidget(&m_sbLayerMagicCount);
-    m_layoutHboxMenu.addWidget(&m_labelInputCount);
-    m_layoutHboxMenu.addWidget(&m_sbLayerInputCount);
-    m_layoutHboxMenu.addWidget(&m_labelOutputCount);
-    m_layoutHboxMenu.addWidget(&m_sbLayerOutputCount);
+    //m_layoutHboxMenu.addWidget(&m_labelInputCount);
+    //m_layoutHboxMenu.addWidget(&m_sbLayerInputCount);
+    //m_layoutHboxMenu.addWidget(&m_labelOutputCount);
+    //m_layoutHboxMenu.addWidget(&m_sbLayerOutputCount);
 
     m_pSpacerLayerToolBox = new QSpacerItem(100,50);
     m_layoutHboxMenu.addSpacerItem(m_pSpacerLayerToolBox);
@@ -48,8 +48,8 @@ void PerceptronWidget::createMasterLayout()
 {
     createLayerLayout();
 
-    mp_pbMasterOutput = new QPushButton();
-    m_LayersHLayout.addWidget(mp_pbMasterOutput);
+    //mp_pbMasterOutput = new QPushButton();
+    //m_LayersHLayout.addWidget(mp_pbMasterOutput);
 }
 
 
@@ -57,13 +57,13 @@ void PerceptronWidget::createControllerConnections()
 {
     connect((&m_sbLayerInputCount), SIGNAL(valueChanged(int)),this,SLOT(sltCreateInputWidgets()));
     connect((&m_sbLayerOutputCount), SIGNAL(valueChanged(int)),this,SLOT(sltCreateInputWidgets()));
-    connect((&m_sbLayerMagicCount), SIGNAL(valueChanged(int)),this,SLOT(sltCreatePerceptronMagicWidgets(int)));
+    connect((&m_sbLayerMasterInputCount), SIGNAL(valueChanged(int)),this,SLOT(sltCreatePerceptronMagicWidgets(int)));
 }
 
 void PerceptronWidget::initializeUI(int rowcount)
 {
     QString layername = "Layer 1   |   ";
-    QString strlayerMagiccount = "Magic Inputs = ";
+    QString strlayerMagiccount = "Master Inputs = ";
     QString strlayerInputcount = "Inputs = ";
     QString strlayerOutputcount = "Outputs = ";
 
@@ -81,15 +81,15 @@ void PerceptronWidget::initializeUI(int rowcount)
 
     m_sbLayerInputCount.setMaximumWidth(70);
     m_sbLayerInputCount.setValue(rowcount);
-    m_labelLayerName.setText(layername);
-    m_labelMagicCount.setText(strlayerMagiccount);
+    //m_labelLayerName.setText(layername);
+    m_labelMasterInputCount.setText(strlayerMagiccount);
     m_labelInputCount.setText(strlayerInputcount);
     m_labelOutputCount.setText(strlayerOutputcount);
-    m_sbLayerMagicCount.setFocus();
+    m_sbLayerMasterInputCount.setFocus();
 
-    mp_pbMasterOutput->setStyleSheet(m_strOutputLabelStylesheet);
-    mp_pbMasterOutput->setText("100");
-    m_pbCreateMatrix.setText("CreateMatrix");
+    //mp_pbMasterOutput->setStyleSheet(m_strOutputLabelStylesheet);
+    //mp_pbMasterOutput->setText("100");
+    m_pbCreateMatrix.setText("Create Network");
 }
 
 void PerceptronWidget::sltCreatePerceptronMagicWidgets(int count)
