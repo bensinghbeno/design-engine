@@ -14,7 +14,7 @@ void PerceptronController::createConnections()
 {
     QObject::connect((&m_perceptronWidget.m_SpinBoxLayerCount), SIGNAL(valueChanged(int)),&m_perceptronJsonModel,SLOT(sltLayerCountUpdate(int)));
     QObject::connect((&m_perceptronWidget.m_sbLayerMasterInputCount), SIGNAL(valueChanged(int)),&m_perceptronJsonModel,SLOT(sltMasterInputCountUpdate(int)));
-    QObject::connect((&m_perceptronWidget.m_pbCreateMatrix), SIGNAL(clicked(bool)),&m_perceptronJsonModel,SLOT(sltInitPerceptronMatrix()));
+    QObject::connect((&m_perceptronWidget.m_pbCreateMatrix), SIGNAL(clicked(bool)),&m_perceptronJsonModel,SLOT(sltCreatePerceptronNetwork()));
 }
 
 void PerceptronController::sltSendLayerCount()
