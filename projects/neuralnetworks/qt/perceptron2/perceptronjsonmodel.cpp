@@ -38,9 +38,9 @@ void PerceptronJsonModel::sltMasterInputCountUpdate(int masterInputCount)
     qDebug() << "MASTERINPUTCOUNT = " << getvalue("MASTERINPUTCOUNT");
 }
 
-void PerceptronJsonModel::sltRequestPerceptronMatrix()
+void PerceptronJsonModel::sltInitPerceptronMatrix()
 {
-    qDebug() << "PerceptronJsonModel::sltRequestPerceptronMatrix()";
+    //qDebug() << "PerceptronJsonModel::sltRequestPerceptronMatrix()";
 
     int currentLayerCount =  getvalue("LAYERCOUNT").toInt();
     int currentMasterInputCount =  getvalue("MASTERINPUTCOUNT").toInt();
@@ -52,6 +52,7 @@ void PerceptronJsonModel::sltRequestPerceptronMatrix()
     }
     else
     {
+        insertvalue("CMD_INITMATRIX", "TRUE");
         sendJsonBuffer();
     }
 

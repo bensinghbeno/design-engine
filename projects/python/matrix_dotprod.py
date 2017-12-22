@@ -46,8 +46,7 @@ def evaluateMatrixComputation():
 		quitProg()
 
 
-
-def createMasterInputArray(rows,coloumns):
+def createDummyInitialLayer():
 	x = np.empty((1, 3), dtype=int)
 
 

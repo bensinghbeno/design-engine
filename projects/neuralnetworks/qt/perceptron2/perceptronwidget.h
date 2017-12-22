@@ -29,8 +29,8 @@ public:
     QSpinBox m_SpinBoxLayerCount;
     QPushButton m_pbCreateMatrix;
     QLabel m_labelLayerName;
-    QLabel m_labelMagicCount;
-    QSpinBox m_sbLayerMagicCount;
+    QLabel m_labelMasterInputCount;
+    QSpinBox m_sbLayerMasterInputCount;
     QLabel m_labelInputCount;
     QLabel m_labelOutputCount;
     QSpinBox m_sbLayerInputCount;
