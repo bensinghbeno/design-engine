@@ -12,7 +12,7 @@ public:
 
     PerceptronJsonTerminal m_perceptronJsonTerminal;
 
-    //Json Helper
+    //Json Model
     QFile m_file;
     QString m_fileBuffer;
     QString m_stringbuffer;
@@ -24,9 +24,11 @@ public:
     void loadjsonfile(QString filepath);
     void insertvalue(QString key, QString value);
     QString getvalue(QString key);
-    QString& getstringbuffer();
+    QString& getJsonStringbuffer();
     void insertJsonStringbuffer(QString strJson);
+    void updateJsonModel(int currentMasterLayerCount, int currentMasterInputCount);
     void demo();
+
 
     //Json Engine
     void sendJsonBuffer();
@@ -36,7 +38,7 @@ signals:
 public slots:
     void sltLayerCountUpdate(int layerCount);
     void sltMasterInputCountUpdate(int masterInputCount);
-    void sltInitPerceptronMatrix();
+    void sltCreatePerceptronNetwork();
 
 };
 
