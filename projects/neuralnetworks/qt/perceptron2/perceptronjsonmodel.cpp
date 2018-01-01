@@ -42,6 +42,7 @@ void PerceptronJsonModel::sltCreatePerceptronNetwork()
     else
     {
         updateJsonModel(currentLayerCount, currentMasterInputCount);
+        emit sgnJsonModelUpdated();
         //sendJsonBuffer();
     }
 
