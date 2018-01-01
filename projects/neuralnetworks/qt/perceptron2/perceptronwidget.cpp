@@ -117,12 +117,17 @@ void PerceptronWidget::createMasterInputOutputWidgets(int masterInputCount)
 {
     cleanupDynamicWidgets();
 
-    for(int it = 0; it < masterInputCount; it++)
+    for(int it = 1; it <= masterInputCount; it++)
     {
+        QString inputId = ("I" + QString::number(it));
+        QString masterInputElementId  = "L1_" + inputId;
+        auto value =  m_PerceptronJsonModel.getvalue(masterInputElementId).toInt();
+
         QSpinBox* pSpinBox = new QSpinBox();
         m_VecSpinBoxMasterInputs.push_back(pSpinBox);
         m_MasterInputLayout.addWidget(pSpinBox);
         pSpinBox->setMaximumWidth(50);
+        pSpinBox->setValue(value);
         list_inputs.append(pSpinBox);
     }
 

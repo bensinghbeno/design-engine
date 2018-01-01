@@ -42,6 +42,7 @@ void PerceptronJsonModel::sltCreatePerceptronNetwork()
     else
     {
         updateJsonModel(currentLayerCount, currentMasterInputCount);
+
         emit sgnJsonModelUpdated();
         //sendJsonBuffer();
     }
@@ -150,6 +151,10 @@ void PerceptronJsonModel::updateJsonModel(int currentMasterLayerCount, int curre
             }
         }
     }
+
+    insertvalue("L1_I1","16");
+    insertvalue("L1_I2","7");
+    insertvalue("L1_I3","77");
 
     qDebug() << " --- Json Model Updated --- \n" << getJsonStringbuffer() ;
 
