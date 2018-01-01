@@ -34,6 +34,7 @@ public:
     void sendJsonBuffer();
 
 signals:
+    void sgnJsonModelUpdated();
 
 public slots:
     void sltLayerCountUpdate(int layerCount);

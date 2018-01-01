@@ -8,8 +8,8 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    PerceptronWidget* myPerceptronWidget = new PerceptronWidget();
     PerceptronJsonModel myPerceptronJsonModel("../../../python/matrix_dotprod.py");
+    PerceptronWidget* myPerceptronWidget = new PerceptronWidget(myPerceptronJsonModel);
     PerceptronController myPerceptronController(*myPerceptronWidget, myPerceptronJsonModel);
 
     return a.exec();

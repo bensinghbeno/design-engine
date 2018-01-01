@@ -1,7 +1,9 @@
 #include "perceptronwidget.h"
+#include "perceptronjsonmodel.h"
 
-PerceptronWidget::PerceptronWidget(QWidget *parent)
+PerceptronWidget::PerceptronWidget(PerceptronJsonModel& perceptronJsonModel, QWidget *parent)
     : QWidget(parent)
+    , m_PerceptronJsonModel(perceptronJsonModel)
     , mRowSize(0)
     , m_magicCount(0)
 {
@@ -39,6 +41,7 @@ void PerceptronWidget::createLayerLayout()
 
     m_layoutVboxMain.addLayout(&m_layoutHboxMenu);
     m_layoutVboxMain.addLayout(&m_LayersHLayout);
+    m_LayersHLayout.addLayout(&m_MasterInputLayout);
     m_LayersHLayout.addLayout(&m_layoutgridLayer);
 
     this->setLayout(&m_layoutVboxMain);
@@ -98,6 +101,29 @@ void PerceptronWidget::sltCreatePerceptronMagicWidgets(int count)
     emit sltCreateInputWidgets();
 }
 
+
+
+void PerceptronWidget::sltCreatePerceptronWidgets()
+{
+    auto masterInputCount = m_PerceptronJsonModel.getvalue("MASTERINPUTCOUNT").toInt();
+    createMasterInputWidgets(masterInputCount);
+}
+
+void PerceptronWidget::createMasterInputWidgets(int masterInputCount)
+{
+    cleanupDynamicWidgets();
+
+    for(int it = 0; it < masterInputCount; it++)
+    {
+        QSpinBox* pSpinBox = new QSpinBox();
+        m_VecSpinBoxMasterInputs.push_back(pSpinBox);
+        m_MasterInputLayout.addWidget(pSpinBox);
+        pSpinBox->setMaximumWidth(50);
+        list_inputs.append(pSpinBox);
+    }
+
+
+}
 
 void PerceptronWidget::sltCreateInputWidgets()
 {
@@ -170,8 +196,15 @@ void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
 
 inline void PerceptronWidget::cleanupDynamicWidgets()
 {
+    m_listMasterInputs.clear();
     list_inputs.clear();
     list_outputs.clear();
+
+    for (QVector<QSpinBox*>::iterator it = m_VecSpinBoxMasterInputs.begin() ; it != m_VecSpinBoxMasterInputs.end(); ++it)
+    {
+        delete (*it);
+    }
+    m_VecSpinBoxMasterInputs.clear();
 
     for (QVector<QSpinBox*>::iterator it = m_VecSpinBoxInputs.begin() ; it != m_VecSpinBoxInputs.end(); ++it)
     {
