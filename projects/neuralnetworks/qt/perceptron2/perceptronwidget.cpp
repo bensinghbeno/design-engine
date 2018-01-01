@@ -43,6 +43,9 @@ void PerceptronWidget::createLayerLayout()
     m_layoutVboxMain.addLayout(&m_LayersHLayout);
     m_LayersHLayout.addLayout(&m_MasterInputLayout);
     m_LayersHLayout.addLayout(&m_layoutgridLayer);
+    m_LayersHLayout.addWidget(&m_btnMasterOutput);
+    m_btnMasterOutput.hide();
+
 
     this->setLayout(&m_layoutVboxMain);
 }
@@ -90,8 +93,9 @@ void PerceptronWidget::initializeUI(int rowcount)
     m_labelOutputCount.setText(strlayerOutputcount);
     m_sbLayerMasterInputCount.setFocus();
 
-    //mp_pbMasterOutput->setStyleSheet(m_strOutputLabelStylesheet);
-    //mp_pbMasterOutput->setText("100");
+    m_btnMasterOutput.setStyleSheet(m_strOutputLabelStylesheet);
+    m_btnMasterOutput.setText("100");
+
     m_pbCreateMatrix.setText("Create Network");
 }
 
@@ -106,10 +110,10 @@ void PerceptronWidget::sltCreatePerceptronMagicWidgets(int count)
 void PerceptronWidget::sltCreatePerceptronWidgets()
 {
     auto masterInputCount = m_PerceptronJsonModel.getvalue("MASTERINPUTCOUNT").toInt();
-    createMasterInputWidgets(masterInputCount);
+    createMasterInputOutputWidgets(masterInputCount);
 }
 
-void PerceptronWidget::createMasterInputWidgets(int masterInputCount)
+void PerceptronWidget::createMasterInputOutputWidgets(int masterInputCount)
 {
     cleanupDynamicWidgets();
 
@@ -122,6 +126,7 @@ void PerceptronWidget::createMasterInputWidgets(int masterInputCount)
         list_inputs.append(pSpinBox);
     }
 
+    m_btnMasterOutput.show();
 
 }
 
@@ -187,7 +192,7 @@ void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
             painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
 
             QPoint start2 = to->mapToGlobal(to->rect().topRight() +  QPoint(0, to->height()/2));
-            QPoint end2 = mp_pbMasterOutput->mapToGlobal(mp_pbMasterOutput->rect().topLeft() +  QPoint(0, to->height()/2));
+            QPoint end2 = m_btnMasterOutput.mapToGlobal(m_btnMasterOutput.rect().topLeft() +  QPoint(0, to->height()/2));
             painter.drawLine(mapFromGlobal(start2), mapFromGlobal(end2));
         }
     }
@@ -197,6 +202,7 @@ void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
 inline void PerceptronWidget::cleanupDynamicWidgets()
 {
     m_listMasterInputs.clear();
+    m_btnMasterOutput.hide();
     list_inputs.clear();
     list_outputs.clear();
 

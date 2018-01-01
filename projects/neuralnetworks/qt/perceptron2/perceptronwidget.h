@@ -27,6 +27,9 @@ public:
     int m_magicCount;
 
     //Widgets
+    QVector<QSpinBox*> m_VecSpinBoxMasterInputs;
+    QPushButton m_btnMasterOutput;
+
     QSpinBox m_SpinBoxLayerCount;
     QPushButton m_pbCreateMatrix;
     QLabel m_labelLayerName;
@@ -36,7 +39,6 @@ public:
     QLabel m_labelOutputCount;
     QSpinBox m_sbLayerInputCount;
     QSpinBox m_sbLayerOutputCount;
-    QVector<QSpinBox*> m_VecSpinBoxMasterInputs;
     QVector<QSpinBox*> m_VecSpinBoxInputs;
     QVector<QPushButton*> m_vecbtnOutputs;
     QFrame* m_pFrameLineSepMainToolBox;
@@ -62,7 +64,7 @@ public:
     inline void cleanupDynamicWidgets();
     inline void cleanupOutputs();
     void addWidgets(const QWidget *from, const QWidget *to);
-    void createMasterInputWidgets(int masterInputCount);
+    void createMasterInputOutputWidgets(int masterInputCount);
 
     //DataModel Interface
     PerceptronJsonModel& m_PerceptronJsonModel;
@@ -91,7 +93,6 @@ private:
     //////////Master Window////////////////
 
 public:
-    QPushButton* mp_pbMasterOutput;
 
     //UI Operations
     void createMasterLayout();
