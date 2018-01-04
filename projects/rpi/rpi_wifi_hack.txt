@@ -1,6 +1,6 @@
-   9 ifconfig wlan1 up
-  10 ifconfig wlan1 192.168.2.156
-  11 route add default gw 192.168.2.254
-  12 wpa_supplicant -B -Dnl80211 -iwlan1 -c /etc/wpa_supplicant.conf 
+/sbin/ifconfig wlan1 up
+/sbin/ifconfig wlan1 192.168.2.156
+/sbin/route add default gw 192.168.2.254
+/sbin/wpa_supplicant -B -Dnl80211 -iwlan1 -c /etc/wpa_supplicant/wpa_supplicant.conf 
   
 
