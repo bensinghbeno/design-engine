@@ -39,7 +39,13 @@ public:
     QLabel m_labelOutputCount;
     QSpinBox m_sbLayerInputCount;
     QSpinBox m_sbLayerOutputCount;
+
     QVector<QSpinBox*> m_VecSpinBoxInputs;
+
+    typedef QList<QSpinBox*> TLayerWidget;
+    QList<TLayerWidget*> m_listLayerWidgets;
+
+
     QVector<QPushButton*> m_vecbtnOutputs;
     QFrame* m_pFrameLineSepMainToolBox;
     QSpacerItem* m_pSpacerLayerToolBox;
@@ -58,13 +64,14 @@ public:
 
     //UI Operations
     void createLayerLayout();
-    void createControllerConnections();
-    void initializeUI(int rowcount);
+    void initializeUi(int rowcount);
     void PlaceOutputWidgets();
     inline void cleanupDynamicWidgets();
     inline void cleanupOutputs();
     void addWidgets(const QWidget *from, const QWidget *to);
-    void createMasterInputOutputWidgets(int masterInputCount);
+    void createMasterInputOutputWidgets();
+    void createLayerWidgets();
+
 
     //DataModel Interface
     PerceptronJsonModel& m_PerceptronJsonModel;
@@ -89,8 +96,9 @@ private:
     QList<const QWidget*> list_inputs;
     QList<const QWidget*> m_listMasterInputs;
     QList<const QWidget*> list_outputs;
+    int m_masterInputCount;
+    int m_layerCount;
 
-    //////////Master Window////////////////
 
 public:
 
