@@ -8,8 +8,7 @@ PerceptronWidget::PerceptronWidget(PerceptronJsonModel& perceptronJsonModel, QWi
     , m_magicCount(0)
 {
     createMasterLayout();
-    initializeUI(0);
-    //createControllerConnections();
+    initializeUi(0);
     show();
 }
 
@@ -59,14 +58,7 @@ void PerceptronWidget::createMasterLayout()
 }
 
 
-void PerceptronWidget::createControllerConnections()
-{
-    connect((&m_sbLayerInputCount), SIGNAL(valueChanged(int)),this,SLOT(sltCreateInputWidgets()));
-    connect((&m_sbLayerOutputCount), SIGNAL(valueChanged(int)),this,SLOT(sltCreateInputWidgets()));
-    connect((&m_sbLayerMasterInputCount), SIGNAL(valueChanged(int)),this,SLOT(sltCreatePerceptronMagicWidgets(int)));
-}
-
-void PerceptronWidget::initializeUI(int rowcount)
+void PerceptronWidget::initializeUi(int rowcount)
 {
     QString layername = "Layer 1   |   ";
     QString strlayerMagiccount = "Master Inputs = ";
@@ -106,18 +98,22 @@ void PerceptronWidget::sltCreatePerceptronMagicWidgets(int count)
 }
 
 
+////////////////////// Main Network Creation/////////////////////
 
 void PerceptronWidget::sltCreatePerceptronWidgets()
 {
-    auto masterInputCount = m_PerceptronJsonModel.getvalue("MASTERINPUTCOUNT").toInt();
-    createMasterInputOutputWidgets(masterInputCount);
+    m_masterInputCount   =   m_PerceptronJsonModel.getvalue("MASTERINPUTCOUNT").toInt();
+    m_layerCount         =   m_PerceptronJsonModel.getvalue("LAYERCOUNT").toInt();
+
+    createMasterInputOutputWidgets();
+    createLayerWidgets();
 }
 
-void PerceptronWidget::createMasterInputOutputWidgets(int masterInputCount)
+void PerceptronWidget::createMasterInputOutputWidgets()
 {
     cleanupDynamicWidgets();
 
-    for(int it = 1; it <= masterInputCount; it++)
+    for(int it = 1; it <= m_masterInputCount; it++)
     {
         QString inputId = ("I" + QString::number(it));
         QString masterInputElementId  = "L1_" + inputId;
@@ -132,8 +128,38 @@ void PerceptronWidget::createMasterInputOutputWidgets(int masterInputCount)
     }
 
     m_btnMasterOutput.show();
-
 }
+
+void PerceptronWidget::createLayerWidgets()
+{
+    // Cleanup Old layers
+    for(TLayerWidget* listLayerWidgets: m_listLayerWidgets)
+    {
+        for(const QSpinBox* outputwidget: (*listLayerWidgets))
+        {
+            delete(outputwidget);
+        }
+        delete(listLayerWidgets);
+    }
+    m_listLayerWidgets.clear();
+
+
+    for(int layercolumn = 0; layercolumn < m_layerCount; layercolumn++)
+    {
+        TLayerWidget* layerwidget = new TLayerWidget;
+
+        for(int inputrow = 0; inputrow < m_masterInputCount; inputrow++)
+        {
+            QSpinBox* pSpinBox = new QSpinBox();
+            m_layoutgridLayer.addWidget(pSpinBox,inputrow, layercolumn);
+            pSpinBox->setMaximumWidth(50);
+            layerwidget->append(pSpinBox);
+        }
+
+        m_listLayerWidgets.push_back(layerwidget);
+    }
+}
+
 
 void PerceptronWidget::sltCreateInputWidgets()
 {
@@ -207,7 +233,8 @@ void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
 inline void PerceptronWidget::cleanupDynamicWidgets()
 {
     m_listMasterInputs.clear();
-    m_btnMasterOutput.hide();
+
+
     list_inputs.clear();
     list_outputs.clear();
 
