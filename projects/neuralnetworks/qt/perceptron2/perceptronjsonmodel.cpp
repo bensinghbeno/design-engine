@@ -87,7 +87,7 @@ void PerceptronJsonModel::demo()
     insertvalue("ROWCOUNT_L1","2");
     insertvalue("COLOUMNCOUNT_L1","2");
     qDebug() << "LAYERCOUNT = " << getvalue("LAYERCOUNT");
-    m_perceptronJsonTerminal.sendJsonBuffer2Engine(getJsonStringbuffer());
+    //m_perceptronJsonTerminal.sendJsonBuffer2Engine(getJsonStringbuffer());
 
 }
 
