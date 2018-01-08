@@ -89,6 +89,7 @@ void PerceptronWidget::initializeUi(int rowcount)
     m_btnMasterOutput.setText("100");
 
     m_pbCreateMatrix.setText("Create Network");
+    m_layoutgridLayer.setSpacing(50);
 }
 
 void PerceptronWidget::sltCreatePerceptronMagicWidgets(int count)
@@ -135,7 +136,7 @@ void PerceptronWidget::createLayerWidgets()
     // Cleanup Old layers
     for(TLayerWidget* listLayerWidgets: m_listLayerWidgets)
     {
-        for(const QSpinBox* outputwidget: (*listLayerWidgets))
+        for(const QPushButton* outputwidget: (*listLayerWidgets))
         {
             delete(outputwidget);
         }
@@ -144,16 +145,18 @@ void PerceptronWidget::createLayerWidgets()
     m_listLayerWidgets.clear();
 
 
+
     for(int layercolumn = 0; layercolumn < m_layerCount; layercolumn++)
     {
         TLayerWidget* layerwidget = new TLayerWidget;
 
         for(int inputrow = 0; inputrow < m_masterInputCount; inputrow++)
         {
-            QSpinBox* pSpinBox = new QSpinBox();
-            m_layoutgridLayer.addWidget(pSpinBox,inputrow, layercolumn);
-            pSpinBox->setMaximumWidth(50);
-            layerwidget->append(pSpinBox);
+            QPushButton* pPushButton = new QPushButton();
+            pPushButton->setStyleSheet(m_strOutputLabelStylesheet);
+            m_layoutgridLayer.addWidget(pPushButton,inputrow, layercolumn);
+            pPushButton->setMaximumWidth(50);
+            layerwidget->append(pPushButton);
         }
 
         m_listLayerWidgets.push_back(layerwidget);

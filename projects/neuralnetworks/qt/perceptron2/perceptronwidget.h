@@ -42,7 +42,7 @@ public:
 
     QVector<QSpinBox*> m_VecSpinBoxInputs;
 
-    typedef QList<QSpinBox*> TLayerWidget;
+    typedef QList<QPushButton*> TLayerWidget;
     QList<TLayerWidget*> m_listLayerWidgets;
 
 
