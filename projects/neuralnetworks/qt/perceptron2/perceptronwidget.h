@@ -22,6 +22,9 @@ public:
 
     //////////Layer////////////////
 
+    //DataModel Interface
+    PerceptronJsonModel& m_PerceptronJsonModel;
+
     //Data
     int mRowSize;
     int m_magicCount;
@@ -43,7 +46,7 @@ public:
     QVector<QSpinBox*> m_VecSpinBoxInputs;
 
     typedef QList<QPushButton*> TLayerWidget;
-    QList<TLayerWidget*> m_listLayerWidgets;
+    QList<TLayerWidget*> m_listLayerOutputWidgets;
 
 
     QVector<QPushButton*> m_vecbtnOutputs;
@@ -51,7 +54,7 @@ public:
     QSpacerItem* m_pSpacerLayerToolBox;
 
     //Stylesheets
-    QString m_strOutputLabelStylesheet;
+    QString m_strOutputItemStylesheet;
 
     //Layouts
     QVBoxLayout m_MainWindowVLayout;
@@ -73,8 +76,7 @@ public:
     void createLayerWidgets();
 
 
-    //DataModel Interface
-    PerceptronJsonModel& m_PerceptronJsonModel;
+
 
 public slots:
     void sltCreateInputWidgets();

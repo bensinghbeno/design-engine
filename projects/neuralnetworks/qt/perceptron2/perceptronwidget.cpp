@@ -65,7 +65,7 @@ void PerceptronWidget::initializeUi(int rowcount)
     QString strlayerInputcount = "Inputs = ";
     QString strlayerOutputcount = "Outputs = ";
 
-    m_strOutputLabelStylesheet = ("QPushButton {"
+    m_strOutputItemStylesheet = ("QPushButton {"
                                  "background-color: lightgreen;"
                                  "border-style: solid;"
                                  "border-width:3px;"
@@ -85,7 +85,7 @@ void PerceptronWidget::initializeUi(int rowcount)
     m_labelOutputCount.setText(strlayerOutputcount);
     m_sbLayerMasterInputCount.setFocus();
 
-    m_btnMasterOutput.setStyleSheet(m_strOutputLabelStylesheet);
+    m_btnMasterOutput.setStyleSheet(m_strOutputItemStylesheet);
     m_btnMasterOutput.setText("100");
 
     m_pbCreateMatrix.setText("Create Network");
@@ -133,8 +133,8 @@ void PerceptronWidget::createMasterInputOutputWidgets()
 
 void PerceptronWidget::createLayerWidgets()
 {
-    // Cleanup Old layers
-    for(TLayerWidget* listLayerWidgets: m_listLayerWidgets)
+    // Cleanup Existing Layer Widgets
+    for(TLayerWidget* listLayerWidgets: m_listLayerOutputWidgets)
     {
         for(const QPushButton* outputwidget: (*listLayerWidgets))
         {
@@ -142,7 +142,7 @@ void PerceptronWidget::createLayerWidgets()
         }
         delete(listLayerWidgets);
     }
-    m_listLayerWidgets.clear();
+    m_listLayerOutputWidgets.clear();
 
 
 
@@ -153,14 +153,54 @@ void PerceptronWidget::createLayerWidgets()
         for(int inputrow = 0; inputrow < m_masterInputCount; inputrow++)
         {
             QPushButton* pPushButton = new QPushButton();
-            pPushButton->setStyleSheet(m_strOutputLabelStylesheet);
+            pPushButton->setStyleSheet(m_strOutputItemStylesheet);
             m_layoutgridLayer.addWidget(pPushButton,inputrow, layercolumn);
             pPushButton->setMaximumWidth(50);
             layerwidget->append(pPushButton);
         }
 
-        m_listLayerWidgets.push_back(layerwidget);
+        m_listLayerOutputWidgets.push_back(layerwidget);
     }
+
+    update();
+}
+
+void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
+{
+    qDebug() << "PerceptronWidget::paintEvent()";
+
+    QPainter painter(this);
+
+    for(const QWidget* from: list_inputs)
+    {
+
+        for(const QPushButton* to: *(m_listLayerOutputWidgets.front()))
+        {
+            QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
+            QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
+            painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
+
+            QPoint start2 = to->mapToGlobal(to->rect().topRight() +  QPoint(0, to->height()/2));
+            QPoint end2 = m_btnMasterOutput.mapToGlobal(m_btnMasterOutput.rect().topLeft() +  QPoint(0, to->height()/2));
+            painter.drawLine(mapFromGlobal(start2), mapFromGlobal(end2));
+        }
+
+    }
+
+//    QPainter painter(this);
+//    for(const QWidget* from: list_inputs)
+//    {
+//        for(const QWidget* to: list_outputs)
+//        {
+//            QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
+//            QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
+//            painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
+
+//            QPoint start2 = to->mapToGlobal(to->rect().topRight() +  QPoint(0, to->height()/2));
+//            QPoint end2 = m_btnMasterOutput.mapToGlobal(m_btnMasterOutput.rect().topLeft() +  QPoint(0, to->height()/2));
+//            painter.drawLine(mapFromGlobal(start2), mapFromGlobal(end2));
+//        }
+//    }
 }
 
 
@@ -196,7 +236,7 @@ void PerceptronWidget::sltCreateInputWidgets()
         m_vecbtnOutputs.push_back(pbtnOutput);
         m_layoutgridLayer.addWidget(pbtnOutput,it, 1);
         pbtnOutput->setText("77");
-        pbtnOutput->setStyleSheet(m_strOutputLabelStylesheet);
+        pbtnOutput->setStyleSheet(m_strOutputItemStylesheet);
         list_outputs.append(pbtnOutput);
     }
 
@@ -211,26 +251,7 @@ void PerceptronWidget::addWidgets(const QWidget * from, const QWidget * to)
     update();
 }
 
-void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
-{
-    //qDebug() << "PerceptronWidget::paintEvent()";
 
-
-    QPainter painter(this);
-    for(const QWidget* from: list_inputs)
-    {
-        for(const QWidget* to: list_outputs)
-        {
-            QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
-            QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
-            painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
-
-            QPoint start2 = to->mapToGlobal(to->rect().topRight() +  QPoint(0, to->height()/2));
-            QPoint end2 = m_btnMasterOutput.mapToGlobal(m_btnMasterOutput.rect().topLeft() +  QPoint(0, to->height()/2));
-            painter.drawLine(mapFromGlobal(start2), mapFromGlobal(end2));
-        }
-    }
-}
 
 
 inline void PerceptronWidget::cleanupDynamicWidgets()
