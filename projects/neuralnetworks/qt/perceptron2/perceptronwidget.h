@@ -28,6 +28,7 @@ public:
     //Data
     int mRowSize;
     int m_magicCount;
+    bool m_startPainting;
 
     //Widgets
     QVector<QSpinBox*> m_VecSpinBoxMasterInputs;
