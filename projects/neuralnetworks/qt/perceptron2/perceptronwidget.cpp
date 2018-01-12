@@ -174,7 +174,7 @@ void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
 
     QPainter painter(this);
 
-    if (!(list_inputs.isEmpty() && m_listLayerOutputWidgets.isEmpty()))
+    if (!(list_inputs.isEmpty()) && !(m_listLayerOutputWidgets.isEmpty()))
     {
 
         // Draw lines from Inputs to Layer
@@ -197,22 +197,33 @@ void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
             QPoint end = m_btnMasterOutput.mapToGlobal(m_btnMasterOutput.rect().topLeft() +  QPoint(0, m_btnMasterOutput.height()/2));
             painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
         }
+
+
+        // Draw lines within Layer
+        for(QList<TLayerWidget*>::iterator it = m_listLayerOutputWidgets.begin(); it != m_listLayerOutputWidgets.end(); it++)
+        {
+            auto layerFrom = *it;
+            auto layerTo = *(it+1);
+
+            if ( (it+1) != m_listLayerOutputWidgets.end())
+            {
+                qDebug() << "Draw within Layer";
+
+                for(const QPushButton* from: (*layerFrom))
+                {
+                    for(const QPushButton* to: (*layerTo))
+                    {
+                        QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
+                        QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
+                        painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
+                    }
+                }
+            }
+
+
+
+        }
     }
-
-    //    QPainter painter(this);
-    //    for(const QWidget* from: list_inputs)
-    //    {
-    //        for(const QWidget* to: list_outputs)
-    //        {
-    //            QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
-    //            QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
-    //            painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
-
-    //            QPoint start2 = to->mapToGlobal(to->rect().topRight() +  QPoint(0, to->height()/2));
-    //            QPoint end2 = m_btnMasterOutput.mapToGlobal(m_btnMasterOutput.rect().topLeft() +  QPoint(0, to->height()/2));
-    //            painter.drawLine(mapFromGlobal(start2), mapFromGlobal(end2));
-    //        }
-    //    }
 }
 
 
