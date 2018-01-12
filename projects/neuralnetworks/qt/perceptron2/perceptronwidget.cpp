@@ -91,6 +91,8 @@ void PerceptronWidget::initializeUi(int rowcount)
 
     m_pbCreateMatrix.setText("Create Network");
     m_layoutgridLayer.setSpacing(50);
+    this->setWindowTitle("Perceptron Graphic Widget");
+
 }
 
 void PerceptronWidget::sltCreatePerceptronMagicWidgets(int count)

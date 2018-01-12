@@ -17,10 +17,12 @@ SOURCES += main.cpp\
     perceptronwidget.cpp \
     perceptroncontroller.cpp \
     perceptronjsonmodel.cpp \
-    perceptronjsonterminal.cpp
+    perceptronjsonterminal.cpp \
+    perceptronweightwidget.cpp
 
 HEADERS  += \
     perceptronwidget.h \
     perceptroncontroller.h \
     perceptronjsonmodel.h \
-    perceptronjsonterminal.h
+    perceptronjsonterminal.h \
+    perceptronweightwidget.h
