@@ -6,6 +6,7 @@ PerceptronWidget::PerceptronWidget(PerceptronJsonModel& perceptronJsonModel, QWi
     , m_PerceptronJsonModel(perceptronJsonModel)
     , mRowSize(0)
     , m_magicCount(0)
+    , m_startPainting(false)
 {
     createMasterLayout();
     initializeUi(0);
@@ -108,6 +109,7 @@ void PerceptronWidget::sltCreatePerceptronWidgets()
 
     createMasterInputOutputWidgets();
     createLayerWidgets();
+    m_startPainting = true;
 }
 
 void PerceptronWidget::createMasterInputOutputWidgets()
@@ -167,40 +169,50 @@ void PerceptronWidget::createLayerWidgets()
 
 void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
 {
+
     qDebug() << "PerceptronWidget::paintEvent()";
 
     QPainter painter(this);
 
-    for(const QWidget* from: list_inputs)
+    if (!(list_inputs.isEmpty() && m_listLayerOutputWidgets.isEmpty()))
     {
 
-        for(const QPushButton* to: *(m_listLayerOutputWidgets.front()))
+        // Draw lines from Inputs to Layer
+        for(const QWidget* from: list_inputs)
         {
-            QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
-            QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
-            painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
 
-            QPoint start2 = to->mapToGlobal(to->rect().topRight() +  QPoint(0, to->height()/2));
-            QPoint end2 = m_btnMasterOutput.mapToGlobal(m_btnMasterOutput.rect().topLeft() +  QPoint(0, to->height()/2));
-            painter.drawLine(mapFromGlobal(start2), mapFromGlobal(end2));
+            for(const QPushButton* to: *(m_listLayerOutputWidgets.front()))
+            {
+                QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
+                QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
+                painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
+            }
+
         }
 
+        // Draw lines from last Layer to Output
+        for(const QPushButton* from: *(m_listLayerOutputWidgets.last()))
+        {
+            QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
+            QPoint end = m_btnMasterOutput.mapToGlobal(m_btnMasterOutput.rect().topLeft() +  QPoint(0, m_btnMasterOutput.height()/2));
+            painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
+        }
     }
 
-//    QPainter painter(this);
-//    for(const QWidget* from: list_inputs)
-//    {
-//        for(const QWidget* to: list_outputs)
-//        {
-//            QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
-//            QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
-//            painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
+    //    QPainter painter(this);
+    //    for(const QWidget* from: list_inputs)
+    //    {
+    //        for(const QWidget* to: list_outputs)
+    //        {
+    //            QPoint start =  from->mapToGlobal(from->rect().topRight() +  QPoint(0, from->height()/2));
+    //            QPoint end = to->mapToGlobal(to->rect().topLeft() +  QPoint(0, to->height()/2));
+    //            painter.drawLine(mapFromGlobal(start), mapFromGlobal(end));
 
-//            QPoint start2 = to->mapToGlobal(to->rect().topRight() +  QPoint(0, to->height()/2));
-//            QPoint end2 = m_btnMasterOutput.mapToGlobal(m_btnMasterOutput.rect().topLeft() +  QPoint(0, to->height()/2));
-//            painter.drawLine(mapFromGlobal(start2), mapFromGlobal(end2));
-//        }
-//    }
+    //            QPoint start2 = to->mapToGlobal(to->rect().topRight() +  QPoint(0, to->height()/2));
+    //            QPoint end2 = m_btnMasterOutput.mapToGlobal(m_btnMasterOutput.rect().topLeft() +  QPoint(0, to->height()/2));
+    //            painter.drawLine(mapFromGlobal(start2), mapFromGlobal(end2));
+    //        }
+    //    }
 }
 
 
