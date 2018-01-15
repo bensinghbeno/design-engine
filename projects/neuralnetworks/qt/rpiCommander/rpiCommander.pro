@@ -17,11 +17,16 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     ../perceptron2/perceptronjsonterminal.cpp \
     ../perceptron2/perceptronjsonmodel.cpp \
-    udpclient.cpp
+    udpclient.cpp \
+    logicmodel.cpp \
+    controller.cpp
 
 HEADERS  += mainwindow.h \
     ../perceptron2/perceptronjsonterminal.h \
     ../perceptron2/perceptronjsonmodel.h \
-    udpclient.h
+    udpclient.h \
+    logicmodel.h \
+    interfaceenums.h \
+    controller.h
 
 FORMS    += mainwindow.ui
