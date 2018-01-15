@@ -1,0 +1,13 @@
+#ifndef INTERFACEENUMS
+#define INTERFACEENUMS
+
+enum EN_BUBBLE_DIRECTION
+{
+    FORWARD = 0,
+    REVERSE = 2,
+    LEFT    = 3,
+    RIGHT   = 4
+};
+
+#endif // INTERFACEENUMS
+
