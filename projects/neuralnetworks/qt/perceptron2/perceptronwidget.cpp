@@ -120,16 +120,17 @@ void PerceptronWidget::createMasterInputOutputWidgets()
 
     for(int it = 1; it <= m_masterInputCount; it++)
     {
-        QString inputId = ("I" + QString::number(it));
-        QString masterInputElementId  = "L1_" + inputId;
-        auto value =  m_PerceptronJsonModel.getvalue(masterInputElementId).toInt();
+        QString inputElementname = ("I" + QString::number(it));
+        auto value =  m_PerceptronJsonModel.getvalue(inputElementname).toInt();
 
         QSpinBox* pSpinBox = new QSpinBox();
         m_VecSpinBoxMasterInputs.push_back(pSpinBox);
         m_MasterInputLayout.addWidget(pSpinBox);
         pSpinBox->setMaximumWidth(50);
         pSpinBox->setValue(value);
+        pSpinBox->setObjectName(inputElementname);
         list_inputs.append(pSpinBox);
+        connect(pSpinBox,SIGNAL(valueChanged(int)),this,SLOT(sltInputsUpdated(int)));
     }
 
     m_btnMasterOutput.show();
@@ -168,6 +169,16 @@ void PerceptronWidget::createLayerWidgets()
 
     update();
 }
+
+////////////////////// Widget Data Updates /////////////////////
+
+void PerceptronWidget::sltInputsUpdated(int inputvalue)
+{
+    qDebug() << "InputWidget - name = " << sender()->objectName() << " value = " << inputvalue;
+    QString inputElementname = sender()->objectName();
+    m_PerceptronJsonModel.insertvalue(inputElementname, QString::number(inputvalue));
+}
+
 
 void PerceptronWidget::paintEvent(QPaintEvent* /*event*/)
 {

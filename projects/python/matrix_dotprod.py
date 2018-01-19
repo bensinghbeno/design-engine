@@ -56,23 +56,23 @@ def createDummyInitialLayer():
 
 ## Main Routine ##
 print "\n----Matrix Dot Prod Python Script Launched--\n"
-processCmdLine()
-processRawJsonBuffer()
-evaluateMatrixComputation()
-quitProg()
+#processCmdLine()
+#processRawJsonBuffer()
+#evaluateMatrixComputation()
+#quitProg()
 
 
 #json_string = '{\n    \"w00\": \"77\",\n    \"w01\": \"19\"\n}\n'
 #print "json_string = ",json_string
 
 
-x = np.array([ 1, 1 ,1])
+x = np.array([ 5, 6 ,7])
 
-w = np.array([[ 5, 1 ,3], 
-              [ 1, 1 ,1], 
-              [ 1, 2 ,1]])
+w = np.array([[ 1, 4 ,7], 
+              [ 2, 5 ,8], 
+              [ 3, 6 ,9]])
 
-#print w.dot(x)
+print w.dot(x)
 
 #print(np.matrix(w))
 #sys.exit()
