@@ -27,56 +27,51 @@ void PerceptronJsonModel::sltMasterInputCountUpdate(int masterInputCount)
     qDebug() << "MASTERINPUTCOUNT = " << getvalue("MASTERINPUTCOUNT");
 }
 
-void PerceptronJsonModel::sltCreatePerceptronNetwork()
+void PerceptronJsonModel::sltCreatePerceptronNetworkModel()
 {
     //qDebug() << "PerceptronJsonModel::sltRequestPerceptronMatrix()";
 
     int currentLayerCount =  getvalue("LAYERCOUNT").toInt();
     int currentMasterInputCount =  getvalue("MASTERINPUTCOUNT").toInt();
 
-    if ((currentLayerCount < 1) || (currentMasterInputCount < 3))
+    updateJsonModel(currentLayerCount, currentMasterInputCount);
+    emit sgnJsonModelUpdated();
+}
+
+void PerceptronJsonModel::updateJsonModel(int currentMasterLayerCount, int currentMasterInputCount)
+{
+    QString layerId;
+    QString inputId;
+    QString inputElementId;
+    QString weightId;
+    QString weightElementId;
+
+    for (int l = 1 ; l <= currentMasterLayerCount; l++)
     {
-        qDebug() << "ERROR : Please provide LAYERCOUNT >= 1 & MASTERINPUTCOUNT >= 3";
-        return;
+        layerId = ("L" + QString::number(l) + "_");
+
+        for (int i = 1 ; i <= currentMasterInputCount; i++)
+        {
+            // Update Inputs
+            inputId = ("I" + QString::number(i));
+            inputElementId  = layerId + inputId;
+            insertvalue(inputElementId,"0");
+
+            //Update Weights
+            for (int w = 1 ; w <= currentMasterInputCount; w++)
+            {
+                weightId = ("W" + QString::number(w) + QString::number(i));
+                weightElementId = layerId + weightId;
+                insertvalue(weightElementId,"0");
+            }
+        }
     }
-    else
-    {
-        updateJsonModel(currentLayerCount, currentMasterInputCount);
 
-        emit sgnJsonModelUpdated();
-        //sendJsonBuffer();
-    }
+    insertvalue("L1_I1","16");
+    insertvalue("L1_I2","7");
+    insertvalue("L1_I3","77");
 
-//    if (currentLayerCount != layerCount)
-//    {
-
-//        for (int i = 1; i <= layerCount; i++ )
-//        {
-//            QString layerid = getvalue("L"+ QString::number(i)+"I1");
-//            if (layerid.isEmpty())
-//            {
-//                qDebug() << "PerceptronJsonModel:: layerid - " << layerid << " isEmpty() !!";
-//                break;
-//            }
-//            else
-//            {
-//                qDebug() << "PerceptronJsonModel:: layerid - " << layerid << " isNotEmpty()";
-//            }
-
-//        }
-
-
-
-//        sendJsonBuffer();
-
-//    }
-//    else
-//    {
-//        qDebug() << "LAYERCOUNT Indifferent!! " << currentLayerCount;
-//    }
-
-    //insertvalue("MASTERINPUTCOUNT", QString::number(masterInputCount));
-    //qDebug() << "MASTERINPUTCOUNT = " << getvalue("MASTERINPUTCOUNT");
+    qDebug() << " --- Json Model Updated --- \n" << getJsonStringbuffer() ;
 
 }
 
@@ -123,42 +118,7 @@ void PerceptronJsonModel::insertJsonStringbuffer(QString strJson)
     m_objlayer = m_docjson.object();
 }
 
-void PerceptronJsonModel::updateJsonModel(int currentMasterLayerCount, int currentMasterInputCount)
-{
-    QString layerId;
-    QString inputId;
-    QString inputElementId;
-    QString weightId;
-    QString weightElementId;
 
-    for (int l = 1 ; l <= currentMasterLayerCount; l++)
-    {
-        layerId = ("L" + QString::number(l) + "_");
-
-        for (int i = 1 ; i <= currentMasterInputCount; i++)
-        {
-            // Update Inputs
-            inputId = ("I" + QString::number(i));
-            inputElementId  = layerId + inputId;
-            insertvalue(inputElementId,"0");
-
-            //Update Weights
-            for (int w = 1 ; w <= currentMasterInputCount; w++)
-            {
-                weightId = ("W" + QString::number(w) + QString::number(i));
-                weightElementId = layerId + weightId;
-                insertvalue(weightElementId,"0");
-            }
-        }
-    }
-
-    insertvalue("L1_I1","16");
-    insertvalue("L1_I2","7");
-    insertvalue("L1_I3","77");
-
-    qDebug() << " --- Json Model Updated --- \n" << getJsonStringbuffer() ;
-
-}
 
 
 void PerceptronJsonModel::loadjsonfile(QString filepath)

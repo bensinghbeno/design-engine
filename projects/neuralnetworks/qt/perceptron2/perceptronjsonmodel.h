@@ -39,7 +39,7 @@ signals:
 public slots:
     void sltLayerCountUpdate(int layerCount);
     void sltMasterInputCountUpdate(int masterInputCount);
-    void sltCreatePerceptronNetwork();
+    void sltCreatePerceptronNetworkModel();
 
 };
 

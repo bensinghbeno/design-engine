@@ -87,6 +87,7 @@ public slots:
     void sltCreateInputWidgets();
     void sltCreatePerceptronMagicWidgets(int count);
     void sltCreatePerceptronWidgets();
+    void sltInputsUpdated(int inputvalue);
 
 protected:
     void paintEvent(QPaintEvent*);
