@@ -9,7 +9,6 @@
 #include <QtGui>
 #include <QPushButton>
 #include <QLine>
-#include "perceptronweightwidget.h"
 
 class PerceptronJsonModel;
 
@@ -21,7 +20,6 @@ public:
     explicit PerceptronWidget(PerceptronJsonModel& perceptronJsonModel, QWidget *parent = 0);
     ~PerceptronWidget();
 
-    PerceptronWeightWidget m_PerceptronDataWidget;
 
     //////////Layer////////////////
 

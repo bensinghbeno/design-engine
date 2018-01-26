@@ -4,6 +4,7 @@
 #include <QObject>
 
 class PerceptronWidget;
+class PerceptronWeightWidget;
 class PerceptronJsonModel;
 
 class PerceptronController : public QObject
@@ -11,10 +12,11 @@ class PerceptronController : public QObject
     Q_OBJECT
 
 public:
-    PerceptronController(PerceptronWidget& perceptronWidget, PerceptronJsonModel& perceptronJsonModel);
+    PerceptronController(PerceptronWidget& perceptronWidget, PerceptronWeightWidget& perceptronWeightWidget, PerceptronJsonModel& perceptronJsonModel);
     void createConnections();
 
     PerceptronWidget& m_perceptronWidget;
+    PerceptronWeightWidget& m_perceptronWeightWidget;
     PerceptronJsonModel& m_perceptronJsonModel;
 
 public slots:
