@@ -1,27 +1,50 @@
 #include "perceptronweightwidget.h"
+#include "perceptronjsonmodel.h"
 
-PerceptronWeightWidget::PerceptronWeightWidget(QWidget *parent) : QWidget(parent)
+PerceptronWeightWidget::PerceptronWeightWidget(PerceptronJsonModel& perceptronJsonModel,QWidget *parent)
+      : QWidget(parent)
+      , m_PerceptronJsonModel(perceptronJsonModel)
 {
-    for(int layercolumn = 0; layercolumn < 3; layercolumn++)
-    {
-        QGridLayout* playoutgridLayer = new QGridLayout();
+    this->setLayout(&m_modelMainHLayout);
+    this->setWindowTitle("Perceptron Weights Widget");
+}
 
-        for(int inputrow = 0; inputrow < 3; inputrow++)
+////////////////////// Main Weight Matrix Creation/////////////////////
+
+void PerceptronWeightWidget::sltCreatePerceptronWeightWidgets()
+{
+    // Cleanup Existing Weight Widgets
+    for(QSpinBox* pSpinBox: m_listWeightWidgets)
+    {
+        delete(pSpinBox);
+    }
+    m_listWeightWidgets.clear();
+
+
+    int masterInputCount   =   m_PerceptronJsonModel.getvalue("MASTERINPUTCOUNT").toInt();
+    int layerCount           =   m_PerceptronJsonModel.getvalue("LAYERCOUNT").toInt();
+
+    for(int layernum = 0; layernum < layerCount; layernum++)
+    {
+        for(int weightcolumn = 0; weightcolumn < masterInputCount; weightcolumn++)
         {
-            QSpinBox* pLayerDataSpinBox = new QSpinBox();
-            playoutgridLayer->addWidget(pLayerDataSpinBox,inputrow, layercolumn);
-            pLayerDataSpinBox->setMaximumWidth(50);
-            pLayerDataSpinBox->setObjectName("SB_" + QString::number(inputrow) +  QString::number(layercolumn));
-            //layerwidget->append(pPushButton);
+            QGridLayout* playoutgridLayer = new QGridLayout();
+
+            for(int weightrow = 0; weightrow < masterInputCount; weightrow++)
+            {
+
+                QSpinBox* pLayerDataSpinBox = new QSpinBox();
+                playoutgridLayer->addWidget(pLayerDataSpinBox,weightrow, weightcolumn);
+                pLayerDataSpinBox->setMaximumWidth(50);
+                pLayerDataSpinBox->setObjectName("L" + QString::number(layernum) + "_W" + QString::number(weightrow) +  QString::number(weightcolumn));
+                m_listWeightWidgets.push_back(pLayerDataSpinBox);
+            }
+
+            m_modelMainHLayout.addLayout(playoutgridLayer);
         }
 
-        m_modelMainHLayout.addLayout(playoutgridLayer);
-
-        //m_listLayerOutputWidgets.push_back(layerwidget);
     }
 
-    this->setLayout(&m_modelMainHLayout);
-    this->show();
-    this->setWindowTitle("Perceptron Weights Widget");
+    show();
 }
 

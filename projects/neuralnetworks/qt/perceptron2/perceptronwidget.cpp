@@ -287,9 +287,6 @@ void PerceptronWidget::addWidgets(const QWidget * from, const QWidget * to)
     update();
 }
 
-
-
-
 inline void PerceptronWidget::cleanupDynamicWidgets()
 {
     m_listMasterInputs.clear();
