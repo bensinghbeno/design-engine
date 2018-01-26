@@ -19,5 +19,8 @@ INSTALLS += target
 HEADERS += \
     udpserver.h \
     ../perceptron2/perceptronjsonterminal.h \
-    ../perceptron2/perceptronjsonmodel.h
+    ../perceptron2/perceptronjsonmodel.h \
+    pigpio.h
+
+QMAKE_LFLAGS += -lpigpio -lrt -lpthread
 
