@@ -37,14 +37,10 @@ void UdpClient::sltReadDatagram()
 
     m_UdpSocket.readDatagram(m_byteArrayBuffer.data(), m_byteArrayBuffer.size(),&sender, &senderPort);
     qDebug() << "UdpServer::sltReadDatagram() = " << m_byteArrayBuffer;
-
     m_pJsonmodel->insertJsonStringbuffer(m_byteArrayBuffer.toStdString().c_str());
     qDebug() << "receive CMD_MOVE = " << m_pJsonmodel->getvalue("CMD_MOVE");
 
     QString cmd = m_pJsonmodel->getvalue("CMD_MOVE");
-
-
-
     if(cmd == "STOP")
     {
         qDebug() << "Execute GPIO Command = STOP" ;
@@ -54,23 +50,40 @@ void UdpClient::sltReadDatagram()
         gpioWrite(4, 0); /* on */
         gpioWrite(17, 0); /* on */
     }
-    else if(cmd == "FWD")
+    else if(cmd == "FORWARD")
     {
         qDebug() << "Execute GPIO Command = FWD" ;
 
-        gpioWrite(2, 1); /* on */
-        gpioWrite(3, 0); /* on */
+        gpioWrite(2, 0); /* on */
+        gpioWrite(3, 1); /* on */
         gpioWrite(4, 1); /* on */
-        gpioWrite(17, 0); /* on */
+        gpioWrite(17,0); /* on */
     }
-    else if(cmd == "REV")
+    else if(cmd == "REVERSE")
     {
         qDebug() << "Execute GPIO Command = REV" ;
+
+        gpioWrite(2, 1); /* on */
+        gpioWrite(3, 0); /* on */
+        gpioWrite(4, 0); /* on */
+        gpioWrite(17,1); /* on */
+    }
+    else if(cmd == "LEFT")
+    {
+        qDebug() << "Execute GPIO Command = LEFT" ;
 
         gpioWrite(2, 0); /* on */
         gpioWrite(3, 1); /* on */
         gpioWrite(4, 0); /* on */
         gpioWrite(17,1); /* on */
     }
+    else if(cmd == "RIGHT")
+    {
+        qDebug() << "Execute GPIO Command = RIGHT" ;
 
+        gpioWrite(2, 1); /* on */
+        gpioWrite(3, 0); /* on */
+        gpioWrite(4, 1); /* on */
+        gpioWrite(17,0); /* on */
+    }
 }
