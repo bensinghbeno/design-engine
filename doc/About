@@ -1,0 +1,95 @@
+About - Company 
+===============
+Bensingh Beno <igenartist@gmail.com>
+:Author Initials: BB
+:toc:
+:icons:
+:numbered:
+:website: http://asciidoc.org/
+
+
+.My Motivation
+**********************************************************************
+ A spark of light that ignites a fire in you..
+
+ Let it glow, let it show your passion so true..
+ 
+ Start it may with tiny little actions..
+ 
+ Acheive it may, In stellar proportions!!
+**********************************************************************
+
+About Me
+--------
+Hola ! my name is Bensingh Beno. My motivation is too poetic :). But the facts are somehow portrayed true.
+I've fallen in love for Robotics, Electronics and Technology since I was in 8th grade.
+A lot of kids including me were inspired by electronic, wireless & robotic kits.
+I liked to use them, but loved to make them myself. DIY started in my life using thermocol sheets, aa batteries, led diodes and dc motors.
+I went on to pursue my dreams of becoming an Engineer in Embedded Systems in Karunya University.
+I loved spending time on the internet & querying for scientific and tecnological advancements.
+The growth of AI never ceased to amazed me. Specially one name that strikes my mind every time was "Boston Dynamics" & "Google X". Their projects seemed state of the art to me and i was driven to contribute in that direction.
+I presented a paper on "Voice Recognition" using LabView. This was printed on the VI Mantra technical book on 2003.
+I took part in various competitions between 2002 - 2004.
+I won the first prize for "Smart Home" project in the "Daksh" technical fest in Sastra University,Tanjore.. I designed the project using voice based home appliance control system using the same concepts I presented earlier using LabView.
+ My engineering project was an autonomous maze solving robot called "Micromouse". The goal of this robot is to navigate itself through a maze of walls and reach the center of the maze by itself. The robot uses IR/Ultrasonic Sensors and uses flood-fill algorithm to know about it's location with reference to the center of the maze and finds way to the center.
+ 
+I became the most fortunate one when I married my love Arti in 2015.
+We have a son EzraSkyler who was blessed to us in 2017.
+ 
+
+ Career at Robert Bosch India
+----------------------------
+ 
+I graduated in the year 2004 & went on to work with Robert Bosch India as an Embedded System Software Engineer.
+ My tech savvyness did not drop in Bosch. I hosted an Autonomous Mini Car Racing Competition named "Carigar" we coordinated with Renesas who provided their kits.
+ I was a mentor to one team.
+ 
+http://www.bosch-india-software.com/en/company/news_and_press_releases/2014_2/news_may29_2014.html[^].
+
+You can find me & the teams here,
+http://www.bosch-india-software.com/en/company/news_and_press_releases/gallery_carrigar_may29.html[^].
+
+I presented various patent applications at bosch & was very enthusiastic about it. Bosch awarded my "Virtual Drum Kit" as the best Creative Idea of the Department 2013.
+
+This also gave me an opportunity to work with the panel members of the patent processing team.
+
+I applied for various patent ideas, but most of them were out of the business umbrella of Bosch. E.g I designed a "Smart Watch with Bluetooth Controller" for presentation slides. I implemented the idea of illuminating the dial when the wrist faces the person. This was seen on the Apple-Watch  a year later :)
+
+Since most of my ideas could not contribute to a successful product, I quit bosch at late 2016. I now work part-time for ForeView Technologies, Chennai, India.
+
+Here I am able to put my creativity to work.
+
+Me Technically... 
+------------------
+
+I am not the smartest person you may have seen, although I am very persistent when it comes to solving real life problems. I love challenges & wherever I see that an improvement is possible, I get on to solve it.
+
+My core area of interest is Robotics & Automation. I love working on Home automation, Raspberry Pi, Linux/QT Applications and Electronic projects.
+
+I felt that AI could be the one Holy Grail to solve most of the problems that Humans face. So it dawned in me, a craving to contribute my career & efforts towards solving AI problems. And so I started "iGeneration". 
+
+About - iGeneration
+-------------------
+
+iGeneration is my first step as a startup. The bigger problem I am trying to solve is "Robotic Human Assistance". 
+
+As humans, I belive that we must have a complete choice to perform what tasks we would like to do. Hence all the quint-essential need-to-do routine tasks can be done by autonomous machines. If autonomous machines can help us in Farming & Sanitation, I beleive that humans can acheive full independence from tasks these tasks & they can work on things they actually love to do. Creation, Art & whaever can bring joy.
+
+The Robotic Human Assistance Problem
+------------------------------------
+
+The most compelling reason in choosing to solve the Human Assistance Problem is the Human "Divide". There are tasks that we as humans can do and tasks that we need to do. The myriad of need to do tasks include "Collecting garbage, Cleaning Streets, Cleaning Sewage". These tasks are currently done by sanitary workers.Society often looks down on sanitary workers. I beleive the major chunk of sanitary work can be automated by Robots and AI. So that brings us to the question of employment for the sanitary workers. I also strongly beleive that all of those workers an be accomodated within the factories that produce these robots. It's an honest attempt to bridge this divide.
+
+Hence iGeneration is dedicated to solve the Robotic Human Assistance Problem.
+Initial references can already be found in my home country, India. A company called "GenRobotics" which makes exoskeletons to perform manual-scavenging of sewage. This company has  now received a project from the Government to take steps.
+At iGeneration, I would like to bring it one knotch up. I would like to make autonomous robotic machines that can performs these tasks themselves.
+
+The first step I am working on is to solve a subset of the problem - "Personal Robotic Home Assistance"
+
+Introducing the Bubble Robot
+----------------------------
+
+The Bubble Bot is the first prototype solution from Igeneration for Personal Robotic Home Assistance.
+It can be imagined as a Siri With Ears and Hands, an Alexa with Feet.
+The bubble uses Deep learning powered by Nvidia GPU's to listen, learn & perform everyday tasks at home.
+

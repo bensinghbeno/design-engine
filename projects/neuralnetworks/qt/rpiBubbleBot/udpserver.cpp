@@ -2,7 +2,7 @@
 #include <QDebug>
 #include "pigpio.h"
 #include <stdio.h>
-
+#include <QThread>
 UdpClient::UdpClient()
 {
     m_pJsonmodel = new PerceptronJsonModel("");
@@ -26,7 +26,18 @@ UdpClient::UdpClient()
 
 }
 
+void stop()
+{
+    qDebug() << "Execute GPIO Command = STOP" ;
 
+    QThread::msleep(100);
+
+    gpioWrite(2, 0); /* on */
+    gpioWrite(3, 0); /* on */
+    gpioWrite(4, 0); /* on */
+    gpioWrite(17, 0); /* on */
+
+}
 
 void UdpClient::sltReadDatagram()
 {
@@ -43,12 +54,7 @@ void UdpClient::sltReadDatagram()
     QString cmd = m_pJsonmodel->getvalue("CMD_MOVE");
     if(cmd == "STOP")
     {
-        qDebug() << "Execute GPIO Command = STOP" ;
-
-        gpioWrite(2, 0); /* on */
-        gpioWrite(3, 0); /* on */
-        gpioWrite(4, 0); /* on */
-        gpioWrite(17, 0); /* on */
+        stop();
     }
     else if(cmd == "FORWARD")
     {
@@ -58,6 +64,7 @@ void UdpClient::sltReadDatagram()
         gpioWrite(3, 1); /* on */
         gpioWrite(4, 1); /* on */
         gpioWrite(17,0); /* on */
+        stop();
     }
     else if(cmd == "REVERSE")
     {
@@ -67,6 +74,7 @@ void UdpClient::sltReadDatagram()
         gpioWrite(3, 0); /* on */
         gpioWrite(4, 0); /* on */
         gpioWrite(17,1); /* on */
+        stop();
     }
     else if(cmd == "LEFT")
     {
@@ -76,6 +84,7 @@ void UdpClient::sltReadDatagram()
         gpioWrite(3, 1); /* on */
         gpioWrite(4, 0); /* on */
         gpioWrite(17,1); /* on */
+        stop();
     }
     else if(cmd == "RIGHT")
     {
@@ -85,5 +94,6 @@ void UdpClient::sltReadDatagram()
         gpioWrite(3, 0); /* on */
         gpioWrite(4, 1); /* on */
         gpioWrite(17,0); /* on */
+        stop();
     }
 }
