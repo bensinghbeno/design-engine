@@ -7,11 +7,13 @@ TEMPLATE = app
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    webserver.cpp
+    webserver.cpp \
+    udpserver.cpp
 
 HEADERS += \
     mainwindow.h \
-    webserver.h
+    webserver.h \
+    udpserver.h
 
 OTHER_FILES += echoclient.html
 

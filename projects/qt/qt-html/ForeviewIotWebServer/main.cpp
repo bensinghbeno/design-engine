@@ -33,8 +33,9 @@
 #include <QApplication>
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QCommandLineOption>
-#include "webserver.h"
 #include "mainwindow.h"
+#include "webserver.h"
+#include "udpserver.h"
 
 int main(int argc, char *argv[])
 {
@@ -55,13 +56,15 @@ int main(int argc, char *argv[])
     bool debug = parser.isSet(dbgOption);
     int port = parser.value(portOption).toInt();
 
+    // Create Logic Model Objects
     WebServer *server = new WebServer(port, debug);
-    QObject::connect(server, &WebServer::closed, &a, &QCoreApplication::quit);
-
     MainWindow objMainWindow;
     objMainWindow.show();
+    UdpServer objUdpServer;
 
-    // Controller Connections
+
+    // Create Controller Connections
+    QObject::connect(server, &WebServer::closed, &a, &QCoreApplication::quit);
     QObject::connect(&objMainWindow,SIGNAL(sigSendToClient(QString)),server,SLOT(sendMessage(QString)));
     QObject::connect(server,SIGNAL(sigMessageRecvFromClient(QString)),&objMainWindow,SLOT(sltUpdateMessageReceived(QString)));
 
