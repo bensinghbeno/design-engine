@@ -30,15 +30,14 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "echoserver.h"
+#include "webserver.h"
 #include "QtWebSockets/qwebsocketserver.h"
 #include "QtWebSockets/qwebsocket.h"
 #include <QtCore/QDebug>
 
 QT_USE_NAMESPACE
 
-//! [constructor]
-EchoServer::EchoServer(quint16 port, bool debug, QObject *parent) :
+WebServer::WebServer(quint16 port, bool debug, QObject *parent) :
     QObject(parent),
     m_pWebSocketServer(new QWebSocketServer(QStringLiteral("Echo Server"),
                                             QWebSocketServer::NonSecureMode, this)),
@@ -49,48 +48,44 @@ EchoServer::EchoServer(quint16 port, bool debug, QObject *parent) :
         if (m_debug)
             qDebug() << "Echoserver listening on port" << port;
         connect(m_pWebSocketServer, &QWebSocketServer::newConnection,
-                this, &EchoServer::onNewConnection);
-        connect(m_pWebSocketServer, &QWebSocketServer::closed, this, &EchoServer::closed);
+                this, &WebServer::onNewConnection);
+        connect(m_pWebSocketServer, &QWebSocketServer::closed, this, &WebServer::closed);
     }
 }
-//! [constructor]
 
-EchoServer::~EchoServer()
+WebServer::~WebServer()
 {
     m_pWebSocketServer->close();
     qDeleteAll(m_clients.begin(), m_clients.end());
 }
 
-//! [onNewConnection]
-void EchoServer::onNewConnection()
+void WebServer::onNewConnection()
 {
-    qDebug() << "EchoServer::onNewConnection()";
+    qDebug() << "WebServer::onNewConnection()";
 
     QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
 
-    connect(pSocket, &QWebSocket::textMessageReceived, this, &EchoServer::processTextMessage);
-    connect(pSocket, &QWebSocket::binaryMessageReceived, this, &EchoServer::processBinaryMessage);
-    connect(pSocket, &QWebSocket::disconnected, this, &EchoServer::socketDisconnected);
+    connect(pSocket, &QWebSocket::textMessageReceived, this, &WebServer::processTextMessage);
+    connect(pSocket, &QWebSocket::binaryMessageReceived, this, &WebServer::processBinaryMessage);
+    connect(pSocket, &QWebSocket::disconnected, this, &WebServer::socketDisconnected);
 
     m_clients << pSocket;
 }
-//! [onNewConnection]
 
 
-void EchoServer::sendMessage(QString message)
+void WebServer::sendMessage(QString message)
 {
 
-    qDebug() << "EchoServer::sendMessage() = " << message;
+    qDebug() << "WebServer::sendMessage() = " << message;
     if (m_clients.last()) {
         m_clients.last()->sendTextMessage(message);
     }
 
 }
 
-//! [processTextMessage]
-void EchoServer::processTextMessage(QString message)
+void WebServer::processTextMessage(QString message)
 {
-    qDebug() << "EchoServer::processTextMessage() = " << message;
+    qDebug() << "WebServer::processTextMessage() = " << message;
     emit sigMessageRecvFromClient(message);
 
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
@@ -100,10 +95,8 @@ void EchoServer::processTextMessage(QString message)
         pClient->sendTextMessage(message);
     }
 }
-//! [processTextMessage]
 
-//! [processBinaryMessage]
-void EchoServer::processBinaryMessage(QByteArray message)
+void WebServer::processBinaryMessage(QByteArray message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (m_debug)
@@ -112,10 +105,8 @@ void EchoServer::processBinaryMessage(QByteArray message)
         pClient->sendBinaryMessage(message);
     }
 }
-//! [processBinaryMessage]
 
-//! [socketDisconnected]
-void EchoServer::socketDisconnected()
+void WebServer::socketDisconnected()
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (m_debug)
@@ -125,4 +116,3 @@ void EchoServer::socketDisconnected()
         pClient->deleteLater();
     }
 }
-//! [socketDisconnected]

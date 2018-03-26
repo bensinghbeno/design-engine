@@ -30,38 +30,40 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef ECHOSERVER_H
-#define ECHOSERVER_H
+#include <QApplication>
+#include <QtCore/QCommandLineParser>
+#include <QtCore/QCommandLineOption>
+#include "webserver.h"
+#include "mainwindow.h"
 
-#include <QtCore/QObject>
-#include <QtCore/QList>
-#include <QtCore/QByteArray>
-
-QT_FORWARD_DECLARE_CLASS(QWebSocketServer)
-QT_FORWARD_DECLARE_CLASS(QWebSocket)
-
-class EchoServer : public QObject
+int main(int argc, char *argv[])
 {
-    Q_OBJECT
-public:
-    explicit EchoServer(quint16 port, bool debug = false, QObject *parent = Q_NULLPTR);
-    ~EchoServer();
+    QApplication a(argc, argv);
 
-Q_SIGNALS:
-    void closed();
-    void sigMessageRecvFromClient(QString message);
+    QCommandLineParser parser;
+    parser.setApplicationDescription("QtWebSockets example: echoserver");
+    parser.addHelpOption();
 
-public Q_SLOTS:
-    void onNewConnection();
-    void processTextMessage(QString message);
-    void sendMessage(QString message);
-    void processBinaryMessage(QByteArray message);
-    void socketDisconnected();
+    QCommandLineOption dbgOption(QStringList() << "d" << "debug",
+            QCoreApplication::translate("main", "Debug output [default: off]."));
+    parser.addOption(dbgOption);
+    QCommandLineOption portOption(QStringList() << "p" << "port",
+            QCoreApplication::translate("main", "Port for echoserver [default: 1234]."),
+            QCoreApplication::translate("main", "port"), QLatin1Literal("1234"));
+    parser.addOption(portOption);
+    parser.process(a);
+    bool debug = parser.isSet(dbgOption);
+    int port = parser.value(portOption).toInt();
 
-private:
-    QWebSocketServer *m_pWebSocketServer;
-    QList<QWebSocket *> m_clients;
-    bool m_debug;
-};
+    WebServer *server = new WebServer(port, debug);
+    QObject::connect(server, &WebServer::closed, &a, &QCoreApplication::quit);
 
-#endif //ECHOSERVER_H
+    MainWindow objMainWindow;
+    objMainWindow.show();
+
+    // Controller Connections
+    QObject::connect(&objMainWindow,SIGNAL(sigSendToClient(QString)),server,SLOT(sendMessage(QString)));
+    QObject::connect(server,SIGNAL(sigMessageRecvFromClient(QString)),&objMainWindow,SLOT(sltUpdateMessageReceived(QString)));
+
+    return a.exec();
+}
