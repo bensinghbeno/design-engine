@@ -17,6 +17,7 @@
             <button onClick="sendMessage();">Send</button>
         </p>
 
+	<p id="demo"></p>
         <script type="text/javascript">
             var debugTextArea = document.getElementById("debugTextArea");
             function debug(message) {
@@ -29,7 +30,9 @@
                 if ( websocket != null )
                 {
                     document.getElementById("inputText").value = "";
-                    websocket.send( msg );
+		    debug("sending JSON :: ");
+		    var myObj = {"SENSOR_1":"100", "SENSOR_2":77, "SENSOR_3":"16","SENSOR_COUNT":"3"};
+                    websocket.send(JSON.stringify(myObj) );
                     console.log( "string sent :", '"'+msg+'"' );
                 }
             }
@@ -38,6 +41,7 @@
             var websocket = null;
 
             function initWebSocket() {
+
                 try {
                     if (typeof MozWebSocket == 'function')
                         WebSocket = MozWebSocket;
@@ -52,7 +56,16 @@
                     };
                     websocket.onmessage = function (evt) {
                         console.log( "Message received :", evt.data );
+                        debug("Message received :");
+
+			debug("JSON PARSER :: SENSOR_COUNT = ");
+			var myObj = JSON.parse(evt.data);
+			var val = myObj["SENSOR_COUNT"];
+			debug(val);
                         debug( evt.data );
+			debug("PARSING DONE :: ");
+
+
                     };
                     websocket.onerror = function (evt) {
                         debug('ERROR: ' + evt.data);

@@ -44,6 +44,11 @@ WebServer::WebServer(quint16 port, bool debug, QObject *parent) :
     m_clients(),
     m_debug(debug)
 {
+    m_pJsonmodel = new PerceptronJsonModel("");
+    m_pJsonmodel->insertvalue("SENSOR_COUNT", "2");
+    m_pJsonmodel->insertvalue("SENSOR_1", "7");
+    m_pJsonmodel->insertvalue("SENSOR_2", "16");
+
     if (m_pWebSocketServer->listen(QHostAddress::Any, port)) {
         if (m_debug)
             qDebug() << "Echoserver listening on port" << port;
@@ -78,7 +83,7 @@ void WebServer::sendMessage(QString message)
 
     qDebug() << "WebServer::sendMessage() = " << message;
     if (m_clients.last()) {
-        m_clients.last()->sendTextMessage(message);
+        m_clients.last()->sendTextMessage(m_pJsonmodel->getJsonStringbuffer());
     }
 
 }

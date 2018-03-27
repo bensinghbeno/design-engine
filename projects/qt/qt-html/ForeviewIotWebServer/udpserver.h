@@ -12,6 +12,7 @@ public:
     QUdpSocket m_UdpSocket;
     QByteArray m_byteArrayBuffer;
 
+
 public slots:
     void sltReadDatagram();
 signals:
