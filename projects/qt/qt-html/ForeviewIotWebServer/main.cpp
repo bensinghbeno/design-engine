@@ -57,16 +57,18 @@ int main(int argc, char *argv[])
     int port = parser.value(portOption).toInt();
 
     // Create Logic Model Objects
-    WebServer *server = new WebServer(port, debug);
+    WebServer *pWebServer = new WebServer(port, debug);
     MainWindow objMainWindow;
     objMainWindow.show();
     UdpServer objUdpServer;
 
 
     // Create Controller Connections
-    QObject::connect(server, &WebServer::closed, &a, &QCoreApplication::quit);
-    QObject::connect(&objMainWindow,SIGNAL(sigSendToClient(QString)),server,SLOT(sendMessage(QString)));
-    QObject::connect(server,SIGNAL(sigMessageRecvFromClient(QString)),&objMainWindow,SLOT(sltUpdateMessageReceived(QString)));
+    QObject::connect(pWebServer, &WebServer::closed, &a, &QCoreApplication::quit);
+    QObject::connect(&objMainWindow,SIGNAL(sigSendToClient(QString)),pWebServer,SLOT(sendMessage(QString)));
+    QObject::connect(pWebServer,SIGNAL(sigMessageRecvFromClient(QString)),&objMainWindow,SLOT(sltUpdateMessageReceived(QString)));
+    QObject::connect(&objUdpServer,SIGNAL(sigDatagramReceived(QString)),&objMainWindow,SLOT(sltUpdateUdpMessageReceived(QString)));
+    QObject::connect(&objMainWindow,SIGNAL(sigSendToUdpClient(QString)),&objUdpServer,SLOT(sltWriteDatagram(QString)));
 
     return a.exec();
 }
