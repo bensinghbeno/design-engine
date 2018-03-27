@@ -36,6 +36,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QList>
 #include <QtCore/QByteArray>
+#include "/home/ben/engine/design-engine/projects/neuralnetworks/qt/perceptron2/perceptronjsonmodel.h"
 
 QT_FORWARD_DECLARE_CLASS(QWebSocketServer)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
@@ -46,6 +47,7 @@ class WebServer : public QObject
 public:
     explicit WebServer(quint16 port, bool debug = false, QObject *parent = Q_NULLPTR);
     ~WebServer();
+    PerceptronJsonModel* m_pJsonmodel;
 
 Q_SIGNALS:
     void closed();

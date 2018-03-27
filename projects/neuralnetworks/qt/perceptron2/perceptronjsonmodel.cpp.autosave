@@ -110,6 +110,8 @@ QString& PerceptronJsonModel::getJsonStringbuffer()
     m_docjson.setObject(m_objlayer);
     m_strdocjson =  m_docjson.toJson(QJsonDocument::Compact);
     return m_strdocjson;
+    
+    return (m_objlayer.begin())
 }
 
 void PerceptronJsonModel::insertJsonStringbuffer(QString strJson)
