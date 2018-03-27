@@ -15,9 +15,16 @@ public:
 
 public slots:
     void sltReadDatagram();
+    void sltWriteDatagram(QString datagram);
+
 signals:
+    void sigDatagramReceived(QString datagram);
 
 public slots:
+
+private:
+    QHostAddress sender;
+    quint16 senderPort;
 };
 
 #endif // UDPSERVER_H

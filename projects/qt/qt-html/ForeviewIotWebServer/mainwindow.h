@@ -17,12 +17,15 @@ public:
 
 Q_SIGNALS:
     void sigSendToClient(QString message);
+    void sigSendToUdpClient(QString message);
 
 
 public Q_SLOTS:
 
     void sltSendTextClicked();
+    void sltSendUdpTextClicked();
     void sltUpdateMessageReceived(QString message);
+    void sltUpdateUdpMessageReceived(QString message);
 
 
 };

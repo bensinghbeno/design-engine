@@ -10,9 +10,17 @@ void UdpServer::sltReadDatagram()
 {
     m_byteArrayBuffer.resize(m_UdpSocket.pendingDatagramSize());
 
-    QHostAddress sender;
-    quint16 senderPort;
-
     m_UdpSocket.readDatagram(m_byteArrayBuffer.data(), m_byteArrayBuffer.size(),&sender, &senderPort);
     qDebug() << "UdpServer::sltReadDatagram() = " << m_byteArrayBuffer;
+
+    QString datagram = m_byteArrayBuffer.toStdString().c_str();
+
+    emit sigDatagramReceived(datagram);
+}
+
+
+void UdpServer::sltWriteDatagram(QString datagram)
+{
+    QByteArray sendDatagram = datagram.toStdString().c_str();
+    m_UdpSocket.writeDatagram(sendDatagram,sender, senderPort);
 }
