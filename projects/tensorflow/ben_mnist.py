@@ -6,11 +6,21 @@
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
+import sys
 
+# Process Commandline
+image_index = 0
+if (len(sys.argv) == 1):
+    print("Please provide image_index number")
+    exit()
+	
+else:	
+    image_index = int(sys.argv[1])
+    print("image_index = %s"%image_index)
+
+
+# Import Input data Images
 from tensorflow.examples.tutorials.mnist import input_data
-
-
-
 data = input_data.read_data_sets("data/MNIST/", one_hot=True)
 data.test.cls = np.array([label.argmax() for label in data.test.labels])
 
@@ -294,7 +304,7 @@ def plot_example_true(dictonary,test_images,test_classes):
                 cls_true=cls_true,
                 cls_pred=cls_pred)
 
-image_index = 101;
+
 test_images = data.test.images[(image_index-1):image_index]
 test_labels = data.test.labels[(image_index-1):image_index]
 test_classes = data.test.cls[(image_index-1):image_index]
