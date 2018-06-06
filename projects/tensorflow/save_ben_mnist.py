@@ -59,8 +59,6 @@ y_pred = tf.nn.softmax(logits)
 
 y_pred_cls = tf.argmax(y_pred, axis=1)
 
-
-
 cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits,
                                                         labels=y_true)
 # Cost-function to be optimized
@@ -321,8 +319,10 @@ plot_example_true(feed_dict_test2,test_images,test_classes)
 #plt.imshow(data.test.images[0].reshape(28,28), cmap='binary')
 #plt.show()
 
-
+#save
+saver = tf.train.Saver()
+save_path = saver.save(session, "/home/ben/engine/design-engine/projects/tensorflow/saved_models/ben_model_1.ckpt")
 
 # Finish
-session.close()
+#session.close()
 exit()
