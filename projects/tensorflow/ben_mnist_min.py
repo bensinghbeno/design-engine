@@ -7,21 +7,12 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
 import sys
-
-
+from ben_mnist_functions import ProcessCommandline
 
 
 # Process Commandline
 image_index = 0
-if (len(sys.argv) == 1):
-    print("Please provide image_index number")
-    exit()	
-else:	
-    image_index = int(sys.argv[1])
-    print("image_index = %s"%image_index)
-
-
-
+ProcessCommandline()
 
 
 # Import Input data Images &init variables
