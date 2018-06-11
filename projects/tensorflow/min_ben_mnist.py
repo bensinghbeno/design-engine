@@ -11,9 +11,8 @@ from min_ben_mnist_functions import ProcessCommandline
 from min_ben_mnist_functions import plot_images
 from min_ben_mnist_functions import optimize
 from min_ben_mnist_functions import recognizeandplotimage
+from min_ben_mnist_functions import plot_mnist_test_image_at_index
 
-# Process Commandline
-image_index = ProcessCommandline()
 
 # Import Input data Images
 from tensorflow.examples.tutorials.mnist import input_data
@@ -26,6 +25,11 @@ img_size_flat = img_size * img_size
 img_shape = (img_size, img_size)
 num_classes = 10
 batch_size = 100
+
+
+# Process Commandline
+image_index = ProcessCommandline()
+
 
 # Placeholder variables
 
@@ -78,3 +82,9 @@ recognizeandplotimage(feed_dict_test2,test_images,test_classes,session,correct_p
 # Finish
 session.close()
 exit()
+
+
+
+
+
+#plot_mnist_test_image_at_index(data, image_index)
