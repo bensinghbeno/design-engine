@@ -114,4 +114,24 @@ def recognizeandplotimage(dictonary,test_images,test_classes, session, correct_p
     plot_images(pred_result,images=images, cls_true=cls_true, img_shape=img_shape, cls_pred=cls_pred)
 
 
+# Plot a grayscale  Image from MNIST Dataset
+def plot_mnist_test_image_at_index(dataset, index):
 
+    label = dataset.test.labels[(index-1):index]
+    label = label.argmax()
+
+    # The rest of columns are pixels
+    pixels = dataset.test.images[(index-1):index]
+
+    # Make those columns into a array of 8-bits pixels
+    # This array will be of 1D with length 784
+    # The pixel intensity values are integers from 0 to 255
+    #pixels = np.array(pixels, dtype='uint8')
+
+    # Reshape the array into 28 x 28 array (2-dimensional array)
+    pixels = pixels.reshape((28, 28))
+
+    # Plot
+    plt.title('Label is {label}'.format(label=label))
+    plt.imshow(pixels, cmap='binary')
+    plt.show()
