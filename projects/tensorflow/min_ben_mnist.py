@@ -31,6 +31,10 @@ batch_size = 100
 image_index = ProcessCommandline()
 
 
+# Test Dataset by plotting image with label at any index
+plot_mnist_test_image_at_index(data, image_index)
+exit()
+
 # Placeholder variables
 
 x = tf.placeholder(tf.float32, [None, img_size_flat])
@@ -88,3 +92,4 @@ exit()
 
 
 #plot_mnist_test_image_at_index(data, image_index)
+#exit()

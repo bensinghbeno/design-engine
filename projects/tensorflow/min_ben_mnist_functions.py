@@ -117,11 +117,11 @@ def recognizeandplotimage(dictonary,test_images,test_classes, session, correct_p
 # Plot a grayscale  Image from MNIST Dataset
 def plot_mnist_test_image_at_index(dataset, index):
 
-    label = dataset.test.labels[(index-1):index]
+    label = dataset.test.labels[index]
     label = label.argmax()
 
     # The rest of columns are pixels
-    pixels = dataset.test.images[(index-1):index]
+    pixels = dataset.test.images[index]
 
     # Make those columns into a array of 8-bits pixels
     # This array will be of 1D with length 784
