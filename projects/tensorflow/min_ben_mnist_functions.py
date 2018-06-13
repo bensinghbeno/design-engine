@@ -135,3 +135,15 @@ def plot_mnist_test_image_at_index(dataset, index):
     plt.title('Label is {label}'.format(label=label))
     plt.imshow(pixels, cmap='binary')
     plt.show()
+
+
+# Plot a greyscale image of size (pix_width_height x pix_width_height)
+def plot_grayscale_image(image, pix_width_height):
+
+    # This array will be of 1D with length 784
+    # The pixel intensity values are integers from 0 to 255
+    # Reshape the array into 28 x 28 array (2-dimensional array)
+    pixels = image.reshape((pix_width_height, pix_width_height))
+
+    plt.imshow(pixels, cmap='binary')
+    plt.show()
