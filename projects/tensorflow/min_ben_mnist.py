@@ -12,6 +12,12 @@ from min_ben_mnist_functions import plot_images
 from min_ben_mnist_functions import optimize
 from min_ben_mnist_functions import recognizeandplotimage
 from min_ben_mnist_functions import plot_mnist_test_image_at_index
+from min_ben_mnist_functions import plot_grayscale_image
+
+# Process Commandline
+image_index = ProcessCommandline()
+print(" index = %s"%image_index)
+
 
 
 # Import Input data Images
@@ -19,7 +25,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 data = input_data.read_data_sets("data/MNIST/", one_hot=True)
 data.test.cls = np.array([label.argmax() for label in data.test.labels])
 
-
+# Variables
 img_size = 28
 img_size_flat = img_size * img_size
 img_shape = (img_size, img_size)
@@ -27,13 +33,15 @@ num_classes = 10
 batch_size = 100
 
 
-# Process Commandline
-image_index = ProcessCommandline()
+# Test Dataset
+#plot_mnist_test_image_at_index(data, image_index)
 
+# Test Batch
+#x_batch, y_true_batch = data.train.next_batch(3)
+#print("label = %s"%y_true_batch[0].argmax())
+#plot_grayscale_image(x_batch[0], 28)
+#exit()
 
-# Test Dataset by plotting image with label at any index
-plot_mnist_test_image_at_index(data, image_index)
-exit()
 
 # Placeholder variables
 
@@ -41,7 +49,6 @@ x = tf.placeholder(tf.float32, [None, img_size_flat])
 y_true = tf.placeholder(tf.float32, [None, num_classes])
 y_true_cls = tf.placeholder(tf.int64, [None])
 
-feed_dict_test = {x: data.test.images, y_true: data.test.labels, y_true_cls: data.test.cls}
 
 # Variables to be optimized
 
