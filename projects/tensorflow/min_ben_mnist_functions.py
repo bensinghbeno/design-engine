@@ -147,3 +147,16 @@ def plot_grayscale_image(image, pix_width_height):
 
     plt.imshow(pixels, cmap='binary')
     plt.show()
+
+# Save a greyscale png image of size (pix_width_height x pix_width_height)
+def save_grayscale_image_as_png(image, pix_width_height):
+
+    # This array will be of 1D with length 784
+    # The pixel intensity values are integers from 0 to 255
+    # Reshape the array into 28 x 28 array (2-dimensional array)
+    pixels = image.reshape((pix_width_height, pix_width_height))
+
+    plt.imshow(pixels, cmap='binary')
+    plt.axis('off')
+    plt.savefig('my_greyscale_image.png')
+    plt.close()

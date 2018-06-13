@@ -7,12 +7,14 @@ import tensorflow as tf
 import numpy as np
 import sys
 
+from PIL import Image
 from min_ben_mnist_functions import ProcessCommandline
 from min_ben_mnist_functions import plot_images
 from min_ben_mnist_functions import optimize
 from min_ben_mnist_functions import recognizeandplotimage
 from min_ben_mnist_functions import plot_mnist_test_image_at_index
 from min_ben_mnist_functions import plot_grayscale_image
+from min_ben_mnist_functions import save_grayscale_image_as_png
 
 # Process Commandline
 image_index = ProcessCommandline()
@@ -39,8 +41,9 @@ batch_size = 100
 # Test Batch
 #x_batch, y_true_batch = data.train.next_batch(3)
 #print("label = %s"%y_true_batch[0].argmax())
-#plot_grayscale_image(x_batch[0], 28)
-#exit()
+#img = x_batch[0]
+#save_grayscale_image_as_png(img, 28)
+#plot_grayscale_image(img, 28)
 
 
 # Placeholder variables
