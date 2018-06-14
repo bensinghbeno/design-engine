@@ -6,6 +6,8 @@
 import tensorflow as tf
 import numpy as np
 import sys
+import os
+import shutil
 
 from PIL import Image
 from min_ben_mnist_functions import ProcessCommandline
@@ -20,8 +22,6 @@ from min_ben_mnist_functions import save_grayscale_image_as_png
 image_index = ProcessCommandline()
 print(" index = %s"%image_index)
 
-
-
 # Import Input data Images
 from tensorflow.examples.tutorials.mnist import input_data
 data = input_data.read_data_sets("data/MNIST/", one_hot=True)
@@ -35,15 +35,47 @@ num_classes = 10
 batch_size = 100
 
 
-# Test Dataset
+## Test Dataset
 #plot_mnist_test_image_at_index(data, image_index)
 
-# Test Batch
+## Test Batch
 #x_batch, y_true_batch = data.train.next_batch(3)
 #print("label = %s"%y_true_batch[0].argmax())
 #img = x_batch[0]
 #save_grayscale_image_as_png(img, 28)
 #plot_grayscale_image(img, 28)
+#exit()
+
+
+
+
+## Extract MNIST Numeric Training Images from Dataset
+
+#dataset_path = 'dataset_images/train/'
+
+#if os.path.exists(dataset_path):
+#    shutil.rmtree(dataset_path)
+#    os.mkdir(dataset_path)
+#else:
+#    os.mkdir(dataset_path)
+
+#for i in range(0, 10):
+#    os.mkdir(dataset_path + str(i))
+
+
+#x_batch, y_true_batch = data.train.next_batch(100)
+
+#for index, im in enumerate(x_batch):
+#    print("index = %s"%index)
+#    lbl = y_true_batch[index].argmax()
+#    print("label = %s"%lbl)
+#    save_path = (dataset_path + str(lbl) + '/' + str(lbl) +'_' + str(index))
+#    save_grayscale_image_as_png(im, 28, save_path)
+
+#exit()
+
+
+
 
 
 # Placeholder variables

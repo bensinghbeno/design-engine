@@ -1,2 +1,0 @@
-model_checkpoint_path: "/home/ben/engine/design-engine/projects/tensorflow/saved_models/ben_model_1.ckpt"
-all_model_checkpoint_paths: "/home/ben/engine/design-engine/projects/tensorflow/saved_models/ben_model_1.ckpt"
