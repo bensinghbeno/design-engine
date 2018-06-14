@@ -5,6 +5,7 @@
 
 import sys
 import matplotlib.pyplot as plt
+import os
 
 def ProcessCommandline():
     if (len(sys.argv) == 1):
@@ -160,3 +161,28 @@ def save_grayscale_image_as_png(image, pix_width_height, path):
     plt.axis('off')
     plt.savefig(path+'.png')
     plt.close()
+
+
+# Extract & Save Dataset Images
+
+def extract_save_numeric_dataset_images(dataset, image_count, dataset_path, size):
+
+
+    if os.path.exists(dataset_path):
+        shutil.rmtree(dataset_path)
+        os.mkdir(dataset_path)
+    else:
+        os.mkdir(dataset_path)
+
+    for i in range(0, 10):
+        os.mkdir(dataset_path + str(i))
+
+
+    x_batch, y_true_batch = dataset.train.next_batch(image_count)
+
+    for index, im in enumerate(x_batch):
+        print("index = %s"%index)
+        lbl = y_true_batch[index].argmax()
+        print("label = %s"%lbl)
+        save_path = (dataset_path + str(lbl) + '/' + str(lbl) +'_' + str(index))
+        save_grayscale_image_as_png(im, size, save_path)
