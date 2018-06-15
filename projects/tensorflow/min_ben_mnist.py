@@ -26,14 +26,16 @@ from min_ben_mnist_functions import plot_mnist_test_image_at_index
 from min_ben_mnist_functions import plot_grayscale_image
 from min_ben_mnist_functions import save_grayscale_image_as_png
 from min_ben_mnist_functions import extract_save_numeric_dataset_images
+from min_ben_mnist_functions import get_label_one_hot_array
+
 
 # Process Commandline
 image_index = ProcessCommandline()
 
 # Import Input data Images
 from tensorflow.examples.tutorials.mnist import input_data
-data = input_data.read_data_sets("data/MNIST/", one_hot=True)
-data.test.cls = np.array([label.argmax() for label in data.test.labels])
+#data = input_data.read_data_sets("data/MNIST/", one_hot=True)
+#data.test.cls = np.array([label.argmax() for label in data.test.labels])
 
 # Variables
 img_size = 28
@@ -42,119 +44,57 @@ img_shape = (img_size, img_size)
 num_classes = 10
 batch_size = 100
 
+
+
 # ========================================================== TEST AREA ==================================================================
 
-
-x_batch, y_true_batch = data.train.next_batch(3)
-imarray = np.array(x_batch[0])
-imarray = imarray.reshape(28, 28)
-
-plt.gray()
-plt.imshow(imarray)
-plt.show()
-
-im = toimage(imarray)
-im.save("foobar.png")
+print("One hot label 2 = \n%s"%get_label_one_hot_array(2,10))
 exit()
 
+def load_plot_get_greyscale_image(fname):
+
+#    x_batch, y_true_batch = data.train.next_batch(3)
+#    imarray = np.array(x_batch[0])
+#    imarray = imarray.reshape(28, 28)
+#    plt.gray()
+#    plt.imshow(imarray)
+#    plt.show()
+#    im = toimage(imarray)
+#    im.save(fname)
 
 
-plt.axis('off')
-plt.savefig('gray_plot.png')
-plt.close()
-
-
-im = Image.fromarray(imarray)
-im.show()
-
-
-
-def load_plot_greyscale_image(image_path):
-
-
-
-#    img = cv2.imread(image_path)
-#    img = cv2.cvtColor( img, cv2.COLOR_RGB2GRAY )
-#    cv2.imwrite( "grey.png", img )
-
-    image = imread("grey.png")
+    image = imread(fname)
 
     if(len(image.shape)<3):
-          print 'gray'
+          print '   Image is gray'
     elif len(image.shape)==3:
-          print 'Color(RGB)'
+          print '   Image is Color(RGB)'
     else:
-          print 'others'
+          print '   Image is others'
 
 
-    plt.imshow(image, cmap='binary')
+    #plt.gray()
+
+    image = Image.open(fname).convert("L")
+    arr = np.asarray(image)
+    plt.imshow(arr, cmap='gray')
+    flat_array = img_array.reshape(784, 1)
+    print("len(flat_array) = %s"%len(flat_array))
     plt.show()
-    exit()
 
-    #im = mpimg.imread(image_path)
-    im = color.rgb2gray(io.imread(image_path))
-    imarray = np.array(im)
-    imarray = imarray.reshape(784, 1)
-    plot_grayscale_image(imarray, 28)
+    return flat_array
 
+#print("len(img_array) = %s"%len(img_array))
 
-load_plot_greyscale_image('dataset_images/train/2/2_11.png')
-exit()
-
-#extract_save_numeric_dataset_images(data, 100,'dataset_images/train/', 28)
+#flat_array = img_array.reshape(784, 1)
+#print("len(flat_array) = %s"%len(flat_array))
 
 
-#x_batch, y_true_batch = data.train.next_batch(batch_size)
-
-#size = 3
-#depth = 10
-
-#a = np.array([])
-#a = np.append(a,1)
-#a = np.append(a,2)
-#a = np.append(a,3)
-#a = a.astype(int)
-
-#print("array = %s"%a)
-
-#b = np.zeros((size, 10))
-#b[np.arange(size), a] = 1
-
-#print("array = %s"%b[0])
-#print("\narray[0] = %s"%b)
+#x_batch, y_true_batch = data.train.next_batch(3)
+#print("len(data_array) = %s"%len(x_batch[0]))
 
 #exit()
-
-
-## Extract & Save Dataset Images
-
-#def extract_save_numeric_dataset_images(dataset, image_count, dataset_path, size):
-
-
-#    if os.path.exists(dataset_path):
-#        shutil.rmtree(dataset_path)
-#        os.mkdir(dataset_path)
-#    else:
-#        os.mkdir(dataset_path)
-
-#    for i in range(0, 10):
-#        os.mkdir(dataset_path + str(i))
-
-
-#    x_batch, y_true_batch = dataset.train.next_batch(image_count)
-
-#    for index, im in enumerate(x_batch):
-#        print("index = %s"%index)
-#        lbl = y_true_batch[index].argmax()
-#        print("label = %s"%lbl)
-#        save_path = (dataset_path + str(lbl) + '/' + str(lbl) +'_' + str(index))
-#        save_grayscale_image_as_png(im, size, save_path)
-
 # =======================================================================================================================================
-
-
-
-
 
 
 
@@ -198,10 +138,18 @@ session.run(tf.global_variables_initializer())
 
 optimize(num_iterations=10, data=data, session=session, optimizer=optimizer, batch_size=batch_size, x=x, y_true=y_true)
 
-test_image = data.test.images[(image_index-1):image_index]
-test_labels = data.test.labels[(image_index-1):image_index]
+#test_image = data.test.images[(image_index-1):image_index]
+#test_labels = data.test.labels[(image_index-1):image_index]
+#test_classes = data.test.cls[(image_index-1):image_index]
+#feed_dict_test2 = {x: test_image, y_true: test_labels, y_true_cls: test_classes}
+
+
+## test custom ############
+test_image = load_plot_get_greyscale_image('zero.png')
+
+test_labels = "data.test.labels[(image_index-1):image_index]"
 test_classes = data.test.cls[(image_index-1):image_index]
-feed_dict_test2 = {x: test_images, y_true: test_labels, y_true_cls: test_classes}
+feed_dict_test2 = {x: test_image, y_true: test_labels, y_true_cls: test_classes}
 
 
 recognizeandplotimage(feed_dict_test2,test_image,test_classes,session,correct_prediction,y_pred_cls,img_shape)
