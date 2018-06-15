@@ -6,6 +6,16 @@
 import sys
 import matplotlib.pyplot as plt
 import os
+import numpy as np
+import shutil
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+from PIL import Image
+from skimage import color
+from skimage import io
+from scipy.misc import imread, imsave, imresize
+import cv2
+from scipy.misc import toimage
 
 def ProcessCommandline():
     if (len(sys.argv) == 1):
@@ -207,3 +217,14 @@ def extract_save_numeric_dataset_images(dataset, image_count, dataset_path, size
         print("label = %s"%lbl)
         save_path = (dataset_path + str(lbl) + '/' + str(lbl) +'_' + str(index))
         save_grayscale_image_as_png(im, size, save_path)
+
+
+
+def get_label_one_hot_array(value, width):
+
+    value = int(value)
+    no_columns = width
+    a = np.array([value])
+    b = np.zeros((1, no_columns))
+    b[np.arange(1), a] = 1
+    return b
