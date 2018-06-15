@@ -38,6 +38,27 @@ def optimize(num_iterations, data, session, optimizer, batch_size, x, y_true):
         session.run(optimizer, feed_dict=feed_dict_train)
 
 
+def optimize_custom(num_iterations, data, session, optimizer, batch_size, x, y_true):
+    for i in range(num_iterations):
+        # Get a batch of training examples.
+        # x_batch now holds a batch of images and
+        # y_true_batch are the true labels for those images.
+        x_batch, y_true_batch = data.train.next_batch(batch_size)
+
+        # Put the batch into a dict with the proper names
+        # for placeholder variables in the TensorFlow graph.
+        # Note that the placeholder for y_true_cls is not set
+        # because it is not used during training.
+        feed_dict_train = {x: x_batch,
+                           y_true: y_true_batch}
+
+        # Run the optimizer using this batch of training data.
+        # TensorFlow assigns the variables in feed_dict_train
+        # to the placeholder variables and then runs the optimizer.
+        session.run(optimizer, feed_dict=feed_dict_train)
+
+
+
 def plot_images(pred_result, images, cls_true, img_shape, cls_pred=None):
 
     len_images = len(images)
