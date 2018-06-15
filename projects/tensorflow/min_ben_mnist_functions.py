@@ -146,6 +146,47 @@ def recognizeandplotimage(dictonary,test_images,test_classes, session, correct_p
     plot_images(pred_result,images=images, cls_true=cls_true, img_shape=img_shape, cls_pred=cls_pred)
 
 
+
+def recognizeandplotimage2(dictonary,test_images,test_classes, session, correct_prediction, y_pred_cls,img_shape):
+    # Use TensorFlow to get a list of boolean values
+    # whether each test-image has been correctly classified,
+    # and a list for the predicted class of each image.
+    correct, cls_pred = session.run([correct_prediction, y_pred_cls],
+                                    feed_dict=dictonary)
+
+    pred_result = "PREDICTION_TRUE"
+
+    # Negate the boolean array.
+    incorrect = (correct == True)
+    print("len(incorrect) = %s"%(len(incorrect)))
+
+    # Get the images from the test-set that have been
+    # incorrectly classified.
+    images = (test_images)[incorrect]
+    len_images = len(images)
+    print("len(images) = %s"%len_images)
+
+    if(len_images == 0):
+        print("INFO: PREDICTION_FALSE")
+        pred_result = "PREDICTION_FALSE"
+        incorrect = (correct == False)
+        images = (test_images)[incorrect]
+        len_images = len(images)
+        print("len(images) = %s"%len_images)
+
+    # Get the predicted classes for those images.
+    cls_pred = cls_pred[incorrect]
+    print("len(cls_pred) = %s"%(len(cls_pred)))
+
+    # Get the true classes for those images.
+    cls_true = (test_classes)[incorrect]
+    print("len(cls_true) = %s"%(len(cls_true)))
+
+
+    # Plot the first 9 images.
+    plot_images(pred_result,images=images, cls_true=cls_true, img_shape=img_shape, cls_pred=cls_pred)
+
+
 # Plot a grayscale  Image from MNIST Dataset
 def plot_mnist_test_image_at_index(dataset, index):
 
