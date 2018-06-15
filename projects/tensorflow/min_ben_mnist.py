@@ -34,8 +34,8 @@ image_index = ProcessCommandline()
 
 # Import Input data Images
 from tensorflow.examples.tutorials.mnist import input_data
-#data = input_data.read_data_sets("data/MNIST/", one_hot=True)
-#data.test.cls = np.array([label.argmax() for label in data.test.labels])
+data = input_data.read_data_sets("data/MNIST/", one_hot=True)
+data.test.cls = np.array([label.argmax() for label in data.test.labels])
 
 # Variables
 img_size = 28
@@ -48,8 +48,8 @@ batch_size = 100
 
 # ========================================================== TEST AREA ==================================================================
 
-print("One hot label 2 = \n%s"%get_label_one_hot_array(2,10))
-exit()
+#print("One hot label 2 = \n%s"%get_label_one_hot_array(2,10))
+#exit()
 
 def load_plot_get_greyscale_image(fname):
 
@@ -78,7 +78,7 @@ def load_plot_get_greyscale_image(fname):
     image = Image.open(fname).convert("L")
     arr = np.asarray(image)
     plt.imshow(arr, cmap='gray')
-    flat_array = img_array.reshape(784, 1)
+    flat_array = arr.reshape(1, 784)
     print("len(flat_array) = %s"%len(flat_array))
     plt.show()
 
@@ -96,6 +96,7 @@ def load_plot_get_greyscale_image(fname):
 #exit()
 # =======================================================================================================================================
 
+#print(" =%s"%)
 
 
 # Placeholder variables
@@ -140,15 +141,15 @@ optimize(num_iterations=10, data=data, session=session, optimizer=optimizer, bat
 
 #test_image = data.test.images[(image_index-1):image_index]
 #test_labels = data.test.labels[(image_index-1):image_index]
-#test_classes = data.test.cls[(image_index-1):image_index]
+test_classes = data.test.cls[(image_index-1):image_index]
 #feed_dict_test2 = {x: test_image, y_true: test_labels, y_true_cls: test_classes}
 
 
 ## test custom ############
 test_image = load_plot_get_greyscale_image('zero.png')
+test_labels = get_label_one_hot_array(0,10)
+#test_classes = [0]
 
-test_labels = "data.test.labels[(image_index-1):image_index]"
-test_classes = data.test.cls[(image_index-1):image_index]
 feed_dict_test2 = {x: test_image, y_true: test_labels, y_true_cls: test_classes}
 
 
