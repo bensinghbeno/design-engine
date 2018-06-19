@@ -27,6 +27,28 @@ def ProcessCommandline():
         print("image_index = %s"%image_index)
 	return image_index
 
+# Plot a greyscale image of size (pix_width_height x pix_width_height)
+def plot_grayscale_image(image, pix_width_height):
+
+    # This array will be of 1D with length 784
+    # The pixel intensity values are integers from 0 to 255
+    # Reshape the array into 28 x 28 array (2-dimensional array)
+    pixels = image.reshape((pix_width_height, pix_width_height))
+
+    plt.imshow(pixels, cmap='binary')
+    plt.show()
+    
+def plot_grayscale_image_label(image, pix_width_height, label):
+
+    # This array will be of 1D with length 784
+    # The pixel intensity values are integers from 0 to 255
+    # Reshape the array into 28 x 28 array (2-dimensional array)
+    pixels = image.reshape((pix_width_height, pix_width_height))
+
+    plt.imshow(pixels, cmap='binary')
+    plt.xlabel("Detected Image No = " + str(label))
+    plt.show()
+
 def optimize(num_iterations, data, session, optimizer, batch_size, x, y_true):
     for i in range(num_iterations):
         # Get a batch of training examples.
@@ -142,7 +164,8 @@ def recognizeandplotimage(dictonary,test_images,test_classes, session, correct_p
 
    
     # Plot the first 9 images.
-    plot_images(pred_result,images=images, cls_true=cls_true, img_shape=img_shape, cls_pred=cls_pred)
+    #plot_images(pred_result,images=images, cls_true=cls_true, img_shape=img_shape, cls_pred=cls_pred)
+    plot_grayscale_image_label(images[0], 28, cls_pred[0])
 
 
 
@@ -183,7 +206,8 @@ def recognizeandplotimage2(dictonary,test_images,test_classes, session, correct_
 
 
     # Plot the first 9 images.
-    plot_images(pred_result,images=images, cls_true=cls_true, img_shape=img_shape, cls_pred=cls_pred)
+    #plot_images(pred_result,images=images, cls_true=cls_true, img_shape=img_shape, cls_pred=cls_pred)
+    plot_grayscale_image_label(images[0], 28, cls_pred[0])
 
 
 # Plot a grayscale  Image from MNIST Dataset
@@ -208,17 +232,6 @@ def plot_mnist_test_image_at_index(dataset, index):
     plt.imshow(pixels, cmap='binary')
     plt.show()
 
-
-# Plot a greyscale image of size (pix_width_height x pix_width_height)
-def plot_grayscale_image(image, pix_width_height):
-
-    # This array will be of 1D with length 784
-    # The pixel intensity values are integers from 0 to 255
-    # Reshape the array into 28 x 28 array (2-dimensional array)
-    pixels = image.reshape((pix_width_height, pix_width_height))
-
-    plt.imshow(pixels, cmap='binary')
-    plt.show()
 
 # Save a greyscale png image of size (pix_width_height x pix_width_height)
 def save_grayscale_image_as_png(image, pix_width_height, path):
@@ -268,3 +281,27 @@ def get_label_one_hot_array(value, width):
     b = np.zeros((1, no_columns))
     b[np.arange(1), a] = 1
     return b
+
+
+def load_plot_get_greyscale_image(fname):
+
+    image = imread(fname)
+
+    if(len(image.shape)<3):
+          print '\nImage Type :  Image is gray'
+    elif len(image.shape)==3:
+          print 'Image Type :  Image is Color(RGB)'
+    else:
+          print 'Image Type :  Image is others'
+
+
+    #plt.gray()
+
+    image = Image.open(fname).convert("L")
+    arr = np.asarray(image)
+    plt.imshow(arr, cmap='gray')
+    flat_array = arr.reshape(1, 784)
+    #print("len(flat_array) = %s"%len(flat_array))
+    plt.show()
+
+    return flat_array
