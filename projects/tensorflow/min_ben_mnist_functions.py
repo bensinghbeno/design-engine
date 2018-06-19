@@ -14,7 +14,6 @@ from PIL import Image
 from skimage import color
 from skimage import io
 from scipy.misc import imread, imsave, imresize
-import cv2
 from scipy.misc import toimage
 
 def ProcessCommandline():
