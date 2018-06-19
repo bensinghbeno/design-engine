@@ -24,9 +24,11 @@ from min_ben_mnist_functions import plot_grayscale_image
 from min_ben_mnist_functions import save_grayscale_image_as_png
 from min_ben_mnist_functions import extract_save_numeric_dataset_images
 from min_ben_mnist_functions import get_label_one_hot_array
+from min_ben_mnist_functions import load_plot_get_greyscale_image
 
+# ======= Start ! ==================================================================================================================================
 
-# Process Commandline
+# Process Command line
 image_index = ProcessCommandline()
 
 # Import Input data Images
@@ -45,55 +47,11 @@ batch_size = 100
 
 # ========================================================== TEST AREA ==================================================================
 
-#print("One hot label 2 = \n%s"%get_label_one_hot_array(2,10))
-#exit()
-
-def load_plot_get_greyscale_image(fname):
-
-#    x_batch, y_true_batch = data.train.next_batch(3)
-#    imarray = np.array(x_batch[0])
-#    imarray = imarray.reshape(28, 28)
-#    plt.gray()
-#    plt.imshow(imarray)
-#    plt.show()
-#    im = toimage(imarray)
-#    im.save(fname)
+#print(" =%s"%)
 
 
-    image = imread(fname)
-
-    if(len(image.shape)<3):
-          print '   Image is gray'
-    elif len(image.shape)==3:
-          print '   Image is Color(RGB)'
-    else:
-          print '   Image is others'
-
-
-    #plt.gray()
-
-    image = Image.open(fname).convert("L")
-    arr = np.asarray(image)
-    plt.imshow(arr, cmap='gray')
-    flat_array = arr.reshape(1, 784)
-    print("len(flat_array) = %s"%len(flat_array))
-    plt.show()
-
-    return flat_array
-
-#print("len(img_array) = %s"%len(img_array))
-
-#flat_array = img_array.reshape(784, 1)
-#print("len(flat_array) = %s"%len(flat_array))
-
-
-#x_batch, y_true_batch = data.train.next_batch(3)
-#print("len(data_array) = %s"%len(x_batch[0]))
-
-#exit()
 # =======================================================================================================================================
 
-#print(" =%s"%)
 
 
 # Placeholder variables
@@ -157,7 +115,7 @@ session.close()
 exit()
 
 
-
+# ================ Stop ! ===============================================================================================================================
 
 
 ##plot_mnist_test_image_at_index(data, image_index)
