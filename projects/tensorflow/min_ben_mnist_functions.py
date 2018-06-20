@@ -29,13 +29,14 @@ def ProcessCommandline():
 
 # Plot a greyscale image of size (pix_width_height x pix_width_height)
 def plot_grayscale_image(image, pix_width_height):
-
+    
     # This array will be of 1D with length 784
     # The pixel intensity values are integers from 0 to 255
     # Reshape the array into 28 x 28 array (2-dimensional array)
     pixels = image.reshape((pix_width_height, pix_width_height))
 
     plt.imshow(pixels, cmap='binary')
+
     plt.show()
     
 def plot_grayscale_image_label(image, pix_width_height, label):
@@ -46,7 +47,7 @@ def plot_grayscale_image_label(image, pix_width_height, label):
     pixels = image.reshape((pix_width_height, pix_width_height))
 
     plt.imshow(pixels, cmap='binary')
-    plt.xlabel("Detected Image No = " + str(label))
+    plt.title('Recognized Image = %s'%label)
     plt.show()
 
 def optimize(num_iterations, data, session, optimizer, batch_size, x, y_true):
@@ -138,76 +139,30 @@ def recognizeandplotimage(dictonary,test_images,test_classes, session, correct_p
 
     # Negate the boolean array.
     incorrect = (correct == True)
-    print("len(incorrect) = %s"%(len(incorrect)))
     
     # Get the images from the test-set that have been
     # incorrectly classified.
     images = (test_images)[incorrect]
     len_images = len(images)
-    print("len(images) = %s"%len_images)
 
     if(len_images == 0):
-        print("INFO: PREDICTION_FALSE")
         pred_result = "PREDICTION_FALSE"
         incorrect = (correct == False)
         images = (test_images)[incorrect]
         len_images = len(images)
-        print("len(images) = %s"%len_images)
     
     # Get the predicted classes for those images.
     cls_pred = cls_pred[incorrect]
-    print("len(cls_pred) = %s"%(len(cls_pred)))
 
     # Get the true classes for those images.
     cls_true = (test_classes)[incorrect]
-    print("len(cls_true) = %s"%(len(cls_true)))
 
    
     # Plot the first 9 images.
     #plot_images(pred_result,images=images, cls_true=cls_true, img_shape=img_shape, cls_pred=cls_pred)
+    print("Result : Recognized No = %s"%cls_pred[0])
     plot_grayscale_image_label(images[0], 28, cls_pred[0])
 
-
-
-def recognizeandplotimage2(dictonary,test_images,test_classes, session, correct_prediction, y_pred_cls,img_shape):
-    # Use TensorFlow to get a list of boolean values
-    # whether each test-image has been correctly classified,
-    # and a list for the predicted class of each image.
-    correct, cls_pred = session.run([correct_prediction, y_pred_cls],
-                                    feed_dict=dictonary)
-
-    pred_result = "PREDICTION_TRUE"
-
-    # Negate the boolean array.
-    incorrect = (correct == True)
-    print("len(incorrect) = %s"%(len(incorrect)))
-
-    # Get the images from the test-set that have been
-    # incorrectly classified.
-    images = (test_images)[incorrect]
-    len_images = len(images)
-    print("len(images) = %s"%len_images)
-
-    if(len_images == 0):
-        print("INFO: PREDICTION_FALSE")
-        pred_result = "PREDICTION_FALSE"
-        incorrect = (correct == False)
-        images = (test_images)[incorrect]
-        len_images = len(images)
-        print("len(images) = %s"%len_images)
-
-    # Get the predicted classes for those images.
-    cls_pred = cls_pred[incorrect]
-    print("len(cls_pred) = %s"%(len(cls_pred)))
-
-    # Get the true classes for those images.
-    cls_true = (test_classes)[incorrect]
-    print("len(cls_true) = %s"%(len(cls_true)))
-
-
-    # Plot the first 9 images.
-    #plot_images(pred_result,images=images, cls_true=cls_true, img_shape=img_shape, cls_pred=cls_pred)
-    plot_grayscale_image_label(images[0], 28, cls_pred[0])
 
 
 # Plot a grayscale  Image from MNIST Dataset
@@ -233,7 +188,7 @@ def plot_mnist_test_image_at_index(dataset, index):
     plt.show()
 
 
-# Save a greyscale png image of size (pix_width_height x pix_width_height)
+# Save a grayscale png image of size (pix_width_height x pix_width_height)
 def save_grayscale_image_as_png(image, pix_width_height, path):
 
     # This array will be of 1D with length 784
@@ -302,6 +257,7 @@ def load_plot_get_greyscale_image(fname):
     plt.imshow(arr, cmap='gray')
     flat_array = arr.reshape(1, 784)
     #print("len(flat_array) = %s"%len(flat_array))
+    plt.title('Loaded Image = %s'%fname)
     plt.show()
 
     return flat_array
