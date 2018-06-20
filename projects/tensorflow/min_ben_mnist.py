@@ -29,8 +29,11 @@ from min_ben_mnist_functions import load_plot_get_greyscale_image
 # ======= Start ! ==================================================================================================================================
 
 
-# Process Command line
-image_index = ProcessCommandline()
+image_index = 555 # Remove this
+
+ # Process Command line
+
+image_file = ProcessCommandline()
 
 # Import Input data Images
 from tensorflow.examples.tutorials.mnist import input_data
@@ -47,6 +50,20 @@ batch_size = 100
 
 
 # ========================================================== TEST AREA ==================================================================
+
+# x_batch, y_true_batch = data.train.next_batch(3)
+# imarray = np.array(x_batch[0])
+# imarray = imarray.reshape(28, 28)
+# 
+# plt.gray()
+# plt.imshow(imarray)
+# plt.show()
+# plt.close()
+#  
+# im = toimage(imarray)
+# im.save("number.png")
+# 
+# exit()
 
 #print(" =%s"%)
 
@@ -102,7 +119,7 @@ test_classes = data.test.cls[(image_index-1):image_index]
 
 
 ## test custom ############
-test_image = load_plot_get_greyscale_image('zero.png')
+test_image = load_plot_get_greyscale_image(image_file)
 test_labels = get_label_one_hot_array(0,10)
 #test_classes = [0]
 

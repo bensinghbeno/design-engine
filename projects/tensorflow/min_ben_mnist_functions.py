@@ -18,14 +18,16 @@ from scipy.misc import toimage
 
 def ProcessCommandline():
     if (len(sys.argv) == 1):
-        print("Please provide image_index number")
+        print("Please provide image file path")
         exit()
             
     else:
-	global image_index	
-        image_index = int(sys.argv[1])
-        print("image_index = %s"%image_index)
-	return image_index
+        image_file = str(sys.argv[1])
+        
+        if (os.path.isfile(image_file)):      
+            print("Image file to recognize = %s"%image_file)
+            
+	return image_file
 
 # Plot a greyscale image of size (pix_width_height x pix_width_height)
 def plot_grayscale_image(image, pix_width_height):
