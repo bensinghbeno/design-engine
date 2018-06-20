@@ -28,6 +28,7 @@ from min_ben_mnist_functions import load_plot_get_greyscale_image
 
 # ======= Start ! ==================================================================================================================================
 
+
 # Process Command line
 image_index = ProcessCommandline()
 
