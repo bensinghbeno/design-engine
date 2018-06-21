@@ -25,6 +25,7 @@ from min_ben_mnist_functions import save_grayscale_image_as_png
 from min_ben_mnist_functions import extract_save_numeric_dataset_images
 from min_ben_mnist_functions import get_label_one_hot_array
 from min_ben_mnist_functions import load_plot_get_greyscale_image
+from min_ben_mnist_functions import plot_grayscale_image_label
 
 # ======= Start ! ==================================================================================================================================
 
@@ -51,7 +52,9 @@ batch_size = 100
 
 # ========================================================== TEST AREA ==================================================================
 
-# x_batch, y_true_batch = data.train.next_batch(3)
+
+
+
 # imarray = np.array(x_batch[0])
 # imarray = imarray.reshape(28, 28)
 # 
@@ -110,7 +113,7 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 session = tf.Session()
 session.run(tf.global_variables_initializer())
 
-optimize(num_iterations=10, data=data, session=session, optimizer=optimizer, batch_size=batch_size, x=x, y_true=y_true)
+optimize(num_iterations=100, data=data, session=session, optimizer=optimizer, batch_size=batch_size, x=x, y_true=y_true)
 
 #test_image = data.test.images[(image_index-1):image_index]
 #test_labels = data.test.labels[(image_index-1):image_index]

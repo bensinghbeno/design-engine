@@ -49,7 +49,7 @@ def plot_grayscale_image_label(image, pix_width_height, label):
     pixels = image.reshape((pix_width_height, pix_width_height))
 
     plt.imshow(pixels, cmap='binary')
-    plt.title('Recognized Image = %s'%label)
+    plt.title('Image = %s'%label)
     plt.show()
 
 def optimize(num_iterations, data, session, optimizer, batch_size, x, y_true):
