@@ -42,7 +42,12 @@ for dir in dir_list:
        i = i+1
        print("Converting Found File = %s"%file)
        file2convert = files_dir + "/" + file
-       command = "convert -resize 28X28 " + file2convert + " converted2grayscale28/resized/" + dir + "/" + dir +"_" + str(i) + ".jpg"
-       print("Conversion Command = %s"%command)
+       resized_file = " converted2grayscale28/resized/" + dir + "/" + dir +"_" + str(i) + ".jpg"
+       command = "convert -resize 28X28! " + file2convert + resized_file
+       print("Resize Conversion Command = %s"%command)
+       os.system(command)
+
+       command = "convert " + resized_file + " -colorspace Gray" + " converted2grayscale28/gray/" + dir + "/" + dir +"_" + str(i)  + "_28" + "_gray"+ ".jpg"
+       print("Gray Conversion Command = %s"%command)
        os.system(command)
 
