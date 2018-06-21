@@ -52,8 +52,40 @@ batch_size = 100
 
 # ========================================================== TEST AREA ==================================================================
 
+labels = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+images_root_path = "converted2grayscale28/gray"
+dir_list = os.listdir(images_root_path)
+i = 0
+for dir in dir_list:
+   print("Gray Images Root Directory = %s"%dir)
+   files_dir = images_root_path + "/" + dir
+   file_list = os.listdir(files_dir)
+   i = i+1
+   for file in file_list:
+       i = i+1
+       print("Image File Found = %s"%file)
+       print("ONE HOT ARRAY = %s"%get_label_one_hot_array(dir, 10))
+       np.append(labels, get_label_one_hot_array(dir, 10))
+       #np.concatenate((labels, get_label_one_hot_array(dir, 10)))
 
 
+print("length of labels = %s"%len(labels))
+for label in labels:
+    print("ONE HOT LABEL = %s"%label)
+
+
+exit()
+
+x_batch, y_true_batch = data.train.next_batch(3)
+
+
+i = 0
+for image in x_batch:
+    plot_grayscale_image_label(image, 28, str(y_true_batch[i].argmax()))
+    i = i+1
+
+exit()
 
 # imarray = np.array(x_batch[0])
 # imarray = imarray.reshape(28, 28)
