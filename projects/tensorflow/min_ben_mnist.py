@@ -26,7 +26,7 @@ from min_ben_mnist_functions import extract_save_numeric_dataset_images
 from min_ben_mnist_functions import get_label_one_hot_array
 from min_ben_mnist_functions import load_plot_get_greyscale_image
 from min_ben_mnist_functions import plot_grayscale_image_label
-
+from min_ben_mnist_functions import optimize_custom
 # ======= Start ! ==================================================================================================================================
 
 
@@ -38,20 +38,22 @@ image_file = ProcessCommandline()
 
 # Import Input data Images
 from tensorflow.examples.tutorials.mnist import input_data
-data = input_data.read_data_sets("data/MNIST/", one_hot=True)
-data.test.cls = np.array([label.argmax() for label in data.test.labels])
+data_mnist = input_data.read_data_sets("data/MNIST/", one_hot=True)
+data_mnist.test.cls = np.array([label.argmax() for label in data_mnist.test.labels])
 
 # Variables
 img_size = 28
 img_size_flat = img_size * img_size
 img_shape = (img_size, img_size)
 num_classes = 10
-batch_size = 100
+batch_size = 8
 
 
 
 # ========================================================== TEST AREA ==================================================================
-
+# x_batch, y_true_batch = data.train.next_batch(3)
+# print("shape = %s"%(x_batch.shape))
+# exit()
 
     
 
@@ -66,6 +68,8 @@ batch_size = 100
 print("======== Start Loading Images ========")
 
 labels_import = np.zeros((0, 10))
+images_import = np.zeros((0, 784))
+
 images_root_path = "converted2grayscale28/gray"
 dir_list = os.listdir(images_root_path)
 i = 0
@@ -77,6 +81,8 @@ for dir in dir_list:
    for file in file_list:
        i = i+1
        print("Image File Found = %s"%file)
+       image_file_path = images_root_path+ "/" + dir + "/" + file
+       images_import = np.concatenate((images_import, load_plot_get_greyscale_image(image_file_path, "false"))) 
        labels_import = np.concatenate((labels_import, get_label_one_hot_array(dir, 10)))
 
 
@@ -88,26 +94,30 @@ print("======== Loading Images Completed ========")
 
 class ctrain:
     labels = labels_import
+    images = images_import
+    
 class cmydata:
     train = ctrain()
+    test = data_mnist.test
 
 
 data = cmydata() 
-print("length of data.train.labels = %s"%len(data.train.labels))
+print("length of mydata.train.labels = %s"%len(data.train.labels))
+print("length of mydata.train.images = %s"%len(data.train.images))
 
-exit()
+x_batch = data.train.images
+y_true_batch = data.train.labels
 
-
-
-x_batch, y_true_batch = data.train.next_batch(3)
-
-
-i = 0
-for image in x_batch:
-    plot_grayscale_image_label(image, 28, str(y_true_batch[i].argmax()))
-    i = i+1
-
-exit()
+## Test Dataset
+# x_batch = data.train.images
+# y_true_batch = data.train.labels
+# 
+# i = 0
+# for image in x_batch:
+#     plot_grayscale_image_label(image, 28, str(y_true_batch[i].argmax()))
+#     i = i+1
+# 
+# exit()
 
 # imarray = np.array(x_batch[0])
 # imarray = imarray.reshape(28, 28)
@@ -167,7 +177,8 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 session = tf.Session()
 session.run(tf.global_variables_initializer())
 
-optimize(num_iterations=100, data=data, session=session, optimizer=optimizer, batch_size=batch_size, x=x, y_true=y_true)
+#ooptimize(num_iterations=100, data=data, session=session, optimizer=optimizer, batch_size=batch_size, x=x, y_true=y_true)
+optimize_custom(num_iterations=100, x_batch=x_batch, y_true_batch=y_true_batch, session=session, optimizer=optimizer, batch_size=batch_size, x=x, y_true=y_true)
 
 #test_image = data.test.images[(image_index-1):image_index]
 #test_labels = data.test.labels[(image_index-1):image_index]
@@ -176,7 +187,7 @@ test_classes = data.test.cls[(image_index-1):image_index]
 
 
 ## test custom ############
-test_image = load_plot_get_greyscale_image(image_file)
+test_image = load_plot_get_greyscale_image(image_file, "true")
 test_labels = get_label_one_hot_array(0,10)
 #test_classes = [0]
 

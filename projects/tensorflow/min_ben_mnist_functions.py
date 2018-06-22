@@ -72,13 +72,13 @@ def optimize(num_iterations, data, session, optimizer, batch_size, x, y_true):
         session.run(optimizer, feed_dict=feed_dict_train)
 
 
-def optimize_custom(num_iterations, data, session, optimizer, batch_size, x, y_true):
+def optimize_custom(num_iterations, x_batch, y_true_batch, session, optimizer, batch_size, x, y_true):
     for i in range(num_iterations):
         # Get a batch of training examples.
         # x_batch now holds a batch of images and
         # y_true_batch are the true labels for those images.
-        x_batch, y_true_batch = data.train.next_batch(batch_size)
-
+        #x_batch, y_true_batch = data.train.next_batch(batch_size)
+        
         # Put the batch into a dict with the proper names
         # for placeholder variables in the TensorFlow graph.
         # Note that the placeholder for y_true_cls is not set
@@ -90,6 +90,25 @@ def optimize_custom(num_iterations, data, session, optimizer, batch_size, x, y_t
         # TensorFlow assigns the variables in feed_dict_train
         # to the placeholder variables and then runs the optimizer.
         session.run(optimizer, feed_dict=feed_dict_train)
+
+# def optimize_custom(num_iterations, data, session, optimizer, batch_size, x, y_true):
+#     for i in range(num_iterations):
+#         # Get a batch of training examples.
+#         # x_batch now holds a batch of images and
+#         # y_true_batch are the true labels for those images.
+#         x_batch, y_true_batch = data.train.next_batch(batch_size)
+# 
+#         # Put the batch into a dict with the proper names
+#         # for placeholder variables in the TensorFlow graph.
+#         # Note that the placeholder for y_true_cls is not set
+#         # because it is not used during training.
+#         feed_dict_train = {x: x_batch,
+#                            y_true: y_true_batch}
+# 
+#         # Run the optimizer using this batch of training data.
+#         # TensorFlow assigns the variables in feed_dict_train
+#         # to the placeholder variables and then runs the optimizer.
+#         session.run(optimizer, feed_dict=feed_dict_train)
 
 
 
@@ -240,7 +259,7 @@ def get_label_one_hot_array(value, width):
     return b
 
 
-def load_plot_get_greyscale_image(fname):
+def load_plot_get_greyscale_image(fname, showplot):
 
     image = imread(fname)
 
@@ -259,7 +278,8 @@ def load_plot_get_greyscale_image(fname):
     plt.imshow(arr, cmap='gray')
     flat_array = arr.reshape(1, 784)
     #print("len(flat_array) = %s"%len(flat_array))
-    plt.title('Loaded Image = %s'%fname)
-    plt.show()
+    if (showplot == "true"):
+        plt.title('Loaded Image = %s'%fname)
+        plt.show()
 
     return flat_array
