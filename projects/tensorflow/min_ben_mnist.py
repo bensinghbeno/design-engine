@@ -52,8 +52,20 @@ batch_size = 100
 
 # ========================================================== TEST AREA ==================================================================
 
-labels = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
+    
+
+# labels = np.concatenate((labels, get_label_one_hot_array(1, 10)))
+# labels = np.concatenate((labels, get_label_one_hot_array(2, 10)))
+# print("label2 = \n%s"%labels)
+# exit()
+# 
+# x_batch, y_true_batch = data.train.next_batch(3)
+# print("label1 = \n%s"%y_true_batch)
+# exit()
+print("======== Start Loading Images ========")
+
+labels_import = np.zeros((0, 10))
 images_root_path = "converted2grayscale28/gray"
 dir_list = os.listdir(images_root_path)
 i = 0
@@ -65,17 +77,27 @@ for dir in dir_list:
    for file in file_list:
        i = i+1
        print("Image File Found = %s"%file)
-       print("ONE HOT ARRAY = %s"%get_label_one_hot_array(dir, 10))
-       np.append(labels, get_label_one_hot_array(dir, 10))
-       #np.concatenate((labels, get_label_one_hot_array(dir, 10)))
+       labels_import = np.concatenate((labels_import, get_label_one_hot_array(dir, 10)))
 
 
-print("length of labels = %s"%len(labels))
-for label in labels:
-    print("ONE HOT LABEL = %s"%label)
+print("length of labels = %s"%len(labels_import))
+# for label in labels:
+#     print("ONE HOT LABEL = %s"%label)
 
+print("======== Loading Images Completed ========")
+
+class ctrain:
+    labels = labels_import
+class cmydata:
+    train = ctrain()
+
+
+data = cmydata() 
+print("length of data.train.labels = %s"%len(data.train.labels))
 
 exit()
+
+
 
 x_batch, y_true_batch = data.train.next_batch(3)
 
