@@ -30,11 +30,28 @@ from min_ben_mnist_functions import optimize_custom
 # ======= Start ! ==================================================================================================================================
 
 
+
 image_index = 555 # Remove this
 
  # Process Command line
 
 image_file = ProcessCommandline()
+resized_file = " detect_resized.jpg"
+grey_file = "detect_grey.jpg"
+
+
+command = "convert -resize 28X28! " + image_file + resized_file
+print("Resize Conversion Command = %s"%command)
+os.system(command)
+command = "convert " + resized_file + " -colorspace Gray" + " " + grey_file
+print("Gray Conversion Command = %s"%command)
+os.system(command)
+os.system("rm -rf " + resized_file)
+image_file = grey_file
+
+load_plot_get_greyscale_image(grey_file, "true")
+
+
 
 # Import Input data Images
 from tensorflow.examples.tutorials.mnist import input_data
@@ -70,7 +87,7 @@ print("======== Start Loading Images ========")
 labels_import = np.zeros((0, 10))
 images_import = np.zeros((0, 784))
 
-images_root_path = "converted2grayscale28/gray"
+images_root_path = "my_training_data/google_images_greyed"
 dir_list = os.listdir(images_root_path)
 i = 0
 for dir in dir_list:
