@@ -49,9 +49,6 @@ os.system(command)
 os.system("rm -rf " + resized_file)
 image_file = grey_file
 
-load_plot_get_greyscale_image(grey_file, "true")
-
-
 
 # Import Input data Images
 from tensorflow.examples.tutorials.mnist import input_data
