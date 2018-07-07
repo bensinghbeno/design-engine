@@ -3,9 +3,7 @@
 #include <ESP8266WiFi.h>
 
 // Replace with your network credentials
-const char* ssid     = "REPLACE_WITH_YOUR_SSID";
-const char* password = "REPLACE_WITH_YOUR_PASSWORD";
-const char WiFiAPPSK[] = "sparkfun";
+const char WiFiAPPSK[] = "artifymyworld";
 
 
 // Set web server port number to 80
@@ -32,22 +30,10 @@ void setup() {
   digitalWrite(output4, LOW);
 
   // Connect to Wi-Fi network with SSID and password
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  //WiFi.begin(ssid, password);
   setupWiFi();
+  Serial.println("Waiting for client to connect !!");
+
   server.begin();
-
-
-//  while (WiFi.status() != WL_CONNECTED) {
-//    delay(500);
-//    Serial.print(".");
-//  }
-
-//  WiFiClient client = server.available();
-//  if (!client) {
-//    return;
-//  }
 
 }
 
@@ -165,7 +151,7 @@ void setupWiFi()
   String macID = String(mac[WL_MAC_ADDR_LENGTH - 2], HEX) +
                  String(mac[WL_MAC_ADDR_LENGTH - 1], HEX);
   macID.toUpperCase();
-  String AP_NameString = "ESP8266 Thing " + macID;
+  String AP_NameString = "WirefreeBubble";
 
   char AP_NameChar[AP_NameString.length() + 1];
   memset(AP_NameChar, 0, AP_NameString.length() + 1);
