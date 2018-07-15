@@ -11,6 +11,7 @@ WiFiServer server(80);
 
 // Variable to store the HTTP request
 String header;
+String gpsData;
 
 // Auxiliar variables to store the current output state
 String output5State = "off";
@@ -115,6 +116,10 @@ void loop(){
               {
                 val = getValue(header, '-', i);
                 Serial.println("Value at : " + String(i) + " = " + val);
+                if (i == 1)
+                {
+                  gpsData = val;
+                }
                 if(val == "FIN")
                 {
                     break;
@@ -151,6 +156,7 @@ void loop(){
 
             // Web Page Heading
             client.println("<body><h1>ESP8266 Web Server</h1>");
+            client.println("<body><h2>GPS DATA : " + gpsData +" </h2>");
 
             // Display current state, and ON/OFF buttons for GPIO 5
             client.println("<p>GPIO 5 - State " + output5State + "</p>");
