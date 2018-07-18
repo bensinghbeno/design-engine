@@ -1,8 +1,13 @@
 package com.example.ben.myapplication;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -18,6 +23,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
+    private TextView textView1;
     private TextView textView;
     private LocationManager locationManager;
     private LocationListener listener;
@@ -28,6 +34,27 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+        textView1 = (TextView) findViewById(R.id.textView1);
+
+        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                float x = event.values[0];
+                float y = event.values[1];
+                float z = event.values[2];
+                textView1.setText(" X = " + Float.toString(x) + " Y = " + Float.toString(y) + " Z = " + Float.toString(z));
+
+//                double total = Math.sqrt(x * x + y * y + z * z);
+
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            }
+
+        }, sensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         textView = (TextView) findViewById(R.id.textView);
 
