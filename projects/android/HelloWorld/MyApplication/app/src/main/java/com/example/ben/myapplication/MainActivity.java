@@ -20,6 +20,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         textView1 = (TextView) findViewById(R.id.textView1);
+        final RequestQueue queue = Volley.newRequestQueue(this);
 
         SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -46,7 +54,29 @@ public class MainActivity extends AppCompatActivity {
                 float z = event.values[2];
                 textView1.setText(" X = " + Float.toString(x) + " Y = " + Float.toString(y) + " Z = " + Float.toString(z));
 
-//                double total = Math.sqrt(x * x + y * y + z * z);
+                String urlPrefix = "http://192.168.4.1/ACCEL-";
+                String urlPostFix = "-FIN--";
+                String url = urlPrefix + Float.toString(x) + "-" + Float.toString(y) + "-" + Float.toString(z)  +urlPostFix;
+
+                // Request a string response from the provided URL.
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                // Display the first 500 characters of the response string.
+                                String resp =  "Response is: "+ response.substring(0,500);
+                                //Toast.makeText(getApplicationContext(), resp, Toast.LENGTH_SHORT).show();
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(), "That didn't work!", Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+
+                // Add the request to the RequestQueue.
+                queue.add(stringRequest);
 
             }
 
@@ -54,18 +84,45 @@ public class MainActivity extends AppCompatActivity {
             public void onAccuracyChanged(Sensor sensor, int accuracy) {
             }
 
-        }, sensor, SensorManager.SENSOR_DELAY_FASTEST);
+        }, sensor, SensorManager.SENSOR_DELAY_NORMAL);
 
         textView = (TextView) findViewById(R.id.textView);
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
+
+
         listener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                Toast.makeText(getApplicationContext(), "Received GPS onLocationChanged !!", Toast.LENGTH_SHORT).show();
 
                 textView.setText("Latitude = " + location.getLatitude() + "\nLongitude = " + location.getLongitude());
+
+
+                String urlPrefix = "http://192.168.4.1/GPS-";
+                String urlPostFix = "-FIN--";
+                String url = urlPrefix + location.getLatitude() + "-" + location.getLongitude() + urlPostFix;
+
+                // Request a string response from the provided URL.
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                // Display the first 500 characters of the response string.
+                                String resp =  "Response is: "+ response.substring(0,500);
+                                //Toast.makeText(getApplicationContext(), resp, Toast.LENGTH_SHORT).show();
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(), "That didn't work!", Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+
+                // Add the request to the RequestQueue.
+                queue.add(stringRequest);
+
             }
 
             @Override
@@ -87,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         configure_button();
-        locationManager.requestLocationUpdates("gps", 5000, 0, listener);
+        locationManager.requestLocationUpdates("gps", 1000, 0, listener);
 
     }
 
