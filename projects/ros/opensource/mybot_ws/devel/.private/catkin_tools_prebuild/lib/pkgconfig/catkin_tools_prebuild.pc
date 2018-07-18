@@ -1,0 +1,8 @@
+prefix=/home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/.private/catkin_tools_prebuild
+
+Name: catkin_tools_prebuild
+Description: Description of catkin_tools_prebuild
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/.private/catkin_tools_prebuild/lib 
+Requires: 
