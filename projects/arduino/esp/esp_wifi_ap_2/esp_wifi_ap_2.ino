@@ -12,6 +12,11 @@ WiFiServer server(80);
 // Variable to store the HTTP request
 String header;
 String gpsData;
+String gpsDataLatitude;
+String gpsDataLongitude;
+String accelX;
+String accelY;
+String accelZ;
 
 // Auxiliar variables to store the current output state
 String output5State = "off";
@@ -118,14 +123,45 @@ void loop(){
                 Serial.println("Value at : " + String(i) + " = " + val);
                 if (i == 1)
                 {
-                  gpsData = val;
+                  gpsDataLatitude = val;
+                }
+                else if (i == 2)
+                {
+                  gpsDataLongitude = val;
                 }
                 if(val == "FIN")
                 {
                     break;
                 }
               }                         
-            } else if (header.indexOf("GET /5/on") >= 0) {
+            }
+            else if (header.indexOf("GET /ACCEL") >= 0)
+            {
+              Serial.println("RECEIVE ACCELEROMETER DATA :: ");
+              Serial.println("HEADER = " + header);
+              String val = "";
+              for( int i = 0; i < 10 ; ++i)
+              {
+                val = getValue(header, '-', i);
+                Serial.println("Value at : " + String(i) + " = " + val);
+                if (i == 1)
+                {
+                  accelX = val;
+                }
+                else if (i == 2)
+                {
+                  accelY = val;
+                }
+                else if (i == 3)
+                {
+                  accelZ = val;
+                }
+                if(val == "FIN")
+                {
+                    break;
+                }
+              }                         
+            }else if (header.indexOf("GET /5/on") >= 0) {
               Serial.println("GPIO 5 on");
               output5State = "on";
               digitalWrite(output5, HIGH);
@@ -155,8 +191,13 @@ void loop(){
             client.println(".button2 {background-color: #77878A;}</style></head>");
 
             // Web Page Heading
-            client.println("<body><h1>ESP8266 Web Server</h1>");
-            client.println("<body><h2>GPS DATA : " + gpsData +" </h2>");
+            client.println("<body><h1>ForeView ESP8266 Web Server</h1>");
+            client.println("<body><h2>GPS Latitude  : " + gpsDataLatitude +" </h2>");
+            client.println("<body><h2>GPS Longitude : " + gpsDataLongitude +" </h2>");
+            client.println("<body><h2>============================================== </h2>");
+            client.println("<body><h2>ACCELEROMETER X : " + accelX +" </h2>");
+            client.println("<body><h2>ACCELEROMETER Y : " + accelY +" </h2>");
+            client.println("<body><h2>ACCELEROMETER Z : " + accelZ +" </h2>");
 
             // Display current state, and ON/OFF buttons for GPIO 5
             client.println("<p>GPIO 5 - State " + output5State + "</p>");
