@@ -13,13 +13,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button button;
     private TextView textView;
     private LocationManager locationManager;
     private LocationListener listener;
@@ -32,15 +30,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         textView = (TextView) findViewById(R.id.textView);
-        button = (Button) findViewById(R.id.button);
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
 
         listener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                textView.append("n " + location.getLongitude() + " " + location.getLatitude());
+                Toast.makeText(getApplicationContext(), "Received GPS onLocationChanged !!", Toast.LENGTH_SHORT).show();
+
+                textView.setText("Latitude = " + location.getLatitude() + "\nLongitude = " + location.getLongitude());
             }
 
             @Override
@@ -62,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
         };
 
         configure_button();
+        locationManager.requestLocationUpdates("gps", 5000, 0, listener);
+
     }
 
     @Override
@@ -88,13 +88,5 @@ public class MainActivity extends AppCompatActivity {
             }
             return;
         }
-        // this code won'textView execute IF permissions are not allowed, because in the line above there is return statement.
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //noinspection MissingPermission
-                locationManager.requestLocationUpdates("gps", 5000, 0, listener);
-            }
-        });
     }
 }
