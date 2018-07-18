@@ -19,7 +19,7 @@
             android:layout_alignParentStart="true"
             android:layout_below="@+id/button"
             android:gravity="center"
-            android:text="Coordinates: "
+            android:text="Waiting for Gps Data : "
             android:textSize="30sp" />
     </ScrollView>
 
@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:text="Request Location" />
+        android:text=" === GPS === " />
 
 
 </RelativeLayout>
