@@ -32,19 +32,34 @@ void LogicModel::SendJsonCommand(QString strCommand)
 
 }
 
+void LogicModel::SendNetworkGetRequest(QString getRequest)
+{
+    QNetworkRequest request(QUrl(getRequest + ""));
+    m_netAccessMgr.get(request);
+}
+
+
 void LogicModel::SendHttpCommand(QString strCommand)
 {
+    QString baseUrl = "http://192.168.4.1/";
+
     switch(strCommand.toStdString().c_str()[0])
     {
         case 'R':
         {
             qDebug() << "strCommand = RIGHT";
+
+            SendNetworkGetRequest(baseUrl + "RIGHT");
+
             break;
         }
 
         case 'L':
         {
             qDebug() << "strCommand = LEFT";
+
+            SendNetworkGetRequest(baseUrl + "LEFT");
+
             break;
         }
 
@@ -52,8 +67,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = FORWARD";
 
-            QNetworkRequest request(QUrl("http://192.168.4.1/5/on"));
-            m_netAccessMgr.get(request);
+            SendNetworkGetRequest(baseUrl + "FORWARD");
 
             break;
         }
@@ -61,6 +75,9 @@ void LogicModel::SendHttpCommand(QString strCommand)
         case 'B':
         {
             qDebug() << "strCommand = BACK";
+
+            SendNetworkGetRequest(baseUrl + "BACK");
+
             break;
         }
 
@@ -68,8 +85,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = STOP";
 
-            QNetworkRequest request(QUrl("http://192.168.4.1/5/off"));
-            m_netAccessMgr.get(request);
+            SendNetworkGetRequest(baseUrl + "STOP");
 
             break;
         }
@@ -77,6 +93,9 @@ void LogicModel::SendHttpCommand(QString strCommand)
         default:
         {
             qDebug() << "strCommand = DEFAULT";
+
+            SendNetworkGetRequest(baseUrl + "STOP");
+
             break;
         }
 

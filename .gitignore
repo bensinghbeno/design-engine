@@ -4,5 +4,6 @@
 *.jpg
 *.png
 *.o
+*.out
 build-*/
 
