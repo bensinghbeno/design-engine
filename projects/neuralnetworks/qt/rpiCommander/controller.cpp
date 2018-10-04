@@ -4,10 +4,10 @@ Controller::Controller(LogicModel& logicModel, MainWindow& mainWindow, QObject *
   , m_LogicModel(logicModel)
   , m_MainWindow(mainWindow)
 {
-    connect(m_MainWindow.ui->FORWARD,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
-    connect(m_MainWindow.ui->REVERSE,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
-    connect(m_MainWindow.ui->LEFT,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
-    connect(m_MainWindow.ui->RIGHT,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
-    connect(m_MainWindow.ui->STOP,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
+    connect(m_MainWindow.ui->F,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
+    connect(m_MainWindow.ui->B,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
+    connect(m_MainWindow.ui->L,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
+    connect(m_MainWindow.ui->R,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
+    connect(m_MainWindow.ui->S,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
 }
 
