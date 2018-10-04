@@ -27,7 +27,7 @@
      <string>Bubble Commander</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="FORWARD">
+   <widget class="QPushButton" name="L">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -37,10 +37,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>Forward</string>
+     <string>Left</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="REVERSE">
+   <widget class="QPushButton" name="R">
     <property name="geometry">
      <rect>
       <x>280</x>
@@ -50,10 +50,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>Reverse</string>
+     <string>Right</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="LEFT">
+   <widget class="QPushButton" name="B">
     <property name="geometry">
      <rect>
       <x>150</x>
@@ -63,10 +63,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>Left</string>
+     <string>Back</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="RIGHT">
+   <widget class="QPushButton" name="F">
     <property name="geometry">
      <rect>
       <x>150</x>
@@ -76,10 +76,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>Right</string>
+     <string>Forward</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="STOP">
+   <widget class="QPushButton" name="S">
     <property name="geometry">
      <rect>
       <x>150</x>

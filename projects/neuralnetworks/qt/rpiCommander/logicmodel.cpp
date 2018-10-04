@@ -16,7 +16,7 @@ LogicModel::~LogicModel()
 void LogicModel::sltSendCommand()
 {
     qDebug() << "Command Pressed = " << sender()->objectName();
-    SendJsonCommand(sender()->objectName());
+    SendHttpCommand(sender()->objectName());
 }
 
 void LogicModel::SendJsonCommand(QString strCommand)
@@ -32,5 +32,62 @@ void LogicModel::SendJsonCommand(QString strCommand)
 
 }
 
+void LogicModel::SendHttpCommand(QString strCommand)
+{
+    switch(strCommand.toStdString().c_str()[0])
+    {
+        case 'R':
+        {
+            qDebug() << "strCommand = RIGHT";
+            break;
+        }
+
+        case 'L':
+        {
+            qDebug() << "strCommand = LEFT";
+            break;
+        }
+
+        case 'F':
+        {
+            qDebug() << "strCommand = FORWARD";
+
+            QNetworkRequest request(QUrl("http://192.168.4.1/5/on"));
+            m_netAccessMgr.get(request);
+
+            break;
+        }
+
+        case 'B':
+        {
+            qDebug() << "strCommand = BACK";
+            break;
+        }
+
+        case 'S':
+        {
+            qDebug() << "strCommand = STOP";
+
+            QNetworkRequest request(QUrl("http://192.168.4.1/5/off"));
+            m_netAccessMgr.get(request);
+
+            break;
+        }
+
+        default:
+        {
+            qDebug() << "strCommand = DEFAULT";
+            break;
+        }
+
+    }
+
+
+
+
+
+
+
+}
 
 
