@@ -29,6 +29,7 @@ public slots:
 
 private:
     QNetworkAccessManager m_netAccessMgr;
+    void SendNetworkGetRequest(QString getRequest);
 
 
 };
