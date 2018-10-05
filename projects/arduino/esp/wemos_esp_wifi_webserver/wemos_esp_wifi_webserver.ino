@@ -171,6 +171,22 @@ void loop(){
             }
             if (header.indexOf("GET /LEFT") >= 0)
             {
+              SetGpioLow();               
+
+              Serial.println("GPIO 1 on");
+              Serial.println("GPIO 4 on");
+
+              output1State = "on";
+              output4State = "on";
+              
+              digitalWrite(output1, HIGH);
+              digitalWrite(output4, HIGH);
+
+              delay(90);
+              SetGpioLow();              
+            }   
+            if (header.indexOf("GET /RIGHT") >= 0)
+            {
               SetGpioLow();
 
               Serial.println("GPIO 5 on");
@@ -182,24 +198,9 @@ void loop(){
               digitalWrite(output5, HIGH);
               digitalWrite(output3, HIGH);
 
-              delay(200);
-              SetGpioLow();              
-            }   
-            if (header.indexOf("GET /RIGHT") >= 0)
-            {
+              delay(90);
               SetGpioLow();
 
-              Serial.println("GPIO 1 on");
-              Serial.println("GPIO 4 on");
-
-              output1State = "on";
-              output4State = "on";
-              
-              digitalWrite(output1, HIGH);
-              digitalWrite(output4, HIGH);
-
-              delay(200);
-              SetGpioLow();              
             }                                     
             else if (header.indexOf("GET /STOP") >= 0)
             {
