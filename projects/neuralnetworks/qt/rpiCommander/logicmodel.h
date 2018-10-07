@@ -5,8 +5,7 @@
 #include"udpclient.h"
 #include "/home/ben/engine/design-engine/projects/neuralnetworks/qt/perceptron2/perceptronjsonmodel.h"
 #include "interfaceenums.h"
-#include <QNetworkRequest>
-#include <QNetworkAccessManager>
+#include "httpgetclient.h"
 
 class LogicModel : public QObject
 {
@@ -22,15 +21,13 @@ public:
     void SendJsonCommand(QString strCommand);
     void SendHttpCommand(QString strCommand);
 
-signals:
 
 public slots:
     void sltSendCommand();
 
-private:
-    QNetworkAccessManager m_netAccessMgr;
-    void SendNetworkGetRequest(QString getRequest);
 
+private:
+    HttpGetClient m_HttpGetClient;
 
 };
 
