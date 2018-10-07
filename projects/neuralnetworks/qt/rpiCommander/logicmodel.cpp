@@ -32,13 +32,6 @@ void LogicModel::SendJsonCommand(QString strCommand)
 
 }
 
-void LogicModel::SendNetworkGetRequest(QString getRequest)
-{
-    QNetworkRequest request(QUrl(getRequest + ""));
-    m_netAccessMgr.get(request);
-}
-
-
 void LogicModel::SendHttpCommand(QString strCommand)
 {
     QString baseUrl = "http://192.168.4.1/";
@@ -49,7 +42,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = RIGHT";
 
-            SendNetworkGetRequest(baseUrl + "RIGHT");
+            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "RIGHT");
 
             break;
         }
@@ -58,7 +51,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = LEFT";
 
-            SendNetworkGetRequest(baseUrl + "LEFT");
+            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "LEFT");
 
             break;
         }
@@ -67,7 +60,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = FORWARD";
 
-            SendNetworkGetRequest(baseUrl + "FORWARD");
+            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "FORWARD");
 
             break;
         }
@@ -76,7 +69,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = BACK";
 
-            SendNetworkGetRequest(baseUrl + "BACK");
+            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "BACK");
 
             break;
         }
@@ -85,7 +78,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = STOP";
 
-            SendNetworkGetRequest(baseUrl + "STOP");
+            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "STOP");
 
             break;
         }
@@ -94,18 +87,12 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = DEFAULT";
 
-            SendNetworkGetRequest(baseUrl + "STOP");
+            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "STOP");
 
             break;
         }
 
     }
-
-
-
-
-
-
 
 }
 

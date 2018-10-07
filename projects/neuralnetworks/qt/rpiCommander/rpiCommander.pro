@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     ../perceptron2/perceptronjsonmodel.cpp \
     udpclient.cpp \
     logicmodel.cpp \
-    controller.cpp
+    controller.cpp \
+    httpgetclient.cpp
 
 HEADERS  += mainwindow.h \
     ../perceptron2/perceptronjsonterminal.h \
@@ -27,6 +28,7 @@ HEADERS  += mainwindow.h \
     udpclient.h \
     logicmodel.h \
     interfaceenums.h \
-    controller.h
+    controller.h \
+    httpgetclient.h
 
 FORMS    += mainwindow.ui
