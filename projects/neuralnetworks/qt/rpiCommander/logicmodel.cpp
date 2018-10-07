@@ -19,6 +19,11 @@ void LogicModel::sltSendCommand()
     SendHttpCommand(sender()->objectName());
 }
 
+void LogicModel::sltStopSendCommand()
+{
+    m_HttpGetClient.StopSendNetworkGetRequest();
+}
+
 void LogicModel::SendJsonCommand(QString strCommand)
 {
     m_pPerceptronJsonModel->insertvalue("CMD_MOVE",strCommand);
