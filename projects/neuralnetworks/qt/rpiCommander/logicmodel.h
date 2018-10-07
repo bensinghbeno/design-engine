@@ -24,6 +24,7 @@ public:
 
 public slots:
     void sltSendCommand();
+    void sltStopSendCommand();
 
 
 private:

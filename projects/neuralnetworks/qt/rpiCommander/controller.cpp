@@ -9,5 +9,11 @@ Controller::Controller(LogicModel& logicModel, MainWindow& mainWindow, QObject *
     connect(m_MainWindow.ui->L,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
     connect(m_MainWindow.ui->R,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
     connect(m_MainWindow.ui->S,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
+
+    connect(m_MainWindow.ui->F,SIGNAL(released()),&m_LogicModel,SLOT(sltStopSendCommand()));
+    connect(m_MainWindow.ui->B,SIGNAL(released()),&m_LogicModel,SLOT(sltStopSendCommand()));
+    connect(m_MainWindow.ui->L,SIGNAL(released()),&m_LogicModel,SLOT(sltStopSendCommand()));
+    connect(m_MainWindow.ui->R,SIGNAL(released()),&m_LogicModel,SLOT(sltStopSendCommand()));
+    connect(m_MainWindow.ui->S,SIGNAL(released()),&m_LogicModel,SLOT(sltStopSendCommand()));
 }
 
