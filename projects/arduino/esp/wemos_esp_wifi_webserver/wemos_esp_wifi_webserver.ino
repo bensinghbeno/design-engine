@@ -29,6 +29,10 @@ const int output5 = 5;
 const int output4 = 4;
 const int output1 = 1;
 const int output3 = 3;
+const int output6 = 6;
+const int output7 = 7;
+const int output8 = 8;
+const int output9 = 9;
 
 String getValue(String data, char separator, int index)
 {
@@ -75,11 +79,12 @@ void setup() {
   pinMode(output4, OUTPUT);
   pinMode(output1, OUTPUT);
   pinMode(output3, OUTPUT);
+  pinMode(output6, OUTPUT);
+  pinMode(output7, OUTPUT);
+  pinMode(output8, OUTPUT);
+  pinMode(output9, OUTPUT);
   // Set outputs to LOW
-  digitalWrite(output5, LOW);
-  digitalWrite(output4, LOW);
-  digitalWrite(output1, LOW);
-  digitalWrite(output3, LOW);
+  SetGpioHigh();
 
   // Connect to Wi-Fi network with SSID and password
   setupWiFi();
@@ -89,24 +94,28 @@ void setup() {
 
 }
 
-void SetGpioLow()
+void SetGpioHigh()
 {
   
-              Serial.println("GPIO 5 off");
-              Serial.println("GPIO 4 off");
-              Serial.println("GPIO 3 off");
-              Serial.println("GPIO 1 off");        
+              Serial.println("GPIO 5 ON");
+              Serial.println("GPIO 4 ON");
+              Serial.println("GPIO 3 ON");
+              Serial.println("GPIO 1 ON");        
              
-              output5State = "off";
-              output4State = "off";
-              output3State = "off";
-              output1State = "off";
+              output5State = "on";
+              output4State = "on";
+              output3State = "on";
+              output1State = "on";
               
               
-              digitalWrite(output5, LOW);
-              digitalWrite(output4, LOW);
-              digitalWrite(output3, LOW);
-              digitalWrite(output1, LOW);
+              digitalWrite(output5, HIGH);
+              digitalWrite(output4, HIGH);
+              digitalWrite(output3, HIGH);
+              digitalWrite(output1, HIGH);
+              digitalWrite(output6, HIGH);
+              digitalWrite(output7, HIGH);
+              digitalWrite(output8, HIGH);
+              digitalWrite(output9, HIGH);
 }
 
 void loop(){
@@ -139,72 +148,72 @@ void loop(){
             client.println("Connection: close");
             client.println();
 
-            if (header.indexOf("GET /FORWARD") >= 0)
-            {
-              Serial.println("GPIO 5 on");
-              Serial.println("GPIO 1 on");
-
-              output5State = "on";
-              output1State = "on";
-              
-              digitalWrite(output5, HIGH);
-              digitalWrite(output1, HIGH);
-
-              delay(200);
-              SetGpioLow();              
-            }
             if (header.indexOf("GET /BACK") >= 0)
             {
-              SetGpioLow();
+              Serial.println("GPIO 5 off");
+              Serial.println("GPIO 1 off");
 
-              Serial.println("GPIO 4 on");
-              Serial.println("GPIO 3 on");
-
-              output4State = "on";
-              output3State = "on";
+              output5State = "off";
+              output1State = "off";
               
-              digitalWrite(output4, HIGH);
-              digitalWrite(output3, HIGH);
+              digitalWrite(output5, LOW);
+              digitalWrite(output1, LOW);
 
               delay(200);
-              SetGpioLow();              
+              SetGpioHigh();              
             }
-            if (header.indexOf("GET /LEFT") >= 0)
+            if (header.indexOf("GET /FORWARD") >= 0)
             {
-              SetGpioLow();               
+              SetGpioHigh();
 
-              Serial.println("GPIO 1 on");
-              Serial.println("GPIO 4 on");
+              Serial.println("GPIO 4 off");
+              Serial.println("GPIO 3 off");
 
-              output1State = "on";
-              output4State = "on";
+              output4State = "off";
+              output3State = "off";
               
-              digitalWrite(output1, HIGH);
-              digitalWrite(output4, HIGH);
+              digitalWrite(output4, LOW);
+              digitalWrite(output3, LOW);
 
-              delay(90);
-              SetGpioLow();              
-            }   
+              delay(200);
+              SetGpioHigh();              
+            }
             if (header.indexOf("GET /RIGHT") >= 0)
             {
-              SetGpioLow();
+              SetGpioHigh();               
 
-              Serial.println("GPIO 5 on");
-              Serial.println("GPIO 3 on");
+              Serial.println("GPIO 1 off");
+              Serial.println("GPIO 4 off");
 
-              output5State = "on";
-              output3State = "on";
+              output1State = "off";
+              output4State = "off";
               
-              digitalWrite(output5, HIGH);
-              digitalWrite(output3, HIGH);
+              digitalWrite(output1, LOW);
+              digitalWrite(output4, LOW);
 
               delay(90);
-              SetGpioLow();
+              SetGpioHigh();              
+            }   
+            if (header.indexOf("GET /LEFT") >= 0)
+            {
+              SetGpioHigh();
+
+              Serial.println("GPIO 5 off");
+              Serial.println("GPIO 3 off");
+
+              output5State = "off";
+              output3State = "off";
+              
+              digitalWrite(output5, LOW);
+              digitalWrite(output3, LOW);
+
+              delay(90);
+              SetGpioHigh();
 
             }                                     
             else if (header.indexOf("GET /STOP") >= 0)
             {
-              SetGpioLow();
+              SetGpioHigh();
             }
 
             // turns the GPIOs on and off
