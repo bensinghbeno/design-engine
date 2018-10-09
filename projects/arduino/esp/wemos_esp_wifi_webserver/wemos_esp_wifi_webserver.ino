@@ -19,20 +19,17 @@ String accelY;
 String accelZ;
 
 // Auxiliar variables to store the current output state
-String output5State = "off";
+String output2State = "off";
 String output4State = "off";
 String output1State = "off";
 String output3State = "off";
 
-// Assign output variables to GPIO pins
-const int output5 = 5;
-const int output4 = 4;
-const int output1 = 1;
+// Assign output variables to GPIO pins (upwards from bottom right for wemos d1 pins - [3, 1, 16, 5]) 
 const int output3 = 3;
-const int output6 = 6;
-const int output7 = 7;
-const int output8 = 8;
-const int output9 = 9;
+const int output1 = 1;
+const int output2 = 16;
+const int output4 = 5;
+
 
 String getValue(String data, char separator, int index)
 {
@@ -75,14 +72,11 @@ void setupWiFi()
 void setup() {
   Serial.begin(115200);
   // Initialize the output variables as outputs
-  pinMode(output5, OUTPUT);
+  pinMode(output2, OUTPUT);
   pinMode(output4, OUTPUT);
   pinMode(output1, OUTPUT);
   pinMode(output3, OUTPUT);
-  pinMode(output6, OUTPUT);
-  pinMode(output7, OUTPUT);
-  pinMode(output8, OUTPUT);
-  pinMode(output9, OUTPUT);
+
   // Set outputs to LOW
   SetGpioHigh();
 
@@ -97,25 +91,21 @@ void setup() {
 void SetGpioHigh()
 {
   
+              Serial.println("GPIO 16 ON");
               Serial.println("GPIO 5 ON");
-              Serial.println("GPIO 4 ON");
               Serial.println("GPIO 3 ON");
               Serial.println("GPIO 1 ON");        
              
-              output5State = "on";
+              output2State = "on";
               output4State = "on";
               output3State = "on";
               output1State = "on";
               
               
-              digitalWrite(output5, HIGH);
+              digitalWrite(output2, HIGH);
               digitalWrite(output4, HIGH);
               digitalWrite(output3, HIGH);
               digitalWrite(output1, HIGH);
-              digitalWrite(output6, HIGH);
-              digitalWrite(output7, HIGH);
-              digitalWrite(output8, HIGH);
-              digitalWrite(output9, HIGH);
 }
 
 void loop(){
@@ -150,13 +140,13 @@ void loop(){
 
             if (header.indexOf("GET /BACK") >= 0)
             {
-              Serial.println("GPIO 5 off");
+              Serial.println("GPIO 16 off");
               Serial.println("GPIO 1 off");
 
-              output5State = "off";
+              output2State = "off";
               output1State = "off";
               
-              digitalWrite(output5, LOW);
+              digitalWrite(output2, LOW);
               digitalWrite(output1, LOW);
 
               delay(200);
@@ -166,7 +156,7 @@ void loop(){
             {
               SetGpioHigh();
 
-              Serial.println("GPIO 4 off");
+              Serial.println("GPIO 5 off");
               Serial.println("GPIO 3 off");
 
               output4State = "off";
@@ -183,7 +173,7 @@ void loop(){
               SetGpioHigh();               
 
               Serial.println("GPIO 1 off");
-              Serial.println("GPIO 4 off");
+              Serial.println("GPIO 5 off");
 
               output1State = "off";
               output4State = "off";
@@ -198,13 +188,13 @@ void loop(){
             {
               SetGpioHigh();
 
-              Serial.println("GPIO 5 off");
+              Serial.println("GPIO 16 off");
               Serial.println("GPIO 3 off");
 
-              output5State = "off";
+              output2State = "off";
               output3State = "off";
               
-              digitalWrite(output5, LOW);
+              digitalWrite(output2, LOW);
               digitalWrite(output3, LOW);
 
               delay(90);
@@ -267,20 +257,20 @@ void loop(){
                 }
               }                         
             }
-            else if (header.indexOf("GET /5/on") >= 0) {
+            else if (header.indexOf("GET /16/on") >= 0) {
+              Serial.println("GPIO 16 on");
+              output2State = "on";
+              digitalWrite(output2, HIGH);
+            } else if (header.indexOf("GET /16/off") >= 0) {
+              Serial.println("GPIO 16 off");
+              output2State = "off";
+              digitalWrite(output2, LOW);
+            } else if (header.indexOf("GET /5/on") >= 0) {
               Serial.println("GPIO 5 on");
-              output5State = "on";
-              digitalWrite(output5, HIGH);
-            } else if (header.indexOf("GET /5/off") >= 0) {
-              Serial.println("GPIO 5 off");
-              output5State = "off";
-              digitalWrite(output5, LOW);
-            } else if (header.indexOf("GET /4/on") >= 0) {
-              Serial.println("GPIO 4 on");
               output4State = "on";
               digitalWrite(output4, HIGH);
-            } else if (header.indexOf("GET /4/off") >= 0) {
-              Serial.println("GPIO 4 off");
+            } else if (header.indexOf("GET /5/off") >= 0) {
+              Serial.println("GPIO 5 off");
               output4State = "off";
               digitalWrite(output4, LOW);
             } else if (header.indexOf("GET /1/on") >= 0) {
@@ -321,22 +311,22 @@ void loop(){
             client.println("<body><h2>ACCELEROMETER Y : " + accelY +" </h2>");
             client.println("<body><h2>ACCELEROMETER Z : " + accelZ +" </h2>");
 
+            // Display current state, and ON/OFF buttons for GPIO 16
+            client.println("<p>GPIO 16 - State " + output2State + "</p>");
+            // If the output2State is off, it displays the ON button
+            if (output2State=="off") {
+              client.println("<p><a href=\"/16/on\"><button class=\"button\">OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/16/off\"><button class=\"button button2\">ON</button></a></p>");
+            }
+
             // Display current state, and ON/OFF buttons for GPIO 5
-            client.println("<p>GPIO 5 - State " + output5State + "</p>");
-            // If the output5State is off, it displays the ON button
-            if (output5State=="off") {
+            client.println("<p>GPIO 5 - State " + output4State + "</p>");
+            // If the output4State is off, it displays the ON button
+            if (output4State=="off") {
               client.println("<p><a href=\"/5/on\"><button class=\"button\">OFF</button></a></p>");
             } else {
               client.println("<p><a href=\"/5/off\"><button class=\"button button2\">ON</button></a></p>");
-            }
-
-            // Display current state, and ON/OFF buttons for GPIO 4
-            client.println("<p>GPIO 4 - State " + output4State + "</p>");
-            // If the output4State is off, it displays the ON button
-            if (output4State=="off") {
-              client.println("<p><a href=\"/4/on\"><button class=\"button\">OFF</button></a></p>");
-            } else {
-              client.println("<p><a href=\"/4/off\"><button class=\"button button2\">ON</button></a></p>");
             }
 
             // Display current state, and ON/OFF buttons for GPIO 1
