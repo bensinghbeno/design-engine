@@ -24,11 +24,21 @@ String output4State = "off";
 String output1State = "off";
 String output3State = "off";
 
-// Assign output variables to GPIO pins (upwards from bottom right for wemos d1 pins - [3, 1, 16, 5]) 
+String output5State = "off";
+String output6State = "off";
+String output7State = "off";
+String output8State = "off";
+
+// Assign output variables to GPIO pins (upwards from bottom right for wemos d1 pins - [3, 1, 16, 5] [4, 14, 12, 13]) 
 const int output3 = 3;
 const int output1 = 1;
 const int output2 = 16;
 const int output4 = 5;
+
+const int output5 = 4;
+const int output6 = 14;
+const int output7 = 12;
+const int output8 = 13;
 
 
 String getValue(String data, char separator, int index)
@@ -77,6 +87,11 @@ void setup() {
   pinMode(output1, OUTPUT);
   pinMode(output3, OUTPUT);
 
+  pinMode(output5, OUTPUT);
+  pinMode(output6, OUTPUT);
+  pinMode(output7, OUTPUT);
+  pinMode(output8, OUTPUT);
+
   // Set outputs to LOW
   SetGpioHigh();
 
@@ -89,23 +104,37 @@ void setup() {
 }
 
 void SetGpioHigh()
-{
-  
+{  
               Serial.println("GPIO 16 ON");
               Serial.println("GPIO 5 ON");
               Serial.println("GPIO 3 ON");
-              Serial.println("GPIO 1 ON");        
+              Serial.println("GPIO 1 ON");  
+
+              Serial.println("GPIO 4 ON");
+              Serial.println("GPIO 14 ON");
+              Serial.println("GPIO 12 ON");
+              Serial.println("GPIO 13 ON");       
              
               output2State = "on";
               output4State = "on";
               output3State = "on";
               output1State = "on";
+
+              output5State = "on";
+              output6State = "on";
+              output7State = "on";
+              output8State = "on";
               
               
               digitalWrite(output2, HIGH);
               digitalWrite(output4, HIGH);
               digitalWrite(output3, HIGH);
               digitalWrite(output1, HIGH);
+
+              digitalWrite(output5, HIGH);
+              digitalWrite(output6, HIGH);
+              digitalWrite(output7, HIGH);
+              digitalWrite(output8, HIGH);
 }
 
 void loop(){
