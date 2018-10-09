@@ -195,7 +195,34 @@ void loop(){
               delay(20);
               SetGpioHigh();              
             }
+            else if (header.indexOf("GET /TO") >= 0)
+            {
+              Serial.println("GPIO 12 off");
+              Serial.println("GPIO 13 on");
 
+              output7State = "off";
+              output8State = "on";
+              
+              digitalWrite(output7, LOW);
+              digitalWrite(output8, HIGH);
+
+              delay(20);
+              SetGpioHigh();              
+            }            
+            else if (header.indexOf("GET /FRO") >= 0)
+            {
+              Serial.println("GPIO 12 on");
+              Serial.println("GPIO 13 off");
+
+              output7State = "on";
+              output8State = "off";
+              
+              digitalWrite(output7, HIGH);
+              digitalWrite(output8, LOW);
+
+              delay(20);
+              SetGpioHigh();              
+            }   
             else if (header.indexOf("GET /BACK") >= 0)
             {
               Serial.println("GPIO 16 off");
@@ -363,7 +390,24 @@ void loop(){
               Serial.println("GPIO 14 off");
               output6State = "off";
               digitalWrite(output6, LOW);
+            } else if (header.indexOf("GET /12/on") >= 0) {
+              Serial.println("GPIO 12 on");
+              output7State = "on";
+              digitalWrite(output7, HIGH);
+            } else if (header.indexOf("GET /12/off") >= 0) {
+              Serial.println("GPIO 12 off");
+              output7State = "off";
+              digitalWrite(output7, LOW);
+            } else if (header.indexOf("GET /13/on") >= 0) {
+              Serial.println("GPIO 13 on");
+              output8State = "on";
+              digitalWrite(output8, HIGH);
+            } else if (header.indexOf("GET /13/off") >= 0) {
+              Serial.println("GPIO 13 off");
+              output8State = "off";
+              digitalWrite(output8, LOW);
             }
+            
             
 
             // Display the HTML web page
@@ -439,6 +483,24 @@ void loop(){
             } else {
               client.println("<p><a href=\"/14/off\"><button class=\"button button2\">ON</button></a></p>");
             }
+
+            // Display current state, and ON/OFF buttons for GPIO 12
+            client.println("<p>GPIO 12 - State " + output7State + "</p>");
+            // If the output7State is off, it displays the ON button
+            if (output7State=="off") {
+              client.println("<p><a href=\"/12/on\"><button class=\"button\">OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/12/off\"><button class=\"button button2\">ON</button></a></p>");
+            }
+
+            // Display current state, and ON/OFF buttons for GPIO 13
+            client.println("<p>GPIO 13 - State " + output8State + "</p>");
+            // If the output8State is off, it displays the ON button
+            if (output8State=="off") {
+              client.println("<p><a href=\"/13/on\"><button class=\"button\">OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/13/off\"><button class=\"button button2\">ON</button></a></p>");
+            }            
 
             client.println("</body></html>");
 

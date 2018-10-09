@@ -11,6 +11,8 @@ Controller::Controller(LogicModel& logicModel, MainWindow& mainWindow, QObject *
     connect(m_MainWindow.ui->S,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
     connect(m_MainWindow.ui->G,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
     connect(m_MainWindow.ui->r,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
+    connect(m_MainWindow.ui->T,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
+    connect(m_MainWindow.ui->f,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
 
     connect(m_MainWindow.ui->F,SIGNAL(released()),&m_LogicModel,SLOT(sltStopSendCommand()));
     connect(m_MainWindow.ui->B,SIGNAL(released()),&m_LogicModel,SLOT(sltStopSendCommand()));
@@ -19,4 +21,6 @@ Controller::Controller(LogicModel& logicModel, MainWindow& mainWindow, QObject *
     connect(m_MainWindow.ui->S,SIGNAL(released()),&m_LogicModel,SLOT(sltStopSendCommand()));
     connect(m_MainWindow.ui->G,SIGNAL(released()),&m_LogicModel,SLOT(sltStopSendCommand()));
     connect(m_MainWindow.ui->r,SIGNAL(released()),&m_LogicModel,SLOT(sltStopSendCommand()));
+    connect(m_MainWindow.ui->T,SIGNAL(released()),&m_LogicModel,SLOT(sltStopSendCommand()));
+    connect(m_MainWindow.ui->f,SIGNAL(released()),&m_LogicModel,SLOT(sltStopSendCommand()));
 }
