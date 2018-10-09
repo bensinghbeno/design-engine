@@ -62,6 +62,23 @@ void LogicModel::SendHttpCommand(QString strCommand)
             break;
         }
 
+        case 'T':
+        {
+            qDebug() << "strCommand = TO";
+
+            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "TO");
+
+            break;
+        }
+
+        case 'f':
+        {
+            qDebug() << "strCommand = FRO";
+
+            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "FRO");
+
+            break;
+        }
         case 'R':
         {
             qDebug() << "strCommand = RIGHT";
