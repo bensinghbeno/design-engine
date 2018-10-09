@@ -43,6 +43,25 @@ void LogicModel::SendHttpCommand(QString strCommand)
 
     switch(strCommand.toStdString().c_str()[0])
     {
+
+        case 'G':
+        {
+            qDebug() << "strCommand = GRAB";
+
+            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "GRAB");
+
+            break;
+        }
+
+        case 'r':
+        {
+            qDebug() << "strCommand = RELEASE";
+
+            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "RELEASE");
+
+            break;
+        }
+
         case 'R':
         {
             qDebug() << "strCommand = RIGHT";
