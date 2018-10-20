@@ -2,6 +2,7 @@
 #include <QApplication>
 #include "logicmodel.h"
 #include "controller.h"
+#include <QDebug>
 
 
 int main(int argc, char *argv[])
@@ -11,10 +12,10 @@ int main(int argc, char *argv[])
     LogicModel objLogicModel;
 
     MainWindow objMainWindow;
-    objMainWindow.show();
 
     Controller objController(objLogicModel, objMainWindow);
 
+    objMainWindow.show();
 
     return a.exec();
 }
