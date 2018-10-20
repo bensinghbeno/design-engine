@@ -9,7 +9,6 @@ LogicModel::LogicModel(QObject *parent) : QObject(parent)
 
 LogicModel::~LogicModel()
 {
-
     delete m_pPerceptronJsonModel;
 }
 
@@ -48,7 +47,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = GRAB";
 
-            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "GRAB");
+            baseUrl += "GRAB";
 
             break;
         }
@@ -57,7 +56,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = RELEASE";
 
-            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "RELEASE");
+            baseUrl += "RELEASE";
 
             break;
         }
@@ -66,7 +65,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = TO";
 
-            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "TO");
+            baseUrl += "TO";
 
             break;
         }
@@ -75,7 +74,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = FRO";
 
-            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "FRO");
+            baseUrl += "FRO";
 
             break;
         }
@@ -83,7 +82,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = RIGHT";
 
-            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "RIGHT");
+            baseUrl += "RIGHT";
 
             break;
         }
@@ -92,7 +91,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = LEFT";
 
-            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "LEFT");
+            baseUrl += "LEFT";
 
             break;
         }
@@ -101,7 +100,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = FORWARD";
 
-            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "FORWARD");
+            baseUrl += "FORWARD";
 
             break;
         }
@@ -110,7 +109,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = BACK";
 
-            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "BACK");
+            baseUrl += "BACK";
 
             break;
         }
@@ -119,7 +118,7 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = STOP";
 
-            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "STOP");
+            baseUrl += "STOP";
 
             break;
         }
@@ -128,13 +127,14 @@ void LogicModel::SendHttpCommand(QString strCommand)
         {
             qDebug() << "strCommand = DEFAULT";
 
-            m_HttpGetClient.SendNetworkGetRequest(baseUrl + "STOP");
+            baseUrl += "STOP";
 
             break;
         }
 
     }
 
+    m_HttpGetClient.SendNetworkGetRequest(baseUrl);
 }
 
 
