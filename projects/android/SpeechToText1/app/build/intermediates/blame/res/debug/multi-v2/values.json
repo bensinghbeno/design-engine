@@ -1,0 +1,79 @@
+{
+    "logs": [
+        {
+            "outputFile": "/home/ben/engine/design-engine/projects/android/SpeechToText1/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values/values.xml",
+            "map": [
+                {
+                    "source": "/home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/res/values/styles.xml",
+                    "from": {
+                        "startLines": "6,15",
+                        "startColumns": "4,4",
+                        "startOffsets": "191,522",
+                        "endLines": "12,17",
+                        "endColumns": "12,12",
+                        "endOffsets": "481,679"
+                    },
+                    "to": {
+                        "startLines": "13,20",
+                        "startColumns": "4,4",
+                        "startOffsets": "683,974",
+                        "endLines": "19,22",
+                        "endColumns": "12,12",
+                        "endOffsets": "969,1129"
+                    }
+                },
+                {
+                    "source": "/home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/res/values/strings.xml",
+                    "from": {
+                        "startLines": "4,3,5,7,6,8",
+                        "startColumns": "4,4,4,4,4,4",
+                        "startOffsets": "111,58,165,281,218,379",
+                        "endColumns": "52,51,52,97,62,58",
+                        "endOffsets": "159,105,213,374,276,433"
+                    },
+                    "to": {
+                        "startLines": "7,8,9,10,11,12",
+                        "startColumns": "4,4,4,4,4,4",
+                        "startOffsets": "311,364,416,469,567,624",
+                        "endColumns": "52,51,52,97,56,58",
+                        "endOffsets": "359,411,464,562,619,678"
+                    }
+                },
+                {
+                    "source": "/home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/res/values/colors.xml",
+                    "from": {
+                        "startLines": "4,3,2",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "151,98,57",
+                        "endColumns": "49,51,39",
+                        "endOffsets": "196,145,92"
+                    },
+                    "to": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,105,157",
+                        "endColumns": "49,51,39",
+                        "endOffsets": "100,152,192"
+                    }
+                },
+                {
+                    "source": "/home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/res/values/dimens.xml",
+                    "from": {
+                        "startLines": "3,4",
+                        "startColumns": "4,4",
+                        "startOffsets": "92,151",
+                        "endColumns": "57,55",
+                        "endOffsets": "145,202"
+                    },
+                    "to": {
+                        "startLines": "5,6",
+                        "startColumns": "4,4",
+                        "startOffsets": "197,255",
+                        "endColumns": "57,55",
+                        "endOffsets": "250,306"
+                    }
+                }
+            ]
+        }
+    ]
+}
