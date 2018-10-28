@@ -14,6 +14,13 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 public class MainActivity extends Activity {
 
 	private TextView txtSpeechInput;
@@ -67,13 +74,61 @@ public class MainActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
+        final RequestQueue queue = Volley.newRequestQueue(this);
+
 		switch (requestCode) {
 		case REQ_CODE_SPEECH_INPUT: {
 			if (resultCode == RESULT_OK && null != data) {
 
+                String urlPrefix = "http://192.168.4.1/3/";
+                String urlPostFix = "off";
+
+                String myRecogCmdPrefix = "\n\n Command Recognized: ";
+                String myResult = "NO";
+
 				ArrayList<String> result = data
 						.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-				txtSpeechInput.setText(result.get(0));
+
+                if (result.get(0).equals("switch on living room"))
+                {
+                    myResult = "YES";
+                    urlPostFix = "on";
+                }
+                if (result.get(0).equals("switch off living room"))
+                {
+                    myResult = "YES";
+                    urlPostFix = "off";
+                }
+
+				txtSpeechInput.setText("\"" + result.get(0) + "\"" + myRecogCmdPrefix + myResult);
+
+                if (myResult.equals("YES"))
+                {
+                    String url = urlPrefix + urlPostFix;
+
+                    Toast.makeText(getApplicationContext(), "URL = " + url, Toast.LENGTH_SHORT).show();
+
+
+                    // Request a string response from the provided URL.
+                    StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                            new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response)
+                                {
+                                    String resp =  "Response is: "+ response.substring(0,500);
+                                    //Toast.makeText(getApplicationContext(), resp, Toast.LENGTH_SHORT).show();
+                                }
+                            }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            //Toast.makeText(getApplicationContext(), "That didn't work!", Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+
+                    queue.add(stringRequest);
+
+                }
 			}
 			break;
 		}
