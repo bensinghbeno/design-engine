@@ -1,63 +1,72 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-27:12
-INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-27:12
-INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-27:12
-INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-27:12
-INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-27:12
-INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-27:12
-INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-27:12
+ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-28:12
+INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-28:12
+INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-28:12
+INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-28:12
+MERGED from [com.android.volley:volley:1.0.0] /home/ben/.gradle/caches/transforms-1/files-1.1/volley-1.0.0.aar/25dcaab52c20369e96fd0c07f2d47aad/AndroidManifest.xml:2:1-11:12
+INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-28:12
+INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-28:12
+INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:1-28:12
 	package
 		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:3:5-44
 		INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml
 		INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml
 	android:versionName
-		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:5:5-30
+		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:6:5-30
 		INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml
 		INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml
 	xmlns:android
 		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:2:11-69
 	android:versionCode
-		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:4:5-28
+		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:5:5-28
 		INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml
 		INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml
+uses-permission#android.permission.INTERNET
+ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:7:5-66
+	android:name
+		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:7:22-64
 uses-sdk
-ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:7:5-9:41
-INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:7:5-9:41
-INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:7:5-9:41
-INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:7:5-9:41
-INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:7:5-9:41
+ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:8:5-10:41
+INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:8:5-10:41
+INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:8:5-10:41
+MERGED from [com.android.volley:volley:1.0.0] /home/ben/.gradle/caches/transforms-1/files-1.1/volley-1.0.0.aar/25dcaab52c20369e96fd0c07f2d47aad/AndroidManifest.xml:7:5-43
+MERGED from [com.android.volley:volley:1.0.0] /home/ben/.gradle/caches/transforms-1/files-1.1/volley-1.0.0.aar/25dcaab52c20369e96fd0c07f2d47aad/AndroidManifest.xml:7:5-43
+INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:8:5-10:41
+INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:8:5-10:41
 	android:targetSdkVersion
-		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:9:9-38
+		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:10:9-38
 		INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml
 		INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml
 	android:minSdkVersion
-		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:8:9-35
+		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:9:9-35
 		INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml
 		INJECTED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml
 application
-ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:11:5-25:19
+ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:12:5-26:19
+MERGED from [com.android.volley:volley:1.0.0] /home/ben/.gradle/caches/transforms-1/files-1.1/volley-1.0.0.aar/25dcaab52c20369e96fd0c07f2d47aad/AndroidManifest.xml:9:5-20
+MERGED from [com.android.volley:volley:1.0.0] /home/ben/.gradle/caches/transforms-1/files-1.1/volley-1.0.0.aar/25dcaab52c20369e96fd0c07f2d47aad/AndroidManifest.xml:9:5-20
 	android:label
-		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:14:9-41
+		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:15:9-41
 	android:icon
-		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:13:9-45
+		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:14:9-45
 	android:allowBackup
-		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:12:9-35
+		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:13:9-35
 	android:theme
-		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:15:9-40
+		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:16:9-40
 activity#info.androidhive.speechtotext.MainActivity
-ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:16:9-24:20
+ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:17:9-25:20
 	android:label
-		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:18:13-45
+		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:19:13-45
 	android:name
-		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:17:13-70
+		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:18:13-70
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:19:13-23:29
+ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:20:13-24:29
 action#android.intent.action.MAIN
-ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:20:17-69
+ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:21:17-69
 	android:name
-		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:20:25-66
+		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:21:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:22:17-77
+ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:23:17-77
 	android:name
-		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:22:27-74
+		ADDED from /home/ben/engine/design-engine/projects/android/SpeechToText1/app/src/main/AndroidManifest.xml:23:27-74

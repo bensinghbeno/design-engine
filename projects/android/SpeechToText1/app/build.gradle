@@ -20,4 +20,6 @@ android {
 
 dependencies {
     compile 'com.android.support:support-v4:19.1.0'
+    implementation 'com.android.volley:volley:1.0.0'
+
 }
