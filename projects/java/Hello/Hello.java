@@ -3,9 +3,14 @@
 
 public class Hello 
 {
+
+
+
 	public static void main(String args[])
 	{
-		System.out.println("Hello Java .. ");
+		String str = "string";
+		int val = 77;
+		System.out.println("Hello Java .., cmdline =  " + str + ", val = " + val);
 	}
 
 }
