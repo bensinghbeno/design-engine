@@ -4,14 +4,16 @@
 *
 */
 
-#include <stdio.h>
+#include <linux/module.h>
+#include <linux/kernel.h>
 
-
-int main(int argc, char** argv)
+int init_module(void)
 {
-
-	printf(" ===  Hello Linux Char Driver1 === \n");
-
+	printk(KERN_INFO" === Hello linux driver === \n");
 	return 0;
 }
 
+void cleanup_module(void)
+{
+	printk(KERN_INFO" === Goodbye linux driver === \n");
+}
