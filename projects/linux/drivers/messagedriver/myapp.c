@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 
    FILE *fp;
 
-   fp = fopen("/dev/mydrivercomm", "w+");
+   fp = fopen("/dev/messagedriver", "w+");
    fputs("AppBuff", fp);
    fclose(fp);
 
