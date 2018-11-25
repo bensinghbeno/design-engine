@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 
 
+global_prev_dir = "STRAIGHT"
 
 #video_capture = cv2.VideoCapture(-1)
 video_capture = cv2.VideoCapture("http://192.168.178.45:8080/video")
@@ -84,20 +85,27 @@ while(True):
         cv2.drawContours(crop_img, contours, -1, (0,255,0), 1)
 
 
-        if cx == 0:
+        if cx <= 10 or cx >= 1000:
            print "I don't see the line"
-
-
-        if cx >= 600:
-            print " =========== Turn RIGHT! ===================="
+           print("====== Previous Dir = %s"%global_prev_dir)
 
 
         if cx > 400 and cx < 600:
             print " =========== DRIVE STRAIGHT! ===================="
+            global_prev_dir = "STRAIGHT"
 
 
-        if cx <= 400:
+        if cx <= 400 and cx > 10:
             print " =========== Turn LEFT! ===================="
+            global_prev_dir = "LEFT"
+
+
+        if cx >= 600 and cx < 1000:
+            print " =========== Turn RIGHT! ===================="
+            global_prev_dir = "RIGHT"
+
+
+
 
 
     print("################## CX = %s"%(cx))
