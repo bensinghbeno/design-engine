@@ -13,11 +13,12 @@ module:
 
 clean:
 	make -C $(KERNEL_SRC_DIR)/build M=$(PWD) clean
+	rm *.out
 
-test:
+deploymodule:
 	-sudo rmmod messagedriver
 	sudo dmesg -C
 	sudo insmod messagedriver.ko
-	sudo rm '/dev/mydrivercomm'
-	sudo mknod '/dev/mydrivercomm' c 240 0 -m 777
+	-sudo rm '/dev/messagedriver'
+	sudo mknod /dev/messagedriver c 240 0 -m 777
 	dmesg
