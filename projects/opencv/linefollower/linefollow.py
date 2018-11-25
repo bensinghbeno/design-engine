@@ -6,11 +6,12 @@ import cv2
 
 
 
-video_capture = cv2.VideoCapture(-1)
+#video_capture = cv2.VideoCapture(-1)
+video_capture = cv2.VideoCapture("http://192.168.178.45:8080/video")
 
-video_capture.set(3, 160)
+#video_capture.set(3, 1920)
 
-video_capture.set(4, 120)
+#video_capture.set(4, 1080)
 
 
 
@@ -26,7 +27,7 @@ while(True):
 
     # Crop the image
 
-    crop_img = frame[60:120, 0:160]
+    crop_img = frame[0:120, 0:1080]
 
 
 
@@ -87,16 +88,20 @@ while(True):
            print "I don't see the line"
 
 
-        if cx >= 120:
+        if cx >= 600:
             print " =========== Turn RIGHT! ===================="
 
 
-        if cx < 120 and cx > 50:
+        if cx > 400 and cx < 600:
             print " =========== DRIVE STRAIGHT! ===================="
 
 
-        if cx <= 50:
+        if cx <= 400:
             print " =========== Turn LEFT! ===================="
+
+
+    print("################## CX = %s"%(cx))
+
 
 
 
