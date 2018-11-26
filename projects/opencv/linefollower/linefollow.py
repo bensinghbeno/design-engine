@@ -1,18 +1,14 @@
-
-
 import numpy as np
 
 import cv2
 
 
-global_prev_dir = "STRAIGHT"
 
-#video_capture = cv2.VideoCapture(-1)
-video_capture = cv2.VideoCapture("http://192.168.178.45:8080/video")
+video_capture = cv2.VideoCapture(-1)
 
-#video_capture.set(3, 1920)
+video_capture.set(3, 160)
 
-#video_capture.set(4, 1080)
+video_capture.set(4, 120)
 
 
 
@@ -28,7 +24,7 @@ while(True):
 
     # Crop the image
 
-    crop_img = frame[0:120, 0:1080]
+    crop_img = frame[60:120, 0:160]
 
 
 
@@ -65,14 +61,10 @@ while(True):
         M = cv2.moments(c)
 
 
-        den = M['m00']
 
-        if den <= 0:
-            cx = 0
-            cy = 0
-        else:
-            cx = int(M['m10']/den)
-            cy = int(M['m01']/den)
+        cx = int(M['m10']/M['m00'])
+
+        cy = int(M['m01']/M['m00'])
 
 
 
@@ -85,31 +77,28 @@ while(True):
         cv2.drawContours(crop_img, contours, -1, (0,255,0), 1)
 
 
-        if cx <= 10 or cx >= 1000:
-           print "I don't see the line"
-           print("====== Previous Dir = %s"%global_prev_dir)
 
+        if cx >= 120:
 
-        if cx > 400 and cx < 600:
-            print " =========== DRIVE STRAIGHT! ===================="
-            global_prev_dir = "STRAIGHT"
-
-
-        if cx <= 400 and cx > 10:
-            print " =========== Turn LEFT! ===================="
-            global_prev_dir = "LEFT"
-
-
-        if cx >= 600 and cx < 1000:
-            print " =========== Turn RIGHT! ===================="
-            global_prev_dir = "RIGHT"
+            print "Turn Left!"
 
 
 
+        if cx < 120 and cx > 50:
+
+            print "On Track!"
 
 
-    print("################## CX = %s"%(cx))
 
+        if cx <= 50:
+
+            print "Turn Right"
+
+
+
+   else:
+
+        print "I don't see the line"
 
 
 
