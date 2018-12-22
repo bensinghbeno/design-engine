@@ -14,7 +14,7 @@ import cv2
 global_prev_dir = "STRAIGHT"
 global_moments_exception = "TRUE"
 
-video_capture = cv2.VideoCapture("http://192.168.178.45:8080/video")
+video_capture = cv2.VideoCapture("http://192.168.0.8:8080/video")
 
 
 while(True):
