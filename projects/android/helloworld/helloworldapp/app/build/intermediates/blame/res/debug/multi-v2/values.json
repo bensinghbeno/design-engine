@@ -1,0 +1,45 @@
+{
+    "logs": [
+        {
+            "outputFile": "/home/ben/engine/design-engine/projects/android/helloworld/helloworldapp/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values/values.xml",
+            "map": [
+                {
+                    "source": "/home/ben/engine/design-engine/projects/android/helloworld/helloworldapp/app/src/main/res/values/styles.xml",
+                    "from": {
+                        "startLines": "6,15",
+                        "startColumns": "4,4",
+                        "startOffsets": "191,522",
+                        "endLines": "12,17",
+                        "endColumns": "12,12",
+                        "endOffsets": "481,679"
+                    },
+                    "to": {
+                        "startLines": "5,12",
+                        "startColumns": "4,4",
+                        "startOffsets": "209,500",
+                        "endLines": "11,14",
+                        "endColumns": "12,12",
+                        "endOffsets": "495,655"
+                    }
+                },
+                {
+                    "source": "/home/ben/engine/design-engine/projects/android/helloworld/helloworldapp/app/src/main/res/values/strings.xml",
+                    "from": {
+                        "startLines": "3,4,5",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "58,109,163",
+                        "endColumns": "49,52,50",
+                        "endOffsets": "103,157,209"
+                    },
+                    "to": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,105,158",
+                        "endColumns": "49,52,50",
+                        "endOffsets": "100,153,204"
+                    }
+                }
+            ]
+        }
+    ]
+}

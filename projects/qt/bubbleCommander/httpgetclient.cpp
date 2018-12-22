@@ -7,20 +7,28 @@ HttpGetClient::HttpGetClient()
 
 void HttpGetClient::SendNetworkGetRequest(QString getRequest)
 {
-    StopSendNetworkGetRequest();
 
-    auto lambda = [getRequest]
-    {
-        QNetworkAccessManager netAccessMgr;
-        QNetworkRequest networkRequest;
-        networkRequest.setUrl(QUrl(getRequest));
-        netAccessMgr.get(networkRequest);
+    QNetworkAccessManager netAccessMgr;
+    QNetworkRequest networkRequest;
+    networkRequest.setUrl(QUrl(getRequest));
+    netAccessMgr.get(networkRequest);
 
-        qDebug() << "Lambda thread SendHttpCommand = " << getRequest;
+    qDebug() << "Lambda thread SendHttpCommand = " << getRequest;
 
-    };
+//    StopSendNetworkGetRequest();
 
-    m_WorkerThread.StartJob(lambda);
+//    auto lambda = [getRequest]
+//    {
+//        QNetworkAccessManager netAccessMgr;
+//        QNetworkRequest networkRequest;
+//        networkRequest.setUrl(QUrl(getRequest));
+//        netAccessMgr.get(networkRequest);
+
+//        qDebug() << "Lambda thread SendHttpCommand = " << getRequest;
+
+//    };
+
+//    m_WorkerThread.StartJob(lambda);
 }
 
 void HttpGetClient::StopSendNetworkGetRequest()

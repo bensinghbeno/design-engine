@@ -1,35 +1,41 @@
 #include <SoftwareSerial.h>
 
-SoftwareSerial mySerial(9, 10); // RX, TX
+String a;
+const int output2 = 16;
+
 
 void setup() {
-  // Open serial communications and wait for port to open:
-  Serial.begin(115200);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
+
+Serial.begin(115200); // opens serial port, sets data rate
+Serial.println("Hello Arduino Serial\n");
+pinMode(output2, OUTPUT);
+digitalWrite(output2, LOW);
 
 
-  Serial.println("Arduino Serial Connected!");
-
-  // set the data rate for the SoftwareSerial port
-  mySerial.begin(115200);
-  while (!mySerial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
-  Serial.println("Software Serial Connected!!");
-
-  mySerial.println("AT\r\n");
 }
 
-void loop() { // run over and over
-  delay(500);
-    mySerial.write("AT\r\n");
+void loop() {
 
-  if (mySerial.available()) {
-    Serial.write(mySerial.read());
-  }
-  if (Serial.available()) {
-    mySerial.write(Serial.read());
-  }
+while(Serial.available()) {
+
+a= Serial.readString();// read the incoming data as string
+
+Serial.println(a);
+//a.trim();
+
+if (a.equals("b"))
+{
+  Serial.println("Command:  GPIO16 ON ");
+  digitalWrite(output2, HIGH);
+
+}
+else
+{
+  Serial.println("Command: Default : GPIO16 OFF ");
+  digitalWrite(output2, LOW);
+
+}
+
+}
+
 }
