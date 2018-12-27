@@ -25,7 +25,4 @@ void UdpClient::sltReadDatagram()
     m_pJsonmodel->insertJsonStringbuffer(m_byteArrayBuffer.toStdString().c_str());
     qDebug() << "receive CMD_MOVE = " << m_pJsonmodel->getvalue("CMD_MOVE");
 
-
-
-
 }
