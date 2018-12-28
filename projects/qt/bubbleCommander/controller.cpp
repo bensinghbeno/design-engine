@@ -4,6 +4,9 @@ Controller::Controller(LogicModel& logicModel, MainWindow& mainWindow, QObject *
   , m_LogicModel(logicModel)
   , m_MainWindow(mainWindow)
 {
+    connect(m_MainWindow.ui->teIp,SIGNAL(textChanged()),&m_LogicModel,SLOT(sltSetIp()));
+    connect(m_MainWindow.ui->tePort,SIGNAL(textChanged()),&m_LogicModel,SLOT(sltSetPort()));
+
     connect(m_MainWindow.ui->F,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
     connect(m_MainWindow.ui->B,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));
     connect(m_MainWindow.ui->L,SIGNAL(pressed()),&m_LogicModel,SLOT(sltSendCommand()));

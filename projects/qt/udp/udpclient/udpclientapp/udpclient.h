@@ -22,9 +22,9 @@ public:
 
 public slots:
     void sltReadDatagram();
-    void sltWriteDatagram(QString data);
     void sltSetIp(QString ip);
     void sltSetPort(quint16 port);
+    void sltWriteDatagram(QString data);
 
 private:
     QString m_Ip;
