@@ -18,9 +18,19 @@
         android:textAppearance="?android:attr/textAppearanceLarge"/>
 
     <TextView
+        android:id="@+id/textViewTitle2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="286dp"
+        android:text="@string/udp_port"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
         android:id="@+id/textView1"
-        android:layout_width="311dp"
-        android:layout_height="40dp"
+        android:layout_width="294dp"
+        android:layout_height="83dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="34dp"
         android:background="#FFFFFF" />
@@ -29,64 +39,53 @@
         android:id="@+id/editText1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/textView1"
         android:layout_alignLeft="@+id/textView1"
         android:layout_alignRight="@+id/textView1"
-        android:layout_below="@+id/textView1"
-        android:layout_marginTop="28dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="33dp"
+        android:layout_marginRight="-4dp"
         android:ems="10">
 
-        <requestFocus/>
+        <requestFocus />
     </EditText>
 
     <Button
         android:id="@+id/buttonSend"
         style="?borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="234dp"
+        android:layout_height="50dp"
         android:layout_below="@+id/editText1"
         android:layout_alignLeft="@+id/editText1"
         android:layout_alignRight="@+id/editText1"
-        android:layout_marginLeft="-6dp"
-        android:layout_marginTop="-1dp"
-        android:layout_marginRight="6dp"
+        android:layout_marginLeft="38dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginRight="39dp"
         android:text="Send" />
 
     <TextView
         android:id="@+id/infoip"
-        android:layout_width="140dp"
-        android:layout_height="36dp"
-        android:layout_alignStart="@+id/textView1"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="-10dp"
-        android:layout_marginBottom="249dp"
+        android:layout_width="318dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/infoport"
+        android:layout_alignStart="@+id/infoport"
         android:textStyle="italic" />
 
     <TextView
         android:id="@+id/infoport"
-        android:layout_width="141dp"
-        android:layout_height="31dp"
+        android:layout_width="317dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/prompt"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="210dp"
+        android:layout_marginBottom="112dp"
         android:textStyle="italic" />
 
     <TextView
-        android:id="@+id/state"
-        android:layout_width="193dp"
-        android:layout_height="40dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="187dp"
-        android:layout_marginBottom="170dp"
-        android:text="un-initiated"
-        android:textSize="20dp" />
-
-    <TextView
         android:id="@+id/prompt"
-        android:layout_width="332dp"
-        android:layout_height="148dp"
-        android:layout_alignParentEnd="true"
+        android:layout_width="319dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginEnd="41dp"
-        android:layout_marginBottom="18dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="58dp"
         android:textSize="18dp" />
 </RelativeLayout>

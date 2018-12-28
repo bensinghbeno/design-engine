@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private final static String TAG = MainActivity.class.getSimpleName();
 
     TextView infoIp, infoPort;
-    TextView textViewState, textViewPrompt;
+    TextView textViewPrompt;
 
     static final int UdpServerPORT = 7777;
     UdpServerThread udpServerThread;
@@ -62,20 +62,11 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
     }
 
-    private void updateState(final String state){
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                textViewState.setText(state);
-            }
-        });
-    }
-
     private void updatePrompt(final String prompt){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                textViewPrompt.append(prompt);
+                textViewPrompt.setText("Data    : " + prompt);
             }
         });
     }
@@ -102,10 +93,8 @@ public class MainActivity extends AppCompatActivity {
             running = true;
 
             try {
-                updateState("Starting UDP Server");
                 socket = new DatagramSocket(serverPort);
 
-                updateState("UDP Server is running");
                 Log.e(TAG, "UDP Server is running");
 
                 while(running){
@@ -119,16 +108,8 @@ public class MainActivity extends AppCompatActivity {
                     InetAddress address = packet.getAddress();
                     int port = packet.getPort();
 
-                    updatePrompt("Request from: " + address + ":" + port + "\n");
-
-                    String dString = new Date().toString() + "\n"
-                            + "Your address " + address.toString() + ":" + String.valueOf(port);
-                    //buf = dString.getBytes();
-                    //packet = new DatagramPacket(buf, buf.length, address, port);
-                    //socket.send(packet);
-
-                    String data = new String(packet.getData());
-                    System.out.println("Received = "+data);
+                    String data = new String(packet.getData(), 0, packet.getLength());
+                    updatePrompt(data);
 
 
                 }
@@ -162,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                     InetAddress inetAddress = enumInetAddress.nextElement();
 
                     if (inetAddress.isSiteLocalAddress()) {
-                        ip += "SiteLocalAddress: "
+                        ip += "Device IP : "
                                 + inetAddress.getHostAddress() + "\n";
                     }
 
@@ -230,11 +211,12 @@ public class MainActivity extends AppCompatActivity {
 
         infoIp = (TextView) findViewById(R.id.infoip);
         infoPort = (TextView) findViewById(R.id.infoport);
-        textViewState = (TextView)findViewById(R.id.state);
         textViewPrompt = (TextView)findViewById(R.id.prompt);
+        textViewPrompt.setText("Data    : ");
+
 
         infoIp.setText(getIpAddress());
-        infoPort.setText(String.valueOf(UdpServerPORT));
+        infoPort.setText("Port          : " + String.valueOf(UdpServerPORT));
         //////
 
         mHandler = new MyHandler(this);
