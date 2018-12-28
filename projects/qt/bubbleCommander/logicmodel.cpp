@@ -4,6 +4,8 @@
 
 LogicModel::LogicModel(QObject *parent) : QObject(parent)
 {
+    m_UdpClient.sltSetIp("192.168.0.9");
+    m_UdpClient.sltSetPort(7777);
 }
 
 LogicModel::~LogicModel()
@@ -13,8 +15,109 @@ LogicModel::~LogicModel()
 void LogicModel::sltSendCommand()
 {
     qDebug() << "Command Pressed = " << sender()->objectName();
-    m_UdpClient.sltWriteDatagram(sender()->objectName());
+    QString result = getTranslatedCommand(sender()->objectName());
+    m_UdpClient.sltWriteDatagram(result);
     //SendHttpCommand(sender()->objectName());
+}
+
+QString LogicModel::getTranslatedCommand(QString key)
+{
+    QString result;
+
+    switch(key.toStdString().c_str()[0])
+    {
+        case 'G':
+        {
+            qDebug() << "strCommand = GRAB";
+
+            result += "GRAB";
+
+            break;
+        }
+
+        case 'r':
+        {
+            qDebug() << "strCommand = RELEASE";
+
+            result += "RELEASE";
+
+            break;
+        }
+
+        case 'T':
+        {
+            qDebug() << "strCommand = TO";
+
+            result += "TO";
+
+            break;
+        }
+
+        case 'f':
+        {
+            qDebug() << "strCommand = FRO";
+
+            result += "FRO";
+
+            break;
+        }
+        case 'R':
+        {
+            qDebug() << "strCommand = RIGHT";
+
+            result += "RIGHT";
+
+            break;
+        }
+
+        case 'L':
+        {
+            qDebug() << "strCommand = LEFT";
+
+            result += "LEFT";
+
+            break;
+        }
+
+        case 'F':
+        {
+            qDebug() << "strCommand = FORWARD";
+
+            result += "FORWARD";
+
+            break;
+        }
+
+        case 'B':
+        {
+            qDebug() << "strCommand = BACK";
+
+            result += "BACK";
+
+            break;
+        }
+
+        case 'S':
+        {
+            qDebug() << "strCommand = STOP";
+
+            result += "STOP";
+
+            break;
+        }
+
+        default:
+        {
+            qDebug() << "strCommand = DEFAULT";
+
+            result += "STOP";
+
+            break;
+        }
+
+    }
+
+    return result;
 }
 
 void LogicModel::sltStopSendCommand()

@@ -18,6 +18,9 @@ public:
     void SendJsonCommand(QString strCommand);
     void SendHttpCommand(QString strCommand);
 
+    QString getTranslatedCommand(QString key);
+
+
 
 public slots:
     void sltSendCommand();
