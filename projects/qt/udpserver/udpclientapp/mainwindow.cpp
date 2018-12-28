@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setWindowTitle("UdpClientApp");
 
     connect(ui->teServerIp,SIGNAL(textChanged()),this,SLOT(sltIpChanged()));
     connect(ui->teServerPort,SIGNAL(textChanged()),this,SLOT(sltPortChanged()));
