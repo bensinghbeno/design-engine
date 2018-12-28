@@ -90,9 +90,9 @@ QString LogicModel::getTranslatedCommand(QString key)
 
         case 'B':
         {
-            qDebug() << "strCommand = BACK";
+            qDebug() << "strCommand = REVERSE";
 
-            result += "BACK";
+            result += "REVERSE";
 
             break;
         }

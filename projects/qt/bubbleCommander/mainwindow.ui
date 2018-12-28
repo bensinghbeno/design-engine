@@ -63,7 +63,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Back</string>
+     <string>Reverse</string>
     </property>
    </widget>
    <widget class="QPushButton" name="F">
