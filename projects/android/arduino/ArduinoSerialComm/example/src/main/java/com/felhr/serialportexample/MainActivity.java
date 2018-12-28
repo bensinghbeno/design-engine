@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
                     String data = new String(packet.getData(), 0, packet.getLength());
                     updatePrompt(data);
 
-
+                    sendToUsbUart(data);
                 }
 
                 Log.e(TAG, "UDP Server ended");
@@ -236,6 +236,26 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public void sendToUsbUart(final String data) {
+        if (!data.equals("")) {
+
+            MainActivity.this.runOnUiThread(new Runnable() {
+                public void run() {
+
+                    if (usbService != null)
+                    { // if UsbService was correctly binded, Send data
+                        TextView textV1 = (TextView) findViewById(R.id.textView1);
+                        textV1.setText(data);
+                        usbService.write(data.getBytes());
+                    }
+
+                }
+            });
+
+
+        }
     }
 
     @Override
