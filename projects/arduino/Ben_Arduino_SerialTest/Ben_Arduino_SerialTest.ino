@@ -28,11 +28,29 @@ if(Serial.available()) {
 a= Serial.readString();// read the incoming data as string
 //
 //Serial.println(a);
-//a.trim();
+a.trim();
 //
-if (a.equals("b"))
+if (a.equals("FORWARD"))
 {
-  Serial.println("Command:  Recognized");
+  Serial.println("Command:  FORWARD");
+//  digitalWrite(output2, HIGH);
+//
+}
+else if (a.equals("REVERSE"))
+{
+  Serial.println("Command:  REVERSE");
+//  digitalWrite(output2, HIGH);
+//
+}
+else if (a.equals("LEFT"))
+{
+  Serial.println("Command:  LEFT");
+//  digitalWrite(output2, HIGH);
+//
+}
+else if (a.equals("RIGHT"))
+{
+  Serial.println("Command:  RIGHT");
 //  digitalWrite(output2, HIGH);
 //
 }
