@@ -19,11 +19,11 @@
 
     <TextView
         android:id="@+id/textView1"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_width="311dp"
+        android:layout_height="40dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="34dp"
-        android:background="#FFFFFF"/>
+        android:background="#FFFFFF" />
 
     <EditText
         android:id="@+id/editText1"
@@ -43,9 +43,50 @@
         style="?borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/editText1"
         android:layout_alignLeft="@+id/editText1"
         android:layout_alignRight="@+id/editText1"
-        android:layout_below="@+id/editText1"
-        android:layout_marginTop="42dp"
-        android:text="Send"/>
+        android:layout_marginLeft="-6dp"
+        android:layout_marginTop="-1dp"
+        android:layout_marginRight="6dp"
+        android:text="Send" />
+
+    <TextView
+        android:id="@+id/infoip"
+        android:layout_width="140dp"
+        android:layout_height="36dp"
+        android:layout_alignStart="@+id/textView1"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="-10dp"
+        android:layout_marginBottom="249dp"
+        android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/infoport"
+        android:layout_width="141dp"
+        android:layout_height="31dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="210dp"
+        android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/state"
+        android:layout_width="193dp"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="187dp"
+        android:layout_marginBottom="170dp"
+        android:text="un-initiated"
+        android:textSize="20dp" />
+
+    <TextView
+        android:id="@+id/prompt"
+        android:layout_width="332dp"
+        android:layout_height="148dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="41dp"
+        android:layout_marginBottom="18dp"
+        android:textSize="18dp" />
 </RelativeLayout>
