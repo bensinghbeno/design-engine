@@ -16,22 +16,18 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    ../perceptron2/perceptronjsonterminal.cpp \
-    ../perceptron2/perceptronjsonmodel.cpp \
-    udpclient.cpp \
     logicmodel.cpp \
     controller.cpp \
     httpgetclient.cpp \
-    backgroundworker.cpp
+    backgroundworker.cpp \
+    ../udp/udpclient/udpclientapp/udpclient.cpp
 
 HEADERS  += mainwindow.h \
-    ../perceptron2/perceptronjsonterminal.h \
-    ../perceptron2/perceptronjsonmodel.h \
-    udpclient.h \
     logicmodel.h \
     interfaceenums.h \
     controller.h \
     httpgetclient.h \
-    backgroundworker.h
+    backgroundworker.h \
+    ../udp/udpclient/udpclientapp/udpclient.h
 
 FORMS    += mainwindow.ui

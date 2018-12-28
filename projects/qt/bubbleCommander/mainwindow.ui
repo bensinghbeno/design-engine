@@ -14,17 +14,17 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="lblIp">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>10</x>
       <y>10</y>
-      <width>141</width>
+      <width>101</width>
       <height>17</height>
      </rect>
     </property>
     <property name="text">
-     <string>Bubble Commander</string>
+     <string>UDP Server IP :</string>
     </property>
    </widget>
    <widget class="QPushButton" name="L">
@@ -144,6 +144,39 @@
      <string>Fro</string>
     </property>
    </widget>
+   <widget class="QTextEdit" name="teIp">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>0</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>10</y>
+      <width>41</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Port</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="tePort">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>0</y>
+      <width>81</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -151,7 +184,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

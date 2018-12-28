@@ -1,38 +1,49 @@
 #include "logicmodel.h"
 #include <QDebug>
+#include <QTextEdit>
 
 LogicModel::LogicModel(QObject *parent) : QObject(parent)
-  , m_pPerceptronJsonModel(new PerceptronJsonModel(""))
 {
-
 }
 
 LogicModel::~LogicModel()
 {
-    delete m_pPerceptronJsonModel;
 }
 
 void LogicModel::sltSendCommand()
 {
     qDebug() << "Command Pressed = " << sender()->objectName();
-    SendHttpCommand(sender()->objectName());
+    m_UdpClient.sltWriteDatagram(sender()->objectName());
+    //SendHttpCommand(sender()->objectName());
 }
 
 void LogicModel::sltStopSendCommand()
 {
-    m_HttpGetClient.StopSendNetworkGetRequest();
+    //m_HttpGetClient.StopSendNetworkGetRequest();
+}
+
+void LogicModel::sltSetIp()
+{
+    m_Ip = static_cast<QTextEdit*>(sender())->toPlainText();
+    m_UdpClient.sltSetIp(m_Ip);
+}
+
+void LogicModel::sltSetPort()
+{
+    m_Port = static_cast<QTextEdit*>(sender())->toPlainText().toInt();
+    m_UdpClient.sltSetPort(m_Port);
 }
 
 void LogicModel::SendJsonCommand(QString strCommand)
 {
-    m_pPerceptronJsonModel->insertvalue("CMD_MOVE",strCommand);
-    qDebug() << "send CMD_MOVE = " << m_pPerceptronJsonModel->getvalue("CMD_MOVE");
+    //    m_pPerceptronJsonModel->insertvalue("CMD_MOVE",strCommand);
+    //    qDebug() << "send CMD_MOVE = " << m_pPerceptronJsonModel->getvalue("CMD_MOVE");
 
-    m_UdpData.clear();
-    m_UdpData.append(m_pPerceptronJsonModel->getJsonStringbuffer().toStdString().c_str());
-    m_UdpClient.m_UdpSocket.writeDatagram(m_UdpData, QHostAddress("192.168.2.167"), 7777);
+    //    m_UdpData.clear();
+    //    m_UdpData.append(m_pPerceptronJsonModel->getJsonStringbuffer().toStdString().c_str());
+    //    m_UdpClient.m_UdpSocket.writeDatagram(m_UdpData, QHostAddress("192.168.2.167"), 7777);
 
-    qDebug() << "BUFFER = " << m_pPerceptronJsonModel->getJsonStringbuffer();
+    //    qDebug() << "BUFFER = " << m_pPerceptronJsonModel->getJsonStringbuffer();
 
 }
 
