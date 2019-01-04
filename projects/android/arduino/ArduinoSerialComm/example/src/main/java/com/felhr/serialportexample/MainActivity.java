@@ -225,7 +225,6 @@ public class MainActivity extends AppCompatActivity {
 
         display = (TextView) findViewById(R.id.textView1);
         display.setMovementMethod(new ScrollingMovementMethod());
-        display.append("aaaaaaaaaaaaaaaaaadjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjefkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkcnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnecccccccccccccccccccccccccccccciiiiiiiiiiiiiiiiiiiiiiiiieeeeeeeeeeeeeeeeeeeeeeeeeeiiiiiiiiieeeeeeeeeeeeeeeeeeeee");
 
         //display.setSelected(true);
 
@@ -320,7 +319,6 @@ public class MainActivity extends AppCompatActivity {
             switch (msg.what) {
                 case UsbService.MESSAGE_FROM_SERIAL_PORT:
                     String data = (String) msg.obj;
-                    mActivity.get().display.setText("");
                     mActivity.get().display.append(data);
                     break;
             }
