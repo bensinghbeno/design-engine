@@ -33,7 +33,9 @@
         android:layout_height="83dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="34dp"
-        android:background="#FFFFFF" />
+        android:background="#FFFFFF"
+        android:scrollbars="vertical"
+        android:gravity="bottom" />
 
     <EditText
         android:id="@+id/editText1"
