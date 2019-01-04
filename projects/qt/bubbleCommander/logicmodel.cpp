@@ -4,7 +4,7 @@
 
 LogicModel::LogicModel(QObject *parent) : QObject(parent)
 {
-    m_UdpClient.sltSetIp("192.168.0.9");
+    m_UdpClient.sltSetIp("192.168.0.101");
     m_UdpClient.sltSetPort(7777);
 }
 

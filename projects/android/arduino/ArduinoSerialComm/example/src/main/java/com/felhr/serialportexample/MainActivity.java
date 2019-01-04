@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -215,6 +216,7 @@ public class MainActivity extends AppCompatActivity {
         textViewPrompt.setText("Data    : ");
 
 
+
         infoIp.setText(getIpAddress());
         infoPort.setText("Port          : " + String.valueOf(UdpServerPORT));
         //////
@@ -222,6 +224,11 @@ public class MainActivity extends AppCompatActivity {
         mHandler = new MyHandler(this);
 
         display = (TextView) findViewById(R.id.textView1);
+        display.setMovementMethod(new ScrollingMovementMethod());
+        display.append("aaaaaaaaaaaaaaaaaadjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjefkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkcnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnecccccccccccccccccccccccccccccciiiiiiiiiiiiiiiiiiiiiiiiieeeeeeeeeeeeeeeeeeeeeeeeeeiiiiiiiiieeeeeeeeeeeeeeeeeeeee");
+
+        //display.setSelected(true);
+
         editText = (EditText) findViewById(R.id.editText1);
         Button sendButton = (Button) findViewById(R.id.buttonSend);
         sendButton.setOnClickListener(new View.OnClickListener() {
@@ -247,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
                     if (usbService != null)
                     { // if UsbService was correctly binded, Send data
                         TextView textV1 = (TextView) findViewById(R.id.textView1);
-                        textV1.setText(data);
+                        textV1.append(" " + data);
                         usbService.write(data.getBytes());
                     }
 
