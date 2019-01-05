@@ -209,24 +209,70 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //UDP///
-
         infoIp = (TextView) findViewById(R.id.infoip);
         infoPort = (TextView) findViewById(R.id.infoport);
         textViewPrompt = (TextView)findViewById(R.id.prompt);
         textViewPrompt.setText("Data    : ");
 
+        // Direction Buttons Manual
+        Button btnLeft = (Button) findViewById(R.id.buttonLeft);
+        btnLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    if (usbService != null) { // if UsbService was correctly binded, Send data
+                        String data = "LEFT";
+                        display.append(data);
+                        usbService.write(data.getBytes());
+                    }
+            }
+        });
+
+        Button btnRight = (Button) findViewById(R.id.buttonRight);
+        btnRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (usbService != null) { // if UsbService was correctly binded, Send data
+                    String data = "RIGHT";
+                    display.append(data);
+                    usbService.write(data.getBytes());
+                }
+            }
+        });
+
+        Button btnForward = (Button) findViewById(R.id.buttonForward);
+        btnForward.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (usbService != null) { // if UsbService was correctly binded, Send data
+                    String data = "FORWARD";
+                    display.append(data);
+                    usbService.write(data.getBytes());
+                }
+            }
+        });
+
+        Button btnReverse = (Button) findViewById(R.id.buttonReverse);
+        btnReverse.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (usbService != null) { // if UsbService was correctly binded, Send data
+                    String data = "REVERSE";
+                    display.append(data);
+                    usbService.write(data.getBytes());
+                }
+            }
+        });
+
 
 
         infoIp.setText(getIpAddress());
         infoPort.setText("Port          : " + String.valueOf(UdpServerPORT));
-        //////
 
         mHandler = new MyHandler(this);
 
         display = (TextView) findViewById(R.id.textView1);
         display.setMovementMethod(new ScrollingMovementMethod());
 
-        //display.setSelected(true);
 
         editText = (EditText) findViewById(R.id.editText1);
         Button sendButton = (Button) findViewById(R.id.buttonSend);

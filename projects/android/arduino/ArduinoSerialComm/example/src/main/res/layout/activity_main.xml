@@ -12,10 +12,12 @@
         android:id="@+id/textViewTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/textViewTitle2"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="-8dp"
         android:text="@string/serial_port"
-        android:textAppearance="?android:attr/textAppearanceLarge"/>
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
         android:id="@+id/textViewTitle2"
@@ -45,7 +47,7 @@
         android:layout_alignLeft="@+id/textView1"
         android:layout_alignRight="@+id/textView1"
         android:layout_marginLeft="4dp"
-        android:layout_marginTop="33dp"
+        android:layout_marginTop="6dp"
         android:layout_marginRight="-4dp"
         android:ems="10">
 
@@ -54,16 +56,63 @@
 
     <Button
         android:id="@+id/buttonSend"
-        style="?borderlessButtonStyle"
-        android:layout_width="234dp"
-        android:layout_height="50dp"
+        android:layout_width="65dp"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/editText1"
         android:layout_alignLeft="@+id/editText1"
         android:layout_alignRight="@+id/editText1"
-        android:layout_marginLeft="38dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginRight="39dp"
-        android:text="Send" />
+        android:layout_marginLeft="-45dp"
+        android:layout_marginTop="17dp"
+        android:layout_marginRight="273dp"
+        android:text="S" />
+
+    <Button
+        android:id="@+id/buttonLeft"
+        android:layout_width="65dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editText1"
+        android:layout_alignLeft="@+id/editText1"
+        android:layout_alignRight="@+id/editText1"
+        android:layout_marginLeft="45dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginRight="184dp"
+        android:text="L" />
+
+    <Button
+        android:id="@+id/buttonForward"
+        android:layout_width="65dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editText1"
+        android:layout_alignLeft="@+id/editText1"
+        android:layout_alignRight="@+id/editText1"
+        android:layout_marginLeft="131dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginRight="98dp"
+        android:text="F" />
+
+    <Button
+        android:id="@+id/buttonReverse"
+        android:layout_width="65dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editText1"
+        android:layout_alignLeft="@+id/editText1"
+        android:layout_alignRight="@+id/editText1"
+        android:layout_marginLeft="133dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginRight="96dp"
+        android:text="R" />
+
+    <Button
+        android:id="@+id/buttonRight"
+        android:layout_width="65dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editText1"
+        android:layout_alignLeft="@+id/editText1"
+        android:layout_alignRight="@+id/editText1"
+        android:layout_marginLeft="215dp"
+        android:layout_marginTop="38dp"
+        android:layout_marginRight="14dp"
+        android:text="R" />
 
     <TextView
         android:id="@+id/infoip"
