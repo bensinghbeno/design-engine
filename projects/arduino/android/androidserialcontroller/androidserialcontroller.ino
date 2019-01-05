@@ -18,7 +18,7 @@ String gpioD5State = "off";
 void setDelayedGpioHigh()
 {  
               //Serial.println("GPIO D2 D3 D4 D5 ON");
-  delay(50);
+  delay(200);
 
 
               digitalWrite(gpioD2, HIGH);
@@ -30,6 +30,7 @@ void setDelayedGpioHigh()
 void setup() 
 {
   Serial.begin(115200); 
+  Serial.setTimeout(10);
 
   pinMode(gpioD2, OUTPUT);
   pinMode(gpioD3, OUTPUT);
