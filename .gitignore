@@ -6,4 +6,5 @@
 *.o
 *.out
 build-*/
+projects/ros/opensource/mybot_ws/build
 
