@@ -1,0 +1,12 @@
+Symlinking /home/ben/engine/design-engine/projects/ros-gazebo/opensource/mybot_ws/devel/lib/pkgconfig/mybot_gazebo.pc
+Symlinking /home/ben/engine/design-engine/projects/ros-gazebo/opensource/mybot_ws/devel/share/mybot_gazebo/cmake/mybot_gazeboConfig.cmake
+Symlinking /home/ben/engine/design-engine/projects/ros-gazebo/opensource/mybot_ws/devel/share/mybot_gazebo/cmake/mybot_gazeboConfig-version.cmake
+Cleaning: (/home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/.private/mybot_gazebo/lib/pkgconfig/mybot_gazebo.pc, /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/lib/pkgconfig/mybot_gazebo.pc)
+Cleaning: (/home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/.private/mybot_gazebo/share/mybot_gazebo/cmake/mybot_gazeboConfig.cmake, /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/share/mybot_gazebo/cmake/mybot_gazeboConfig.cmake)
+Cleaning: (/home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/.private/mybot_gazebo/share/mybot_gazebo/cmake/mybot_gazeboConfig-version.cmake, /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/share/mybot_gazebo/cmake/mybot_gazeboConfig-version.cmake)
+Unlinking: /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/lib/pkgconfig/mybot_gazebo.pc
+Already unlinked: {}
+Unlinking: /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/share/mybot_gazebo/cmake/mybot_gazeboConfig.cmake
+Already unlinked: {}
+Unlinking: /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/share/mybot_gazebo/cmake/mybot_gazeboConfig-version.cmake
+Already unlinked: {}

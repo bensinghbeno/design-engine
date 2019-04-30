@@ -1,4 +1,0 @@
-mybot_gazebo
-/home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/.private/mybot_gazebo/lib/pkgconfig/mybot_gazebo.pc /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/lib/pkgconfig/mybot_gazebo.pc
-/home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/.private/mybot_gazebo/share/mybot_gazebo/cmake/mybot_gazeboConfig.cmake /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/share/mybot_gazebo/cmake/mybot_gazeboConfig.cmake
-/home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/.private/mybot_gazebo/share/mybot_gazebo/cmake/mybot_gazeboConfig-version.cmake /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/share/mybot_gazebo/cmake/mybot_gazeboConfig-version.cmake
