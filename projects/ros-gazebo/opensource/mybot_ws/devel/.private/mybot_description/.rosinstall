@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/ben/engine/design-engine/projects/ros-gazebo/opensource/mybot_ws/devel/.private/mybot_description/setup.sh

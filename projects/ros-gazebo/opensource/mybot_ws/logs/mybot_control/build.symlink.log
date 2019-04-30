@@ -1,0 +1,12 @@
+Symlinking /home/ben/engine/design-engine/projects/ros-gazebo/opensource/mybot_ws/devel/lib/pkgconfig/mybot_control.pc
+Symlinking /home/ben/engine/design-engine/projects/ros-gazebo/opensource/mybot_ws/devel/share/mybot_control/cmake/mybot_controlConfig-version.cmake
+Symlinking /home/ben/engine/design-engine/projects/ros-gazebo/opensource/mybot_ws/devel/share/mybot_control/cmake/mybot_controlConfig.cmake
+Cleaning: (/home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/.private/mybot_control/lib/pkgconfig/mybot_control.pc, /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/lib/pkgconfig/mybot_control.pc)
+Cleaning: (/home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/.private/mybot_control/share/mybot_control/cmake/mybot_controlConfig-version.cmake, /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/share/mybot_control/cmake/mybot_controlConfig-version.cmake)
+Cleaning: (/home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/.private/mybot_control/share/mybot_control/cmake/mybot_controlConfig.cmake, /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/share/mybot_control/cmake/mybot_controlConfig.cmake)
+Unlinking: /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/lib/pkgconfig/mybot_control.pc
+Already unlinked: {}
+Unlinking: /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/share/mybot_control/cmake/mybot_controlConfig-version.cmake
+Already unlinked: {}
+Unlinking: /home/ben/engine/design-engine/projects/ros/opensource/mybot_ws/devel/share/mybot_control/cmake/mybot_controlConfig.cmake
+Already unlinked: {}
