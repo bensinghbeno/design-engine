@@ -1,8 +1,0 @@
-prefix=/home/ben/engine/design-engine/projects/ros-gazebo/opensource/mybot_ws/devel/.private/mybot_gazebo
-
-Name: mybot_gazebo
-Description: Description of mybot_gazebo
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/ben/engine/design-engine/projects/ros-gazebo/opensource/mybot_ws/devel/.private/mybot_gazebo/lib 
-Requires: 

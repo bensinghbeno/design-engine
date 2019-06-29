@@ -1,0 +1,4 @@
+mybot_gazebo
+/home/beno/my/design-engine/projects/ros-gazebo/mybot_ws/devel/.private/mybot_gazebo/share/mybot_gazebo/cmake/mybot_gazeboConfig-version.cmake /home/beno/my/design-engine/projects/ros-gazebo/mybot_ws/devel/share/mybot_gazebo/cmake/mybot_gazeboConfig-version.cmake
+/home/beno/my/design-engine/projects/ros-gazebo/mybot_ws/devel/.private/mybot_gazebo/share/mybot_gazebo/cmake/mybot_gazeboConfig.cmake /home/beno/my/design-engine/projects/ros-gazebo/mybot_ws/devel/share/mybot_gazebo/cmake/mybot_gazeboConfig.cmake
+/home/beno/my/design-engine/projects/ros-gazebo/mybot_ws/devel/.private/mybot_gazebo/lib/pkgconfig/mybot_gazebo.pc /home/beno/my/design-engine/projects/ros-gazebo/mybot_ws/devel/lib/pkgconfig/mybot_gazebo.pc
