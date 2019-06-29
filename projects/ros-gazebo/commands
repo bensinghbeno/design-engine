@@ -1,0 +1,10 @@
+catkin clean
+catkin build
+
+source ./devel/setup.bash
+roslaunch mybot_gazebo mybot_world.launch
+
+new tab : 
+source ./devel/setup.bash
+rosrun image_view image_view image:=/mybot/camera1/image_raw
+
