@@ -1,3 +1,30 @@
+Init:::
+
+ 1062  mkdir rrbot
+ 1063  mkdir -p rrbot/src
+ 1064  ls
+ 1065  cd rrbot/src/
+ 1066  git clone https://github.com/ros-simulation/gazebo_ros_demos.git
+ 1067  ls
+ 1068  cd ..
+ 1069  ls
+ 1073  catkin build
+ 1074  cd src/
+ 1075  catkin build
+ 1076  gitk
+ 1077  cd ..
+ 1078  catkin config --extend /opt/ros/kinetic
+ 1079  catkin build
+ 1080  source devel/setup.bash 
+ 1081  roslaunch rrbot_description rrbot_rviz.launch
+ 1082  history
+ben@ben-Inspiron-5548:~/engine/design-engine/projects/ros-gazebo/rrbot$ ls
+build  devel  logs  src
+
+
+=======================================================================================================
+
+
 catkin clean
 catkin build
 

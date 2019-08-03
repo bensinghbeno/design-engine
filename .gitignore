@@ -7,4 +7,8 @@
 *.out
 build-*/
 projects/ros/opensource/mybot_ws/build
+projects/ros-gazebo/rrbot/build
+projects/ros-gazebo/rrbot/devel
+projects/ros-gazebo/rrbot/logs
+projects/ros-gazebo/rrbot/.catkin_tools
 
