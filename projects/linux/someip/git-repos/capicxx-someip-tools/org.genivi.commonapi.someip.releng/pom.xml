@@ -1,0 +1,48 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>commonapi</groupId>
+    <artifactId>org.genivi.commonapi.someip.releng</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>../org.genivi.commonapi.someip.target</module>
+
+        <module>../org.genivi.commonapi.someip</module>
+        <module>../org.genivi.commonapi.someip.deployment.validator</module>
+        <module>../org.genivi.commonapi.someip.feature</module>
+
+        <module>../org.genivi.commonapi.someip.cli</module>
+        <module>../org.genivi.commonapi.someip.cli.feature</module>
+        <module>../org.genivi.commonapi.someip.cli.product</module>
+
+        <module>../org.genivi.commonapi.someip.ui</module>
+        <module>../org.genivi.commonapi.someip.validator</module>
+        <module>../org.genivi.commonapi.someip.validator.feature</module>
+
+        <module>../org.genivi.commonapi.someip.updatesite</module>
+    </modules>
+    <parent>
+        <groupId>commonapi</groupId>
+        <artifactId>org.genivi.commonapi.releng</artifactId>
+        <version>3.1.12-SNAPSHOT</version>
+        <relativePath>../org.genivi.commonapi.releng</relativePath>
+    </parent>
+    <repositories>
+        <repository>
+        <id>core.cli</id>
+        <layout>p2</layout>
+        <url>file:${COREPATH}/org.genivi.commonapi.core.cli.product/target/repository/</url>
+        </repository>
+        <repository>
+        <id>core.updatesite</id>
+        <layout>p2</layout>
+        <url>file:${COREPATH}/org.genivi.commonapi.core.updatesite/target/repository/</url>
+        </repository>
+    </repositories>
+    <properties>
+      <buildDir>target</buildDir>
+    </properties>
+    <build>
+      <directory>${buildDir}</directory>
+    </build>
+</project>

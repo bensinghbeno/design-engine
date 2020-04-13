@@ -1,0 +1,94 @@
+{
+    "unicast" : "192.168.7.18",
+    "netmask" : "255.255.255.0",
+    "logging" :
+    {
+        "level" : "trace",
+        "console" : "true",
+        "file" : { "enable" : "false", "path" : "/var/log/vsomeip.log" },
+        "dlt" : "false"
+    },
+    "applications" :
+    [
+        {
+            "name" : "client-sample",
+            "id" : "0x1343"
+        },
+        {
+            "name" : "service-sample",
+            "id" : "0x1277"
+        },
+        {
+            "name" : "MultiFunctionalSeatsServer",
+            "id" : "0x1277"
+        },
+        {
+            "name" : "software-update",
+            "id" : "0x1278"
+        },
+    	{
+            "name" : "TimeAndDateServer",
+            "id" : "0x1288"
+    	},
+	{
+	    "name" : "VehicleFunctionsServer",
+            "id" : "0x1289"
+        }
+    ],
+    "servicegroups" :
+    [
+        {
+            "name" : "default",
+            "services" :
+            [
+                {
+                    "service" : "0x1234",
+                    "instance" : "0x5678",
+                    "unreliable" : "30509"
+                }
+            ]
+        },
+        {
+            "name" : "hardware.vehicle.cpu.swupdate",
+            "services" :
+            [
+                {
+                    "service" : "4661",
+                    "instance" : "22140",
+                    "reliable" : { "port" : "30509", "enable-magic-cookies" : "false" }
+                }
+            ]
+        },
+        {
+            "name" : "hardware.vehicle.cpu.diagnostics",
+            "services" :
+            [
+                {
+                    "service" : "4663",
+                    "instance" : "22142",
+                    "unreliable" : "30509"
+                },
+                {
+                    "service" : "4664",
+                    "instance" : "22145",
+                    "unreliable" : "30509"
+                }
+            ]
+        }
+    ],
+    "routing" : "vsomeipd",
+    "service-discovery" :
+    {
+        "enable" : "true",
+        "multicast" : "224.244.224.245",
+        "port" : "30490",
+        "protocol" : "udp",
+        "initial_delay_min" : "10",
+        "initial_delay_max" : "100",
+        "repetitions_base_delay" : "200",
+        "repetitions_max" : "3",
+        "ttl" : "3",
+        "cyclic_offer_delay" : "2000",
+        "request_response_delay" : "1500"
+    }
+}

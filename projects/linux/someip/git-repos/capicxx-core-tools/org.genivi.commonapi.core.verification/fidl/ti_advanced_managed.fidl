@@ -1,0 +1,69 @@
+/* Copyright (C) 2014 BMW Group
+ * Author: Manfred Bathelt (manfred.bathelt@bmw.de)
+ * Author: Juergen Gehring (juergen.gehring@bmw.de)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+package commonapi.advanced.managed
+
+interface Manager manages Device, SpecialDevice {
+    version { major 1 minor 0 }
+
+    attribute String [] myDevices
+
+    method addDevice {
+        in {
+            UInt8 x
+        }
+    }
+
+    method removeDevice {
+	in {
+	    UInt8 x
+	}
+    }
+}
+
+interface Device {
+    version { major 1 minor 0 }
+
+    method doSomething {
+    }
+}
+
+interface SpecialDevice extends Device {
+    version { major 1 minor 0 }
+
+    method doSomethingSpecial {
+    }
+}
+
+
+
+interface HLevelTop manages HLevelMiddle {
+    version { major 1  minor 0 }
+    method test {
+        in {
+            EN x
+        }
+        out {
+            UInt8 a
+        }
+    }
+
+    enumeration EN {
+        DEFAULT
+        NEW
+    }
+}
+
+interface HLevelMiddle manages HLevelBottom {
+	version { major 1 minor 0 }
+    attribute UInt16 a
+}
+
+interface HLevelBottom {
+	version { major 1 minor 0 }
+    attribute UInt8 a
+}

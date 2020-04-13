@@ -1,0 +1,686 @@
+/* Copyright (C) 2014, 2015 BMW Group
+ * Author: Lutz Bichler (lutz.bichler@bmw.de)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+package org.genivi.commonapi.someip.generator
+
+import com.google.inject.Inject
+import java.util.List
+import org.eclipse.core.resources.IResource
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.generator.IFileSystemAccess
+import org.franca.core.franca.FArgument
+import org.franca.core.franca.FArrayType
+import org.franca.core.franca.FBasicTypeId
+import org.franca.core.franca.FEnumerationType
+import org.franca.core.franca.FField
+import org.franca.core.franca.FMapType
+import org.franca.core.franca.FStructType
+import org.franca.core.franca.FType
+import org.franca.core.franca.FTypeCollection
+import org.franca.core.franca.FTypeDef
+import org.franca.core.franca.FTypeRef
+import org.franca.core.franca.FUnionType
+import org.genivi.commonapi.core.generator.FrancaGeneratorExtensions
+import org.genivi.commonapi.someip.deployment.PropertyAccessor
+import org.genivi.commonapi.someip.preferences.FPreferencesSomeIP
+import org.genivi.commonapi.someip.preferences.PreferenceConstantsSomeIP
+import org.franca.core.franca.FTypedElement
+
+class FTypeCollectionSomeIPDeploymentGenerator {
+    @Inject private extension FrancaGeneratorExtensions
+    @Inject private extension FrancaSomeIPGeneratorExtensions
+    @Inject private extension FrancaSomeIPDeploymentAccessorHelper
+
+    def generateTypeCollectionDeployment(FTypeCollection tc, IFileSystemAccess fileSystemAccess,
+        PropertyAccessor deploymentAccessor, IResource modelid) {
+
+        if(FPreferencesSomeIP::getInstance.getPreference(PreferenceConstantsSomeIP::P_GENERATE_CODE_SOMEIP, "true").equals("true")) {
+            fileSystemAccess.generateFile(tc.someipDeploymentHeaderPath, IFileSystemAccess.DEFAULT_OUTPUT,
+                tc.generateDeploymentHeader(deploymentAccessor, modelid))
+            fileSystemAccess.generateFile(tc.someipDeploymentSourcePath, IFileSystemAccess.DEFAULT_OUTPUT,
+                tc.generateDeploymentSource(deploymentAccessor, modelid))
+        }
+        else {
+            fileSystemAccess.generateFile(tc.someipDeploymentHeaderPath, IFileSystemAccess.DEFAULT_OUTPUT,
+                PreferenceConstantsSomeIP::NO_CODE)
+            fileSystemAccess.generateFile(tc.someipDeploymentSourcePath, IFileSystemAccess.DEFAULT_OUTPUT,
+                PreferenceConstantsSomeIP::NO_CODE)
+        }
+    }
+
+    def private generateDeploymentHeader(FTypeCollection _tc,
+                                         PropertyAccessor _accessor,
+                                         IResource _modelid) '''
+        «generateCommonApiSomeIPLicenseHeader()»
+
+        #ifndef «_tc.defineName.toUpperCase»_SOMEIP_DEPLOYMENT_HPP_
+        #define «_tc.defineName.toUpperCase»_SOMEIP_DEPLOYMENT_HPP_
+
+        «val DeploymentHeaders = _tc.getDeploymentInputIncludes(_accessor)»
+        «FOR deploymentHeader : DeploymentHeaders.sort»
+            «IF !deploymentHeader.equals(someipDeploymentHeaderPath(_tc))»
+                #include <«deploymentHeader»>
+            «ENDIF»
+        «ENDFOR»
+
+        #if !defined (COMMONAPI_INTERNAL_COMPILATION)
+        #define COMMONAPI_INTERNAL_COMPILATION
+        #endif
+        #include <CommonAPI/SomeIP/Deployment.hpp>
+        #undef COMMONAPI_INTERNAL_COMPILATION
+
+        «_tc.generateVersionNamespaceBegin»
+        «_tc.model.generateNamespaceBeginDeclaration»
+        «_tc.generateDeploymentNamespaceBegin»
+
+        // typecollection-specific deployment types
+        «FOR t: _tc.types.filter[it instanceof FEnumerationType]»
+            «val deploymentType = t.generateDeploymentType(0, _accessor)»
+            typedef «deploymentType» «t.elementName»Deployment_t;
+
+        «ENDFOR»
+        «FOR t: _tc.types.filter[!(it instanceof FEnumerationType)]»
+            «val deploymentType = t.generateDeploymentType(0, _accessor)»
+            typedef «deploymentType» «t.elementName»Deployment_t;
+
+        «ENDFOR»
+
+        // typecollection-specific deployments
+        «FOR t: _tc.types»
+        	«t.generateDeploymentDeclaration(_tc, _accessor)»
+        «ENDFOR»
+
+        «_tc.generateDeploymentNamespaceEnd»
+        «_tc.model.generateNamespaceEndDeclaration»
+        «_tc.generateVersionNamespaceEnd»
+
+        #endif // «_tc.defineName.toUpperCase»_SOMEIP_DEPLOYMENT_HPP_
+    '''
+
+    def private generateDeploymentSource(FTypeCollection _tc,
+                                         PropertyAccessor _accessor,
+                                         IResource _modelid) '''
+
+        «generateCommonApiSomeIPLicenseHeader()»
+        «val DeploymentHeaders = _tc.getDeploymentInputIncludes(_accessor)»
+        «DeploymentHeaders.map["#include <" + it + ">"].join("\n")»
+
+        «_tc.generateVersionNamespaceBegin»
+        «_tc.model.generateNamespaceBeginDeclaration»
+        «_tc.generateDeploymentNamespaceBegin»
+
+        // typecollection-specific deployments
+        «FOR t: _tc.types»
+            «t.generateDeploymentDefinition(_tc, _accessor)»
+        «ENDFOR»
+
+        «_tc.generateDeploymentNamespaceEnd»
+        «_tc.model.generateNamespaceEndDeclaration»
+        «_tc.generateVersionNamespaceEnd»
+    '''
+
+    // Generate deployment types
+    def protected dispatch String generateDeploymentType(FArrayType _array, int _indent, PropertyAccessor _accessor) {
+        return generateArrayDeploymentType(_array.elementType, _indent, _accessor)
+    }
+
+    def protected String generateArrayDeploymentType(FTypeRef _elementType, int _indent, PropertyAccessor _accessor) {
+        var String deployment = generateIndent(_indent) + "CommonAPI::SomeIP::ArrayDeployment<\n"
+        if (_elementType.derived != null) {
+            deployment += generateDeploymentType(_elementType.derived, _indent + 1, _accessor)
+        } else if (_elementType.predefined != null) {
+            deployment += generateDeploymentType(_elementType.predefined, _indent + 1, _accessor)
+        }
+        return deployment + "\n" + generateIndent(_indent) + ">"
+    }
+
+    def protected dispatch String generateDeploymentType(FEnumerationType _enum, int _indent, PropertyAccessor _accessor) {
+        if (_indent == 0)
+            return generateIndent(_indent) + "CommonAPI::SomeIP::EnumerationDeployment<"
+                 + _enum.getBackingType(_accessor).toString.toLowerCase + "_t>"
+        else
+            return generateIndent(_indent) + _enum.getDeploymentType(_enum.containingTypeCollection, true)
+    }
+
+    def protected dispatch String generateDeploymentType(FMapType _map, int _indent, PropertyAccessor _accessor) {
+        var String deployment = generateIndent(_indent) + "CommonAPI::SomeIP::MapDeployment<\n"
+        if (_map.keyType.derived != null) {
+            deployment += generateDeploymentType(_map.keyType.derived, _indent + 1, _accessor)
+        } else if (_map.keyType.predefined != null) {
+            deployment += generateDeploymentType(_map.keyType.predefined, _indent + 1, _accessor)
+        }
+        deployment += ",\n"
+        if (_map.valueType.derived != null) {
+            deployment += generateDeploymentType(_map.valueType.derived, _indent + 1, _accessor)
+        } else if (_map.valueType.predefined != null) {
+            deployment += generateDeploymentType(_map.valueType.predefined, _indent + 1, _accessor)
+        }
+        return deployment + "\n" + generateIndent(_indent) + ">"
+    }
+
+    def protected dispatch String generateDeploymentType(FStructType _struct, int _indent, PropertyAccessor _accessor) {
+        var String deployment = generateIndent(_indent)
+        var List<FField> elements = _struct.allElements
+        if (elements.length == 0) {
+            deployment += "CommonAPI::EmptyDeployment"
+        } else {
+            deployment += "CommonAPI::SomeIP::StructDeployment<\n"
+            for (e : elements) {
+                if (e.array) {
+                    deployment = deployment + generateArrayDeploymentType(e.type, _indent + 1, _accessor)
+                } else if (e.type.derived != null) {
+                    deployment = deployment + generateDeploymentType(e.type.derived, _indent + 1, _accessor)
+                } else if (e.type.predefined != null) {
+                    deployment = deployment + generateDeploymentType(e.type.predefined, _indent + 1, _accessor)
+                } else {
+                   deployment += "Warning struct with unknown element: " + e.type.fullName
+                }
+                if (e != elements.last) deployment += ",\n"
+            }
+            deployment += "\n" + generateIndent(_indent) + ">"
+        }
+        return deployment
+    }
+
+    def protected dispatch String generateDeploymentType(FUnionType _union, int _indent, PropertyAccessor _accessor) {
+        var String deployment = generateIndent(_indent)
+        var List<FField> elements = _union.allElements
+        if (elements == 0) {
+            deployment += "CommonAPI::EmptyDeployment"
+        } else {
+            deployment += "CommonAPI::SomeIP::VariantDeployment<\n"
+            for (e : elements) {
+                if (e.array) {
+                    deployment = deployment + generateArrayDeploymentType(e.type, _indent + 1, _accessor)
+                } else if (e.type.derived != null) {
+                    deployment = deployment + generateDeploymentType(e.type.derived, _indent + 1, _accessor)
+                } else if (e.type.predefined != null) {
+                    deployment = deployment + generateDeploymentType(e.type.predefined, _indent + 1, _accessor)
+                } else {
+                   deployment += "Warning union with unknown element: " + e.type.fullName
+                }
+                if (e != elements.last) deployment += ",\n"
+            }
+            deployment += "\n" + generateIndent(_indent) + ">"
+        }
+        return deployment
+    }
+
+    def protected dispatch String generateDeploymentType(FTypeDef _typeDef, int _indent, PropertyAccessor _accessor) {
+        val FTypeRef actualType = _typeDef.actualType
+        if (actualType.derived != null)
+            return actualType.derived.generateDeploymentType(_indent, _accessor)
+
+        if (actualType.predefined != null)
+            return actualType.predefined.generateDeploymentType(_indent, _accessor)
+
+        return "CommonAPI::EmptyDeployment"
+    }
+
+    def protected dispatch String generateDeploymentType(FBasicTypeId _type, int _indent, PropertyAccessor _accessor) {
+        var String deployment = generateIndent(_indent)
+        if (_type == FBasicTypeId.STRING)
+            deployment = deployment + "CommonAPI::SomeIP::StringDeployment"
+        else if (_type == FBasicTypeId.BYTE_BUFFER)
+            deployment = deployment + "CommonAPI::SomeIP::ByteBufferDeployment"
+        else if (_type == FBasicTypeId.INT8 || _type == FBasicTypeId.INT16 ||
+            _type == FBasicTypeId.INT32 || _type == FBasicTypeId.INT64 ||
+            _type == FBasicTypeId.UINT8 || _type == FBasicTypeId.UINT16 ||
+            _type == FBasicTypeId.UINT32 || _type == FBasicTypeId.UINT64)
+            deployment = deployment + _type.deployment
+        else
+            deployment = deployment + "CommonAPI::EmptyDeployment"
+
+        return deployment
+    }
+
+    def protected dispatch String generateDeploymentType(FType _type, int _indent, PropertyAccessor _accessor) {
+        return generateIndent(_indent) + "CommonAPI::EmptyDeployment"
+    }
+
+    //////////////////////////////////////
+    // Generate deployment declarations //
+    //////////////////////////////////////
+    def protected dispatch String generateDeploymentDeclaration(FArrayType _array, FTypeCollection _tc, PropertyAccessor _accessor) {
+        if (_accessor.hasDeployment(_array)) {
+            return _array.elementType.generateDeploymentDeclaration(_tc, _accessor) +
+                   "COMMONAPI_EXPORT extern " + _array.getDeploymentType(_tc, true) + " " + _array.name + "Deployment;"
+        }
+        return ""
+    }
+
+    def protected dispatch String generateDeploymentDeclaration(FEnumerationType _enum, FTypeCollection _tc, PropertyAccessor _accessor) {
+        if (_accessor.hasDeployment(_enum)) {
+            return "COMMONAPI_EXPORT extern " + _enum.elementName + "Deployment_t " + _enum.name + "Deployment;"
+        }
+        return ""
+    }
+
+    def protected dispatch String generateDeploymentDeclaration(FMapType _map, FTypeCollection _tc, PropertyAccessor _accessor) {
+        if (_accessor.hasDeployment(_map)) {
+            return _map.keyType.generateDeploymentDeclaration(_tc, _accessor) +
+                   _map.valueType.generateDeploymentDeclaration(_tc, _accessor) +
+                   "COMMONAPI_EXPORT extern " + _map.getDeploymentType(_tc, true) + " " + _map.name + "Deployment;"
+        }
+    }
+
+    def protected dispatch String generateDeploymentDeclaration(FStructType _struct, FTypeCollection _tc, PropertyAccessor _accessor) {
+        if(_struct.isStructEmpty ) {
+            return "static_assert(false, \"struct " + _struct.name + " must not be empty !\");";
+        }
+        if (_accessor.hasDeployment(_struct)) {
+            var String declaration = ""
+            for (e : _struct.elements) {
+                declaration += e.generateDeploymentDeclaration(_tc, _accessor)
+            }
+            declaration += "COMMONAPI_EXPORT extern " + _struct.getDeploymentType(_tc, true) + " " + _struct.name + "Deployment;"
+            return declaration + "\n"
+        }
+        return ""
+    }
+
+    def protected dispatch String generateDeploymentDeclaration(FUnionType _union, FTypeCollection _tc, PropertyAccessor _accessor) {
+        if (_accessor.hasDeployment(_union)) {
+            var String declaration = ""
+            for (e : _union.elements) {
+                declaration += e.generateDeploymentDeclaration(_tc, _accessor)
+            }
+            declaration += "COMMONAPI_EXPORT extern " + _union.getDeploymentType(_tc, true) + " " + _union.name + "Deployment;"
+            return declaration + "\n"
+        }
+        return ""
+    }
+
+    def protected dispatch String generateDeploymentDeclaration(FField _field, FTypeCollection _tc, PropertyAccessor _accessor) {
+        if (_accessor.hasSpecificDeployment(_field) || (_field.array && _accessor.hasDeployment(_field))) {
+            return "COMMONAPI_EXPORT extern " + _field.getDeploymentType(_tc, true) + " " + _field.getRelativeName() + "Deployment;\n"
+        }
+        return ""
+    }
+
+    def protected dispatch String generateDeploymentDeclaration(FTypeDef _typeDef, FTypeCollection _tc, PropertyAccessor _accessor) {
+        return ""
+    }
+
+    def protected dispatch String generateDeploymentDeclaration(FTypeRef _typeRef, FTypeCollection _tc, PropertyAccessor _accessor) {
+        return ""
+    }
+
+    /////////////////////////////////////
+    // Generate deployment definitions //
+    /////////////////////////////////////
+    def protected dispatch String generateDeploymentDefinition(FArrayType _array, FTypeCollection _tc, PropertyAccessor _accessor) {
+        if (_accessor.hasDeployment(_array)) {
+            var String definition = _array.elementType.generateDeploymentDefinition(_tc, _accessor)
+            definition += _array.getDeploymentType(_tc, true) + " " + _array.name + "Deployment("
+            definition += _array.getDeploymentParameter(_array, _accessor)
+            definition += ");"
+            return definition
+        }
+        return ""
+    }
+
+    def protected dispatch String generateDeploymentDefinition(FEnumerationType _enum, FTypeCollection _tc, PropertyAccessor _accessor) {
+            if (_accessor.hasDeployment(_enum)) {
+                var String definition = _enum.elementName + "Deployment_t " + _enum.name + "Deployment("
+                definition += _enum.getDeploymentParameter(_enum, _accessor)
+                definition += ");"
+                return definition
+            }
+            return ""
+    }
+
+    def protected dispatch String generateDeploymentDefinition(FMapType _map, FTypeCollection _tc, PropertyAccessor _accessor) {
+        if (_accessor.hasDeployment(_map)) {
+            var String definition = _map.keyType.generateDeploymentDefinition(_tc, _accessor) +
+                                    _map.valueType.generateDeploymentDefinition(_tc, _accessor)
+            definition += _map.getDeploymentType(_tc, true) + " " + _map.name + "Deployment("
+            definition += _map.getDeploymentParameter(_map, _accessor)
+            definition += ");"
+            return definition
+        }
+        return ""
+    }
+
+    def protected dispatch String generateDeploymentDefinition(FStructType _struct, FTypeCollection _tc, PropertyAccessor _accessor) {
+        var String definition = ""
+        if (_accessor.hasDeployment(_struct)) {
+            for (e : _struct.elements) {
+                definition += e.generateDeploymentDefinition(_tc, _accessor)
+            }
+            definition += _struct.getDeploymentType(_tc, true) + " " + _struct.name + "Deployment("
+            definition += _struct.getDeploymentParameter(_struct, _accessor)
+            definition += ");\n"
+            return definition
+        }
+        return ""
+    }
+
+    def protected dispatch String generateDeploymentDefinition(FUnionType _union, FTypeCollection _tc, PropertyAccessor _accessor) {
+        var String definition = ""
+        if (_accessor.hasDeployment(_union)) {
+            for (e : _union.elements) {
+                definition += e.generateDeploymentDefinition(_tc, _accessor)
+            }
+            definition += _union.getDeploymentType(_tc, true) + " " + _union.name + "Deployment("
+            definition += _union.getDeploymentParameter(_union, _accessor)
+            definition += ");\n"
+            return definition
+        }
+        return ""
+    }
+
+    def protected dispatch String generateDeploymentDefinition(FField _field, FTypeCollection _tc, PropertyAccessor _accessor) {
+       if (_accessor.hasSpecificDeployment(_field) ||
+           (_field.array && _accessor.hasDeployment(_field))) {
+            var String definition = "";
+            if (_field.array && _accessor.hasNonArrayDeployment(_field)) {
+                definition += _field.type.getDeploymentType(_tc, false) + " " + _field.getRelativeName() + "ElementDeployment("
+                definition += getDeploymentParameter(_field.type, _field, _accessor)
+                definition += ");\n";
+            }             
+            definition += _field.getDeploymentType(_tc, true) + " " + _field.getRelativeName() + "Deployment("
+            if (_field.array && _accessor.hasNonArrayDeployment(_field)) {
+                definition += "&" + _field.getRelativeName() + "ElementDeployment, "
+                definition += getArrayDeploymentParameter(_field.type, _field, _accessor)
+            } else {
+                definition += getDeploymentParameter(_field, _field, _accessor)
+            }
+            definition += ");\n"
+            return definition
+        }
+        return ""
+    }
+
+    def protected dispatch String generateDeploymentDefinition(FTypeDef _typeDef, FTypeCollection _tc, PropertyAccessor _accessor) {
+        return generateDeploymentDefinition(_typeDef.getActualType, _tc, _accessor)
+    }
+
+    def protected dispatch String generateDeploymentDefinition(FTypeRef _typeRef, FTypeCollection _tc, PropertyAccessor _accessor) {
+        return ""
+    }
+
+    ///////////////////////////////////
+    // Get the deployment parameter  //
+    ///////////////////////////////////
+    def protected dispatch String getDeploymentParameter(FArrayType _array, EObject _source, PropertyAccessor _accessor) {
+        var String parameter = getArrayElementTypeDeploymentParameter(_array.elementType, _array, _accessor) + ", "
+        parameter += getArrayDeploymentParameter(_array, _source, _accessor)
+        return parameter
+    }
+
+    def protected dispatch String getDeploymentParameter(FEnumerationType _enum, EObject _source, PropertyAccessor _accessor) {
+        var String parameter = ""
+
+        var Integer baseType = _accessor.getSomeIpEnumWidthHelper(_source)
+        if (baseType == null)
+            baseType = _accessor.getSomeIpEnumWidth(_enum)
+
+        var Integer bitWidth = _accessor.getSomeIpEnumBitWidthHelper(_source)
+        if (bitWidth == null)
+            bitWidth = _accessor.getSomeIpEnumBitWidthHelper(_enum)
+
+        if (bitWidth != null) {
+            parameter += bitWidth.toString
+        } else {
+            if (baseType != null) {
+                val int bits = baseType.intValue * 8
+                parameter += Integer.toString(bits)
+            } else {
+                parameter += "32" // Default value: 4 Byte
+            }
+        }
+
+        val FBasicTypeId typeId = _enum.getBackingType(_accessor)
+        parameter += ", " + isSigned(typeId.literal)
+
+        var Integer invalidValue = _accessor.getSomeIpEnumInvalidValueHelper(_source)
+        if (invalidValue == null)
+            invalidValue = _accessor.getSomeIpEnumInvalidValue(_enum)
+        if (invalidValue != null)
+            parameter += ", " + invalidValue.toString
+
+        return parameter
+    }
+
+    def protected dispatch String getDeploymentParameter(FMapType _map, EObject _source, PropertyAccessor _accessor) {
+        var String parameter = _map.keyType.getDeploymentRef(_accessor) + ", " + _map.valueType.getDeploymentRef(_accessor) + ", "
+        parameter += getMapDeploymentParameter(_map, _source, _accessor)
+        return parameter
+    }
+
+    def protected dispatch String getDeploymentParameter(FStructType _struct, EObject _source, PropertyAccessor _accessor) {
+        var String parameter = ""
+
+        var Integer lengthWidth = _accessor.getSomeIpStructLengthWidthHelper(_source)
+        if (lengthWidth == null && _struct != _source)
+            lengthWidth = _accessor.getSomeIpStructLengthWidthHelper(_struct)
+        if (lengthWidth != null)
+            parameter += lengthWidth.toString + ", "
+        else
+            parameter += "0, "
+
+        parameter += getDerivedDeploymentParameter(_struct, _accessor)
+        // cut off the last comma
+        return parameter.substring(0, parameter.length -2)
+    }
+
+    def protected String getDerivedDeploymentParameter(FStructType _struct, PropertyAccessor _accessor) {
+        var String parameter = ""
+
+        if(_struct.base != null) { // need to use the accessor for the base struct !
+            var baseAccessor = getAccessor(_struct.base.eContainer as FTypeCollection)
+            parameter += getDerivedDeploymentParameter(_struct.base, baseAccessor)
+
+        }
+        for (s : _struct.elements) {
+            parameter += s.getDeploymentRef(_struct, _accessor) + ", "
+        }
+
+        return parameter
+    }
+
+    def protected dispatch String getDeploymentParameter(FUnionType _union, EObject _source, PropertyAccessor _accessor) {
+        var String parameter = ""
+
+        var Integer lengthWidth = _accessor.getSomeIpUnionLengthWidthHelper(_source)
+        if (lengthWidth == null && _union != _source)
+            lengthWidth = _accessor.getSomeIpUnionLengthWidthHelper(_union)
+        if (lengthWidth != null)
+            parameter += lengthWidth.toString + ", "
+        else
+            parameter += "4, "
+
+        var Integer typeWidth = _accessor.getSomeIpUnionTypeWidthHelper(_source)
+        if (typeWidth == null && _union != _source)
+            typeWidth = _accessor.getSomeIpUnionTypeWidthHelper(_union)
+        if (typeWidth != null)
+            parameter += typeWidth.toString + ", "
+        else
+            parameter += "4, "
+
+        var Boolean defaultOrder = _accessor.getSomeIpUnionDefaultOrderHelper(_source)
+        if (defaultOrder == null && _union != _source)
+            defaultOrder = _accessor.getSomeIpUnionDefaultOrderHelper(_union)
+        if (defaultOrder != null)
+            parameter += defaultOrder.toString + ", "
+        else
+            parameter += "true, "
+
+        var Integer maxLength = _accessor.getSomeIpUnionMaxLengthHelper(_source)
+        if (maxLength == null && _union != _source)
+            maxLength = _accessor.getSomeIpUnionMaxLengthHelper(_union)
+        if (maxLength != null)
+            parameter += maxLength.toString + ", "
+        else
+            parameter += "0, "
+
+        for (s : _union.elements) {
+            parameter += s.getDeploymentRef(_union, _accessor)
+            if (s != _union.elements.last) parameter += ", "
+        }
+
+        return parameter
+    }
+
+    def protected dispatch String getDeploymentParameter(FBasicTypeId _typeId, EObject _source, PropertyAccessor _accessor) {
+        var String parameter = ""
+        if (_typeId == FBasicTypeId.STRING) {
+            val Integer length = _accessor.getSomeIpStringLength(_source)
+            if (length != null)
+                parameter += length.toString + ", "
+            else
+                parameter += "0, "
+
+            val Integer lengthWidth = _accessor.getSomeIpStringLengthWidth(_source)
+            if (lengthWidth != null)
+                parameter += lengthWidth.toString + ", "
+            else
+                parameter += "4, "
+
+            val PropertyAccessor.SomeIpStringEncoding encoding
+                = _accessor.getSomeIpStringEncoding(_source)
+            if (encoding != null)
+                parameter += "CommonAPI::SomeIP::StringEncoding::" + encoding.toString.toUpperCase
+            else
+                parameter += "CommonAPI::SomeIP::StringEncoding::UTF8"
+        } else if (_typeId == FBasicTypeId.BYTE_BUFFER) {
+            parameter += getByteBufferDeploymentParamter(_source, _source, _accessor)
+        } else if (_typeId == FBasicTypeId.INT8 || _typeId == FBasicTypeId.INT16 ||
+            _typeId == FBasicTypeId.INT32 || _typeId == FBasicTypeId.INT64 ||
+            _typeId == FBasicTypeId.UINT8 || _typeId == FBasicTypeId.UINT16 ||
+            _typeId == FBasicTypeId.UINT32 || _typeId == FBasicTypeId.UINT64) {
+            var Integer bitWidth = _accessor.getSomeIpIntegerBitWidthHelper(_source)
+            if (bitWidth != null)
+                parameter += bitWidth.toString
+            else
+                parameter += _typeId.bitWidth
+            val Integer invalidValue = _accessor.getSomeIpIntegerInvalidValueHelper(_source)
+            if (invalidValue != null) {
+                parameter += ", " + invalidValue.toString
+            }
+        }
+        return parameter
+    }
+
+    def protected dispatch String getDeploymentParameter(FTypeRef _typeRef, EObject _source, PropertyAccessor _accessor) {
+        if (_typeRef.derived != null) {
+            return _typeRef.derived.getDeploymentParameter(_source, _accessor)
+        }
+
+        if (_typeRef.predefined != null) {
+            return _typeRef.predefined.getDeploymentParameter(_source, _accessor)
+        }
+
+        return ""
+    }
+
+    def protected dispatch String getDeploymentParameter(FTypeDef _typeDef, EObject _source, PropertyAccessor _accessor) {
+
+        return getDeploymentParameter(_typeDef.getActualType, _source, _accessor)
+    }
+
+
+    def protected dispatch String getDeploymentParameter(FTypedElement _attribute, EObject _object, PropertyAccessor _accessor) {
+        if (_attribute.array) {
+            var String parameter = getArrayElementTypeDeploymentParameter(_attribute.type, _object, _accessor) + ", "
+            parameter += getArrayDeploymentParameter(_attribute, _attribute, _accessor)
+            return parameter
+        }
+        return _attribute.type.getDeploymentParameter(_attribute, _accessor)
+    }
+
+    def protected dispatch String getDeploymentParameter(FArgument _argument, EObject _object, PropertyAccessor _accessor) {
+        if (_argument.array) {
+            var String parameter = getArrayElementTypeDeploymentParameter(_argument.type, _object, _accessor) + ", "
+            parameter += getArrayDeploymentParameter(_argument, _argument, _accessor)
+            return parameter
+        }
+        return _argument.type.getDeploymentParameter(_argument, _accessor)
+    }
+
+    // Arrays may be either defined types or inline
+    def protected String getArrayElementTypeDeploymentParameter(FTypeRef _elementType, EObject _source, PropertyAccessor _accessor) {
+        return _elementType.getDeploymentRef(_accessor)
+    }
+
+    def protected String getByteBufferDeploymentParamter(EObject _buffer, EObject _source, PropertyAccessor _accessor) {
+        var String parameter = ""
+        var Integer minLength = _accessor.getSomeIpByteBufferMinLength(_source)
+        if (minLength == null && _buffer != _source)
+            minLength = _accessor.getSomeIpByteBufferMinLength(_buffer)
+        if (minLength != null)
+            parameter += minLength.toString + ", "
+
+        var Integer maxLength = _accessor.getSomeIpByteBufferMaxLength(_source)
+        if (maxLength == null && _buffer != _source)
+            maxLength = _accessor.getSomeIpByteBufferMaxLength(_buffer)
+        if (maxLength != null)
+            parameter += maxLength.toString
+
+        return parameter
+    }
+
+    def protected String getArrayDeploymentParameter(EObject _array, EObject _source, PropertyAccessor _accessor) {
+        var String parameter = ""
+        var Integer minLength = _accessor.getSomeIpArrayMinLengthHelper(_source)
+        if (minLength == null && _array != _source)
+            minLength = _accessor.getSomeIpArrayMinLengthHelper(_array)
+        if (minLength != null)
+            parameter += minLength.toString + ", "
+		else
+        	parameter += FrancaSomeIPDeploymentAccessorHelper.SOMEIP_DEFAULT_MIN_LENGTH.toString + ", "          
+
+        var Integer maxLength = _accessor.getSomeIpArrayMaxLengthHelper(_source)
+        if (maxLength == null && _array != _source)
+            maxLength = _accessor.getSomeIpArrayMaxLengthHelper(_array)
+        if (maxLength != null)
+            parameter += maxLength.toString + ", "
+		else
+        	parameter += FrancaSomeIPDeploymentAccessorHelper.SOMEIP_DEFAULT_MAX_LENGTH.toString + ", "           
+
+        var Integer lengthWidth = _accessor.getSomeIpArrayLengthWidthHelper(_source)
+        if (lengthWidth == null && _array != _source)
+            lengthWidth = _accessor.getSomeIpArrayLengthWidthHelper(_array)
+        if (lengthWidth != null)
+            parameter += lengthWidth.toString
+        else
+        	parameter += FrancaSomeIPDeploymentAccessorHelper.SOMEIP_DEFAULT_LENGTH_WIDTH.toString
+
+        return parameter
+    }
+
+    def protected String getMapDeploymentParameter(EObject _map, EObject _source, PropertyAccessor _accessor) {
+        var String parameter = ""
+        var Integer minLength = _accessor.getSomeIpMapMinLengthHelper(_source)
+        if (minLength == null && _map != _source)
+            minLength = _accessor.getSomeIpMapMinLengthHelper(_map)
+        if (minLength != null)
+            parameter += minLength.toString + ", "
+		else
+        	parameter += FrancaSomeIPDeploymentAccessorHelper.SOMEIP_DEFAULT_MIN_LENGTH.toString            
+
+        var Integer maxLength = _accessor.getSomeIpMapMaxLengthHelper(_source)
+        if (maxLength == null && _map != _source)
+            maxLength = _accessor.getSomeIpMapMaxLengthHelper(_map)
+        if (maxLength != null)
+            parameter += maxLength.toString + ", "
+		else
+        	parameter += FrancaSomeIPDeploymentAccessorHelper.SOMEIP_DEFAULT_MAX_LENGTH.toString + ", "          
+
+        var Integer lengthWidth = _accessor.getSomeIpMapLengthWidthHelper(_source)
+        if (lengthWidth == null && _map != _source)
+            lengthWidth = _accessor.getSomeIpMapLengthWidthHelper(_map)
+        if (lengthWidth != null)
+            parameter += lengthWidth.toString
+		else
+        	parameter += FrancaSomeIPDeploymentAccessorHelper.SOMEIP_DEFAULT_LENGTH_WIDTH.toString + ", "           
+
+        return parameter
+    }
+
+}
+

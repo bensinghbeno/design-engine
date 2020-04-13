@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+             <extension
+                point="org.franca.core.dsl.francaValidator">
+                <validator
+                      class="org.genivi.commonapi.core.validator.ValidatorCoreUi"
+                      mode="FAST"
+                      name="ValidatorCore">
+                </validator>
+               </extension>
+             <extension
+                   point="org.eclipse.ui.preferencePages">
+                <page
+                      class="org.genivi.commonapi.core.validator.preferencepage.ValidatorCorePreferencesPage"
+                      id="org.genivi.commonapi.core.validator.preferencepage.ValidatorCorePreferencesPage"
+                      name="CommonAPI Validator">
+                </page>
+             </extension>
+</plugin>

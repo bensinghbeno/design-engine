@@ -1,0 +1,24 @@
+Changes
+=======
+
+v3.1.12.1
+- support 'lock functors' in AttributeDispatcher(s)
+
+v3.1.12
+- Improve deployment validator
+- Support inline array deployments
+- Add deployment and robustness tests
+- Fix usage of SomeIPStructStructLengthWidth deployment
+
+v3.1.11
+- Validate array deployment parameters
+- Create deep copy of passed receiver list when firing selective
+  broadcasts
+
+v3.1.10
+- Upgrade to JDK-1.8.
+- Explicitely set visibility for the deployments to enable linkage after compilation with -fvisibility=hidden.
+- Added new deployment parameter CRCWidth for attributes, broadcasts and methods.
+- Added config file to run tests with security. All clients are allowed to do everything and "credentials" (uid/gid) may need to be adjusted in order to run tests on different platforms depending on which user/group the tests started from.
+- Added filter in validator to avoid validation of interfaces deployed for the core or dbus.
+
