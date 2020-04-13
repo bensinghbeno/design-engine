@@ -1,0 +1,47 @@
+import "platform:/plugin/org.genivi.commonapi.someip/deployment/CommonAPI-SOMEIP_deployment_spec.fdepl"
+import "@COMMONAPI_TEST_FIDL_PATH@/ti_threading.fidl"
+
+define org.genivi.commonapi.someip.deployment for interface commonapi.threading.TestInterface {
+    SomeIpServiceID = 4660
+    
+    method testMethod {
+        SomeIpMethodID = 1911
+    }
+    
+    broadcast testBroadcast {
+        SomeIpEventID = 41913
+        SomeIpEventGroups = { 17749 }
+    }
+
+    broadcast secondTestBroadcast {
+        SomeIpEventID = 41914
+        SomeIpEventGroups = { 17750 }
+    }
+}
+
+define org.genivi.commonapi.someip.deployment for provider Service {
+    instance commonapi.threading.TestInterface {
+        InstanceId = "my.test.commonapi.address"
+    
+        // 5706 -> 22278
+        SomeIpInstanceID = 22278
+    }
+    instance commonapi.threading.TestInterface {
+        InstanceId = "my.test.commonapi.address.six"
+
+        // 5707 -> 22279
+        SomeIpInstanceID = 22279
+    }
+    instance commonapi.threading.TestInterface {
+        InstanceId = "my.test.commonapi.address.seven"
+
+        // 5708 -> 22280
+        SomeIpInstanceID = 22280
+    }
+    instance commonapi.threading.TestInterface {
+        InstanceId = "my.test.commonapi.address.eight"
+
+        // 5709 -> 22281
+        SomeIpInstanceID = 22281
+    }
+}

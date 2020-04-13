@@ -1,10 +1,14 @@
 
+# cmake build dirs
+projects/linux/someip/git-repos/capicxx-core-runtime/build
+projects/linux/someip/git-repos/capicxx-core-tools/build
 
 # qt build dirs
 *.jpg
 *.png
 *.o
 *.out
+build/
 build-*/
 projects/ros/opensource/mybot_ws/build
 projects/ros-gazebo/rrbot/build
