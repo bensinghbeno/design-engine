@@ -18,7 +18,7 @@ import java.net.Socket;
  */
 public class TcpClient {
 
-    public static final String SERVER_IP = "10.0.2.2"; //your computer IP address
+    public static final String SERVER_IP = "192.168.0.74"; //your computer IP address
     public static final int SERVER_PORT = 4444;
     // message to send to the server
     private String mServerMessage;
