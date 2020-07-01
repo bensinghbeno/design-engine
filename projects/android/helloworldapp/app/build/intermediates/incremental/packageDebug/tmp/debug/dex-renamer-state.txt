@@ -1,4 +1,4 @@
-#Sat Jun 06 12:20:58 CEST 2020
+#Wed Jul 01 14:35:24 CEST 2020
 base.0=/home/beno/my/design-engine/projects/android/helloworldapp/app/build/intermediates/dex/debug/out/classes.dex
 path.0=classes.dex
 renamed.0=classes.dex
