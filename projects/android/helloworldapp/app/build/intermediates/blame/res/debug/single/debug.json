@@ -4,6 +4,10 @@
         "source": "/home/beno/my/design-engine/projects/android/helloworldapp/app/src/main/res/drawable/clipart.png"
     },
     {
+        "merged": "/home/beno/my/design-engine/projects/android/helloworldapp/app/build/intermediates/res/merged/debug/drawable_ic_launcher_background.xml.flat",
+        "source": "/home/beno/my/design-engine/projects/android/helloworldapp/app/src/main/res/drawable/ic_launcher_background.xml"
+    },
+    {
         "merged": "/home/beno/my/design-engine/projects/android/helloworldapp/app/build/intermediates/res/merged/debug/layout_activity_hello.xml.flat",
         "source": "/home/beno/my/design-engine/projects/android/helloworldapp/app/src/main/res/layout/activity_hello.xml"
     },
