@@ -55,8 +55,9 @@
 
 QT_USE_NAMESPACE
 
-SerialPortReader::SerialPortReader(QObject *parent)
+SerialPortReader::SerialPortReader(QString serialPortName, QObject *parent)
     : QObject(parent)
+    , mSerialPortName(serialPortName)
     , m_standardOutput(stdout)
 {
     qDebug("SerialPortReader::SerialPortReader()");
@@ -68,21 +69,21 @@ void SerialPortReader::process()
 
     m_timer = new QTimer();
 
-    mSerial0 = new QSerialPort;
-    QString serialPortName = "ttyUSB0";
-    mSerial0->setPortName(serialPortName);
+    mSerial = new QSerialPort;
+    //QString mSerialPortName = "ttyUSB0";
+    mSerial->setPortName(mSerialPortName);
     int serialPortBaudRate = QSerialPort::Baud115200;
-    mSerial0->setBaudRate(serialPortBaudRate);
+    mSerial->setBaudRate(serialPortBaudRate);
 
-    if (!mSerial0->open(QIODevice::ReadOnly))
+    if (!mSerial->open(QIODevice::ReadOnly))
     {
-        qDebug() << "Failed to open port : " << serialPortName << "Error : " << mSerial0->errorString();
+        qDebug() << "Failed to open port : " << mSerialPortName << "Error : " << mSerial->errorString();
 
         QCoreApplication::quit();
     }
 
-    connect(mSerial0, &QSerialPort::readyRead, this, &SerialPortReader::handleReadyRead);
-    connect(mSerial0, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
+    connect(mSerial, &QSerialPort::readyRead, this, &SerialPortReader::handleReadyRead);
+    connect(mSerial, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
             this, &SerialPortReader::handleError);
     connect(m_timer, &QTimer::timeout, this, &SerialPortReader::handleTimeout);
 
@@ -97,9 +98,9 @@ SerialPortReader::~SerialPortReader()
 
 void SerialPortReader::handleReadyRead()
 {
-    //m_standardOutput << QObject::tr("SerialPortReader::handleReadyRead") << endl;
+    m_standardOutput << QObject::tr("SerialPortReader::handleReadyRead") << endl;
 
-    m_readData.append(mSerial0->readAll());
+    m_readData.append(mSerial->readAll());
 
     if (!m_timer->isActive())
         m_timer->start(1);
@@ -109,23 +110,29 @@ void SerialPortReader::handleTimeout()
 {
     if (m_readData.isEmpty())
     {
-        //qDebug() << "No data was currently available for reading from port : " << mSerial0->portName();
+        qDebug() << "No data was currently available for reading from port : " << mSerial->portName();
     }
     else
     {
-        //qDebug() << "Data successfully received from port : " << mSerial0->portName() << endl   ;
-        //qDebug()  << m_readData << endl;
+        qDebug() << "Data successfully received from port : " << mSerial->portName() << endl   ;
+        qDebug()  << m_readData << endl;
 
         QString str(m_readData);
-        QString last = str.right(45);
-        QStringList list1 = last.split("Range:");
-        QStringList list2 = list1.at(1).split("m\t");
-
-        if (!list2.empty())
+        if (str.size() > 45)
         {
-            QString range = list2.at(0);
-            //qDebug()  << endl << "===== RANGE 0 = " << range << endl;
-            emit updateData(range);
+            QString last = str.right(45);
+            QStringList list1 = last.split("Range:");
+            if (!list1.empty())
+            {
+                QStringList list2 = list1.at(1).split("m\t");
+
+                if (!list2.empty())
+                {
+                    QString range = list2.at(0);
+                    //qDebug()  << endl << "===== RANGE 0 = " << range << endl;
+                    emit updateData(range);
+                }
+            }
         }
 
 
@@ -140,7 +147,7 @@ void SerialPortReader::handleTimeout()
 void SerialPortReader::handleError(QSerialPort::SerialPortError serialPortError)
 {
     if (serialPortError == QSerialPort::ReadError) {
-        m_standardOutput << QObject::tr("An I/O error occurred while reading the data from port %1, error: %2").arg(mSerial0->portName()).arg(mSerial0->errorString()) << endl;
+        m_standardOutput << QObject::tr("An I/O error occurred while reading the data from port %1, error: %2").arg(mSerial->portName()).arg(mSerial->errorString()) << endl;
         QCoreApplication::exit(1);
     }
 }
