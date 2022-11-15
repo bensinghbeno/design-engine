@@ -16,11 +16,14 @@ class UartHandler : public QObject
 public:
     explicit UartHandler(int argumentCount, QStringList& argumentList, QObject *parent = 0);
     SerialPortReader* mSerialPortReader0;
+    SerialPortReader* mSerialPortReader1;
     QMutex mutex;
     QSerialPort* mSerial0;
+    QSerialPort* mSerial1;
     QString  mRange0;
     QString  mRange1;
     QThread* mThread;
+    QThread* mThread1;
 
 
 

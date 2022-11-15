@@ -69,7 +69,7 @@ class SerialPortReader : public QObject
     Q_OBJECT
 
 public:
-    SerialPortReader(QObject *parent = 0);
+    SerialPortReader(QString serialPortName, QObject *parent = 0);
     ~SerialPortReader();
 
 public slots:
@@ -82,11 +82,12 @@ signals:
     void updateData(QString data);
 
 private:
-    QSerialPort *mSerial0;
-    QString  m_Range0;
+    QSerialPort *mSerial;
+    QString  m_Range;
     QTextStream m_standardOutput;
     QTimer      *m_timer;
     QByteArray m_readData;
+    QString mSerialPortName;
 };
 
 #endif
