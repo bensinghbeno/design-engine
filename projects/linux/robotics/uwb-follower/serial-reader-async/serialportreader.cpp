@@ -81,6 +81,10 @@ void SerialPortReader::process()
 
         QCoreApplication::quit();
     }
+    else
+    {
+        qDebug() << "Successfully Opened Port: " << mSerialPortName ;    
+    }
 
     connect(mSerial, &QSerialPort::readyRead, this, &SerialPortReader::handleReadyRead);
     connect(mSerial, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
@@ -98,7 +102,7 @@ SerialPortReader::~SerialPortReader()
 
 void SerialPortReader::handleReadyRead()
 {
-    m_standardOutput << QObject::tr("SerialPortReader::handleReadyRead") << endl;
+    //m_standardOutput << QObject::tr("SerialPortReader::handleReadyRead") << endl;
 
     m_readData.append(mSerial->readAll());
 
@@ -110,14 +114,15 @@ void SerialPortReader::handleTimeout()
 {
     if (m_readData.isEmpty())
     {
-        qDebug() << "No data was currently available for reading from port : " << mSerial->portName();
+        //qDebug() << "No data was currently available for reading from port : " << mSerial->portName();
     }
     else
     {
-        qDebug() << "Data successfully received from port : " << mSerial->portName() << endl   ;
-        qDebug()  << m_readData << endl;
+        //qDebug() << "Data successfully received from port : " << mSerial->portName() << endl   ;
+        //qDebug()  << m_readData << endl;
 
         QString str(m_readData);
+        
         if (str.size() > 45)
         {
             QString last = str.right(45);
@@ -127,9 +132,9 @@ void SerialPortReader::handleTimeout()
                 QStringList list2 = list1.at(1).split("m\t");
 
                 if (!list2.empty())
-                {
+                {                
                     QString range = list2.at(0);
-                    //qDebug()  << endl << "===== RANGE 0 = " << range << endl;
+                    //qDebug()  << endl << "===== RANGE  = " << range << endl;
                     emit updateData(range);
                 }
             }

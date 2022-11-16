@@ -24,8 +24,8 @@ UartHandler::UartHandler(int argumentCount, QStringList &argumentList, QObject *
     mThread->start();
     mThread1->start();
     
-    mThread->wait();
-    mThread1->wait();
+    //mThread->wait();
+    //mThread1->wait();
 }
 
 void UartHandler::handleDataUpdate0(QString data)
