@@ -33,6 +33,7 @@ signals:
 public slots:
 
     void handleDataUpdate0(QString data);
+    void handleDataUpdate1(QString data);
 
 };
 
