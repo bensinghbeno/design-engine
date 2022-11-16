@@ -31,9 +31,11 @@ UartHandler::UartHandler(int argumentCount, QStringList &argumentList, QObject *
 void UartHandler::handleDataUpdate0(QString data)
 {
     mutex.lock();
-    mRange0 = data;
+    //mRange0 = data;
 
-    qDebug() << "==== UartHandler - Range 0 :: "  << mRange0;
+    nRange0 = data.toFloat();
+
+    //qDebug() << "Range 0 :: "  << nRange0;
 
     mutex.unlock();
 }
@@ -41,10 +43,37 @@ void UartHandler::handleDataUpdate0(QString data)
 void UartHandler::handleDataUpdate1(QString data)
 {
     mutex.lock();
-    mRange1 = data;
+    //mRange1 = data;
 
-    qDebug() << "==== UartHandler - Range 1 :: "  << mRange1;
+    nRange1 = data.toFloat();
+
+    //qDebug() << "Range 1 :: "  << nRange1;
+    
+    float diff = (nRange0 - nRange1);
+
+    // // DIRECTION // //
+    if ((nRange0 > 2) || (nRange1 > 2))
+    {
+        if (diff > 0.2)
+        {
+            qDebug() << "LEFT ";
+        }
+        else if (diff< (-(0.2)))
+        {
+            qDebug() << "RIGHT";
+        }
+        else
+        {
+            qDebug() << "FORWARD";
+        }
+    }
+    else
+        {
+            qDebug() << "STOP";
+        }
+
 
     mutex.unlock();
 }
+
 

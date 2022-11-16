@@ -22,6 +22,8 @@ public:
     QSerialPort* mSerial1;
     QString  mRange0;
     QString  mRange1;
+    float nRange0;
+    float nRange1;
     QThread* mThread;
     QThread* mThread1;
 
