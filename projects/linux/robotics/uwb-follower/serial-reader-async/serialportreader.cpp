@@ -107,7 +107,7 @@ void SerialPortReader::handleReadyRead()
     m_readData.append(mSerial->readAll());
 
     if (!m_timer->isActive())
-        m_timer->start(1);
+        m_timer->start(10);  
 }
 
 void SerialPortReader::handleTimeout()

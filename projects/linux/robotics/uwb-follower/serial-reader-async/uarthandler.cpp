@@ -2,15 +2,24 @@
 #include <QDebug>
 #include <QThread>
 #include <wiringPi.h> // Include WiringPi library!
+#include <QThread>
 
 
-UartHandler::UartHandler(int argumentCount, QStringList &argumentList, QObject *parent) : QObject(parent)
+UartHandler::UartHandler(int argumentCount, QStringList &argumentList, QObject *parent) 
+: QObject(parent)
+, mLeftCount(0)
+, mRightCount(0)
+, mFwdCount(0)
+, mSkipEvent(3)
 {
     qDebug() << "Launch Serial Handler";
     wiringPiSetupGpio(); // Initialize wiringPi -- using Broadcom pin numbers
     
     pinMode(20, OUTPUT);     // Set regular LED as output
     pinMode(21, OUTPUT);     // Set regular LED as output
+    
+    digitalWrite(20, LOW);  
+    digitalWrite(21, LOW); 
 
     mThread = new QThread();
     mSerialPortReader0 = new SerialPortReader("ttyUSB0");
@@ -61,21 +70,65 @@ void UartHandler::handleDataUpdate1(QString data)
     qDebug() << "DIFF :: "  << diff;
 
     // // DIRECTION // //
-    if ((nRange0 > 2.5) || (nRange1 > 2.5))
+    if ((nRange0 > 3) || (nRange1 > 3))
     {
-        if (diff > 0.33)
+        if (diff > 0.4)
         {
             qDebug() << "LEFT ";
+            
+            if (mLeftCount < mSkipEvent)
+            {
+            	++mLeftCount;
+            	digitalWrite(20, LOW);  
+            	digitalWrite(21, LOW); 
+            }
+            else
+            {
+            mLeftCount = 0;
+            digitalWrite(20, LOW);  
+            digitalWrite(21, HIGH);  
+            } 
         }
-        else if (diff< (-(0.33)))
+        else if (diff< (-(0.4)))
         {
             qDebug() << "RIGHT";
+            //digitalWrite(20, HIGH);  
+            //digitalWrite(21, LOW);   
+            
+            
+            if (mRightCount < mSkipEvent)
+            {
+            	++mRightCount;
+            	digitalWrite(20, LOW);  
+            	digitalWrite(21, LOW); 
+            }
+            else
+            {
+            	mRightCount = 0;
+            	digitalWrite(20, HIGH);  
+            	digitalWrite(21, LOW);  
+            } 
         }
         else
         {
             qDebug() << "FORWARD";
-            digitalWrite(20, HIGH);  
-            digitalWrite(21, HIGH);    
+            //digitalWrite(20, HIGH);  
+            //digitalWrite(21, HIGH);   
+            
+            
+            
+            if (mFwdCount < mSkipEvent)
+            {
+            	++mFwdCount;
+            	digitalWrite(20, LOW);  
+            	digitalWrite(21, LOW); 
+            }
+            else
+            {
+            	mFwdCount = 0;
+            	digitalWrite(20, HIGH);  
+            	digitalWrite(21, HIGH);  
+            }  
         }
     }
     else

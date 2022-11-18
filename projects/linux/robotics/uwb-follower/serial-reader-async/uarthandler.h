@@ -26,7 +26,11 @@ public:
     float nRange1;
     QThread* mThread;
     QThread* mThread1;
-
+    
+    int mLeftCount;
+    int mRightCount;
+    int mFwdCount;
+    int mSkipEvent;
 
 
 
