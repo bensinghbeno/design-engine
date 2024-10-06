@@ -1,19 +1,46 @@
 import cv2
 import mediapipe as mp
-import pyttsx3
+import subprocess
 import threading
+import queue
+import argparse
 
-# Initialize text-to-speech engine
-engine = pyttsx3.init()
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description='Hand detection with throttled TTS')
+parser.add_argument('--throttle', type=int, default=10, help='Number of detections before TTS is triggered')
+args = parser.parse_args()
 
-# Set female voice
-voices = engine.getProperty('voices')
-for voice in voices:
-    if "female" in voice.name.lower():
-        engine.setProperty('voice', voice.id)
-        break  # Use the first female voice found
+# Create a queue for speech requests
+speech_queue = queue.Queue()
 
-# Initialize mediapipe pose model to detect full body pose
+# Function to speak text using espeak
+def speak_text(text):
+    subprocess.run(['espeak', text])
+
+# Function to handle speech queue
+def speech_worker():
+    while True:
+        text = speech_queue.get()
+        if text is None:
+            break
+        speak_text(text)
+        speech_queue.task_done()
+
+# Start the speech worker thread
+speech_thread = threading.Thread(target=speech_worker)
+speech_thread.start()
+
+# Function to add text to the speech queue
+def queue_speech(text):
+    # Clear the queue and add new text
+    while not speech_queue.empty():
+        try:
+            speech_queue.get_nowait()
+        except queue.Empty:
+            break
+    speech_queue.put(text)
+
+# Initialize mediapipe pose model
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 pose = mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -34,62 +61,54 @@ def detect_hand_above_head(pose_landmarks):
 
     return left_hand_up, right_hand_up
 
-# Function to play text as audio in a separate thread
-def speak_non_blocking(text):
-    threading.Thread(target=speak, args=(text,)).start()
+# Counters for throttling
+left_hand_counter = 0
+right_hand_counter = 0
 
-# Function to play text as audio
-def speak(text):
-    engine.say(text)
-    engine.runAndWait()
+try:
+    while cap.isOpened():
+        success, frame = cap.read()
+        if not success:
+            break
 
-# Variables to track if audio has already been played
-left_hand_audio_played = False
-right_hand_audio_played = False
+        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        image.flags.writeable = False
+        results_pose = pose.process(image)
 
-while cap.isOpened():
-    success, frame = cap.read()
-    if not success:
-        break
+        image.flags.writeable = True
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-    # Convert the image color to RGB for mediapipe
-    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    image.flags.writeable = False
-    results_pose = pose.process(image)
+        if results_pose.pose_landmarks:
+            mp_drawing.draw_landmarks(image, results_pose.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
-    image.flags.writeable = True
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            left_hand_up, right_hand_up = detect_hand_above_head(results_pose.pose_landmarks.landmark)
 
-    if results_pose.pose_landmarks:
-        # Draw the full-body landmarks
-        mp_drawing.draw_landmarks(image, results_pose.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+            if left_hand_up:
+                left_hand_counter += 1
+                cv2.putText(image, f"Left hand up: {left_hand_counter}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                if left_hand_counter % args.throttle == 0:
+                    queue_speech("Left hand is up")
+            else:
+                left_hand_counter = 0
 
-        # Detect if the hand is above the head
-        left_hand_up, right_hand_up = detect_hand_above_head(results_pose.pose_landmarks.landmark)
+            if right_hand_up:
+                right_hand_counter += 1
+                cv2.putText(image, f"Right hand up: {right_hand_counter}", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                if right_hand_counter % args.throttle == 0:
+                    queue_speech("Right hand is up")
+            else:
+                right_hand_counter = 0
 
-        # Handle left hand detection
-        if left_hand_up and not left_hand_audio_played:
-            cv2.putText(image, "Left hand is above head", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            speak_non_blocking("Left")
-            left_hand_audio_played = True  # Mark audio as played
-        elif not left_hand_up:
-            left_hand_audio_played = False  # Reset if hand is lowered
+        cv2.imshow('Hand Above Head Detection', image)
 
-        # Handle right hand detection
-        if right_hand_up and not right_hand_audio_played:
-            cv2.putText(image, "Right hand is above head", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            speak_non_blocking("Right")
-            right_hand_audio_played = True  # Mark audio as played
-        elif not right_hand_up:
-            right_hand_audio_played = False  # Reset if hand is lowered
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
-    # Display the resulting frame
-    cv2.imshow('Hand Above Head Detection', image)
+finally:
+    cap.release()
+    cv2.destroyAllWindows()
+    pose.close()
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# Release the capture and close windows
-cap.release()
-cv2.destroyAllWindows()
-pose.close()
+    # Stop the speech worker thread
+    speech_queue.put(None)
+    speech_thread.join()
