@@ -16,7 +16,7 @@ ROAD_WIDTH = 300
 CAR_WIDTH = 50
 CAR_HEIGHT = 100
 FPS = 60
-FINISH_TIME = 200  # Changed to 200 seconds
+FINISH_TIME = 200  # Increased finish time to 200 seconds
 
 # Colors
 WHITE = (255, 255, 255)
@@ -28,6 +28,8 @@ RED = (255, 0, 0)
 # Load assets
 CAR_IMAGE = pygame.image.load('car.jpg')  # Your car image here
 OBSTACLE_IMAGE = pygame.image.load('obstacle.jpg')  # Other cars/obstacles image
+pygame.mixer.init()
+NICE_SOUND = pygame.mixer.Sound('nice.mp3')  # Sound file for "Nice" message
 
 # Initialize screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -81,6 +83,7 @@ class Obstacle:
         self.image = pygame.transform.scale(OBSTACLE_IMAGE, (CAR_WIDTH, CAR_HEIGHT))
         self.x = random.randint((SCREEN_WIDTH - ROAD_WIDTH) // 2, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH)
         self.y = -CAR_HEIGHT
+        self.crossed = False  # Track if the obstacle has crossed
 
         base_speed = 1  # Base speed for level 0
         self.speed = base_speed * (speed_factor + 1)
@@ -88,6 +91,7 @@ class Obstacle:
     def move(self):
         self.y += self.speed
         if self.y > SCREEN_HEIGHT:
+            self.crossed = True  # Mark as crossed when it goes off screen
             self.y = -CAR_HEIGHT
             self.x = random.randint((SCREEN_WIDTH - ROAD_WIDTH) // 2, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH)
 
@@ -111,8 +115,8 @@ def game_loop(speed_level):
 
     car = Car()
 
-    # Fewer obstacles for all levels (reduced by half)
-    num_obstacles = max(1, 3 // 2)  # Half the number of obstacles
+    # Increase the number of obstacles by 2
+    num_obstacles = max(1, 3 + 2)  # Increase number of obstacles
     obstacles = [Obstacle(speed_level) for _ in range(num_obstacles)]
 
     start_time = time.time()
@@ -138,6 +142,7 @@ def game_loop(speed_level):
         car.draw()
 
         # Move and draw obstacles
+        collision_occurred = False
         for obstacle in obstacles:
             obstacle.move()
             obstacle.draw()
@@ -146,6 +151,12 @@ def game_loop(speed_level):
             if obstacle.check_collision(car):
                 game_over()
                 game_over_flag = True
+                collision_occurred = True
+
+            # Play sound if the obstacle has crossed and there was no collision
+            if obstacle.crossed and not collision_occurred:
+                NICE_SOUND.play()
+                obstacle.crossed = False  # Reset crossing state
 
         # Check for finish condition (200 seconds)
         if time.time() - start_time > FINISH_TIME:
