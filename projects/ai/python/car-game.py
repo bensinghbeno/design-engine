@@ -114,18 +114,26 @@ def game_over():
     pygame.display.update()
     time.sleep(2)
 
+def draw_collision_effect(obstacle):
+    # Draw a red circle around the obstacle to indicate collision
+    collision_radius = max(CAR_WIDTH, CAR_HEIGHT)
+    pygame.draw.circle(screen, RED, (obstacle.x + CAR_WIDTH // 2, obstacle.y + CAR_HEIGHT // 2), collision_radius, 5)
+
 def game_loop(speed_level):
     global move_left, move_right, game_over_flag
 
     car = Car()
 
-    # Increase the number of obstacles and reduce by 30%
+    # Scoring variables
+    score = 0
     original_num_obstacles = 5  # 3 + 2
     num_obstacles = max(1, int(original_num_obstacles * 0.7))  # Reduce by 30%
     obstacles = [Obstacle(speed_level) for _ in range(num_obstacles)]
 
     start_time = time.time()
     finished_without_collision = False
+    collision_effect_time = 0
+    last_collided_obstacle = None  # Keep track of the last collided obstacle
 
     while not game_over_flag:
         screen.fill(WHITE)
@@ -154,14 +162,25 @@ def game_loop(speed_level):
 
             # Check for collision
             if obstacle.check_collision(car):
-                game_over()
-                game_over_flag = True
                 collision_occurred = True
+                collision_effect_time = pygame.time.get_ticks()  # Record the time of collision
+                last_collided_obstacle = obstacle  # Update the last collided obstacle
+                score = max(0, score - 1)  # Decrease score by 1 (don't let it go below zero)
 
-            # Play sound if the obstacle has crossed and there was no collision
-            if obstacle.crossed and not collision_occurred:
-                NICE_SOUND.play()
+            # Add 1 point if obstacle crossed without collision
+            if obstacle.crossed:
+                if not collision_occurred:
+                    score += 1  # Increase score by 1
                 obstacle.crossed = False  # Reset crossing state
+
+        # Draw collision effect if recent collision on the last collided obstacle
+        if last_collided_obstacle and pygame.time.get_ticks() - collision_effect_time < 500:  # Show effect for 0.5 seconds
+            draw_collision_effect(last_collided_obstacle)
+
+        # Display score at the top right corner
+        font = pygame.font.SysFont(None, 55)
+        score_text = font.render(f'Score: {score}', True, BLACK)
+        screen.blit(score_text, (SCREEN_WIDTH - score_text.get_width() - 20, 20))
 
         # Check for finish condition (200 seconds)
         if time.time() - start_time > FINISH_TIME:
@@ -177,7 +196,6 @@ def game_loop(speed_level):
     # Show winning screen if no collision
     if finished_without_collision:
         screen.fill(GREEN)
-        font = pygame.font.SysFont(None, 55)
         win_text = font.render('Wooow, You did it!!!, You Win!!!!!', True, WHITE)
         screen.blit(win_text, ((SCREEN_WIDTH - win_text.get_width()) // 2, SCREEN_HEIGHT // 2))
         pygame.display.update()
@@ -185,6 +203,7 @@ def game_loop(speed_level):
 
     # Quit the game
     pygame.quit()
+
 
 def detect_human_movement(video_file=None):
     global move_left, move_right, game_over_flag
@@ -195,10 +214,23 @@ def detect_human_movement(video_file=None):
     else:
         cap = cv2.VideoCapture(0)
 
+    # Reduce frame size for faster processing
+    FRAME_WIDTH = 320  # Set a smaller width for the frame
+    FRAME_HEIGHT = 240  # Set a smaller height for the frame
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
+
+    frame_skip = 30  # Process every 2nd frame to speed up detection
+    frame_count = 0
+
     while cap.isOpened() and not game_over_flag:
         ret, frame = cap.read()
         if not ret:
             break
+
+        frame_count += 1
+        if frame_count % frame_skip != 0:
+            continue  # Skip this frame to speed up detection
 
         # Convert the frame to RGB for Mediapipe processing
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -221,6 +253,7 @@ def detect_human_movement(video_file=None):
 
     cap.release()
     cv2.destroyAllWindows()
+
 
 # Start the game
 if __name__ == "__main__":
