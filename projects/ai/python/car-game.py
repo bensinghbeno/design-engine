@@ -16,7 +16,7 @@ ROAD_WIDTH = 300
 CAR_WIDTH = 50
 CAR_HEIGHT = 100
 FPS = 60
-FINISH_TIME = 20
+FINISH_TIME = 200  # Changed to 200 seconds
 
 # Colors
 WHITE = (255, 255, 255)
@@ -147,7 +147,7 @@ def game_loop(speed_level):
                 game_over()
                 game_over_flag = True
 
-        # Check for finish condition (20 seconds)
+        # Check for finish condition (200 seconds)
         if time.time() - start_time > FINISH_TIME:
             game_over_flag = True
             finished_without_collision = True
