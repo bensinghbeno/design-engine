@@ -115,8 +115,9 @@ def game_loop(speed_level):
 
     car = Car()
 
-    # Increase the number of obstacles by 2
-    num_obstacles = max(1, 3 + 2)  # Increase number of obstacles
+    # Increase the number of obstacles and reduce by 30%
+    original_num_obstacles = 5  # 3 + 2
+    num_obstacles = max(1, int(original_num_obstacles * 0.7))  # Reduce by 30%
     obstacles = [Obstacle(speed_level) for _ in range(num_obstacles)]
 
     start_time = time.time()
@@ -181,11 +182,14 @@ def game_loop(speed_level):
     # Quit the game
     pygame.quit()
 
-def detect_human_movement():
+def detect_human_movement(video_file=None):
     global move_left, move_right, game_over_flag
 
-    # Open the webcam feed
-    cap = cv2.VideoCapture(0)
+    # Open the video file or the webcam feed
+    if video_file:
+        cap = cv2.VideoCapture(video_file)
+    else:
+        cap = cv2.VideoCapture(0)
 
     while cap.isOpened() and not game_over_flag:
         ret, frame = cap.read()
@@ -211,27 +215,25 @@ def detect_human_movement():
                 move_left = False
                 move_right = False
 
-        # Don't show the capture window (just game)
-
     cap.release()
     cv2.destroyAllWindows()
 
 # Start the game
 if __name__ == "__main__":
-    # Handle command line argument for speed level
-    if len(sys.argv) != 2 or not sys.argv[1].isdigit() or not (0 <= int(sys.argv[1]) <= 5):
-        print("Usage: python car_game.py <speed_level: 0-5>")
+    # Handle command line argument for speed level and optional video file
+    if len(sys.argv) < 2 or not sys.argv[1].isdigit() or not (0 <= int(sys.argv[1]) <= 5):
+        print("Usage: python car_game.py <speed_level: 0-5> [optional_video_path]")
         sys.exit(1)
 
     speed_level = int(sys.argv[1])
+    video_file = sys.argv[2] if len(sys.argv) == 3 else None
 
-    # Start the human detection thread
-    human_thread = threading.Thread(target=detect_human_movement)
+    # Start the human detection thread with optional video file
+    human_thread = threading.Thread(target=detect_human_movement, args=(video_file,))
     human_thread.start()
 
     # Run the game loop
     game_loop(speed_level)
 
-    # Signal the thread to stop when game is over
-    game_over_flag = True
+    # Wait for the human detection thread to finish before exiting
     human_thread.join()
