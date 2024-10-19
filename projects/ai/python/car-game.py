@@ -9,10 +9,11 @@ import cv2
 # Initialize pygame
 pygame.init()
 
-# Constants
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 700
-ROAD_WIDTH = 300
+# Constants for screen size (fullscreen mode)
+SCREEN_INFO = pygame.display.Info()  # Get display screen info
+SCREEN_WIDTH = SCREEN_INFO.current_w  # Get screen width
+SCREEN_HEIGHT = SCREEN_INFO.current_h  # Get screen height
+ROAD_WIDTH = SCREEN_WIDTH // 2  # Adjust road width to fit half the screen width
 CAR_WIDTH = 50
 CAR_HEIGHT = 100
 FPS = 60
@@ -31,8 +32,8 @@ OBSTACLE_IMAGE = pygame.image.load('obstacle.jpg')  # Other cars/obstacles image
 pygame.mixer.init()
 NICE_SOUND = pygame.mixer.Sound('nice.mp3')  # Sound file for "Nice" message
 
-# Initialize screen
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+# Initialize screen in fullscreen mode
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
 pygame.display.set_caption("Car Game")
 
 # Create clock for FPS
@@ -228,12 +229,12 @@ if __name__ == "__main__":
     speed_level = int(sys.argv[1])
     video_file = sys.argv[2] if len(sys.argv) == 3 else None
 
-    # Start the human detection thread with optional video file
+    # Start human movement detection in a separate thread
     human_thread = threading.Thread(target=detect_human_movement, args=(video_file,))
     human_thread.start()
 
-    # Run the game loop
+    # Start the game loop
     game_loop(speed_level)
 
-    # Wait for the human detection thread to finish before exiting
+    # Wait for human movement detection thread to finish
     human_thread.join()
