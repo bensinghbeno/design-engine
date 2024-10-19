@@ -2,6 +2,9 @@ import pygame
 import random
 import time
 import sys
+import threading
+import mediapipe as mp
+import cv2
 
 # Initialize pygame
 pygame.init()
@@ -13,7 +16,7 @@ ROAD_WIDTH = 300
 CAR_WIDTH = 50
 CAR_HEIGHT = 100
 FPS = 60
-FINISH_TIME = 20  # Reduced to 20 seconds
+FINISH_TIME = 20
 
 # Colors
 WHITE = (255, 255, 255)
@@ -32,6 +35,15 @@ pygame.display.set_caption("Car Game")
 
 # Create clock for FPS
 clock = pygame.time.Clock()
+
+# Mediapipe pose setup
+mp_pose = mp.solutions.pose
+pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+
+# Global variables for controlling the car
+move_left = False
+move_right = False
+game_over_flag = False
 
 def draw_road():
     # Road in the middle
@@ -70,7 +82,6 @@ class Obstacle:
         self.x = random.randint((SCREEN_WIDTH - ROAD_WIDTH) // 2, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH)
         self.y = -CAR_HEIGHT
 
-        # Dynamic speed based on level (0 is slowest, then increasing for 1, 2, etc.)
         base_speed = 1  # Base speed for level 0
         self.speed = base_speed * (speed_factor + 1)
 
@@ -96,14 +107,15 @@ def game_over():
     time.sleep(2)
 
 def game_loop(speed_level):
+    global move_left, move_right, game_over_flag
+
     car = Car()
 
     # Fewer obstacles for all levels (reduced by half)
     num_obstacles = max(1, 3 // 2)  # Half the number of obstacles
     obstacles = [Obstacle(speed_level) for _ in range(num_obstacles)]
-    
+
     start_time = time.time()
-    game_over_flag = False
     finished_without_collision = False
 
     while not game_over_flag:
@@ -114,11 +126,11 @@ def game_loop(speed_level):
             if event.type == pygame.QUIT:
                 game_over_flag = True
 
-        # Move car based on key input
+        # Move car based on key input or human detection
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_LEFT] or move_left:
             car.move(-1)  # Moving left
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_RIGHT] or move_right:
             car.move(1)  # Moving right
 
         # Draw the road and the car
@@ -153,10 +165,45 @@ def game_loop(speed_level):
         win_text = font.render('Wooow, You did it!!!, You Win!!!!!', True, WHITE)
         screen.blit(win_text, ((SCREEN_WIDTH - win_text.get_width()) // 2, SCREEN_HEIGHT // 2))
         pygame.display.update()
-        time.sleep(2)  # Pause for 2 seconds to show the win message
+        time.sleep(2)
 
     # Quit the game
     pygame.quit()
+
+def detect_human_movement():
+    global move_left, move_right, game_over_flag
+
+    # Open the webcam feed
+    cap = cv2.VideoCapture(0)
+
+    while cap.isOpened() and not game_over_flag:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Convert the frame to RGB for Mediapipe processing
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = pose.process(frame_rgb)
+
+        if results.pose_landmarks:
+            left_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].x
+            right_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER].x
+
+            # Swapped the direction for correct left/right movement
+            if left_shoulder < 0.4:  # Move right
+                move_left = False
+                move_right = True
+            elif right_shoulder > 0.6:  # Move left
+                move_left = True
+                move_right = False
+            else:  # Stay neutral
+                move_left = False
+                move_right = False
+
+        # Don't show the capture window (just game)
+
+    cap.release()
+    cv2.destroyAllWindows()
 
 # Start the game
 if __name__ == "__main__":
@@ -166,4 +213,14 @@ if __name__ == "__main__":
         sys.exit(1)
 
     speed_level = int(sys.argv[1])
+
+    # Start the human detection thread
+    human_thread = threading.Thread(target=detect_human_movement)
+    human_thread.start()
+
+    # Run the game loop
     game_loop(speed_level)
+
+    # Signal the thread to stop when game is over
+    game_over_flag = True
+    human_thread.join()
