@@ -13,7 +13,7 @@ pygame.init()
 SCREEN_INFO = pygame.display.Info()  # Get display screen info
 SCREEN_WIDTH = SCREEN_INFO.current_w  # Get screen width
 SCREEN_HEIGHT = SCREEN_INFO.current_h  # Get screen height
-ROAD_WIDTH = SCREEN_WIDTH // 2  # Adjust road width to fit half the screen width
+ROAD_WIDTH = int(SCREEN_WIDTH * 0.8)  # Increase road width to 80% of the screen width
 CAR_WIDTH = 50
 CAR_HEIGHT = 100
 FPS = 60
@@ -49,17 +49,20 @@ move_right = False
 game_over_flag = False
 
 def draw_road():
+    # Adjust tree/rock width by reducing it further
+    tree_area_width = (SCREEN_WIDTH - ROAD_WIDTH) // 2
+
     # Road in the middle
     road_rect = pygame.Rect((SCREEN_WIDTH - ROAD_WIDTH) // 2, 0, ROAD_WIDTH, SCREEN_HEIGHT)
     pygame.draw.rect(screen, GRAY, road_rect)
 
-    # Grass and trees on both sides
-    pygame.draw.rect(screen, GREEN, pygame.Rect(0, 0, (SCREEN_WIDTH - ROAD_WIDTH) // 2, SCREEN_HEIGHT))
-    pygame.draw.rect(screen, GREEN, pygame.Rect(SCREEN_WIDTH - (SCREEN_WIDTH - ROAD_WIDTH) // 2, 0, (SCREEN_WIDTH - ROAD_WIDTH) // 2, SCREEN_HEIGHT))
+    # Grass and trees/rocks on both sides (reduced width)
+    pygame.draw.rect(screen, GREEN, pygame.Rect(0, 0, tree_area_width, SCREEN_HEIGHT))
+    pygame.draw.rect(screen, GREEN, pygame.Rect(SCREEN_WIDTH - tree_area_width, 0, tree_area_width, SCREEN_HEIGHT))
 
-    # Add some random trees/rocks (for effect)
+    # Add random trees/rocks in the smaller area
     for i in range(10):
-        tree_x = random.choice([random.randint(10, 100), random.randint(SCREEN_WIDTH - 100, SCREEN_WIDTH - 10)])
+        tree_x = random.choice([random.randint(10, tree_area_width - 10), random.randint(SCREEN_WIDTH - tree_area_width + 10, SCREEN_WIDTH - 10)])
         tree_y = random.randint(0, SCREEN_HEIGHT)
         pygame.draw.circle(screen, BLACK, (tree_x, tree_y), random.randint(15, 25))
 
