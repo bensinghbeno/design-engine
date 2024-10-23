@@ -5,6 +5,8 @@ import sys
 import threading
 import mediapipe as mp
 import cv2
+import argparse
+
 
 # Initialize pygame
 pygame.init()
@@ -257,13 +259,32 @@ def detect_human_movement(video_file=None):
 
 # Start the game
 if __name__ == "__main__":
-    # Handle command line argument for speed level and optional video file
-    if len(sys.argv) < 2 or not sys.argv[1].isdigit() or not (0 <= int(sys.argv[1]) <= 5):
-        print("Usage: python car_game.py <speed_level: 0-5> [optional_video_path]")
-        sys.exit(1)
+    
+    # Create the parser
+    parser = argparse.ArgumentParser(description="Car game with adjustable speed levels")
 
-    speed_level = int(sys.argv[1])
-    video_file = sys.argv[2] if len(sys.argv) == 3 else None
+    # Add the speed_level argument
+    parser.add_argument(
+        "--speed_level",
+        type=int,
+        choices=range(6),  # Allows values 0-5
+        required=True,
+        help="Set the speed level (0-5)"
+    )
+
+    # Add the optional video file argument
+    parser.add_argument(
+        "--video",
+        type=str,
+        help="Path to the optional video file"
+    )
+
+    # Parse the arguments
+    args = parser.parse_args()
+    
+    # Get the speed level from parsed arguments
+    speed_level = args.speed_level
+    video_file = args.video
 
     # Start human movement detection in a separate thread
     human_thread = threading.Thread(target=detect_human_movement, args=(video_file,))
