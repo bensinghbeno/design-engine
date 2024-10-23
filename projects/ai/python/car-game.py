@@ -9,10 +9,29 @@ import cv2
 # Initialize pygame
 pygame.init()
 
-# Constants for screen size (fullscreen mode)
+# Constants for screen size based on command-line argument
 SCREEN_INFO = pygame.display.Info()  # Get display screen info
-SCREEN_WIDTH = SCREEN_INFO.current_w  # Get screen width
-SCREEN_HEIGHT = SCREEN_INFO.current_h  # Get screen height
+
+# Set default screen size to full
+screen_size_arg = None  # Placeholder for screen size argument
+
+# Function to parse command-line arguments
+def parse_arguments():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--screen_size", type=str, choices=["half", "full"], help="Set the screen size to 'half' or 'full'")
+    parser.add_argument("--speed_level", type=int, choices=range(1, 6), required=True, help="Set the speed level (1-5)")
+    parser.add_argument("--video", type=str, help="Path to the optional video file")
+    return parser.parse_args()
+
+args = parse_arguments()
+
+if args.screen_size == "half":
+    SCREEN_WIDTH = int(SCREEN_INFO.current_w / 2)  # Get screen width
+else:
+    SCREEN_WIDTH = SCREEN_INFO.current_w  # Full width
+
+SCREEN_HEIGHT = SCREEN_INFO.current_h  # Full height
 ROAD_WIDTH = int(SCREEN_WIDTH * 0.8)  # Increase road width to 80% of the screen width
 CAR_WIDTH = 50
 CAR_HEIGHT = 100
@@ -32,8 +51,12 @@ OBSTACLE_IMAGE = pygame.image.load('obstacle.jpg')  # Other cars/obstacles image
 pygame.mixer.init()
 NICE_SOUND = pygame.mixer.Sound('nice.mp3')  # Sound file for "Nice" message
 
-# Initialize screen in fullscreen mode
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+# Initialize screen
+if args.screen_size == "half":
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # Use SCREEN_WIDTH based on argument
+else:
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+
 pygame.display.set_caption("Car Game")
 
 # Create clock for FPS
@@ -178,7 +201,7 @@ def game_loop(speed_level):
         car.draw()  
 
         font = pygame.font.SysFont(None, 36)
-        score_text = font.render(f"Score: {score}", True, BLACK)
+        score_text = font.render("Score: {}".format(score), True, BLACK)
         screen.blit(score_text, (SCREEN_WIDTH - score_text.get_width() - 20, 10))
 
         if collision_occurred:
@@ -204,65 +227,45 @@ def game_loop(speed_level):
         pygame.display.update()
         time.sleep(3)
 
-    pygame.quit()
-
 def detect_human_movement(video_file=None):
-    global move_left, move_right, game_over_flag
+    global move_left, move_right
 
-    cap = cv2.VideoCapture(video_file if video_file else 0)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-    
-    frame_skip = 5
-    frame_count = 0
-    
-    while cap.isOpened() and not game_over_flag:
-        ret, frame = cap.read()
-        if not ret:
-            break
+    cap = cv2.VideoCapture(0 if video_file is None else video_file)
 
-        frame_count += 1
-        if frame_count % frame_skip != 0:
-            continue
+    mp_drawing = mp.solutions.drawing_utils
+    with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = pose.process(frame_rgb)
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            results = pose.process(frame_rgb)
 
-        if results.pose_landmarks:
-            left_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].x
-            right_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER].x
+            if results.pose_landmarks:
+                left_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].x
+                right_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER].x
 
-            if left_shoulder < 0.4:
-                move_left = True
-                move_right = False
-            elif right_shoulder > 0.6:
-                move_left = False
-                move_right = True
-            else:
-                move_left = False
-                move_right = False
+                if left_shoulder < 0.4:
+                    move_left = True
+                    move_right = False
+                elif right_shoulder > 0.6:
+                    move_left = False
+                    move_right = True
+                else:
+                    move_left = False
+                    move_right = False
 
     cap.release()
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    import argparse
-    
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--speed_level", type=int, choices=range(1, 6), required=True, help="Set the speed level (1-5)")
-    parser.add_argument("--video", type=str, help="Path to the optional video file")
-    
-    args = parser.parse_args()
-    
-    speed_level = args.speed_level
-    video_file = args.video
-
-    human_thread = threading.Thread(target=detect_human_movement, args=(video_file,))
-    
+    human_thread = threading.Thread(target=detect_human_movement, args=(args.video,))
     human_thread.start()
     
-    game_loop(speed_level)
+    game_loop(args.speed_level)
     
     human_thread.join()
     
+    pygame.quit()
     sys.exit()
