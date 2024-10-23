@@ -5,8 +5,6 @@ import sys
 import threading
 import mediapipe as mp
 import cv2
-import argparse
-
 
 # Initialize pygame
 pygame.init()
@@ -74,11 +72,10 @@ class Car:
         self.x = (SCREEN_WIDTH - CAR_WIDTH) // 2
         self.y = SCREEN_HEIGHT - CAR_HEIGHT - 10
         self.speed = 10
-        self.lateral_speed = self.speed / 3  # Slower by 3 times when moving left-right
+        self.lateral_speed = self.speed / 3
 
     def move(self, dx):
-        self.x += dx * self.lateral_speed  # Apply lateral speed adjustment
-        # Boundary check
+        self.x += dx * self.lateral_speed  
         self.x = max((SCREEN_WIDTH - ROAD_WIDTH) // 2, min(self.x, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH))
 
     def draw(self):
@@ -89,15 +86,15 @@ class Obstacle:
         self.image = pygame.transform.scale(OBSTACLE_IMAGE, (CAR_WIDTH, CAR_HEIGHT))
         self.x = random.randint((SCREEN_WIDTH - ROAD_WIDTH) // 2, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH)
         self.y = -CAR_HEIGHT
-        self.crossed = False  # Track if the obstacle has crossed
+        self.crossed = False  
 
-        base_speed = 1  # Base speed for level 0
+        base_speed = 1  
         self.speed = base_speed * (speed_factor + 1)
 
     def move(self):
         self.y += self.speed
         if self.y > SCREEN_HEIGHT:
-            self.crossed = True  # Mark as crossed when it goes off screen
+            self.crossed = True  
             self.y = -CAR_HEIGHT
             self.x = random.randint((SCREEN_WIDTH - ROAD_WIDTH) // 2, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH)
 
@@ -109,122 +106,117 @@ class Obstacle:
         obstacle_rect = pygame.Rect(self.x, self.y, CAR_WIDTH, CAR_HEIGHT)
         return car_rect.colliderect(obstacle_rect)
 
-def game_over():
-    font = pygame.font.SysFont(None, 75)
-    game_over_text = font.render('GAME OVER', True, RED)
-    screen.blit(game_over_text, ((SCREEN_WIDTH - game_over_text.get_width()) // 2, SCREEN_HEIGHT // 2))
-    pygame.display.update()
-    time.sleep(2)
-
-def draw_collision_effect(obstacle):
-    # Draw a red circle around the obstacle to indicate collision
-    collision_radius = max(CAR_WIDTH, CAR_HEIGHT)
-    pygame.draw.circle(screen, RED, (obstacle.x + CAR_WIDTH // 2, obstacle.y + CAR_HEIGHT // 2), collision_radius, 5)
+def draw_close_button():
+    button_size = 60
+    button_padding = 30
+    button_x = button_padding
+    button_y = button_padding
+    
+    # Draw the button rectangle and 'X'
+    pygame.draw.rect(screen, RED, (button_x, button_y, button_size, button_size))
+    
+    line_padding = 5
+    
+    # Draw 'X' lines on the button to indicate close functionality.
+    pygame.draw.line(screen,
+                     WHITE,
+                     (button_x + line_padding,
+                      button_y + line_padding),
+                     (button_x + button_size - line_padding,
+                      button_y + button_size - line_padding),
+                     width=2)
+    
+    pygame.draw.line(screen,
+                     WHITE,
+                     (button_x + button_size - line_padding,
+                      button_y + line_padding),
+                     (button_x + line_padding,
+                      button_y + button_size - line_padding),
+                     width=2)
+    
+    return pygame.Rect(button_x,
+                       button_y,
+                       button_size,
+                       button_size)
 
 def game_loop(speed_level):
     global move_left, move_right, game_over_flag
 
     car = Car()
-
-    # Scoring variables
     score = 0
-    original_num_obstacles = 5  # 3 + 2
-    num_obstacles = max(1, int(original_num_obstacles * 0.7))  # Reduce by 30%
+    num_obstacles = 5
     obstacles = [Obstacle(speed_level) for _ in range(num_obstacles)]
-
     start_time = time.time()
     finished_without_collision = False
     collision_effect_time = 0
-    last_collided_obstacle = None  # Keep track of the last collided obstacle
-
+    last_collided_obstacle = None
+    
     while not game_over_flag:
         screen.fill(WHITE)
 
-        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over_flag = True
-
-        # Move car based on key input or human detection
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if close_button_rect.collidepoint(event.pos):
+                    game_over_flag = True
+        
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] or move_left:
-            car.move(-1)  # Moving left
+            car.move(-1)  
         if keys[pygame.K_RIGHT] or move_right:
-            car.move(1)  # Moving right
+            car.move(1)  
 
-        # Draw the road and the car
         draw_road()
         car.draw()
 
-        # Move and draw obstacles
         collision_occurred = False
         for obstacle in obstacles:
             obstacle.move()
             obstacle.draw()
 
-            # Check for collision
             if obstacle.check_collision(car):
                 collision_occurred = True
-                collision_effect_time = pygame.time.get_ticks()  # Record the time of collision
-                last_collided_obstacle = obstacle  # Update the last collided obstacle
-                score = max(0, score - 1)  # Decrease score by 1 (don't let it go below zero)
-
-            # Add 1 point if obstacle crossed without collision
+                collision_effect_time = pygame.time.get_ticks()
+                last_collided_obstacle = obstacle
+                score = max(score - 1, 0)
             if obstacle.crossed:
                 if not collision_occurred:
-                    score += 1  # Increase score by 1
-                obstacle.crossed = False  # Reset crossing state
+                    score += 1
+                obstacle.crossed = False
 
-        # Draw collision effect if recent collision on the last collided obstacle
-        if last_collided_obstacle and pygame.time.get_ticks() - collision_effect_time < 500:  # Show effect for 0.5 seconds
-            draw_collision_effect(last_collided_obstacle)
+        font = pygame.font.SysFont(None, 36)
+        score_text = font.render(f"Score: {score}", True, BLACK)
+        screen.blit(score_text, (SCREEN_WIDTH - score_text.get_width() - 20, 10))
 
-        # Display score at the top right corner
-        font = pygame.font.SysFont(None, 55)
-        score_text = font.render(f'Score: {score}', True, BLACK)
-        screen.blit(score_text, (SCREEN_WIDTH - score_text.get_width() - 20, 20))
-
-        # Check for finish condition (200 seconds)
         if time.time() - start_time > FINISH_TIME:
             game_over_flag = True
             finished_without_collision = True
 
-        # Update display
+        close_button_rect = draw_close_button()
         pygame.display.update()
-
-        # Cap the frame rate
         clock.tick(FPS)
 
-    # Show winning screen if no collision
     if finished_without_collision:
         screen.fill(GREEN)
-        win_text = font.render('Wooow, You did it!!!, You Win!!!!!', True, WHITE)
-        screen.blit(win_text, ((SCREEN_WIDTH - win_text.get_width()) // 2, SCREEN_HEIGHT // 2))
+        font = pygame.font.SysFont(None, 72)
+        win_text = font.render("You Win!", True, WHITE)
+        screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - win_text.get_height() // 2))
         pygame.display.update()
-        time.sleep(2)
+        time.sleep(3)
 
-    # Quit the game
     pygame.quit()
-
 
 def detect_human_movement(video_file=None):
     global move_left, move_right, game_over_flag
 
-    # Open the video file or the webcam feed
-    if video_file:
-        cap = cv2.VideoCapture(video_file)
-    else:
-        cap = cv2.VideoCapture(0)
-
-    # Reduce frame size for faster processing
-    FRAME_WIDTH = 320  # Set a smaller width for the frame
-    FRAME_HEIGHT = 240  # Set a smaller height for the frame
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
-
-    frame_skip = 30  # Process every 2nd frame to speed up detection
+    cap = cv2.VideoCapture(video_file if video_file else 0)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    
+    frame_skip = 5
     frame_count = 0
-
+    
     while cap.isOpened() and not game_over_flag:
         ret, frame = cap.read()
         if not ret:
@@ -232,9 +224,8 @@ def detect_human_movement(video_file=None):
 
         frame_count += 1
         if frame_count % frame_skip != 0:
-            continue  # Skip this frame to speed up detection
+            continue
 
-        # Convert the frame to RGB for Mediapipe processing
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = pose.process(frame_rgb)
 
@@ -242,56 +233,37 @@ def detect_human_movement(video_file=None):
             left_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].x
             right_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER].x
 
-            # Swapped the direction for correct left/right movement
-            if left_shoulder < 0.4:  # Move right
-                move_left = False
-                move_right = True
-            elif right_shoulder > 0.6:  # Move left
+            if left_shoulder < 0.4:
                 move_left = True
                 move_right = False
-            else:  # Stay neutral
+            elif right_shoulder > 0.6:
+                move_left = False
+                move_right = True
+            else:
                 move_left = False
                 move_right = False
 
     cap.release()
     cv2.destroyAllWindows()
 
-
-# Start the game
 if __name__ == "__main__":
+    import argparse
     
-    # Create the parser
-    parser = argparse.ArgumentParser(description="Car game with adjustable speed levels")
-
-    # Add the speed_level argument
-    parser.add_argument(
-        "--speed_level",
-        type=int,
-        choices=range(6),  # Allows values 0-5
-        required=True,
-        help="Set the speed level (0-5)"
-    )
-
-    # Add the optional video file argument
-    parser.add_argument(
-        "--video",
-        type=str,
-        help="Path to the optional video file"
-    )
-
-    # Parse the arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--speed_level", type=int, choices=range(1, 6), required=True, help="Set the speed level (1-5)")
+    parser.add_argument("--video", type=str, help="Path to the optional video file")
+    
     args = parser.parse_args()
     
-    # Get the speed level from parsed arguments
     speed_level = args.speed_level
     video_file = args.video
 
-    # Start human movement detection in a separate thread
     human_thread = threading.Thread(target=detect_human_movement, args=(video_file,))
+    
     human_thread.start()
-
-    # Start the game loop
+    
     game_loop(speed_level)
-
-    # Wait for human movement detection thread to finish
+    
     human_thread.join()
+    
+    sys.exit()
