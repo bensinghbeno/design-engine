@@ -49,18 +49,14 @@ move_right = False
 game_over_flag = False
 
 def draw_road():
-    # Adjust tree/rock width by reducing it further
     tree_area_width = (SCREEN_WIDTH - ROAD_WIDTH) // 2
 
-    # Road in the middle
     road_rect = pygame.Rect((SCREEN_WIDTH - ROAD_WIDTH) // 2, 0, ROAD_WIDTH, SCREEN_HEIGHT)
     pygame.draw.rect(screen, GRAY, road_rect)
 
-    # Grass and trees/rocks on both sides (reduced width)
     pygame.draw.rect(screen, GREEN, pygame.Rect(0, 0, tree_area_width, SCREEN_HEIGHT))
     pygame.draw.rect(screen, GREEN, pygame.Rect(SCREEN_WIDTH - tree_area_width, 0, tree_area_width, SCREEN_HEIGHT))
 
-    # Add random trees/rocks in the smaller area
     for i in range(10):
         tree_x = random.choice([random.randint(10, tree_area_width - 10), random.randint(SCREEN_WIDTH - tree_area_width + 10, SCREEN_WIDTH - 10)])
         tree_y = random.randint(0, SCREEN_HEIGHT)
@@ -79,6 +75,7 @@ class Car:
         self.x = max((SCREEN_WIDTH - ROAD_WIDTH) // 2, min(self.x, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH))
 
     def draw(self):
+        # Draw the car as its original image
         screen.blit(self.image, (self.x, self.y))
 
 class Obstacle:
@@ -112,32 +109,25 @@ def draw_close_button():
     button_x = button_padding
     button_y = button_padding
     
-    # Draw the button rectangle and 'X'
     pygame.draw.rect(screen, RED, (button_x, button_y, button_size, button_size))
     
     line_padding = 5
+    pygame.draw.line(screen, WHITE, (button_x + line_padding, button_y + line_padding),
+                     (button_x + button_size - line_padding, button_y + button_size - line_padding), width=2)
+    pygame.draw.line(screen, WHITE, (button_x + button_size - line_padding, button_y + line_padding),
+                     (button_x + line_padding, button_y + button_size - line_padding), width=2)
     
-    # Draw 'X' lines on the button to indicate close functionality.
-    pygame.draw.line(screen,
-                     WHITE,
-                     (button_x + line_padding,
-                      button_y + line_padding),
-                     (button_x + button_size - line_padding,
-                      button_y + button_size - line_padding),
-                     width=2)
-    
-    pygame.draw.line(screen,
-                     WHITE,
-                     (button_x + button_size - line_padding,
-                      button_y + line_padding),
-                     (button_x + line_padding,
-                      button_y + button_size - line_padding),
-                     width=2)
-    
-    return pygame.Rect(button_x,
-                       button_y,
-                       button_size,
-                       button_size)
+    return pygame.Rect(button_x, button_y, button_size, button_size)
+
+def draw_animating_red_box(car, time_passed):
+    """Draws an animating red outline around the car to indicate a collision."""
+    max_outline_size = 15  # Max thickness of the outline
+    # Calculate the outline size based on time passed (up to 3 seconds)
+    outline_size = int((time_passed / 3) * max_outline_size)
+
+    if outline_size > 0:  # Only draw if the outline size is greater than 0
+        car_rect = pygame.Rect(car.x - outline_size // 2, car.y - outline_size // 2, CAR_WIDTH + outline_size, CAR_HEIGHT + outline_size)
+        pygame.draw.rect(screen, RED, car_rect, outline_size)  # Draw the outline without filling
 
 def game_loop(speed_level):
     global move_left, move_right, game_over_flag
@@ -148,9 +138,8 @@ def game_loop(speed_level):
     obstacles = [Obstacle(speed_level) for _ in range(num_obstacles)]
     start_time = time.time()
     finished_without_collision = False
-    collision_effect_time = 0
-    last_collided_obstacle = None
-    
+    collision_start_time = None  # Time when collision occurred
+
     while not game_over_flag:
         screen.fill(WHITE)
 
@@ -168,7 +157,6 @@ def game_loop(speed_level):
             car.move(1)  
 
         draw_road()
-        car.draw()
 
         collision_occurred = False
         for obstacle in obstacles:
@@ -177,17 +165,28 @@ def game_loop(speed_level):
 
             if obstacle.check_collision(car):
                 collision_occurred = True
-                collision_effect_time = pygame.time.get_ticks()
-                last_collided_obstacle = obstacle
+                if collision_start_time is None:  # Set the start time of the collision
+                    collision_start_time = time.time()
                 score = max(score - 1, 0)
+
             if obstacle.crossed:
                 if not collision_occurred:
                     score += 1
                 obstacle.crossed = False
 
+        # Draw the car above the obstacles
+        car.draw()  
+
         font = pygame.font.SysFont(None, 36)
         score_text = font.render(f"Score: {score}", True, BLACK)
         screen.blit(score_text, (SCREEN_WIDTH - score_text.get_width() - 20, 10))
+
+        if collision_occurred:
+            time_passed = time.time() - collision_start_time
+            draw_animating_red_box(car, time_passed)
+            # Stop the animation after 3 seconds
+            if time_passed >= 3:
+                collision_start_time = None  # Reset the collision time
 
         if time.time() - start_time > FINISH_TIME:
             game_over_flag = True
