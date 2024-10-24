@@ -2,9 +2,16 @@ import pygame
 import random
 import time
 import sys
+import cv2
+import mediapipe as mp
+import threading
 
 # Initialize pygame
 pygame.init()
+
+# Mediapipe pose setup
+mp_pose = mp.solutions.pose
+pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
 # Constants for screen size based on command-line argument
 SCREEN_INFO = pygame.display.Info()  # Get display screen info
@@ -60,6 +67,7 @@ pygame.display.set_caption("Car Game")
 clock = pygame.time.Clock()
 
 # Global variables for controlling the car
+car_x_position = (SCREEN_WIDTH - CAR_WIDTH) // 2  # Start in the middle of the screen
 move_left = False
 move_right = False
 game_over_flag = False
@@ -81,41 +89,36 @@ def draw_road():
 class Car:
     def __init__(self):
         self.image = pygame.transform.scale(CAR_IMAGE, (CAR_WIDTH, CAR_HEIGHT))
-        self.x = (SCREEN_WIDTH - CAR_WIDTH) // 2
         self.y = SCREEN_HEIGHT - CAR_HEIGHT - 10
         self.speed = 10
         self.lateral_speed = self.speed / 3
 
     def move(self, dx):
-        self.x += dx * self.lateral_speed  
-        self.x = max((SCREEN_WIDTH - ROAD_WIDTH) // 2, min(self.x, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH))
+        global car_x_position
+        car_x_position += dx * self.lateral_speed  
+        car_x_position = max((SCREEN_WIDTH - ROAD_WIDTH) // 2, min(car_x_position, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH))
 
     def draw(self):
-        # Draw the car as its original image
-        screen.blit(self.image, (self.x, self.y))
+        screen.blit(self.image, (car_x_position, self.y))
 
 class Obstacle:
     def __init__(self, speed_factor):
         self.image = pygame.transform.scale(OBSTACLE_IMAGE, (CAR_WIDTH, CAR_HEIGHT))
         self.x = random.randint((SCREEN_WIDTH - ROAD_WIDTH) // 2, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH)
-        self.y = -CAR_HEIGHT
-        self.crossed = False  
-
-        base_speed = 1  
-        self.speed = base_speed * (speed_factor + 1)
+        self.y = random.randint(-150, -100)
+        self.speed = speed_factor
 
     def move(self):
         self.y += self.speed
         if self.y > SCREEN_HEIGHT:
-            self.crossed = True  
-            self.y = -CAR_HEIGHT
+            self.y = random.randint(-150, -100)
             self.x = random.randint((SCREEN_WIDTH - ROAD_WIDTH) // 2, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH)
 
     def draw(self):
         screen.blit(self.image, (self.x, self.y))
 
     def check_collision(self, car):
-        car_rect = pygame.Rect(car.x, car.y, CAR_WIDTH, CAR_HEIGHT)
+        car_rect = pygame.Rect(car_x_position, car.y, CAR_WIDTH, CAR_HEIGHT)
         obstacle_rect = pygame.Rect(self.x, self.y, CAR_WIDTH, CAR_HEIGHT)
         return car_rect.colliderect(obstacle_rect)
 
@@ -141,8 +144,51 @@ def draw_animating_red_box(car, time_passed):
     outline_size = int((time_passed / 3) * max_outline_size)
 
     if outline_size > 0:  # Only draw if the outline size is greater than 0
-        car_rect = pygame.Rect(car.x - outline_size // 2, car.y - outline_size // 2, CAR_WIDTH + outline_size, CAR_HEIGHT + outline_size)
+        car_rect = pygame.Rect(car_x_position - outline_size // 2, car.y - outline_size // 2, CAR_WIDTH + outline_size, CAR_HEIGHT + outline_size)
         pygame.draw.rect(screen, RED, car_rect, outline_size)  # Draw the outline without filling
+
+def detect_human_movement(video_file=None):
+    global car_x_position
+
+    # Use webcam if no video file is provided
+    cap = cv2.VideoCapture(video_file) if video_file else cv2.VideoCapture(0)
+    FRAME_WIDTH = 640
+    FRAME_HEIGHT = 480
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        
+        # Flip the frame horizontally for a mirror effect
+        frame = cv2.flip(frame, 1)
+
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = pose.process(frame_rgb)
+
+        if results.pose_landmarks:
+            # Calculate the center x position of the person
+            left_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].x
+            right_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER].x
+            person_center_x = int((left_shoulder + right_shoulder) / 2 * FRAME_WIDTH)
+
+            # Update the car's x position based on the detected human position
+            car_x_position = person_center_x / FRAME_WIDTH * SCREEN_WIDTH  # Normalize to screen size
+
+            # Draw the vertical line in the middle of the person
+            cv2.line(frame, (person_center_x, 0), (person_center_x, FRAME_HEIGHT), (0, 255, 255), 2)
+
+        # Display the frame
+        cv2.imshow("Human Detection", frame)
+
+        # Exit on pressing 'q'
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
 
 def game_loop(speed_level):
     global move_left, move_right, game_over_flag
@@ -155,69 +201,83 @@ def game_loop(speed_level):
     finished_without_collision = False
     collision_start_time = None  # Time when collision occurred
 
-    while not game_over_flag:
-        screen.fill(WHITE)
+    # Start the human detection thread
+    video_file = args.video if args.video else None
+    human_detection_thread = threading.Thread(target=detect_human_movement, args=(video_file,))
+    human_detection_thread.daemon = True  # Allow thread to exit when the main program does
+    human_detection_thread.start()
 
+    while True:
+        screen.fill(WHITE)
+        draw_road()
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                game_over_flag = True
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if close_button_rect.collidepoint(event.pos):
-                    game_over_flag = True
-        
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            car.move(-1)  
-        if keys[pygame.K_RIGHT]:
-            car.move(1)  
+                pygame.quit()
+                sys.exit()
 
-        draw_road()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    move_left = True
+                if event.key == pygame.K_RIGHT:
+                    move_right = True
 
-        collision_occurred = False
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT:
+                    move_left = False
+                if event.key == pygame.K_RIGHT:
+                    move_right = False
+
+        # Move the car
+        if move_left:
+            car.move(-1)
+        if move_right:
+            car.move(1)
+
+        # Move and draw obstacles
         for obstacle in obstacles:
             obstacle.move()
             obstacle.draw()
 
             if obstacle.check_collision(car):
-                collision_occurred = True
-                if collision_start_time is None:  # Set the start time of the collision
+                if collision_start_time is None:  # Only start the timer on the first collision
                     collision_start_time = time.time()
-                score = max(score - 1, 0)
+                finished_without_collision = False
+                draw_animating_red_box(car, time.time() - collision_start_time)
+            else:
+                finished_without_collision = True  # Reset if there's no collision
 
-            if obstacle.crossed:
-                if not collision_occurred:
-                    score += 1
-                obstacle.crossed = False
+        # Draw the car
+        car.draw()
 
-        # Draw the car above the obstacles
-        car.draw()  
+        # Draw the close button
+        close_button = draw_close_button()
 
-        font = pygame.font.SysFont(None, 36)
-        score_text = font.render("Score: {}".format(score), True, BLACK)
-        screen.blit(score_text, (SCREEN_WIDTH - score_text.get_width() - 20, 10))
+        # Handle close button click
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        if pygame.mouse.get_pressed()[0]:  # Left mouse button
+            if close_button.collidepoint((mouse_x, mouse_y)):
+                pygame.quit()
+                sys.exit()
 
-        if collision_occurred:
-            time_passed = time.time() - collision_start_time
-            draw_animating_red_box(car, time_passed)
-            # Stop the animation after 3 seconds
-            if time_passed >= 3:
-                collision_start_time = None  # Reset the collision time
-
-        if time.time() - start_time > FINISH_TIME:
-            game_over_flag = True
-            finished_without_collision = True
-
-        close_button_rect = draw_close_button()
-        pygame.display.update()
+        # Update the display
+        pygame.display.flip()
         clock.tick(FPS)
 
-    if finished_without_collision:
-        screen.fill(GREEN)
-        font = pygame.font.SysFont(None, 72)
-        win_text = font.render("You Win!", True, WHITE)
-        screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - win_text.get_height() // 2))
-        pygame.display.update()
-        time.sleep(3)
+        # Check game over condition
+        if finished_without_collision and (time.time() - start_time) >= FINISH_TIME:
+            break
+
+    # Game over screen
+    screen.fill(WHITE)
+    font = pygame.font.SysFont("Arial", 50)
+    game_over_text = font.render("Game Over!", True, BLACK)
+    screen.blit(game_over_text, ((SCREEN_WIDTH - game_over_text.get_width()) // 2, SCREEN_HEIGHT // 3))
+    pygame.display.flip()
+    time.sleep(3)
+
+    # Stop the human detection thread
+    human_detection_thread.join()
 
 if __name__ == "__main__":
     game_loop(args.speed_level)
