@@ -10,6 +10,28 @@ import os  # For handling file paths
 # Initialize pygame
 pygame.init()
 
+# Initialize pygame mixer
+pygame.mixer.init()
+
+def play_mp3(mp3_path):
+    # Check if the file exists and is an MP3 file
+    if not os.path.exists(mp3_path):
+        print(f"File {mp3_path} does not exist.")
+        return
+    if not mp3_path.endswith(".mp3"):
+        print("Please provide a valid MP3 file.")
+        return
+
+    # Load and play the MP3 file
+    pygame.mixer.music.load(mp3_path)
+    pygame.mixer.music.play()
+
+    print(f"Playing {mp3_path}...")
+
+    # Keep the program running while the music plays
+    while pygame.mixer.music.get_busy():
+        pygame.time.Clock().tick(10)  # Check if the music is still playing
+
 # Mediapipe pose setup
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -17,32 +39,31 @@ pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 # Constants for screen size based on command-line argument
 SCREEN_INFO = pygame.display.Info()  # Get display screen info
 
-# Set default screen size to full
-screen_size_arg = None  # Placeholder for screen size argument
-
 # Function to parse command-line arguments
 def parse_arguments():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--screen_size", type=str, choices=["half", "full"], help="Set the screen size to 'half' or 'full'")
     parser.add_argument("--speed_level", type=int, choices=range(1, 6), required=True, help="Set the speed level (1-5)")
-    parser.add_argument("--image_path", type=str, default="./", help="Path to folder containing images (default: current folder)")
     parser.add_argument("--video", type=str, help="Path to the optional video file")
+    parser.add_argument("--image_path", type=str, default=".", help="Path to the folder containing car and obstacle images")
+    parser.add_argument("--skip_frames", type=int, default=0, help="Number of frames to skip for reducing processing load")
     return parser.parse_args()
 
 args = parse_arguments()
 
+# Set screen size
 if args.screen_size == "half":
     SCREEN_WIDTH = int(SCREEN_INFO.current_w / 2)  # Get screen width
 else:
     SCREEN_WIDTH = SCREEN_INFO.current_w  # Full width
-
 SCREEN_HEIGHT = SCREEN_INFO.current_h  # Full height
+
 ROAD_WIDTH = int(SCREEN_WIDTH * 0.8)  # Increase road width to 80% of the screen width
 CAR_WIDTH = 50
 CAR_HEIGHT = 100
 FPS = 60
-FINISH_TIME = 200  # Increased finish time to 200 seconds
+FINISH_TIME = 200  # Finish time
 
 # Colors
 WHITE = (255, 255, 255)
@@ -53,10 +74,10 @@ RED = (255, 0, 0)
 
 # Load assets with default or user-specified image path
 image_path = args.image_path
-CAR_IMAGE = pygame.image.load(os.path.join(image_path, 'car.jpg'))  # Load car image from the specified folder
-OBSTACLE_IMAGE = pygame.image.load(os.path.join(image_path, 'obstacle.jpg'))  # Load obstacle image from the specified folder
-pygame.mixer.init()
-NICE_SOUND = pygame.mixer.Sound(os.path.join('sounds/nice.mp3'))  # Load sound from the specified folder
+CAR_IMAGE = pygame.image.load(os.path.join(image_path, 'car.jpg'))  # Load car image
+OBSTACLE_IMAGE = pygame.image.load(os.path.join(image_path, 'obstacle.jpg'))  # Load obstacle image
+
+
 
 # Initialize screen
 if args.screen_size == "half":
@@ -75,6 +96,7 @@ move_left = False
 move_right = False
 game_over_flag = False
 
+
 def draw_road():
     tree_area_width = (SCREEN_WIDTH - ROAD_WIDTH) // 2
 
@@ -89,6 +111,7 @@ def draw_road():
         tree_y = random.randint(0, SCREEN_HEIGHT)
         pygame.draw.circle(screen, BLACK, (tree_x, tree_y), random.randint(15, 25))
 
+
 class Car:
     def __init__(self):
         self.image = pygame.transform.scale(CAR_IMAGE, (CAR_WIDTH, CAR_HEIGHT))
@@ -98,7 +121,7 @@ class Car:
 
     def move(self, dx):
         global car_x_position
-        car_x_position += dx * self.lateral_speed  
+        car_x_position += dx * self.lateral_speed
         # Restrict the car movement within the road bounds
         left_road_edge = (SCREEN_WIDTH - ROAD_WIDTH) // 2
         right_road_edge = (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH
@@ -106,6 +129,7 @@ class Car:
 
     def draw(self):
         screen.blit(self.image, (car_x_position, self.y))
+
 
 class Obstacle:
     def __init__(self, speed_factor):
@@ -128,6 +152,7 @@ class Obstacle:
         obstacle_rect = pygame.Rect(self.x, self.y, CAR_WIDTH, CAR_HEIGHT)
         return car_rect.colliderect(obstacle_rect)
 
+
 def draw_close_button():
     button_size = 60
     button_padding = 30
@@ -144,6 +169,7 @@ def draw_close_button():
     
     return pygame.Rect(button_x, button_y, button_size, button_size)
 
+
 def draw_animating_red_box(car, time_passed):
     """Draws an animating red outline around the car to indicate a collision."""
     max_outline_size = 15  # Max thickness of the outline
@@ -153,25 +179,33 @@ def draw_animating_red_box(car, time_passed):
         car_rect = pygame.Rect(car_x_position - outline_size // 2, car.y - outline_size // 2, CAR_WIDTH + outline_size, CAR_HEIGHT + outline_size)
         pygame.draw.rect(screen, RED, car_rect, outline_size)  # Draw the outline without filling
 
-def detect_human_movement(video_file=None):
+
+def detect_human_movement(video_file=None, skip_frames=0):
     global car_x_position
 
     # Use webcam if no video file is provided
     cap = cv2.VideoCapture(video_file) if video_file else cv2.VideoCapture(0)
-    FRAME_WIDTH = 640
-    FRAME_HEIGHT = 480
+    FRAME_WIDTH = 1280
+    FRAME_HEIGHT = 720
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
 
-    # Skip displaying the window altogether by commenting out or removing cv2.imshow
+    frame_counter = 0  # To track the current frame
+
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
-        
+
+        # Skip frames if necessary
+        if frame_counter % (skip_frames + 1) != 0:
+            frame_counter += 1
+            continue
+
         # Flip the frame horizontally for a mirror effect
         frame = cv2.flip(frame, 1)
 
+        # Convert the frame to RGB for mediapipe processing
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = pose.process(frame_rgb)
 
@@ -184,7 +218,7 @@ def detect_human_movement(video_file=None):
             # Update the car's x position based on the detected human position
             car_x_position = person_center_x / FRAME_WIDTH * SCREEN_WIDTH  # Normalize to screen size
 
-        # No window display using cv2.imshow
+        frame_counter += 1
 
         # Exit on pressing 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -193,10 +227,12 @@ def detect_human_movement(video_file=None):
     cap.release()
     cv2.destroyAllWindows()
 
+
 def draw_score(score):
     font = pygame.font.SysFont("Arial", 30)
     score_text = font.render(f"Score: {score}", True, BLACK)
     screen.blit(score_text, (SCREEN_WIDTH - 150, 10))
+
 
 def game_loop(speed_level):
     global move_left, move_right
@@ -246,7 +282,9 @@ def game_loop(speed_level):
                 finished_without_collision = False
                 draw_animating_red_box(car, time.time() - collision_start_time)
             else:
-                finished_without_collision = True  # Reset if there's no collision
+                # Play the sound if an obstacle is avoided and the sound isn't already playing
+                if finished_without_collision and not pygame.mixer.get_busy():
+                    play_mp3('/home/oem/Documents/dev/design-engine/projects/ai/python/motion-car-game/sounds/spidey-web.mp3')
 
         # Draw the car
         car.draw()
@@ -284,14 +322,11 @@ def game_loop(speed_level):
     pygame.quit()
     sys.exit()
 
+
 if __name__ == "__main__":
-    # Start human detection in a separate thread
-    human_detection_thread = threading.Thread(target=detect_human_movement, args=(args.video,))
-    human_detection_thread.daemon = True  # Allow thread to exit when the main program does
+    human_detection_thread = threading.Thread(target=detect_human_movement, args=(args.video, args.skip_frames))
+    human_detection_thread.daemon = True
     human_detection_thread.start()
 
-    # Wait for 5 seconds before starting the game
-    time.sleep(2)
-
-    # Start the game loop
+    time.sleep(2)  # Wait for 2 seconds before starting the game
     game_loop(args.speed_level)
