@@ -5,6 +5,7 @@ import sys
 import cv2
 import mediapipe as mp
 import threading
+import os  # For handling file paths
 
 # Initialize pygame
 pygame.init()
@@ -25,6 +26,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--screen_size", type=str, choices=["half", "full"], help="Set the screen size to 'half' or 'full'")
     parser.add_argument("--speed_level", type=int, choices=range(1, 6), required=True, help="Set the speed level (1-5)")
+    parser.add_argument("--image_path", type=str, default="./", help="Path to folder containing images (default: current folder)")
     parser.add_argument("--video", type=str, help="Path to the optional video file")
     return parser.parse_args()
 
@@ -49,11 +51,12 @@ GRAY = (128, 128, 128)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
-# Load assets
-CAR_IMAGE = pygame.image.load('car.jpg')  # Your car image here
-OBSTACLE_IMAGE = pygame.image.load('obstacle.jpg')  # Other cars/obstacles image
+# Load assets with default or user-specified image path
+image_path = args.image_path
+CAR_IMAGE = pygame.image.load(os.path.join(image_path, 'car.jpg'))  # Load car image from the specified folder
+OBSTACLE_IMAGE = pygame.image.load(os.path.join(image_path, 'obstacle.jpg'))  # Load obstacle image from the specified folder
 pygame.mixer.init()
-NICE_SOUND = pygame.mixer.Sound('nice.mp3')  # Sound file for "Nice" message
+NICE_SOUND = pygame.mixer.Sound(os.path.join('sounds/nice.mp3'))  # Load sound from the specified folder
 
 # Initialize screen
 if args.screen_size == "half":
@@ -96,7 +99,10 @@ class Car:
     def move(self, dx):
         global car_x_position
         car_x_position += dx * self.lateral_speed  
-        car_x_position = max((SCREEN_WIDTH - ROAD_WIDTH) // 2, min(car_x_position, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH))
+        # Restrict the car movement within the road bounds
+        left_road_edge = (SCREEN_WIDTH - ROAD_WIDTH) // 2
+        right_road_edge = (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH
+        car_x_position = max(left_road_edge, min(car_x_position, right_road_edge))
 
     def draw(self):
         screen.blit(self.image, (car_x_position, self.y))
@@ -188,15 +194,14 @@ def detect_human_movement(video_file=None):
     cv2.destroyAllWindows()
 
 def draw_score(score):
-    font = pygame.font.SysFont(None, 36)
+    font = pygame.font.SysFont("Arial", 30)
     score_text = font.render(f"Score: {score}", True, BLACK)
-    screen.blit(score_text, (SCREEN_WIDTH - score_text.get_width() - 20, 20))
+    screen.blit(score_text, (SCREEN_WIDTH - 150, 10))
 
 def game_loop(speed_level):
-    global move_left, move_right, game_over_flag
-
-    car = Car()
+    global move_left, move_right
     score = 0
+    car = Car()
     num_obstacles = 5
     obstacles = [Obstacle(speed_level) for _ in range(num_obstacles)]
     start_time = time.time()
