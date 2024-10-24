@@ -157,6 +157,7 @@ def detect_human_movement(video_file=None):
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
 
+    # Skip displaying the window altogether by commenting out or removing cv2.imshow
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
@@ -177,11 +178,7 @@ def detect_human_movement(video_file=None):
             # Update the car's x position based on the detected human position
             car_x_position = person_center_x / FRAME_WIDTH * SCREEN_WIDTH  # Normalize to screen size
 
-            # Draw the vertical line in the middle of the person
-            cv2.line(frame, (person_center_x, 0), (person_center_x, FRAME_HEIGHT), (0, 255, 255), 2)
-
-        # Display the frame
-        cv2.imshow("Human Detection", frame)
+        # No window display using cv2.imshow
 
         # Exit on pressing 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -200,12 +197,6 @@ def game_loop(speed_level):
     start_time = time.time()
     finished_without_collision = False
     collision_start_time = None  # Time when collision occurred
-
-    # Start the human detection thread
-    video_file = args.video if args.video else None
-    human_detection_thread = threading.Thread(target=detect_human_movement, args=(video_file,))
-    human_detection_thread.daemon = True  # Allow thread to exit when the main program does
-    human_detection_thread.start()
 
     while True:
         screen.fill(WHITE)
@@ -276,10 +267,17 @@ def game_loop(speed_level):
     pygame.display.flip()
     time.sleep(3)
 
-    # Stop the human detection thread
-    human_detection_thread.join()
-
-if __name__ == "__main__":
-    game_loop(args.speed_level)
     pygame.quit()
     sys.exit()
+
+if __name__ == "__main__":
+    # Start human detection in a separate thread
+    human_detection_thread = threading.Thread(target=detect_human_movement, args=(args.video,))
+    human_detection_thread.daemon = True  # Allow thread to exit when the main program does
+    human_detection_thread.start()
+
+    # Wait for 5 seconds before starting the game
+    time.sleep(2)
+
+    # Start the game loop
+    game_loop(args.speed_level)
