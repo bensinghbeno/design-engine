@@ -105,13 +105,13 @@ class Obstacle:
     def __init__(self, speed_factor):
         self.image = pygame.transform.scale(OBSTACLE_IMAGE, (CAR_WIDTH, CAR_HEIGHT))
         self.x = random.randint((SCREEN_WIDTH - ROAD_WIDTH) // 2, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH)
-        self.y = random.randint(-150, -100)
+        self.y = random.randint(-SCREEN_HEIGHT, -100)  # Ensure obstacles appear at random heights
         self.speed = speed_factor
 
     def move(self):
         self.y += self.speed
         if self.y > SCREEN_HEIGHT:
-            self.y = random.randint(-150, -100)
+            self.y = random.randint(-SCREEN_HEIGHT, -100)  # Reset the obstacle height after it leaves the screen
             self.x = random.randint((SCREEN_WIDTH - ROAD_WIDTH) // 2, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH)
 
     def draw(self):
@@ -187,6 +187,11 @@ def detect_human_movement(video_file=None):
     cap.release()
     cv2.destroyAllWindows()
 
+def draw_score(score):
+    font = pygame.font.SysFont(None, 36)
+    score_text = font.render(f"Score: {score}", True, BLACK)
+    screen.blit(score_text, (SCREEN_WIDTH - score_text.get_width() - 20, 20))
+
 def game_loop(speed_level):
     global move_left, move_right, game_over_flag
 
@@ -240,6 +245,10 @@ def game_loop(speed_level):
 
         # Draw the car
         car.draw()
+
+        # Update and display the score
+        score += 1  # Increment score each frame the game runs
+        draw_score(score)
 
         # Draw the close button
         close_button = draw_close_button()
