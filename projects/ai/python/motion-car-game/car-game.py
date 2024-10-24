@@ -14,23 +14,30 @@ pygame.init()
 pygame.mixer.init()
 
 def play_mp3(mp3_path):
-    # Check if the file exists and is an MP3 file
-    if not os.path.exists(mp3_path):
-        print(f"File {mp3_path} does not exist.")
-        return
-    if not mp3_path.endswith(".mp3"):
-        print("Please provide a valid MP3 file.")
-        return
+    # Function to play the mp3 in a separate thread
+    def play_music():
+        # Check if the file exists and is an MP3 file
+        if not os.path.exists(mp3_path):
+            print(f"File {mp3_path} does not exist.")
+            return
+        if not mp3_path.endswith(".mp3"):
+            print("Please provide a valid MP3 file.")
+            return
 
-    # Load and play the MP3 file
-    pygame.mixer.music.load(mp3_path)
-    pygame.mixer.music.play()
+        # Load and play the MP3 file
+        pygame.mixer.music.load(mp3_path)
+        pygame.mixer.music.play()
 
-    print(f"Playing {mp3_path}...")
+        print(f"Playing {mp3_path}...")
 
-    # Keep the program running while the music plays
-    while pygame.mixer.music.get_busy():
-        pygame.time.Clock().tick(10)  # Check if the music is still playing
+        # Keep the program running while the music plays
+        while pygame.mixer.music.get_busy():
+            pygame.time.Clock().tick(10)  # Check if the music is still playing
+
+    # Run the play_music function in a new thread to avoid blocking
+    music_thread = threading.Thread(target=play_music)
+    music_thread.daemon = True  # Ensure the thread will close when the program exits
+    music_thread.start()
 
 # Mediapipe pose setup
 mp_pose = mp.solutions.pose
@@ -286,12 +293,15 @@ def game_loop(speed_level):
                 finished_without_collision = False
                 draw_animating_red_box(car, time.time() - collision_start_time)
                 draw_score(1111111)
+                play_mp3('sounds/spidey-web.mp3')
             else:
                 # If the obstacle passes the car without collision, increase the score
                 if obstacle.y > car.y + CAR_HEIGHT and not obstacle.is_avoided:
                     score += 1
                     obstacle.is_avoided = True  # Mark obstacle as avoided
-                    draw_score(score)  # Update the score display
+                    draw_score(1010101010101)  # Update the score display
+                    play_mp3('sounds/nice.mp3')
+
 
         # Draw the car
         car.draw()
