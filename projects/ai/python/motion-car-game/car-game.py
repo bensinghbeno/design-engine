@@ -137,12 +137,15 @@ class Obstacle:
         self.x = random.randint((SCREEN_WIDTH - ROAD_WIDTH) // 2, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH)
         self.y = random.randint(-SCREEN_HEIGHT, -100)  # Ensure obstacles appear at random heights
         self.speed = speed_factor
+        self.is_avoided = False  # Track if the obstacle has been avoided
 
     def move(self):
         self.y += self.speed
         if self.y > SCREEN_HEIGHT:
-            self.y = random.randint(-SCREEN_HEIGHT, -100)  # Reset the obstacle height after it leaves the screen
+            # Reset the obstacle position and mark it as not avoided yet
+            self.y = random.randint(-SCREEN_HEIGHT, -100)
             self.x = random.randint((SCREEN_WIDTH - ROAD_WIDTH) // 2, (SCREEN_WIDTH + ROAD_WIDTH) // 2 - CAR_WIDTH)
+            self.is_avoided = False
 
     def draw(self):
         screen.blit(self.image, (self.x, self.y))
@@ -151,6 +154,7 @@ class Obstacle:
         car_rect = pygame.Rect(car_x_position, car.y, CAR_WIDTH, CAR_HEIGHT)
         obstacle_rect = pygame.Rect(self.x, self.y, CAR_WIDTH, CAR_HEIGHT)
         return car_rect.colliderect(obstacle_rect)
+
 
 
 def draw_close_button():
@@ -241,7 +245,7 @@ def game_loop(speed_level):
     num_obstacles = 5
     obstacles = [Obstacle(speed_level) for _ in range(num_obstacles)]
     start_time = time.time()
-    finished_without_collision = False
+    finished_without_collision = True
     collision_start_time = None  # Time when collision occurred
 
     while True:
@@ -281,17 +285,16 @@ def game_loop(speed_level):
                     collision_start_time = time.time()
                 finished_without_collision = False
                 draw_animating_red_box(car, time.time() - collision_start_time)
+                draw_score(1111111)
             else:
-                # Play the sound if an obstacle is avoided and the sound isn't already playing
-                if finished_without_collision and not pygame.mixer.get_busy():
-                    play_mp3('/home/oem/Documents/dev/design-engine/projects/ai/python/motion-car-game/sounds/spidey-web.mp3')
+                # If the obstacle passes the car without collision, increase the score
+                if obstacle.y > car.y + CAR_HEIGHT and not obstacle.is_avoided:
+                    score += 1
+                    obstacle.is_avoided = True  # Mark obstacle as avoided
+                    draw_score(score)  # Update the score display
 
         # Draw the car
         car.draw()
-
-        # Update and display the score
-        score += 1  # Increment score each frame the game runs
-        draw_score(score)
 
         # Draw the close button
         close_button = draw_close_button()
@@ -321,7 +324,7 @@ def game_loop(speed_level):
 
     pygame.quit()
     sys.exit()
-
+    
 
 if __name__ == "__main__":
     human_detection_thread = threading.Thread(target=detect_human_movement, args=(args.video, args.skip_frames))
