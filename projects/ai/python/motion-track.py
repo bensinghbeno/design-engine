@@ -22,6 +22,9 @@ def detect_human_movement(video_file=None):
         ret, frame = cap.read()
         if not ret:
             break
+        
+        # Flip the frame horizontally for a mirror effect
+        frame = cv2.flip(frame, 1)
 
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = pose.process(frame_rgb)
@@ -31,6 +34,9 @@ def detect_human_movement(video_file=None):
             left_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].x
             right_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER].x
             person_center_x = int((left_shoulder + right_shoulder) / 2 * FRAME_WIDTH)
+
+            # Print the x position of the center of the person
+            print(f"X Position of Person Center: {person_center_x}")
 
             # Draw the vertical line in the middle of the person
             cv2.line(frame, (person_center_x, 0), (person_center_x, FRAME_HEIGHT), (0, 255, 255), 2)
