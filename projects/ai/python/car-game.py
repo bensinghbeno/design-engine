@@ -2,9 +2,6 @@ import pygame
 import random
 import time
 import sys
-import threading
-import mediapipe as mp
-import cv2
 
 # Initialize pygame
 pygame.init()
@@ -61,10 +58,6 @@ pygame.display.set_caption("Car Game")
 
 # Create clock for FPS
 clock = pygame.time.Clock()
-
-# Mediapipe pose setup
-mp_pose = mp.solutions.pose
-pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
 # Global variables for controlling the car
 move_left = False
@@ -145,7 +138,6 @@ def draw_close_button():
 def draw_animating_red_box(car, time_passed):
     """Draws an animating red outline around the car to indicate a collision."""
     max_outline_size = 15  # Max thickness of the outline
-    # Calculate the outline size based on time passed (up to 3 seconds)
     outline_size = int((time_passed / 3) * max_outline_size)
 
     if outline_size > 0:  # Only draw if the outline size is greater than 0
@@ -174,9 +166,9 @@ def game_loop(speed_level):
                     game_over_flag = True
         
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT] or move_left:
+        if keys[pygame.K_LEFT]:
             car.move(-1)  
-        if keys[pygame.K_RIGHT] or move_right:
+        if keys[pygame.K_RIGHT]:
             car.move(1)  
 
         draw_road()
@@ -227,45 +219,7 @@ def game_loop(speed_level):
         pygame.display.update()
         time.sleep(3)
 
-def detect_human_movement(video_file=None):
-    global move_left, move_right
-
-    cap = cv2.VideoCapture(0 if video_file is None else video_file)
-
-    mp_drawing = mp.solutions.drawing_utils
-    with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            results = pose.process(frame_rgb)
-
-            if results.pose_landmarks:
-                left_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].x
-                right_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER].x
-
-                if left_shoulder < 0.4:
-                    move_left = True
-                    move_right = False
-                elif right_shoulder > 0.6:
-                    move_left = False
-                    move_right = True
-                else:
-                    move_left = False
-                    move_right = False
-
-    cap.release()
-    cv2.destroyAllWindows()
-
 if __name__ == "__main__":
-    human_thread = threading.Thread(target=detect_human_movement, args=(args.video,))
-    human_thread.start()
-    
     game_loop(args.speed_level)
-    
-    human_thread.join()
-    
     pygame.quit()
     sys.exit()
