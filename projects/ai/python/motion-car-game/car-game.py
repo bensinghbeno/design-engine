@@ -58,7 +58,7 @@ def parse_arguments():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--screen_size", type=str, choices=["half", "full"], help="Set the screen size to 'half' or 'full'")
-    parser.add_argument("--speed_level", type=int, choices=range(1, 6), required=True, help="Set the speed level (1-5)")
+    parser.add_argument("--speed_level", type=int, choices=range(1, 20), required=True, help="Set the speed level (1-5)")
     parser.add_argument("--video", type=str, help="Path to the optional video file")
     parser.add_argument("--image_path", type=str, default=".", help="Path to the folder containing car and obstacle images")
     parser.add_argument("--skip_frames", type=int, default=0, help="Number of frames to skip for reducing processing load")
@@ -67,9 +67,8 @@ def parse_arguments():
 
 
 args = parse_arguments()
-
-
 player_name = args.player_name
+my_level = args.speed_level
 
 
 # Set screen size
@@ -116,6 +115,33 @@ move_right = False
 game_over_flag = False
 
 
+def write_to_html(player_name, level, score):
+    html_file = "game_scores.html"
+
+    # Check if the file exists
+    if not os.path.exists(html_file):
+        # Create a new file with the initial structure if it doesn't exist
+        with open(html_file, 'w') as file:
+            file.write("<html><head><title>Game Scores</title></head><body>")
+            file.write("<h1>Game Scores</h1><table border='1'>")
+            file.write("<tr><th>Player Name</th><th>Level</th><th>Score</th></tr>")
+            file.write("</table></body></html>")
+
+    # Read the existing content and split where to insert the new row
+    with open(html_file, 'r') as file:
+        content = file.read()
+    
+    # Locate the closing table tag to insert the new row before it
+    insert_position = content.find("</table>")
+    
+    # Construct the new row and insert it in the correct position
+    if insert_position != -1:
+        new_row = f"<tr><td>{player_name}</td><td>{level}</td><td>{score}</td></tr>\n"
+        content = content[:insert_position] + new_row + content[insert_position:]
+
+        # Write the updated content back to the file
+        with open(html_file, 'w') as file:
+            file.write(content)
 
 def draw_player_info(player_name, score_value):
     font = pygame.font.SysFont("Arial", 30)
@@ -274,15 +300,21 @@ def detect_human_movement(video_file=None, skip_frames=0):
 
 
 def game_loop(speed_level):
-    global move_left, move_right, score, player_name
+    global move_left, move_right, score, player_name, my_level
     car = Car()
     num_obstacles = 5
     obstacles = [Obstacle(speed_level) for _ in range(num_obstacles)]
     start_time = time.time()
     finished_without_collision = True
     collision_start_time = None  # Time when collision occurred
+    
+    MAX_GAME_DURATION = 120  # Set max game duration in seconds
+    start_time = time.time()
 
     while True:
+        elapsed_time = time.time() - start_time
+        if elapsed_time > MAX_GAME_DURATION:
+            break        
         screen.fill(WHITE)
         draw_road()
         draw_player_info(player_name, score)
@@ -358,6 +390,7 @@ def game_loop(speed_level):
     screen.fill(WHITE)
     font = pygame.font.SysFont("Arial", 50)
     game_over_text = font.render("Game Over!", True, BLACK)
+    write_to_html(player_name, my_level, score)
     screen.blit(game_over_text, ((SCREEN_WIDTH - game_over_text.get_width()) // 2, SCREEN_HEIGHT // 3))
     pygame.display.flip()
     time.sleep(3)
