@@ -62,9 +62,15 @@ def parse_arguments():
     parser.add_argument("--video", type=str, help="Path to the optional video file")
     parser.add_argument("--image_path", type=str, default=".", help="Path to the folder containing car and obstacle images")
     parser.add_argument("--skip_frames", type=int, default=0, help="Number of frames to skip for reducing processing load")
+    parser.add_argument("--player_name", type=str, required=True, help="Enter the player's name")
     return parser.parse_args()
 
+
 args = parse_arguments()
+
+
+player_name = args.player_name
+
 
 # Set screen size
 if args.screen_size == "half":
@@ -268,7 +274,7 @@ def detect_human_movement(video_file=None, skip_frames=0):
 
 
 def game_loop(speed_level):
-    global move_left, move_right, score
+    global move_left, move_right, score, player_name
     car = Car()
     num_obstacles = 5
     obstacles = [Obstacle(speed_level) for _ in range(num_obstacles)]
@@ -279,7 +285,7 @@ def game_loop(speed_level):
     while True:
         screen.fill(WHITE)
         draw_road()
-        draw_player_info("PLAYER 1", score)
+        draw_player_info(player_name, score)
 
         
         for event in pygame.event.get():
