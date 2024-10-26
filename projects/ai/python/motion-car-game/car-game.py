@@ -12,6 +12,8 @@ pygame.init()
 
 # Initialize pygame mixer
 pygame.mixer.init()
+score = 0
+
 
 def play_mp3(mp3_path):
     # Function to play the mp3 in a separate thread
@@ -90,7 +92,6 @@ CAR_IMAGE = pygame.image.load(os.path.join(image_path, 'car.jpg'))  # Load car i
 OBSTACLE_IMAGE = pygame.image.load(os.path.join(image_path, 'obstacle.jpg'))  # Load obstacle image
 
 
-
 # Initialize screen
 if args.screen_size == "half":
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # Use SCREEN_WIDTH based on argument
@@ -107,6 +108,25 @@ car_x_position = (SCREEN_WIDTH - CAR_WIDTH) // 2  # Start in the middle of the s
 move_left = False
 move_right = False
 game_over_flag = False
+
+
+
+def draw_player_info(player_name, score_value):
+    font = pygame.font.SysFont("Arial", 30)
+    name_text = font.render(f"{player_name}", True, (255, 255, 0))  # Yellow text
+    score_text = font.render(f"Score: {score_value}", True, (255, 255, 0))  # Yellow text
+
+    box_width = max(name_text.get_width(), score_text.get_width()) + 20
+    box_height = name_text.get_height() + score_text.get_height() + 20
+    box_x = SCREEN_WIDTH - box_width - 10
+    box_y = 10
+
+    pygame.draw.rect(screen, (0, 0, 255), (box_x, box_y, box_width, box_height))
+    pygame.draw.rect(screen, (255, 255, 0), (box_x, box_y, box_width, box_height), 2)
+
+    screen.blit(name_text, (box_x + 10, box_y + 5))
+    screen.blit(score_text, (box_x + 10, box_y + 10 + name_text.get_height()))
+
 
 
 def draw_road():
@@ -244,15 +264,11 @@ def detect_human_movement(video_file=None, skip_frames=0):
     cv2.destroyAllWindows()
 
 
-def draw_score(score):
-    font = pygame.font.SysFont("Arial", 30)
-    score_text = font.render(f"Score: {score}", True, BLACK)
-    screen.blit(score_text, (SCREEN_WIDTH - 150, 10))
+
 
 
 def game_loop(speed_level):
-    global move_left, move_right
-    score = 0
+    global move_left, move_right, score
     car = Car()
     num_obstacles = 5
     obstacles = [Obstacle(speed_level) for _ in range(num_obstacles)]
@@ -263,6 +279,8 @@ def game_loop(speed_level):
     while True:
         screen.fill(WHITE)
         draw_road()
+        draw_player_info("PLAYER 1", score)
+
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -297,15 +315,15 @@ def game_loop(speed_level):
                     collision_start_time = time.time()
                 finished_without_collision = False
                 draw_animating_red_box(car, time.time() - collision_start_time)
-                draw_score(1111111)
+                score -= 1
                 play_mp3('sounds/sangi-mangi.mp3')
             else:
                 # If the obstacle passes the car without collision, increase the score
                 if obstacle.y > car.y + CAR_HEIGHT and not obstacle.is_avoided:
-                    score += 1
+                    score += 50
                     obstacle.is_avoided = True  # Mark obstacle as avoided
-                    draw_score(1010101010101)  # Update the score display
                     play_mp3('sounds/eppadi-raa.mp3')
+
                     
 
 
