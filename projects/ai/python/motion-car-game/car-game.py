@@ -24,10 +24,14 @@ def play_mp3(mp3_path):
             print("Please provide a valid MP3 file.")
             return
 
+        # Check if music is already playing, and skip if it is
+        if pygame.mixer.music.get_busy():
+            print(f"Audio already playing, skipping play attempt for {mp3_path}")
+            return
+        
         # Load and play the MP3 file
         pygame.mixer.music.load(mp3_path)
         pygame.mixer.music.play()
-
         print(f"Playing {mp3_path}...")
 
         # Keep the program running while the music plays
@@ -38,6 +42,7 @@ def play_mp3(mp3_path):
     music_thread = threading.Thread(target=play_music)
     music_thread.daemon = True  # Ensure the thread will close when the program exits
     music_thread.start()
+
 
 # Mediapipe pose setup
 mp_pose = mp.solutions.pose
@@ -293,7 +298,7 @@ def game_loop(speed_level):
                 finished_without_collision = False
                 draw_animating_red_box(car, time.time() - collision_start_time)
                 draw_score(1111111)
-                play_mp3('sounds/spidey-ruoh.mp3')
+                play_mp3('sounds/sangi-mangi.mp3')
             else:
                 # If the obstacle passes the car without collision, increase the score
                 if obstacle.y > car.y + CAR_HEIGHT and not obstacle.is_avoided:
