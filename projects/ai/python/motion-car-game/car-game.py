@@ -305,6 +305,8 @@ def game_loop(speed_level):
                     score += 1
                     obstacle.is_avoided = True  # Mark obstacle as avoided
                     draw_score(1010101010101)  # Update the score display
+                    play_mp3('sounds/eppadi-raa.mp3')
+                    
 
 
         # Draw the car
