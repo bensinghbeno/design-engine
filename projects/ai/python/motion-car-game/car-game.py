@@ -293,14 +293,13 @@ def game_loop(speed_level):
                 finished_without_collision = False
                 draw_animating_red_box(car, time.time() - collision_start_time)
                 draw_score(1111111)
-                play_mp3('sounds/spidey-web.mp3')
+                play_mp3('sounds/spidey-ruoh.mp3')
             else:
                 # If the obstacle passes the car without collision, increase the score
                 if obstacle.y > car.y + CAR_HEIGHT and not obstacle.is_avoided:
                     score += 1
                     obstacle.is_avoided = True  # Mark obstacle as avoided
                     draw_score(1010101010101)  # Update the score display
-                    play_mp3('sounds/nice.mp3')
 
 
         # Draw the car
