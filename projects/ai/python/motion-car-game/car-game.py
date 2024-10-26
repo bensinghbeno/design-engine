@@ -89,7 +89,7 @@ RED = (255, 0, 0)
 # Load assets with default or user-specified image path
 image_path = args.image_path
 CAR_IMAGE = pygame.image.load(os.path.join(image_path, 'car.jpg'))  # Load car image
-OBSTACLE_IMAGE = pygame.image.load(os.path.join(image_path, 'obstacle.jpg'))  # Load obstacle image
+OBSTACLE_IMAGE = pygame.image.load(os.path.join(image_path, 'obstacle.png'))  # Load obstacle image
 
 
 # Initialize screen
