@@ -58,7 +58,7 @@ def parse_arguments():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--screen_size", type=str, choices=["half", "full"], help="Set the screen size to 'half' or 'full'")
-    parser.add_argument("--speed_level", type=int, choices=range(1, 20), required=True, help="Set the speed level (1-5)")
+    parser.add_argument("--speed_level", type=int, choices=range(1, 30), required=True, help="Set the speed level (1-5)")
     parser.add_argument("--video", type=str, help="Path to the optional video file")
     parser.add_argument("--image_path", type=str, default=".", help="Path to the folder containing car and obstacle images")
     parser.add_argument("--skip_frames", type=int, default=0, help="Number of frames to skip for reducing processing load")
@@ -308,7 +308,7 @@ def game_loop(speed_level):
     finished_without_collision = True
     collision_start_time = None  # Time when collision occurred
     
-    MAX_GAME_DURATION = 120  # Set max game duration in seconds
+    MAX_GAME_DURATION = 60  # Set max game duration in seconds
     start_time = time.time()
 
     while True:
