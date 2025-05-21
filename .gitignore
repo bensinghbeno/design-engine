@@ -7,6 +7,11 @@ projects/linux/someip/git-repos/capicxx-core-tools/build
 *.jpg
 *.png
 *.o
+*.mp3
+*.mkv
+*.gz
+*.zip
+*.wav
 *.out
 build/
 build-*/
