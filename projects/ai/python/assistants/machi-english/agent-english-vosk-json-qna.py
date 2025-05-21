@@ -8,9 +8,9 @@ import os
 
 # === CONFIGURATION ===
 VOSK_MODEL_PATH = "vosk-model-small-en-us-0.15"
-DATA_FILE = "data.json"  # vehicle data file
-openai.api_key = os.getenv("OPENAI_API_KEY")  # Load API key from environment variable
-
+DATA_FILE = "data.json"  # additional context if needed
+SCOPE_FILE = "scope.json"  # contains allowed topics
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # === INITIALIZE MODELS ===
 q = queue.Queue()
@@ -18,23 +18,28 @@ model = Model(VOSK_MODEL_PATH)
 rec = KaldiRecognizer(model, 16000)
 tts = pyttsx3.init()
 
-# === LOAD DATA CONTEXT ===
+# === LOAD DATA CONTEXT (Optional) ===
 try:
     with open(DATA_FILE, "r") as f:
-        vehicle_data = json.load(f)
+        extra_data = json.load(f)
 except Exception as e:
-    print("Error loading JSON data:", e)
-    vehicle_data = {}
+    print("Error loading data.json:", e)
+    extra_data = {}
+
+# === LOAD TOPIC SCOPE ===
+try:
+    with open(SCOPE_FILE, "r") as f:
+        topic_scope = json.load(f).get("topics", [])
+except Exception as e:
+    print("Error loading scope.json:", e)
+    topic_scope = []
 
 def speak(text):
     print(f"Assistant: {text}")
-    
-    # Set voice properties
     voices = tts.getProperty('voices')
-    tts.setProperty('voice', voices[1].id)  # Change index to select a different voice
-    tts.setProperty('rate', 200)  # Adjust speed (default is usually 200)
-    tts.setProperty('volume', 0.9)  # Adjust volume (0.0 to 1.0)
-    
+    tts.setProperty('voice', voices[1].id if len(voices) > 1 else voices[0].id)
+    tts.setProperty('rate', 200)
+    tts.setProperty('volume', 0.9)
     tts.say(text)
     tts.runAndWait()
 
@@ -55,23 +60,23 @@ def listen():
 
 def ask_gpt(question):
     print(f"You said: {question}")
-    
+
+    topics_list = ", ".join(topic_scope)
     system_prompt = (
-        "You are a helpful voice assistant that can answer questions using the following vehicle data. "
-        "If the user question matches any of these keys or sounds related, answer directly using the value. "
-        "Otherwise, try to answer normally."
+        "You are a helpful voice assistant. Only answer questions that fall within the following topics: "
+        f"{topics_list}. If the question is unrelated to these topics, politely respond that you're limited to these subjects."
     )
-    
-    # Format the JSON key-values into readable lines
-    context = "\n".join([f"{k}: {v}" for k, v in vehicle_data.items()])
-    
+
+    # Optionally include extra data (like vehicle info, etc.)
+    context = "\n".join([f"{k}: {v}" for k, v in extra_data.items()])
+
     messages = [
-        {"role": "system", "content": system_prompt + "\n\nVehicle Data:\n" + context},
+        {"role": "system", "content": system_prompt + "\n\n" + context},
         {"role": "user", "content": question}
     ]
-    
+
     response = openai.ChatCompletion.create(
-        model="gpt-4o-mini",  # or "gpt-3.5-turbo", etc.
+        model="gpt-4o-mini",
         messages=messages,
         temperature=0.3
     )
@@ -86,4 +91,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
