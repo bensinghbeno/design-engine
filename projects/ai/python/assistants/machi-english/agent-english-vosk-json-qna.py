@@ -1,24 +1,25 @@
 import queue
 import sounddevice as sd
 import json
-import pyttsx3
-from vosk import Model, KaldiRecognizer
-import openai
 import os
+import tempfile
+from vosk import Model, KaldiRecognizer
+from gtts import gTTS
+from playsound import playsound
+import openai
 
 # === CONFIGURATION ===
 VOSK_MODEL_PATH = "vosk-model-small-en-us-0.15"
-DATA_FILE = "data.json"  # additional context if needed
-SCOPE_FILE = "scope.json"  # contains allowed topics
+DATA_FILE = "data.json"
+SCOPE_FILE = "scope.json"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # === INITIALIZE MODELS ===
 q = queue.Queue()
 model = Model(VOSK_MODEL_PATH)
 rec = KaldiRecognizer(model, 16000)
-tts = pyttsx3.init()
 
-# === LOAD DATA CONTEXT (Optional) ===
+# === LOAD DATA CONTEXT ===
 try:
     with open(DATA_FILE, "r") as f:
         extra_data = json.load(f)
@@ -35,13 +36,10 @@ except Exception as e:
     topic_scope = []
 
 def speak(text):
-    print(f"Assistant: {text}")
-    voices = tts.getProperty('voices')
-    tts.setProperty('voice', voices[1].id if len(voices) > 1 else voices[0].id)
-    tts.setProperty('rate', 200)
-    tts.setProperty('volume', 0.9)
-    tts.say(text)
-    tts.runAndWait()
+    tts = gTTS(text=text, lang='en')
+    with tempfile.NamedTemporaryFile(delete=True, suffix=".mp3") as fp:
+        tts.save(fp.name)
+        playsound(fp.name)
 
 def callback(indata, frames, time, status):
     if status:
@@ -60,14 +58,13 @@ def listen():
 
 def ask_gpt(question):
     print(f"You said: {question}")
-
     topics_list = ", ".join(topic_scope)
+
     system_prompt = (
-        "You are a helpful voice assistant. Only answer questions that fall within the following topics: "
-        f"{topics_list}. If the question is unrelated to these topics, politely respond that you're limited to these subjects."
+        "You are a helpful voice assistant. Only answer questions within these topics: "
+        f"{topics_list}. If unrelated, respond with: 'I'm sorry, please ask questions about these.'."
     )
 
-    # Optionally include extra data (like vehicle info, etc.)
     context = "\n".join([f"{k}: {v}" for k, v in extra_data.items()])
 
     messages = [
@@ -80,14 +77,21 @@ def ask_gpt(question):
         messages=messages,
         temperature=0.3
     )
-    return response['choices'][0]['message']['content'].strip()
+    reply = response['choices'][0]['message']['content'].strip()
+    return reply
 
 def main():
     while True:
         query = listen()
         if query:
-            answer = ask_gpt(query)
-            speak(answer)
+            reply = ask_gpt(query)
+            if "I'm sorry" in reply:
+                print("Assistant: I'm sorry, please ask questions about these.")
+                speak("I'm sorry, please ask questions about these.")
+                print(f"Allowed topics :::::::::::: {', '.join(topic_scope)}")
+            else:
+                print(f"Assistant: {reply}")
+                speak(reply)
 
 if __name__ == "__main__":
     main()
