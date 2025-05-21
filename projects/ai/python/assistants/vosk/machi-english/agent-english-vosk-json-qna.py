@@ -4,11 +4,12 @@ import json
 import pyttsx3
 from vosk import Model, KaldiRecognizer
 import openai
+import os
 
 # === CONFIGURATION ===
 VOSK_MODEL_PATH = "vosk-model-small-en-us-0.15"
 DATA_FILE = "data.json"  # vehicle data file
-openai.api_key = "REDACTED"  # replace with your key
+openai.api_key = os.getenv("OPENAI_API_KEY")  # Load API key from environment variable
 
 
 # === INITIALIZE MODELS ===
