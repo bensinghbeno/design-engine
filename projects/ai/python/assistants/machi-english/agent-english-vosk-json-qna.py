@@ -10,6 +10,7 @@ from playsound import playsound
 import openai
 from tkinter import Tk, Label
 from PIL import Image, ImageTk
+import sys
 
 # === CONFIGURATION ===
 VOSK_MODEL_PATH = "vosk-model-small-en-us-0.15"
@@ -101,31 +102,48 @@ def listen():
 def ask_gpt(question):
     print(f"You said: {question}")
 
-    topics_list = ", ".join(topic_scope)
-    print(f"Assistant: Please ask questions about these topics:")
-    print(f"Allowed topics: {topics_list}")
+    # Build system prompt to instruct GPT to extract the keyword
+    system_prompt = (
+        "You're an assistant that extracts the key subject from a spoken request "
+        "to search for an image. Return ONLY the subject as a short phrase, without any explanation. "
+        "Examples:\n"
+        "- 'show me actor tom cruise' → 'tom cruise'\n"
+        "- 'can you show me a banana' → 'banana'\n"
+        "- 'I want to see the Eiffel Tower' → 'Eiffel Tower'\n"
+    )
 
-    topic_keywords = {
-        "Animals": ["cat", "dog", "lion", "tiger", "elephant"],
-        "Countries": ["India", "USA", "France", "Germany", "Japan"],
-        "Superheroes": ["Superman", "Batman", "Spiderman", "Ironman", "Hulk"],
-        "Cities": ["New York", "Paris", "Tokyo", "London", "Mumbai"],
-        "Fruits": ["apple", "banana", "mango", "orange", "grape"]
-    }
+    try:
+        completion = openai.ChatCompletion.create(
+        model="gpt-4o-mini",  # free tier model and widely accessible
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": question}
+            ],
+            temperature=0
+        )
+        keyword = completion.choices[0].message['content'].strip()
+        print(f"Extracted keyword: {keyword}")
 
-    for topic, keywords in topic_keywords.items():
-        for keyword in keywords:
-            if keyword.lower() in question.lower():
-                print(f"Searching for an image related to: {keyword}")
-                search_and_display_image(keyword)  # Use the specific keyword
-                return f"Here is an image of a {keyword}."
+        search_and_display_image(keyword)
+        return f"Here is an image of {keyword}."
+    except Exception as e:
+        print("Error calling GPT:", e)
+        return "Sorry, I couldn't understand your request."
 
-    return "I'm sorry, please ask questions about these."
+
+def quit_application(event=None):
+    """Close the application gracefully."""
+    print("Exiting application...")
+    root.destroy()  # Close the Tkinter window
+    sys.exit(0)  # Exit the program
 
 def main():
+    root.bind('<q>', quit_application)  # Bind the 'q' key to quit the application
     while True:
         query = listen()
         if query:
+            if query.lower() == 'q':  # Allow voice command to quit as well
+                quit_application()
             reply = ask_gpt(query)
             if "I'm sorry" in reply:
                 print("Assistant: I'm sorry, please ask questions about these.")
