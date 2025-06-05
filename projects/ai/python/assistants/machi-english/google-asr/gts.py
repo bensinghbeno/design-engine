@@ -31,11 +31,11 @@ def recognize_and_save():
     print("Listening continuously for wake word...")
     buffer = collections.deque(maxlen=10)  # 10 recent phrases
     wake_detected = False
+    wake_word_text = ""
 
     while not wake_detected:
         with mic as source:
-            audio = recognizer.listen(source, phrase_time_limit=3)
-        buffer.append(audio)
+            audio = recognizer.listen(source, phrase_time_limit=5)  # increased duration
 
         try:
             text = recognizer.recognize_google(audio).lower()
@@ -43,6 +43,7 @@ def recognize_and_save():
             for wake in WAKE_WORDS:
                 if wake in text:
                     print("Wake word detected!")
+                    wake_word_text = wake
                     wake_detected = True
                     break
         except sr.UnknownValueError:
@@ -56,10 +57,8 @@ def recognize_and_save():
     with mic as source:
         audio_followup = recognizer.listen(source, phrase_time_limit=6)
 
-    # Combine only from wake word chunk onward
-    all_chunks = list(buffer)[-1:] + [audio_followup]  # start with wake word chunk
     all_audio = sr.AudioData(
-        b''.join([chunk.get_raw_data() for chunk in all_chunks]),
+        audio_followup.get_raw_data(),
         audio_followup.sample_rate,
         audio_followup.sample_width
     )
@@ -71,13 +70,6 @@ def recognize_and_save():
     try:
         print("Recognizing full input...")
         full_text = recognizer.recognize_google(all_audio)
-
-        # Remove everything before and including wake word
-        for wake in WAKE_WORDS:
-            if wake in full_text.lower():
-                full_text = full_text.lower().split(wake, 1)[-1].strip()
-                break
-
         print("You said:", full_text)
         save_wav_file(all_audio, wav_path)
         save_transcription(full_text, txt_path)
