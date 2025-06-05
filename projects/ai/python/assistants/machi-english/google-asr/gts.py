@@ -2,6 +2,7 @@ import speech_recognition as sr
 import os
 from datetime import datetime
 import time
+import collections
 
 DATA_DIR = 'training_data'
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -18,24 +19,7 @@ def save_transcription(text, filename):
     with open(filename, 'w') as f:
         f.write(text)
 
-# Listen for wake word and return True if heard
-def detect_wake_word(recognizer, mic):
-    print("Listening for wake word...")
-    with mic as source:
-        audio = recognizer.listen(source)
-    try:
-        text = recognizer.recognize_google(audio).lower()
-        print("Heard:", text)
-        for word in WAKE_WORDS:
-            if word in text:
-                print("Wake word detected!")
-                return True
-    except sr.UnknownValueError:
-        print("Could not understand audio")
-    except sr.RequestError as e:
-        print(f"Google API error: {e}")
-    return False
-
+# Listen and buffer audio in real-time to detect wake word and record follow-up
 def recognize_and_save():
     recognizer = sr.Recognizer()
     mic = sr.Microphone()
@@ -44,31 +28,64 @@ def recognize_and_save():
         print("Adjusting for ambient noise... Please wait.")
         recognizer.adjust_for_ambient_noise(source)
 
-    # Wait until wake word is detected
-    while True:
-        if detect_wake_word(recognizer, mic):
-            break
-        time.sleep(0.5)  # small delay before next listen
+    print("Listening continuously for wake word...")
+    buffer = collections.deque(maxlen=10)  # 10 recent phrases
+    wake_detected = False
 
+    while not wake_detected:
+        with mic as source:
+            audio = recognizer.listen(source, phrase_time_limit=3)
+        buffer.append(audio)
+
+        try:
+            text = recognizer.recognize_google(audio).lower()
+            print("Heard:", text)
+            for wake in WAKE_WORDS:
+                if wake in text:
+                    print("Wake word detected!")
+                    wake_detected = True
+                    break
+        except sr.UnknownValueError:
+            continue
+        except sr.RequestError as e:
+            print(f"Google API error: {e}")
+            continue
+
+    # After wake word is detected, capture longer command input
+    print("Listening for command after wake word...")
     with mic as source:
-        print("Listening for command after wake word...")
-        audio = recognizer.listen(source)
+        audio_followup = recognizer.listen(source, phrase_time_limit=6)
+
+    # Combine only from wake word chunk onward
+    all_chunks = list(buffer)[-1:] + [audio_followup]  # start with wake word chunk
+    all_audio = sr.AudioData(
+        b''.join([chunk.get_raw_data() for chunk in all_chunks]),
+        audio_followup.sample_rate,
+        audio_followup.sample_width
+    )
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     wav_path = os.path.join(DATA_DIR, f"{timestamp}.wav")
     txt_path = os.path.join(DATA_DIR, f"{timestamp}.txt")
 
     try:
-        print("Recognizing...")
-        text = recognizer.recognize_google(audio)
-        print("You said:", text)
-        save_wav_file(audio, wav_path)
-        save_transcription(text, txt_path)
+        print("Recognizing full input...")
+        full_text = recognizer.recognize_google(all_audio)
+
+        # Remove everything before and including wake word
+        for wake in WAKE_WORDS:
+            if wake in full_text.lower():
+                full_text = full_text.lower().split(wake, 1)[-1].strip()
+                break
+
+        print("You said:", full_text)
+        save_wav_file(all_audio, wav_path)
+        save_transcription(full_text, txt_path)
         print(f"Saved audio to {wav_path} and transcription to {txt_path}")
     except sr.UnknownValueError:
-        print("Google Speech Recognition could not understand audio")
+        print("Could not understand full input")
     except sr.RequestError as e:
-        print(f"Could not request results from Google Speech Recognition service; {e}")
+        print(f"Google API error: {e}")
 
 if __name__ == "__main__":
     recognize_and_save()
