@@ -2,12 +2,13 @@
 # cmake build dirs
 projects/linux/someip/git-repos/capicxx-core-runtime/build
 projects/linux/someip/git-repos/capicxx-core-tools/build
-
+projects/ai/python/assistants/machi-english/google-asr/training_data
 # qt build dirs
 *.jpg
 *.png
 *.o
 *.mp3
+*.mp4
 *.mkv
 *.gz
 *.zip
