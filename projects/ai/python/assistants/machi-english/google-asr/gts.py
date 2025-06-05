@@ -1,9 +1,12 @@
 import speech_recognition as sr
 import os
 from datetime import datetime
+import time
 
 DATA_DIR = 'training_data'
 os.makedirs(DATA_DIR, exist_ok=True)
+
+WAKE_WORDS = ["hey machi", "hello machi", "machi"]
 
 # Save audio to a WAV file
 def save_wav_file(audio, filename):
@@ -15,6 +18,24 @@ def save_transcription(text, filename):
     with open(filename, 'w') as f:
         f.write(text)
 
+# Listen for wake word and return True if heard
+def detect_wake_word(recognizer, mic):
+    print("Listening for wake word...")
+    with mic as source:
+        audio = recognizer.listen(source)
+    try:
+        text = recognizer.recognize_google(audio).lower()
+        print("Heard:", text)
+        for word in WAKE_WORDS:
+            if word in text:
+                print("Wake word detected!")
+                return True
+    except sr.UnknownValueError:
+        print("Could not understand audio")
+    except sr.RequestError as e:
+        print(f"Google API error: {e}")
+    return False
+
 def recognize_and_save():
     recognizer = sr.Recognizer()
     mic = sr.Microphone()
@@ -22,7 +43,15 @@ def recognize_and_save():
     with mic as source:
         print("Adjusting for ambient noise... Please wait.")
         recognizer.adjust_for_ambient_noise(source)
-        print("Listening... Speak now!")
+
+    # Wait until wake word is detected
+    while True:
+        if detect_wake_word(recognizer, mic):
+            break
+        time.sleep(0.5)  # small delay before next listen
+
+    with mic as source:
+        print("Listening for command after wake word...")
         audio = recognizer.listen(source)
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
