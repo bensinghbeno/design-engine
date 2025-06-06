@@ -10,6 +10,7 @@ from tkinter import Tk, Label
 from PIL import Image, ImageTk
 import sys
 import speech_recognition as sr
+from bs4 import BeautifulSoup
 
 # === CONFIGURATION ===
 DATA_FILE = "data.json"
@@ -52,25 +53,48 @@ def display_image(image_path):
 # Start with the loading GIF
 display_image(GIF_PATH)
 
+from bs4 import BeautifulSoup
+
 def search_and_display_image(query):
-    try:
-        # Use Google Custom Search JSON API for image search
-        search_url = f"https://www.googleapis.com/customsearch/v1?q={query}&searchType=image&key={GOOGLE_API_KEY}&cx={GOOGLE_CSE_ID}"
-        response = requests.get(search_url)
-        response.raise_for_status()
-        image_url = response.json()["items"][0]["link"]  # Get the first image result
+    GOOGLE_API_KEY = "AIzaSyCHkMwQIwPo5ARcwxVl2-8xYPOT5k5rhgM"
+    GOOGLE_CSE_ID = "f353698d81ef5475f"
 
-        # Download the image
-        image_response = requests.get(image_url, stream=True)
-        image_response.raise_for_status()
-        temp_image_path = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg").name
-        with open(temp_image_path, "wb") as f:
-            f.write(image_response.content)
+    def google_image_search(query):
+        url = "https://www.googleapis.com/customsearch/v1"
+        params = {
+            "key": GOOGLE_API_KEY,
+            "cx": GOOGLE_CSE_ID,
+            "q": query,
+            "searchType": "image",
+            "num": 1,
+        }
 
-        # Display the downloaded image
-        display_image(temp_image_path)
-    except Exception as e:
-        print("Error fetching image:", e)
+        try:
+            print(f"Searching for: {query}")
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            data = response.json()
+            image_url = data["items"][0]["link"]
+            print(f"Found image: {image_url}")
+            return image_url
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+
+    def download_and_show_image(image_url):
+        try:
+            response = requests.get(image_url, stream=True)
+            response.raise_for_status()
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as f:
+                f.write(response.content)
+                img = Image.open(f.name)
+                img.show()
+        except Exception as e:
+            print(f"Image load error: {e}")
+
+    image_url = google_image_search(query)
+    if image_url:
+        download_and_show_image(image_url)
 
 def speak(text):
     tts = gTTS(text=text, lang='en')
