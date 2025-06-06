@@ -97,7 +97,10 @@ def listen():
             data = q.get()
             if rec.AcceptWaveform(data):
                 result = json.loads(rec.Result())
-                return result.get("text", "")
+                text = result.get("text", "")
+                if text.lower() == "quit":  # Check for the "quit" command
+                    quit_application()  # Call the quit function
+                return text
 
 def ask_gpt(question):
     print(f"You said: {question}")
@@ -142,8 +145,6 @@ def main():
     while True:
         query = listen()
         if query:
-            if query.lower() == 'q':  # Allow voice command to quit as well
-                quit_application()
             reply = ask_gpt(query)
             if "I'm sorry" in reply:
                 print("Assistant: I'm sorry, please ask questions about these.")
