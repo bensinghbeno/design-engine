@@ -1,28 +1,23 @@
 import queue
-import sounddevice as sd
 import json
 import os
 import tempfile
 import requests
-from vosk import Model, KaldiRecognizer
 from gtts import gTTS
 from playsound import playsound
 import openai
 from tkinter import Tk, Label
 from PIL import Image, ImageTk
 import sys
+import speech_recognition as sr
 
 # === CONFIGURATION ===
-VOSK_MODEL_PATH = "vosk-model-small-en-us-0.15"
 DATA_FILE = "data.json"
 SCOPE_FILE = "scope.json"
 GIF_PATH = "res/question.gif"
 openai.api_key = os.getenv("OPENAI_API_KEY")
-
-# === INITIALIZE MODELS ===
-q = queue.Queue()
-model = Model(VOSK_MODEL_PATH)
-rec = KaldiRecognizer(model, 16000)
+GOOGLE_API_KEY = "YOUR_GOOGLE_API_KEY"  # Replace with your Google API key
+GOOGLE_CSE_ID = "YOUR_GOOGLE_CSE_ID"  # Replace with your Custom Search Engine ID
 
 # === LOAD DATA CONTEXT ===
 try:
@@ -48,23 +43,22 @@ label.pack()
 
 def display_image(image_path):
     img = Image.open(image_path)
-    img = img.resize((400, 400), Image.Resampling.LANCZOS)  # Use LANCZOS instead of ANTIALIAS
+    img = img.resize((400, 400), Image.Resampling.LANCZOS)  # Use LANCZOS for resizing
     img_tk = ImageTk.PhotoImage(img)
     label.config(image=img_tk)
     label.image = img_tk
     root.update()  # Ensure GUI refresh
-
 
 # Start with the loading GIF
 display_image(GIF_PATH)
 
 def search_and_display_image(query):
     try:
-        # Replace with a real image search API
-        search_url = f"https://api.unsplash.com/photos/random?query={query}&client_id=AequTRHmxFgl1JjuIZo8rhOmByLoFAoQCh85DawCGT8"
+        # Use Google Custom Search JSON API for image search
+        search_url = f"https://www.googleapis.com/customsearch/v1?q={query}&searchType=image&key={GOOGLE_API_KEY}&cx={GOOGLE_CSE_ID}"
         response = requests.get(search_url)
         response.raise_for_status()
-        image_url = response.json()["urls"]["regular"]
+        image_url = response.json()["items"][0]["link"]  # Get the first image result
 
         # Download the image
         image_response = requests.get(image_url, stream=True)
@@ -84,23 +78,21 @@ def speak(text):
         tts.save(fp.name)
         playsound(fp.name)
 
-def callback(indata, frames, time, status):
-    if status:
-        print("Error:", status)
-    q.put(bytes(indata))
-
 def listen():
     print("🎙️ Say something...")
-    with sd.RawInputStream(samplerate=16000, blocksize=8000, dtype='int16',
-                           channels=1, callback=callback):
-        while True:
-            data = q.get()
-            if rec.AcceptWaveform(data):
-                result = json.loads(rec.Result())
-                text = result.get("text", "")
-                if text.lower() == "quit":  # Check for the "quit" command
-                    quit_application()  # Call the quit function
-                return text
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        audio = recognizer.listen(source)
+        try:
+            text = recognizer.recognize_google(audio)
+            print(f"You said: {text}")
+            if text.lower() == "quit":  # Check for the "quit" command
+                quit_application()  # Call the quit function
+            return text
+        except sr.UnknownValueError:
+            print("Google ASR could not understand the audio.")
+        except sr.RequestError as e:
+            print(f"Google ASR request error: {e}")
 
 def ask_gpt(question):
     print(f"You said: {question}")
@@ -117,7 +109,7 @@ def ask_gpt(question):
 
     try:
         completion = openai.ChatCompletion.create(
-        model="gpt-4o-mini",  # free tier model and widely accessible
+            model="gpt-4o-mini",  # free tier model and widely accessible
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": question}
@@ -132,7 +124,6 @@ def ask_gpt(question):
     except Exception as e:
         print("Error calling GPT:", e)
         return "Sorry, I couldn't understand your request."
-
 
 def quit_application(event=None):
     """Close the application gracefully."""
@@ -153,7 +144,6 @@ def main():
             else:
                 print(f"Assistant: {reply}")
                 speak(reply)
-
 
 if __name__ == "__main__":
     root.after(100, main)  # Run the main loop alongside the Tkinter window
