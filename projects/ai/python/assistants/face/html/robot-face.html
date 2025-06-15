@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cute Robot Assistant Face</title>
+    <!-- Tailwind CSS for modern styling and responsiveness -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font for a cute look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #e0f2fe; /* Light Blue background for a cool vibe */
+            overflow: hidden; /* Prevent scrollbars */
+        }
+
+        .robot-face-container {
+            background: linear-gradient(135deg, #a78bfa, #818cf8); /* Purple/Indigo gradient for coolness */
+            border-radius: 2.5rem; /* More rounded corners */
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 80%; /* Responsive width */
+            max-width: 400px; /* Max width for desktop */
+            aspect-ratio: 1 / 1; /* Make it square */
+        }
+
+        .eyes-container {
+            display: flex;
+            gap: 2rem; /* Space between eyes */
+            margin-bottom: 2.5rem; /* Space above mouth */
+        }
+
+        .eye {
+            width: 3.5rem;
+            height: 3.5rem;
+            background-color: #fce7f3; /* Light pink for cuteness */
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .pupil {
+            width: 1.5rem;
+            height: 1.5rem;
+            background-color: #4a044e; /* Dark purple for contrast */
+            border-radius: 50%;
+            transition: transform 0.2s ease-in-out; /* Smooth movement */
+        }
+
+        .mouth-container {
+            width: 8rem;
+            height: 2rem;
+            background-color: #fee2e2; /* Light red/pink for cuteness */
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Hide overflow during animation */
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .mouth-line {
+            width: 60%;
+            height: 0.3rem;
+            background-color: #ef4444; /* Brighter red for visibility */
+            border-radius: 0.15rem;
+            transform-origin: center center;
+            transition: height 0.1s ease-out; /* Smooth height change */
+        }
+
+        /* Talking animation for the mouth */
+        .mouth-container.talking .mouth-line {
+            animation: talk 0.4s infinite alternate; /* Faster animation for talking */
+        }
+
+        @keyframes talk {
+            0% {
+                height: 0.3rem; /* Closed mouth */
+                transform: scaleX(1);
+            }
+            50% {
+                height: 1.2rem; /* Open mouth */
+                transform: scaleX(0.8);
+            }
+            100% {
+                height: 0.3rem; /* Closed mouth */
+                transform: scaleX(1);
+            }
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 600px) {
+            .robot-face-container {
+                padding: 1.5rem;
+                width: 90%;
+            }
+            .eyes-container {
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+            .eye {
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+            .pupil {
+                width: 1rem;
+                height: 1rem;
+            }
+            .mouth-container {
+                width: 6rem;
+                height: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="robot-face-container" id="robotFace">
+        <div class="eyes-container">
+            <div class="eye">
+                <div class="pupil" id="leftPupil"></div>
+            </div>
+            <div class="eye">
+                <div class="pupil" id="rightPupil"></div>
+            </div>
+        </div>
+        <div class="mouth-container" id="mouth">
+            <div class="mouth-line"></div>
+        </div>
+
+        <!-- Control buttons for animation -->
+        <div class="mt-8 flex gap-4">
+            <button id="startTalkBtn" class="px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 active:bg-green-700">
+                Start Talking
+            </button>
+            <button id="stopTalkBtn" class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-300 active:bg-red-700">
+                Stop Talking
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const mouth = document.getElementById('mouth');
+        const startTalkBtn = document.getElementById('startTalkBtn');
+        const stopTalkBtn = document.getElementById('stopTalkBtn');
+        const leftPupil = document.getElementById('leftPupil');
+        const rightPupil = document.getElementById('rightPupil');
+
+        let talkingInterval;
+
+        // Function to start the talking animation
+        function startTalking() {
+            mouth.classList.add('talking');
+            // Optional: You could simulate speech here
+        }
+
+        // Function to stop the talking animation
+        function stopTalking() {
+            mouth.classList.remove('talking');
+        }
+
+        // Add event listeners to buttons
+        startTalkBtn.addEventListener('click', startTalking);
+        stopTalkBtn.addEventListener('click', stopTalking);
+
+        // Optional: Make pupils follow mouse for a more interactive feel
+        document.addEventListener('mousemove', (e) => {
+            const faceRect = document.getElementById('robotFace').getBoundingClientRect();
+            const faceCenterX = faceRect.left + faceRect.width / 2;
+            const faceCenterY = faceRect.top + faceRect.height / 2;
+
+            const maxMove = 10; // Max pixels pupils can move
+
+            const moveX = ((e.clientX - faceCenterX) / faceRect.width) * maxMove * 2;
+            const moveY = ((e.clientY - faceCenterY) / faceRect.height) * maxMove * 2;
+
+            leftPupil.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            rightPupil.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        });
+
+        // Start talking automatically after a short delay on load
+        window.onload = () => {
+            setTimeout(startTalking, 1000); // Start talking 1 second after load
+            setTimeout(stopTalking, 3000); // Stop after 2 seconds
+        };
+
+    </script>
+</body>
+</html>
