@@ -14,7 +14,14 @@
             align-items: center;
             min-height: 100vh;
             background-color: #e0f2fe;
-            overflow: hidden;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Stack items vertically */
+            align-items: center; /* Center items horizontally */
+            gap: 1.5rem; /* Add spacing between the face and the text area */
         }
 
         .robot-face-container {
@@ -122,13 +129,20 @@
         }
 
         .command-container {
-            margin-top: 2rem;
             text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .command-label {
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: block;
         }
 
         #commandText {
             width: 100%;
-            max-width: 400px;
             padding: 0.5rem;
             border-radius: 0.5rem;
             border: 1px solid #ccc;
@@ -141,24 +155,24 @@
     </style>
 </head>
 <body>
-    <div class="robot-face-container" id="robotFace">
-        <div class="eyes-container">
-            <div class="eye"><div class="pupil" id="leftPupil"></div></div>
-            <div class="eye"><div class="pupil" id="rightPupil"></div></div>
+    <div class="container">
+        <div class="robot-face-container" id="robotFace">
+            <div class="eyes-container">
+                <div class="eye"><div class="pupil" id="leftPupil"></div></div>
+                <div class="eye"><div class="pupil" id="rightPupil"></div></div>
+            </div>
+            <div class="mouth-container" id="mouth">
+                <div class="mouth-line"></div>
+            </div>
         </div>
-        <div class="mouth-container" id="mouth">
-            <div class="mouth-line"></div>
-        </div>
-    </div>
 
-    <!-- Command Received Section -->
-    <div class="command-container">
-        <label for="commandText" style="font-weight: bold; font-size: 1rem; margin-bottom: 0.5rem; display: block;">
-            Command Received:
-        </label>
-        <textarea id="commandText" rows="2" readonly 
-            style="width: 100%; max-width: 400px; padding: 0.5rem; border-radius: 0.5rem; border: 1px solid #ccc; resize: none; font-family: 'Inter', sans-serif; font-size: 1rem;">
-        </textarea>
+        <!-- Command Received Section -->
+        <div class="command-container">
+            <label for="commandText" class="command-label">
+                Command Received:
+            </label>
+            <textarea id="commandText" rows="2" readonly></textarea>
+        </div>
     </div>
 
     <script>
