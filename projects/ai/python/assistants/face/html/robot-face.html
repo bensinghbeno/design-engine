@@ -70,15 +70,16 @@
         .mouth-container {
             width: 8rem;
             height: 2rem;
-            background-color: #fee2e2;
-            border-radius: 0.5rem;
+            background-color: #fee2e2; /* Default */
+            border-radius: 0.5rem; /* Default */
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
             box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
             position: relative;
-            transition: background-color 0.3s ease-in-out;
+            /* Added transition for all properties to smoothly change size, color, border-radius */
+            transition: all 0.3s ease-in-out;
         }
 
         .mouth-line {
@@ -109,6 +110,91 @@
             }
         }
 
+        /* New CSS for teeth element */
+        .teeth {
+            position: absolute;
+            width: 90%; /* Width relative to mouth container */
+            height: 70%; /* Height relative to mouth container */
+            background-color: transparent; /* No background for this container itself; pseudo-elements draw teeth */
+            border-radius: 0.5rem; /* Overall rounding for the teeth set */
+            display: none; /* Hidden by default */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Adjust for centering */
+            opacity: 0; /* Fade in */
+            transition: opacity 0.2s ease-in-out;
+            overflow: hidden; /* Crucial to contain the pseudo-elements and their borders */
+            z-index: 2; /* Ensure teeth are above mouth-line if it were still visible */
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2); /* Keep subtle inner shadow for depth */
+        }
+
+        /* Pseudo-elements for upper and lower teeth rows */
+        .teeth::before,
+        .teeth::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 50%; /* Each pseudo-element takes half the height of the .teeth container */
+            background-color: white; /* Color of the teeth */
+            /* Create vertical lines for tooth separation (simulating individual teeth) */
+            background-image: linear-gradient(to right, #e0e0e0 1px, transparent 1px);
+            background-size: calc(100% / 8) 100%; /* Divides into 8 segments for a set of visible teeth */
+            background-repeat: repeat-x; /* Repeat the vertical lines */
+            box-sizing: border-box; /* Include padding/border in width/height calculations */
+        }
+
+        .teeth::before {
+            top: 0; /* Upper teeth */
+            border-bottom: 2px solid #ccc; /* A clear line separating upper and lower sets */
+            border-top-left-radius: 0.5rem; /* Rounded corners for the top teeth row */
+            border-top-right-radius: 0.5rem;
+        }
+
+        .teeth::after {
+            bottom: 0; /* Lower teeth */
+            border-top: 2px solid #ccc; /* A clear line separating upper and lower sets */
+            border-bottom-left-radius: 0.5rem; /* Rounded corners for the bottom teeth row */
+            border-bottom-right-radius: 0.5rem;
+        }
+
+        /* Styles for the mouth when laughing */
+        .mouth-container.laugh {
+            background-color: #fef08a; /* Light yellow for laugh */
+            animation: laughScale 1s infinite alternate forwards; /* Animation makes it go big/small */
+        }
+
+        /* Keyframes for continuous laugh scaling */
+        @keyframes laughScale {
+            0% {
+                /* Start at the enlarged size */
+                width: 24rem;
+                height: 6rem;
+                border-radius: 50%;
+            }
+            50% {
+                /* Shrink to approximately the initial size */
+                width: 8rem;
+                height: 2rem;
+                border-radius: 0.5rem; /* Go back to less rounded */
+            }
+            100% {
+                /* Return to the enlarged size */
+                width: 24rem;
+                height: 6rem;
+                border-radius: 50%;
+            }
+        }
+
+        .mouth-container.laugh .mouth-line {
+            display: none; /* Hide mouth line when laughing */
+        }
+
+        .mouth-container.laugh .teeth {
+            display: block; /* Show teeth */
+            opacity: 1; /* Fade in teeth */
+        }
+
+
         @media (max-width: 600px) {
             .robot-face-container {
                 padding: 1.5rem;
@@ -129,6 +215,27 @@
             .mouth-container {
                 width: 6rem;
                 height: 1.5rem;
+            }
+            /* Responsive keyframes for continuous laugh scaling */
+            @keyframes laughScale {
+                0% {
+                    /* Start at the enlarged size for mobile */
+                    width: 18rem;
+                    height: 4.5rem;
+                    border-radius: 50%;
+                }
+                50% {
+                    /* Shrink to approximately the initial size for mobile */
+                    width: 6rem;
+                    height: 1.5rem;
+                    border-radius: 0.5rem;
+                }
+                100% {
+                    /* Return to the enlarged size for mobile */
+                    width: 18rem;
+                    height: 4.5rem;
+                    border-radius: 50%;
+                }
             }
         }
 
@@ -197,6 +304,7 @@
     <div class="container">
         <div class="robot-face-container" id="robotFace">
             <div class="eyes-container">
+                <!-- Eyebrows are correctly placed inside eyes-container -->
                 <div class="eyebrow" id="leftEyebrow"></div>
                 <div class="eyebrow" id="rightEyebrow"></div>
                 <div class="eye"><div class="pupil" id="leftPupil"></div></div>
@@ -204,9 +312,11 @@
             </div>
             <div class="mouth-container" id="mouth">
                 <div class="mouth-line"></div>
+                <div class="teeth" id="teeth"></div> <!-- New: Teeth element -->
             </div>
         </div>
 
+        <!-- Command Received Section -->
         <div class="command-container">
             <label for="commandText" class="command-label">
                 Command Received:
@@ -220,21 +330,33 @@
         const leftPupil = document.getElementById('leftPupil');
         const rightPupil = document.getElementById('rightPupil');
         const commandText = document.getElementById('commandText');
-        // Get references to the eyebrow elements
         const leftEyebrow = document.getElementById('leftEyebrow');
         const rightEyebrow = document.getElementById('rightEyebrow');
+        const teeth = document.getElementById('teeth'); // Get reference to teeth element
 
         function setExpression(expression) {
-            mouth.classList.remove("talking");
-            // Always remove the animation class first to reset the eyebrows for non-talking states
+            // Reset all animations and states first
+            mouth.classList.remove("talking", "laugh"); // Remove both talking and laugh classes
             leftEyebrow.classList.remove("talking-eyebrow");
             rightEyebrow.classList.remove("talking-eyebrow");
+            teeth.style.display = 'none'; // Hide teeth by default
+            teeth.style.opacity = '0'; // Ensure teeth are faded out
+            
+            // The mouth's default width, height, border-radius, and background-color are
+            // now controlled purely by the base .mouth-container CSS rules.
+            // We no longer explicitly set them via JavaScript here,
+            // allowing the CSS class rules to take full effect for transitions.
+            
+            // Ensure mouth-line is visible by default unless specified otherwise
+            mouth.querySelector('.mouth-line').style.display = 'block';
+            // Also reset its background color to default, as it might have changed
+            mouth.style.backgroundColor = '#fee2e2'; // default pink
+
 
             switch (expression) {
                 case "talk":
                     mouth.classList.add("talking");
                     mouth.style.backgroundColor = "#fcd34d"; // talking = yellow
-                    // Add the animation class only when the 'talk' command is received
                     leftEyebrow.classList.add("talking-eyebrow");
                     rightEyebrow.classList.add("talking-eyebrow");
                     break;
@@ -242,11 +364,16 @@
                     mouth.style.backgroundColor = "#86efac"; // green
                     break;
                 case "laugh":
-                    mouth.style.backgroundColor = "#fef08a"; // light yellow
+                    mouth.classList.add("laugh"); // Add laugh class to mouth
+                    // Styles for size, shape, and color are now handled by .mouth-container.laugh CSS
+                    teeth.style.display = 'block'; // Show teeth
+                    teeth.style.opacity = '1'; // Fade in teeth
+                    // The mouth-line will be hidden by .mouth-container.laugh .mouth-line CSS
                     break;
                 case "normal":
                 default:
-                    mouth.style.backgroundColor = "#fee2e2"; // default pink
+                    // All reset happens at the top of the function
+                    // The default styles from .mouth-container CSS will apply here
                     break;
             }
         }
