@@ -120,6 +120,24 @@
                 height: 1.5rem;
             }
         }
+
+        .command-container {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        #commandText {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #ccc;
+            resize: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            background-color: #fff;
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -133,10 +151,21 @@
         </div>
     </div>
 
+    <!-- Command Received Section -->
+    <div class="command-container">
+        <label for="commandText" style="font-weight: bold; font-size: 1rem; margin-bottom: 0.5rem; display: block;">
+            Command Received:
+        </label>
+        <textarea id="commandText" rows="2" readonly 
+            style="width: 100%; max-width: 400px; padding: 0.5rem; border-radius: 0.5rem; border: 1px solid #ccc; resize: none; font-family: 'Inter', sans-serif; font-size: 1rem;">
+        </textarea>
+    </div>
+
     <script>
         const mouth = document.getElementById('mouth');
         const leftPupil = document.getElementById('leftPupil');
         const rightPupil = document.getElementById('rightPupil');
+        const commandText = document.getElementById('commandText');
 
         function setExpression(expression) {
             mouth.classList.remove("talking");
@@ -179,6 +208,7 @@
             const msg = event.data.trim().toLowerCase();
             console.log("📩 Command received:", msg);
             setExpression(msg);
+            commandText.value = msg; // Display the command in the textarea
         };
 
         // Default animation
