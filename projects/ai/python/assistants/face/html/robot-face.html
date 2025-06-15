@@ -36,12 +36,15 @@
             width: 80%;
             max-width: 400px;
             aspect-ratio: 1 / 1;
+            position: relative; /* Crucial for positioning eyebrows relative to the face */
         }
 
         .eyes-container {
             display: flex;
             gap: 2rem;
             margin-bottom: 2.5rem;
+            position: relative; /* Crucial for positioning eyebrows relative to the eyes container */
+            z-index: 1; /* Ensure eyes and eyebrows are above other elements if needed */
         }
 
         .eye {
@@ -53,6 +56,7 @@
             justify-content: center;
             align-items: center;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative; /* Keep this for pupil positioning */
         }
 
         .pupil {
@@ -152,12 +156,49 @@
             background-color: #fff;
             color: #333;
         }
+
+        .eyebrow {
+            width: 3rem;
+            height: 0.5rem;
+            background-color: #4a044e;
+            border-radius: 0.25rem;
+            position: absolute;
+            top: -1rem; /* Adjust as needed to position above the eye */
+            transition: transform 0.2s ease-in-out;
+        }
+
+        #leftEyebrow {
+            left: calc(50% - 2rem - 3.5rem / 2); /* Adjust positioning for left eyebrow */
+        }
+
+        #rightEyebrow {
+            right: calc(50% - 2rem - 3.5rem / 2); /* Adjust positioning for right eyebrow */
+        }
+
+        /* This is the class that triggers the eyebrow animation when added via JavaScript */
+        .talking-eyebrow {
+            animation: eyebrowMove 0.4s infinite alternate;
+        }
+
+        @keyframes eyebrowMove {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-0.5rem); /* Move up */
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="robot-face-container" id="robotFace">
             <div class="eyes-container">
+                <div class="eyebrow" id="leftEyebrow"></div>
+                <div class="eyebrow" id="rightEyebrow"></div>
                 <div class="eye"><div class="pupil" id="leftPupil"></div></div>
                 <div class="eye"><div class="pupil" id="rightPupil"></div></div>
             </div>
@@ -166,7 +207,6 @@
             </div>
         </div>
 
-        <!-- Command Received Section -->
         <div class="command-container">
             <label for="commandText" class="command-label">
                 Command Received:
@@ -180,13 +220,23 @@
         const leftPupil = document.getElementById('leftPupil');
         const rightPupil = document.getElementById('rightPupil');
         const commandText = document.getElementById('commandText');
+        // Get references to the eyebrow elements
+        const leftEyebrow = document.getElementById('leftEyebrow');
+        const rightEyebrow = document.getElementById('rightEyebrow');
 
         function setExpression(expression) {
             mouth.classList.remove("talking");
+            // Always remove the animation class first to reset the eyebrows for non-talking states
+            leftEyebrow.classList.remove("talking-eyebrow");
+            rightEyebrow.classList.remove("talking-eyebrow");
+
             switch (expression) {
                 case "talk":
                     mouth.classList.add("talking");
                     mouth.style.backgroundColor = "#fcd34d"; // talking = yellow
+                    // Add the animation class only when the 'talk' command is received
+                    leftEyebrow.classList.add("talking-eyebrow");
+                    rightEyebrow.classList.add("talking-eyebrow");
                     break;
                 case "smile":
                     mouth.style.backgroundColor = "#86efac"; // green
@@ -214,6 +264,7 @@
         });
 
         // WebSocket connection
+        // Ensure you have a WebSocket server running on ws://localhost:8765
         const socket = new WebSocket("ws://localhost:8765");
 
         socket.onopen = () => console.log("✅ WebSocket connected");
@@ -225,7 +276,7 @@
             commandText.value = msg; // Display the command in the textarea
         };
 
-        // Default animation
+        // Set initial expression when the page loads
         window.onload = () => {
             setExpression("normal");
         };
