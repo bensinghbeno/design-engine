@@ -17,7 +17,7 @@ char inChar = 0;             // Serial character input
 signed int speedLeft = 0;    // Final left motor speed
 signed int speedRight = 0;   // Final right motor speed
 bool commandSet = false;     // Track whether any command was activated
-
+const int speedMin = 100;
 // ===== COMMAND FUNCTIONS =====
 void doStop() {
   speedLeft = 0;
@@ -26,26 +26,26 @@ void doStop() {
 }
 
 void doForward() {
-  speedLeft = -50;
-  speedRight = 50;
+  speedLeft = -speedMin;
+  speedRight = speedMin;
   Serial.println(":: FORWARD");
 }
 
 void doReverse() {
-  speedLeft = 50;
-  speedRight = -50;
+  speedLeft = speedMin;
+  speedRight = -speedMin;
   Serial.println(":: REVERSE");
 }
 
 void doLeftTurn() {
-  speedLeft = 50;
-  speedRight = 50;
+  speedLeft = speedMin;
+  speedRight = speedMin;
   Serial.println(":: LEFT TURN");
 }
 
 void doRightTurn() {
-  speedLeft = -50;
-  speedRight = -50;
+  speedLeft = -speedMin;
+  speedRight = -speedMin;
   Serial.println(":: RIGHT TURN");
 }
 
@@ -103,10 +103,10 @@ void loop() {
       rcAction = true;
     }
 
-    if (ch1Value >= 1000 && ch1Value <= 1450) {
+    if (ch1Value >= 1000 && ch1Value <= 1250) {
       doLeftTurn();
       rcAction = true;
-    } else if (ch1Value >= 1550 && ch1Value <= 2000) {
+    } else if (ch1Value >= 1750 && ch1Value <= 2000) {
       doRightTurn();
       rcAction = true;
     }
