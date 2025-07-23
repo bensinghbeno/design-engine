@@ -15,8 +15,8 @@ CENTER_TOLERANCE = 40
 # Paths to wav files (or mp3 if supported)
 LEFT_WAV = "/home/ben/Music/left.wav"
 RIGHT_WAV = "/home/ben/Music/right.wav"
-CENTERED_WAV = "/home/ben/Music/correct.wav"
-
+FORWARD_WAV = "/home/ben/Music/forward.wav"
+APPROACHED_WAV = "/home/ben/Music/approached.wav"
 # Initialize pygame mixer
 pygame.mixer.init()
 
@@ -52,30 +52,47 @@ while True:
     if best_box is not None:
         left, top, right, bottom = best_box
         face_center_x = (left + right) // 2
-        frame_center_x = FRAME_WIDTH // 2
-        offset = face_center_x - frame_center_x
+        face_center_y = (top + bottom) // 2
 
-        if abs(offset) <= CENTER_TOLERANCE:
-            command = "CENTERED"
-        elif offset < 0:
-            command = "TURN LEFT"
-        else:
+        # Custom command logic based on X and Y
+        if 400 <= face_center_x <= 500:
             command = "TURN RIGHT"
+        elif 0 <= face_center_x <= 200:
+            command = "TURN LEFT"
+        elif 201 <= face_center_x <= 399:
+            if face_center_y > 250:
+                command = "FORWARD"
+            elif face_center_y <= 250:
+                command = "APPROACHED"
+        else:
+            command = "NO FACE"
 
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
-        cv2.putText(frame, command, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+        cv2.putText(
+            frame,
+            f"{command} ({face_center_x},{face_center_y})",
+            (left, top - 10),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.9,
+            (0, 255, 0),
+            2,
+        )
+        # Draw a small circle at the center of the bounding box
+        cv2.circle(frame, (face_center_x, face_center_y), 5, (255, 0, 0), -1)
 
     # Play audio if command changed and no audio is playing
-    if command in ["TURN LEFT", "TURN RIGHT", "CENTERED"] and command != last_command:
+    if command in ["TURN LEFT", "TURN RIGHT", "APPROACHED", "FORWARD"] and command != last_command:
         if not is_audio_playing():
             if command == "TURN LEFT":
                 play_wav(LEFT_WAV)
             elif command == "TURN RIGHT":
                 play_wav(RIGHT_WAV)
-            elif command == "CENTERED":
-                play_wav(CENTERED_WAV)
+            elif command == "APPROACHED":
+                play_wav(APPROACHED_WAV)
+            elif command == "FORWARD":
+                play_wav(FORWARD_WAV)                
             last_command = command  # Set only if audio was played
-    elif command not in ["TURN LEFT", "TURN RIGHT", "CENTERED"]:
+    elif command not in ["TURN LEFT", "TURN RIGHT", "APPROACHED","FORWARD"]:
         last_command = None
 
     cv2.imshow("Specific Face Tracker", frame)
