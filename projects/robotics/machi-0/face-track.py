@@ -1,47 +1,37 @@
 import cv2
+import face_recognition
 
-# Load model
-MODEL_PATH = "/home/ben/models/face-dnn"
-net = cv2.dnn.readNetFromCaffe(
-    f"{MODEL_PATH}/deploy.prototxt",
-    f"{MODEL_PATH}/res10_300x300_ssd_iter_140000.caffemodel"
-)
+# Load reference face encoding
+reference_image = face_recognition.load_image_file("reference.jpg")
+reference_encoding = face_recognition.face_encodings(reference_image)[0]
 
 video_capture = cv2.VideoCapture(0)
 FRAME_WIDTH = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-FRAME_HEIGHT = int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
 CENTER_TOLERANCE = 40
 
-print("[INFO] DNN-based face tracking started...")
+print("[INFO] Specific face tracking started...")
 
 while True:
     ret, frame = video_capture.read()
     if not ret:
         break
 
-    # Prepare blob for DNN
-    blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300),
-                                 (104.0, 177.0, 123.0), swapRB=False, crop=False)
-    net.setInput(blob)
-    detections = net.forward()
+    # Detect faces and get encodings
+    face_locations = face_recognition.face_locations(frame)
+    face_encodings = face_recognition.face_encodings(frame, face_locations)
 
     command = "NO FACE"
-
-    # Loop through detections
-    h, w = frame.shape[:2]
-    max_conf = 0
     best_box = None
 
-    for i in range(detections.shape[2]):
-        confidence = detections[0, 0, i, 2]
-        if confidence > 0.5 and confidence > max_conf:
-            box = detections[0, 0, i, 3:7] * [w, h, w, h]
-            best_box = box.astype("int")
-            max_conf = confidence
+    for (top, right, bottom, left), encoding in zip(face_locations, face_encodings):
+        match = face_recognition.compare_faces([reference_encoding], encoding, tolerance=0.5)[0]
+        if match:
+            best_box = (left, top, right, bottom)
+            break  # Only track the first matching face
 
     if best_box is not None:
-        x1, y1, x2, y2 = best_box
-        face_center_x = (x1 + x2) // 2
+        left, top, right, bottom = best_box
+        face_center_x = (left + right) // 2
         frame_center_x = FRAME_WIDTH // 2
         offset = face_center_x - frame_center_x
 
@@ -52,10 +42,10 @@ while True:
         else:
             command = "TURN RIGHT"
 
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(frame, command, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+        cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
+        cv2.putText(frame, command, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
-    cv2.imshow("DNN Face Tracker", frame)
+    cv2.imshow("Specific Face Tracker", frame)
     print("[COMMAND]", command)
 
     if cv2.waitKey(1) & 0xFF == ord("q"):
