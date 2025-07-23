@@ -3,12 +3,14 @@ import face_recognition
 import subprocess
 import psutil
 import pygame
+import serial
+import time
 
 # Load reference face encoding
 reference_image = face_recognition.load_image_file("reference.jpg")
 reference_encoding = face_recognition.face_encodings(reference_image)[0]
 
-video_capture = cv2.VideoCapture(0)
+video_capture = cv2.VideoCapture(2)
 FRAME_WIDTH = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
 CENTER_TOLERANCE = 40
 
@@ -20,6 +22,12 @@ APPROACHED_WAV = "/home/ben/Music/approached.wav"
 # Initialize pygame mixer
 pygame.mixer.init()
 
+# Serial setup
+SERIAL_PORT = '/dev/ttyACM0'   # Change as needed
+BAUD_RATE = 115200
+ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+time.sleep(2)  # Allow Arduino to reset
+
 def is_audio_playing():
     return pygame.mixer.music.get_busy()
 
@@ -27,9 +35,14 @@ def play_wav(path):
     pygame.mixer.music.load(path)
     pygame.mixer.music.play()
 
+def send_serial_command(cmd):
+    ser.write(cmd.encode())
+    print(f"[SERIAL] Sent command: {cmd}")
+
 print("[INFO] Specific face tracking started...")
 
 last_command = None
+last_serial = None
 
 while True:
     ret, frame = video_capture.read()
@@ -57,12 +70,12 @@ while True:
         # Custom command logic based on X and Y
         if 400 <= face_center_x <= 500:
             command = "TURN RIGHT"
-        elif 0 <= face_center_x <= 200:
+        elif 0 <= face_center_x <= 250:
             command = "TURN LEFT"
-        elif 201 <= face_center_x <= 399:
-            if face_center_y > 250:
+        elif 201 <= face_center_x <= 350:
+            if face_center_y > 90:
                 command = "FORWARD"
-            elif face_center_y <= 250:
+            elif face_center_y <= 90:
                 command = "APPROACHED"
         else:
             command = "NO FACE"
@@ -94,6 +107,23 @@ while True:
             last_command = command  # Set only if audio was played
     elif command not in ["TURN LEFT", "TURN RIGHT", "APPROACHED","FORWARD"]:
         last_command = None
+
+    serial_cmd = "0"  # Default to stop
+    if command == "TURN RIGHT":
+        serial_cmd = "4"
+    elif command == "TURN LEFT":
+        serial_cmd = "3"
+    elif command == "FORWARD":
+        serial_cmd = "1"
+    elif command == "APPROACHED":
+        serial_cmd = "0"
+    else:
+        serial_cmd = "0"
+
+    # Only send serial if changed
+    if serial_cmd != last_serial:
+        send_serial_command(serial_cmd)
+        last_serial = serial_cmd
 
     cv2.imshow("Specific Face Tracker", frame)
     print("[COMMAND]", command)
