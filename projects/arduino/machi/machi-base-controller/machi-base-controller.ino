@@ -19,9 +19,44 @@ signed int speedRight = 0;   // Final right motor speed
 bool commandSet = false;     // Track whether any command was activated
 const int speedMin = 100;
 // ===== COMMAND FUNCTIONS =====
+
+void doLongForward() {
+  speedLeft = -speedMin;
+  speedRight = speedMin;
+  Serial.println("::LONG FORWARD");
+  smartDriveDuo30.control(speedLeft, speedRight);
+  delay(1000);
+}
+
+void doLongReverse() {
+  speedLeft = speedMin;
+  speedRight = -speedMin;
+  Serial.println(":: LONG REVERSE");
+  smartDriveDuo30.control(speedLeft, speedRight);
+  delay(1000);
+}
+
+void doLongTurnLeft() {
+  speedLeft = speedMin;
+  speedRight = speedMin;
+  Serial.println("::LONG TURN LEFT");
+  smartDriveDuo30.control(speedLeft, speedRight);
+  delay(500);
+}
+
+void doLongTurnRight() {
+  speedLeft = -speedMin;
+  speedRight = -speedMin;
+  Serial.println("::LONG TURN RIGHT");
+  smartDriveDuo30.control(speedLeft, speedRight);
+  delay(500);
+}
+
+
 void doStop() {
   speedLeft = 0;
   speedRight = 0;
+  smartDriveDuo30.control(speedLeft, speedRight);  // <-- ADD THIS LINE
   Serial.println(":: STOP");
 }
 
@@ -77,13 +112,32 @@ void loop() {
     delay(10);
     inChar = (char)Serial.read();
 
-    switch (inChar) {
-      case '0': doStop();       break;
-      case '1': doReverse();    break;
-      case '2': doForward();    break;
-      case '3': doLeftTurn();   break;
-      case '4': doRightTurn();  break;
-    }
+  switch (inChar) {
+    case '0':
+      doStop();
+      break;
+
+    case '1':
+      doLongReverse();
+      doStop();        // Stop after duration
+      break;
+
+    case '2':
+      doLongForward();
+      doStop();
+      break;
+
+    case '3':
+      doLongTurnLeft();
+      doStop();
+      break;
+
+    case '4':
+      doLongTurnRight();
+      doStop();
+      break;
+  }
+
 
     commandSet = true;  // Serial input takes control
   }
@@ -117,7 +171,6 @@ void loop() {
   }
 
   // --- Send Command to Motor Driver (Only Once) ---
-  smartDriveDuo30.control(speedLeft, speedRight);
 
   delay(100);
 }
