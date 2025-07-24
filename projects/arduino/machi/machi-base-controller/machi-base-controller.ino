@@ -112,32 +112,13 @@ void loop() {
     delay(10);
     inChar = (char)Serial.read();
 
-  switch (inChar) {
-    case '0':
-      doStop();
-      break;
-
-    case '1':
-      doLongReverse();
-      doStop();        // Stop after duration
-      break;
-
-    case '2':
-      doLongForward();
-      doStop();
-      break;
-
-    case '3':
-      doLongTurnLeft();
-      doStop();
-      break;
-
-    case '4':
-      doLongTurnRight();
-      doStop();
-      break;
-  }
-
+    switch (inChar) {
+      case '0': doStop();       break;
+      case '1': doLongReverse(); break;
+      case '2': doLongForward(); break;
+      case '3': doLongTurnLeft(); break;
+      case '4': doLongTurnRight(); break;
+    }
 
     commandSet = true;  // Serial input takes control
   }
@@ -157,10 +138,10 @@ void loop() {
       rcAction = true;
     }
 
-    if (ch1Value >= 1000 && ch1Value <= 1250) {
+    if (ch1Value >= 1000 && ch1Value <= 1450) {
       doLeftTurn();
       rcAction = true;
-    } else if (ch1Value >= 1750 && ch1Value <= 2000) {
+    } else if (ch1Value >= 1550 && ch1Value <= 2000) {
       doRightTurn();
       rcAction = true;
     }
@@ -171,6 +152,7 @@ void loop() {
   }
 
   // --- Send Command to Motor Driver (Only Once) ---
+  smartDriveDuo30.control(speedLeft, speedRight);
 
   delay(100);
 }
