@@ -28,6 +28,7 @@ const int encoderPinA = 2;  // Interrupt 0
 const int encoderPinB = 3;
 
 void setup() {
+
   Serial.begin(115200);
 
   pinMode(motorIn1, OUTPUT);
@@ -39,6 +40,8 @@ void setup() {
 
   attachInterrupt(digitalPinToInterrupt(encoderPinA), updateEncoder, CHANGE);
 
+  Serial.print("Setup() : ");
+
   stopMotor();
 }
 
@@ -46,18 +49,19 @@ void loop() {
   if (Serial.available()) {
     char command = Serial.read();
 
-    Serial.print("Received command: ");
-    Serial.println(command);
+    if (!command)
+    {
+      Serial.print("Received command: ");
+      Serial.println(command);
+    }
 
     switch (command) {
       case '0':
-        Serial.println("Stopping motor.");
         stopMotor();
         break;
 
       case '1':
-        Serial.println("Rotating 90 degrees clockwise.");
-        rotate90(true);  // Clockwise
+        rotateBen();  // Clockwise
         break;
 
       case '2':
@@ -65,13 +69,46 @@ void loop() {
         rotate90(false); // Counter-clockwise
         break;
 
-      case '3':
-        Serial.println("Rotating clockwise for 5 seconds at slowest speed.");
-        rotateClockwiseFor5sSlow();
+      case '5':
+        displayEncoderCount();
         break;
     }
   }
 }
+
+void rotateBen()
+{
+  Serial.print("RotateBen() : ");
+
+  displayEncoderCount();
+
+  rotateClockwiseFor1sSlow();
+
+  displayEncoderCount();
+
+}
+
+void rotateClockwiseFor1sSlow() {
+  Serial.println("rotateClockwiseFor1sSlow() : ");
+  digitalWrite(motorIn1, HIGH);
+  digitalWrite(motorIn2, LOW);
+  analogWrite(motorPWM, 200);
+  Serial.println("------ Motor running ------");
+  unsigned long startTime = millis();
+  while (millis() - startTime < 10) {
+  }
+  Serial.println("------- Timeout ------------ ");
+
+  stopMotor();
+}
+
+void displayEncoderCount()
+{
+  Serial.print("Encoder count = ");
+  Serial.println(encoderCount);
+}
+
+
 
 void updateEncoder() {
   bool A = digitalRead(encoderPinA);
@@ -86,11 +123,14 @@ void updateEncoder() {
   // Log encoder count every 10 pulses for less serial spam
   static long lastLogged = 0;
   if (abs(encoderCount - lastLogged) >= 10) {
-    Serial.print("Encoder count: ");
+    Serial.print("Encoder count = ");
     Serial.println(encoderCount);
     lastLogged = encoderCount;
   }
 }
+
+
+
 
 void rotate90(bool clockwise) {
   encoderCount = 0;
@@ -128,21 +168,6 @@ void stopMotor() {
   analogWrite(motorPWM, 0);
   digitalWrite(motorIn1, LOW);
   digitalWrite(motorIn2, LOW);
-  Serial.println("Motor stopped.");
+  Serial.println("StopMotor() :");
 }
 
-void rotateClockwiseFor5sSlow() {
-  digitalWrite(motorIn1, HIGH);
-  digitalWrite(motorIn2, LOW);
-  analogWrite(motorPWM, 50); // Slowest speed (may need to adjust for your motor)
-  Serial.println("Motor running clockwise at slowest speed for 5 seconds...");
-  unsigned long startTime = millis();
-  while (millis() - startTime < 5000) {
-    // Optionally log encoder count
-    // Serial.print("Encoder count: ");
-    // Serial.println(encoderCount);
-    delay(100);
-  }
-  stopMotor();
-  Serial.println("5 seconds elapsed. Motor stopped.");
-}
