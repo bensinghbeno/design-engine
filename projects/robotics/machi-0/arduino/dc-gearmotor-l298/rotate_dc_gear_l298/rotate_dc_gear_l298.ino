@@ -82,20 +82,20 @@ void rotateBen()
 
   displayEncoderCount();
 
-  rotateClockwiseFor1sSlow();
+  rotateSmoothClockwiseFor1sSlow();
 
   displayEncoderCount();
 
 }
 
-void rotateClockwiseFor1sSlow() {
-  Serial.println("rotateClockwiseFor1sSlow() : ");
+void rotateSmoothClockwiseFor1sSlow() {
+  Serial.println("rotateSmoothClockwiseFor1sSlow() : ");
   digitalWrite(motorIn1, HIGH);
   digitalWrite(motorIn2, LOW);
-  analogWrite(motorPWM, 200);
+  analogWrite(motorPWM, 100);
   Serial.println("------ Motor running ------");
   unsigned long startTime = millis();
-  while (millis() - startTime < 10) {
+  while (millis() - startTime < 500) {
   }
   Serial.println("------- Timeout ------------ ");
 
