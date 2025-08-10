@@ -8,7 +8,7 @@ GND	Arduino GND	Common ground
 5V	Leave jumper ON (powered from motor 12V supply regulator)	Logic power (via onboard regulator)
 VMS (Motor supply)	Connect to 12V external power source	Motor power supply
 
-Additional connections for encoder:
+Arduino ↔ Motor+Encoder Connections:
 Motor Encoder Wire	Arduino Mega Pin	Purpose
 Encoder VCC (Blue)	Arduino 5V	Encoder power
 Encoder GND (Gray)	Arduino GND	Encoder ground (common GND)
@@ -65,8 +65,15 @@ void loop() {
         break;
 
       case '2':
-        Serial.println("Rotating 90 degrees counter-clockwise.");
-        rotate90(false); // Counter-clockwise
+        rotateClockwiseUntilDecrement();
+        break;
+
+      case '3':
+        applyReverseBrake();
+        break;        
+
+      case '4':
+        rotateSmoothClockwiseFor1sSlow();
         break;
 
       case '5':
@@ -74,6 +81,51 @@ void loop() {
         break;
     }
   }
+}
+
+void rotateClockwiseUntilDecrement() {
+  Serial.print("rotateClockwiseUntilDecrement() : ");
+
+  long startCount = encoderCount;
+  Serial.print("Starting encoder count: ");
+  Serial.println(startCount);
+
+  digitalWrite(motorIn1, HIGH);
+  digitalWrite(motorIn2, LOW);
+  analogWrite(motorPWM, 200);
+  Serial.println("Motor running clockwise at PWM 200.");
+
+  while ((startCount - encoderCount) < 1000) {
+    // Optionally, add a small delay for stability
+    // delay(1);
+  }
+
+  applyReverseBrake();
+  Serial.print("Stopped. Encoder decremented by: ");
+  Serial.println(startCount - encoderCount);
+}
+
+void applyReverseBrake() {
+  Serial.print("applyReverseBrake() : ");
+
+  long startCount = encoderCount;
+  Serial.print("Starting encoder count: ");
+  Serial.println(startCount);
+
+  digitalWrite(motorIn1, LOW);
+  digitalWrite(motorIn2, HIGH);
+  analogWrite(motorPWM, 200);
+  Serial.println("Motor Braking anti-clockwise at PWM 200.");
+
+  Serial.println("------ Motor running ------");
+  unsigned long startTime = millis();
+  while (millis() - startTime < 75) {
+  }
+  Serial.println("------- Timeout ------------ ");
+
+  stopMotor();
+
+  Serial.print("Motor Braked : ");
 }
 
 void rotateBen()
@@ -92,7 +144,7 @@ void rotateSmoothClockwiseFor1sSlow() {
   Serial.println("rotateSmoothClockwiseFor1sSlow() : ");
   digitalWrite(motorIn1, HIGH);
   digitalWrite(motorIn2, LOW);
-  analogWrite(motorPWM, 100);
+  analogWrite(motorPWM, 80);
   Serial.println("------ Motor running ------");
   unsigned long startTime = millis();
   while (millis() - startTime < 500) {
@@ -123,7 +175,7 @@ void updateEncoder() {
   // Log encoder count every 10 pulses for less serial spam
   static long lastLogged = 0;
   if (abs(encoderCount - lastLogged) >= 10) {
-    Serial.print("Encoder count = ");
+    Serial.print("-- Encoder count = ");
     Serial.println(encoderCount);
     lastLogged = encoderCount;
   }
