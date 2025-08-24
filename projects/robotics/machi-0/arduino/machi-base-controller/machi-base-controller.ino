@@ -17,7 +17,7 @@ char inChar = 0;             // Serial character input
 signed int speedLeft = 0;    // Final left motor speed
 signed int speedRight = 0;   // Final right motor speed
 bool commandSet = false;     // Track whether any command was activated
-const int speedMin = 100;
+const int speedMin = 255;
 // ===== COMMAND FUNCTIONS =====
 
 void doLongForward() {
