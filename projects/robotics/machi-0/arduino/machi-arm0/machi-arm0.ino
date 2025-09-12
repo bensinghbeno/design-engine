@@ -8,7 +8,14 @@
 
 // ----- RC Input -----
 IBusBM ibus;
-
+int ch1Value;
+int ch2Value;
+int ch3Value;
+int ch4Value;
+int ch5Value;
+int ch6Value;
+int ch7Value;
+int ch8Value;
 
 // Pin definitions
 const int ENA = 10;  // L298 ENA (Enable A)
@@ -34,6 +41,51 @@ void setup() {
 }
 // ===== MAIN LOOP =====
 void loop() {
+
+  // Read and print channel values (first 8 channels)
+  ch1Value = ibus.readChannel(0); // UpperArmJoint-Roll-LR
+  Serial.print("Ch1 ");
+  Serial.print(ch1Value);
+  Serial.print(" | ");
+
+  ch2Value = ibus.readChannel(1); // ForeArmJoint-Pitch-LR
+  Serial.print("Ch2 ");
+  Serial.print(ch2Value);
+  Serial.print(" | ");
+
+  ch3Value = ibus.readChannel(2); // ForeArmJoint-Pitch-LR
+  Serial.print("Ch3 ");
+  Serial.print(ch3Value);
+  Serial.print(" | ");
+
+  ch4Value = ibus.readChannel(3); // ForeArmJoint-Pitch-LR
+  Serial.print("Ch4 ");
+  Serial.print(ch4Value);
+  Serial.print(" | ");
+
+  Serial.print("Ch5 ");
+  ch5Value = ibus.readChannel(4); // ForeArmJoint-Pitch-LR
+  Serial.print(ch5Value);
+  Serial.print(" | ");
+
+  ch6Value = ibus.readChannel(5); // ForeArmJoint-Pitch-LR
+  Serial.print("Ch6 ");
+  Serial.print(ch6Value);
+  Serial.print(" | ");
+
+  ch7Value = ibus.readChannel(6); // ForeArmJoint-Pitch-LR
+  Serial.print("Ch7 ");
+  Serial.print(ch7Value);
+  Serial.print(" | ");
+
+  ch8Value = ibus.readChannel(7); // ForeArmJoint-Pitch-LR
+  Serial.print("Ch8 ");
+  Serial.print(ch8Value);
+  Serial.print(" | ");
+
+  Serial.println();
+  delay(100);
+
   commandSet = false;  // Reset command flag
 
   // --- Check Serial Command ---
@@ -52,22 +104,25 @@ void loop() {
 
   // --- RC Input Check (Priority Only If No Serial Command Issued) ---
   if (!commandSet) {
-    int ch1Value = ibus.readChannel(0); // CH1 (Steering)
-    int ch2Value = ibus.readChannel(1); // CH2 (Throttle)
 
     bool rcAction = false;
 
-    if (ch2Value >= 1000 && ch2Value <= 1250) {
-      reverse(speedMin);
+    if (ch1Value >= 1000 && ch1Value <= 1250) {
+      upperArmJointRollLeft(speedMin);
       rcAction = true;
+    } else if (ch1Value >= 1750 && ch1Value <= 2000) {
+      upperArmJointRollRight(speedMin);
+      rcAction = true;
+    } else if (ch2Value >= 1000 && ch2Value <= 1250) {
+      //forward(speedMin);
+      //rcAction = true;
     } else if (ch2Value >= 1750 && ch2Value <= 2000) {
-      forward(speedMin);
-      rcAction = true;
+      //forward(speedMin);
+      //rcAction = true;
     }
 
     //delay(rcThrottleDelay);
     //stopMotor();
-    
 
     // if (ch1Value >= 1000 && ch1Value <= 1450) {
     //   doLeftTurn();
@@ -84,6 +139,20 @@ void loop() {
 
 }
 
+// ARM control functions
+void upperArmJointRollLeft(int speed) {
+  Serial.println("Command: upperArmJointRollLeft");
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, speed);
+}
+
+void upperArmJointRollRight(int speed) {
+  Serial.println("Command: upperArmJointRollRight");
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  analogWrite(ENA, speed);
+}
 
 // Motor control functions
 void forward(int speed) {
