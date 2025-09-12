@@ -18,9 +18,13 @@ int ch7Value;
 int ch8Value;
 
 // Pin definitions
-const int ENA = 10;  // L298 ENA (Enable A)
-const int IN1 = 8;   // L298 IN1
-const int IN2 = 9;   // L298 IN2
+const int ENA = 10;  // Motor A enable (already used)
+const int IN1 = 8;   // Motor A IN1 (already used)
+const int IN2 = 9;   // Motor A IN2 (already used)
+
+const int ENB = 13;  // Motor B enable (PWM)
+const int IN3 = 11;  // Motor B IN3
+const int IN4 = 12;  // Motor B IN4
 
 // ----- Variables -----
 char inChar = 0;             // Serial character input
@@ -33,6 +37,10 @@ void setup() {
   pinMode(ENA, OUTPUT);
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
+
+  pinMode(ENB, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
 
   // Start serial communication
   Serial.begin(115200);
@@ -94,7 +102,7 @@ void loop() {
     inChar = (char)Serial.read();
 
     switch (inChar) {
-      case '0': stopMotor();       break;
+      case '0': stopAllMotors();       break;
       case '1': forward(speedMin); break;
       case '2': reverse(speedMin); break;
     }
@@ -114,11 +122,11 @@ void loop() {
       upperArmJointRollRight(speedMin);
       rcAction = true;
     } else if (ch2Value >= 1000 && ch2Value <= 1250) {
-      //forward(speedMin);
-      //rcAction = true;
+      foreArmJointPitchUp(speedMin);
+      rcAction = true;
     } else if (ch2Value >= 1750 && ch2Value <= 2000) {
-      //forward(speedMin);
-      //rcAction = true;
+      foreArmJointPitchDown(speedMin);
+      rcAction = true;
     }
 
     //delay(rcThrottleDelay);
@@ -133,7 +141,8 @@ void loop() {
     // }
 
     if (!rcAction) {
-      stopMotor();
+      stopUpperArmJointMotor();
+      stopForeArmJointMotor();
     }
   }
 
@@ -154,6 +163,21 @@ void upperArmJointRollRight(int speed) {
   analogWrite(ENA, speed);
 }
 
+void foreArmJointPitchUp(int speed) {
+  Serial.println("Command: foreArmJointPitchUp");
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENB, speed);
+}
+
+void foreArmJointPitchDown(int speed) {
+  Serial.println("Command: foreArmJointPitchUp");
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENB, speed);
+}
+
+
 // Motor control functions
 void forward(int speed) {
   Serial.println("Command: Forward");
@@ -169,9 +193,23 @@ void reverse(int speed) {
   analogWrite(ENA, speed); // PWM speed control
 }
 
-void stopMotor() {
+
+
+void stopUpperArmJointMotor() {
   Serial.println("Command: Stop");
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, LOW);
   digitalWrite(ENA, LOW); // Disable motor
+}
+
+void stopForeArmJointMotor() {
+  Serial.println("Command: Stop");
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(ENB, LOW); // Disable motor
+}
+
+void stopAllMotors() {
+  stopUpperArmJointMotor();
+  stopForeArmJointMotor();
 }
