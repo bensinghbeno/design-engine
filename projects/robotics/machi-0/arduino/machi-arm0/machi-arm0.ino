@@ -11,6 +11,7 @@
 signed int speedLeft = 0;  
 signed int speedRight = 0;   
 const int speedMin = 255;
+bool enableRightUpperArmPitch = false;
 
 Cytron_SmartDriveDuo smartDriveDuo30(PWM_INDEPENDENT, INAUR1, INAUR2, ANAUR1, ANAUR2);
 
@@ -136,12 +137,23 @@ void loop() {
       upperArmRight_RollRight(speedMin);
       rcAction = true;
     } else if (ch2Value >= 1000 && ch2Value <= 1250) {
-      upperArmRight_PitchDown();
+      foreArmRight_PitchDown();
       rcAction = true;
     } else if (ch2Value >= 1750 && ch2Value <= 2000) {
+      foreArmRight_PitchUp();
+      rcAction = true;
+    } else if ((enableRightUpperArmPitch) && (ch3Value <= 1100 )){
+      enableRightUpperArmPitch = true;
+      upperArmRight_PitchDown();
+      rcAction = true;
+    } else if ((enableRightUpperArmPitch) && (ch3Value >= 1900 )){
+      enableRightUpperArmPitch = true;
       upperArmRight_PitchUp();
       rcAction = true;
-    }
+    } else if ((enableRightUpperArmPitch == false) && (ch3Value >= 1300 && ch2Value <= 1700)) {
+      enableRightUpperArmPitch = true;
+    } 
+    
 
 
     if (!rcAction) {
@@ -159,7 +171,7 @@ void allMotors_Stop() {
 
 void upperArmRight_PitchStop() 
 {
-  smartDriveDuo30.control(0, 0);  // <-- ADD THIS LINE
+  smartDriveDuo30.control(0, 0);  
   Serial.println(":: uppertArmRight_Stop");
 }
 
@@ -171,17 +183,12 @@ void upperArmRight_RollStop()
   analogWrite(ENA, 0);
 }
 
-void upperArmRight_Stop() 
-{
-  smartDriveDuo30.control(0, 0);  // <-- ADD THIS LINE
-  Serial.println(":: uppertArmRight_Stop");
-}
 
 void upperArmRight_PitchUp()
 {
   speedLeft = speedMin;
   speedRight = -speedMin;
-  smartDriveDuo30.control(speedLeft, speedRight);  // <-- ADD THIS LINE
+  smartDriveDuo30.control(speedLeft, 0);  
   Serial.println(":: upperRightArm_PitchDown");
 }
 
@@ -189,7 +196,7 @@ void upperArmRight_PitchDown()
 {
   speedLeft = -speedMin;
   speedRight = speedMin;
-  smartDriveDuo30.control(speedLeft, speedRight);  // <-- ADD THIS LINE
+  smartDriveDuo30.control(speedLeft, 0); 
   Serial.println(":: upperRightArm_PitchDown");
 }
 
@@ -206,6 +213,20 @@ void upperArmRight_RollRight(int speed) {
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, HIGH);
   analogWrite(ENA, speed);
+}
+
+void foreArmRight_PitchUp()
+{
+  speedRight = speedMin;
+  smartDriveDuo30.control(0, speedRight);  
+  Serial.println(":: foreArmRight_PitchUp");
+}
+
+void foreArmRight_PitchDown()
+{
+  speedRight = -speedMin;
+  smartDriveDuo30.control(0, speedRight);  
+  Serial.println(":: foreArmRight_PitchDown");
 }
 
 /*
