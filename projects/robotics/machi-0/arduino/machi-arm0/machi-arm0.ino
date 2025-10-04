@@ -1,10 +1,21 @@
-// L298 Motor Driver with Arduino Serial Control
-// Command from Serial Monitor:
-// 0 = Stop motor
-// 1 = Forward for 1 second
-// 2 = Reverse for 1 second
+#include <Cytron_SmartDriveDuo.h>
 
 #include <IBusBM.h>
+
+// ----- Cytron_SmartDriveDuo ArmUpperRightMotor -----
+#define INAUR1 4
+#define ANAUR1 5
+#define ANAUR2 6
+#define INAUR2 7
+
+signed int speedLeft = 0;  
+signed int speedRight = 0;   
+const int speedMin = 255;
+
+Cytron_SmartDriveDuo smartDriveDuo30(PWM_INDEPENDENT, INAUR1, INAUR2, ANAUR1, ANAUR2);
+
+// ------ //
+
 
 // ----- RC Input -----
 IBusBM ibus;
@@ -22,25 +33,28 @@ const int ENA = 10;  // Motor A enable (already used)
 const int IN1 = 8;   // Motor A IN1 (already used)
 const int IN2 = 9;   // Motor A IN2 (already used)
 
-const int ENB = 13;  // Motor B enable (PWM)
-const int IN3 = 11;  // Motor B IN3
-const int IN4 = 12;  // Motor B IN4
+// const int ENB = 13;  // Motor B enable (PWM)
+// const int IN3 = 11;  // Motor B IN3
+// const int IN4 = 12;  // Motor B IN4
 
 // ----- Variables -----
 char inChar = 0;             // Serial character input
 bool commandSet = false;     // Track whether any command was activated
-const int speedMin = 200;
 const int rcThrottleDelay  = 1000; // ms
 
 void setup() {
-  // Set motor control pins as output
+
+  allMotors_Stop();
+
+  //Set motor control pins as output
   pinMode(ENA, OUTPUT);
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
 
-  pinMode(ENB, OUTPUT);
-  pinMode(IN3, OUTPUT);
-  pinMode(IN4, OUTPUT);
+  // pinMode(ENB, OUTPUT);
+  // pinMode(IN3, OUTPUT);
+  // pinMode(IN4, OUTPUT);
+  
 
   // Start serial communication
   Serial.begin(115200);
@@ -102,9 +116,9 @@ void loop() {
     inChar = (char)Serial.read();
 
     switch (inChar) {
-      case '0': stopAllMotors();       break;
-      case '1': forward(speedMin); break;
-      case '2': reverse(speedMin); break;
+      case '0': allMotors_Stop(); break;
+      //case '1': forward(speedMin); break;
+      //case '2': reverse(speedMin); break;
     }
 
     commandSet = true;  // Serial input takes control
@@ -116,45 +130,86 @@ void loop() {
     bool rcAction = false;
 
     if (ch1Value >= 1000 && ch1Value <= 1250) {
-      upperArmJointRollLeft(speedMin);
+      upperArmRight_RollLeft(speedMin);
       rcAction = true;
     } else if (ch1Value >= 1750 && ch1Value <= 2000) {
-      upperArmJointRollRight(speedMin);
+      upperArmRight_RollRight(speedMin);
       rcAction = true;
     } else if (ch2Value >= 1000 && ch2Value <= 1250) {
-      foreArmJointPitchUp(speedMin);
+      upperArmRight_PitchDown();
       rcAction = true;
     } else if (ch2Value >= 1750 && ch2Value <= 2000) {
-      foreArmJointPitchDown(speedMin);
+      upperArmRight_PitchUp();
       rcAction = true;
     }
 
-    //delay(rcThrottleDelay);
-    //stopMotor();
-
-    // if (ch1Value >= 1000 && ch1Value <= 1450) {
-    //   doLeftTurn();
-    //   rcAction = true;
-    // } else if (ch1Value >= 1550 && ch1Value <= 2000) {
-    //   doRightTurn();
-    //   rcAction = true;
-    // }
 
     if (!rcAction) {
-      stopUpperArmJointMotor();
-      stopForeArmJointMotor();
+      allMotors_Stop();
     }
   }
 
 }
 
-// ARM control functions
-void upperArmJointRollLeft(int speed) {
-  Serial.println("Command: upperArmJointRollLeft");
+void allMotors_Stop() {
+  upperArmRight_PitchStop();
+  upperArmRight_RollStop();
+
+}
+
+void upperArmRight_PitchStop() 
+{
+  smartDriveDuo30.control(0, 0);  // <-- ADD THIS LINE
+  Serial.println(":: uppertArmRight_Stop");
+}
+
+void upperArmRight_RollStop() 
+{
+  Serial.println("Command: upperArmRight_RollStop");
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, 0);
+}
+
+void upperArmRight_Stop() 
+{
+  smartDriveDuo30.control(0, 0);  // <-- ADD THIS LINE
+  Serial.println(":: uppertArmRight_Stop");
+}
+
+void upperArmRight_PitchUp()
+{
+  speedLeft = speedMin;
+  speedRight = -speedMin;
+  smartDriveDuo30.control(speedLeft, speedRight);  // <-- ADD THIS LINE
+  Serial.println(":: upperRightArm_PitchDown");
+}
+
+void upperArmRight_PitchDown()
+{
+  speedLeft = -speedMin;
+  speedRight = speedMin;
+  smartDriveDuo30.control(speedLeft, speedRight);  // <-- ADD THIS LINE
+  Serial.println(":: upperRightArm_PitchDown");
+}
+
+
+void upperArmRight_RollLeft(int speed) {
+  Serial.println("Command: upperArmRight_RollLeft");
   digitalWrite(IN1, HIGH);
   digitalWrite(IN2, LOW);
   analogWrite(ENA, speed);
 }
+
+void upperArmRight_RollRight(int speed) {
+  Serial.println("Command: upperArmRight_RollRight");
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  analogWrite(ENA, speed);
+}
+
+/*
+
 
 void upperArmJointRollRight(int speed) {
   Serial.println("Command: upperArmJointRollRight");
@@ -195,12 +250,6 @@ void reverse(int speed) {
 
 
 
-void stopUpperArmJointMotor() {
-  Serial.println("Command: Stop");
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, LOW);
-  digitalWrite(ENA, LOW); // Disable motor
-}
 
 void stopForeArmJointMotor() {
   Serial.println("Command: Stop");
@@ -208,8 +257,6 @@ void stopForeArmJointMotor() {
   digitalWrite(IN3, LOW);
   digitalWrite(ENB, LOW); // Disable motor
 }
+*/
 
-void stopAllMotors() {
-  stopUpperArmJointMotor();
-  stopForeArmJointMotor();
-}
+
