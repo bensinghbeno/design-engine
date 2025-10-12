@@ -2,6 +2,16 @@
 
 #include <IBusBM.h>
 
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+
+// Create the PCA9685 object
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+
+#define SERVO_CHANNEL 0  // Using CH0 on PCA9685
+#define SERVOMIN 150     // Minimum pulse length out of 4096
+#define SERVOMAX 600     // Maximum pulse length out of 4096  
+
 // ----- Cytron_SmartDriveDuo ArmUpperRightMotor -----
 #define INAUR1 4
 #define ANAUR1 5
@@ -52,9 +62,9 @@ void setup() {
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
 
-  // pinMode(ENB, OUTPUT);
-  // pinMode(IN3, OUTPUT);
-  // pinMode(IN4, OUTPUT);
+
+  pwm.begin();
+  pwm.setPWMFreq(100); 
   
 
   // Start serial communication
@@ -150,11 +160,15 @@ void loop() {
       enableRightUpperArmPitch = true;
       upperArmRight_PitchUp();
       rcAction = true;
-    } else if ((enableRightUpperArmPitch == false) && (ch3Value >= 1300 && ch2Value <= 1700)) {
+    } else if ((enableRightUpperArmPitch == false) && (ch3Value >= 1300 && ch3Value <= 1700)) {
       enableRightUpperArmPitch = true;
-    } 
-    
-
+    } else if (ch5Value >= 1750 && ch5Value <= 2000) {
+      rightHand_Close();
+      rcAction = true;
+    } else if (ch5Value >= 1000 && ch5Value <= 1250) {
+      rightHand_Open();
+      rcAction = true;
+    }
 
     if (!rcAction) {
       allMotors_Stop();
@@ -167,6 +181,21 @@ void allMotors_Stop() {
   upperArmRight_PitchStop();
   upperArmRight_RollStop();
 
+}
+
+void rightHand_Open() 
+{
+  Serial.println(":: rightHand_Open");
+
+  pwm.setPWM(SERVO_CHANNEL, 0, SERVOMAX); // Forward position
+  delay(1000); // Hold for 1 second
+}
+
+void rightHand_Close() 
+{
+  Serial.println(":: rightHand_Close");
+  pwm.setPWM(SERVO_CHANNEL, 0, SERVOMIN); // Reverse / start
+  delay(1000);
 }
 
 void upperArmRight_PitchStop() 
