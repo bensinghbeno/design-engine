@@ -10,7 +10,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 #define SERVO_CHANNEL 0  // Using CH0 on PCA9685
 #define SERVOMIN 150     // Minimum pulse length out of 4096
-#define SERVOMAX 600     // Maximum pulse length out of 4096  
+#define SERVOMAX 300     // Maximum pulse length out of 4096  
 
 // ----- Cytron_SmartDriveDuo ArmUpperRightMotor -----
 #define INAUR1 4
@@ -22,6 +22,7 @@ signed int speedLeft = 0;
 signed int speedRight = 0;   
 const int speedMin = 255;
 bool enableRightUpperArmPitch = false;
+bool isRightHandOpen = false; // Tracks whether the hand is open
 
 Cytron_SmartDriveDuo smartDriveDuo30(PWM_INDEPENDENT, INAUR1, INAUR2, ANAUR1, ANAUR2);
 
@@ -185,17 +186,40 @@ void allMotors_Stop() {
 
 void rightHand_Open() 
 {
+  if (isRightHandOpen) {
+    Serial.println(":: rightHand_Open - Already Open");
+    return; // Do nothing if the hand is already open
+  }
+
   Serial.println(":: rightHand_Open");
 
-  pwm.setPWM(SERVO_CHANNEL, 0, SERVOMAX); // Forward position
-  delay(1000); // Hold for 1 second
+  // Gradually move the servo to the open position
+  for (int pulse = SERVOMIN; pulse <= SERVOMAX; pulse += 10) { // Increment in small steps
+    pwm.setPWM(SERVO_CHANNEL, 0, pulse);
+    delay(20); // Small delay for smooth movement
+  }
+
+  // Mark the hand as open
+  isRightHandOpen = true;
 }
 
 void rightHand_Close() 
 {
+  if (!isRightHandOpen) {
+    Serial.println(":: rightHand_Close - Already Closed");
+    return; // Do nothing if the hand is already closed
+  }
+
   Serial.println(":: rightHand_Close");
-  pwm.setPWM(SERVO_CHANNEL, 0, SERVOMIN); // Reverse / start
-  delay(1000);
+
+  // Gradually move the servo to the closed position
+  for (int pulse = SERVOMAX; pulse >= SERVOMIN; pulse -= 10) { // Decrement in small steps
+    pwm.setPWM(SERVO_CHANNEL, 0, pulse);
+    delay(20); // Small delay for smooth movement
+  }
+
+  // Mark the hand as closed
+  isRightHandOpen = false;
 }
 
 void upperArmRight_PitchStop() 
