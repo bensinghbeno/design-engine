@@ -24,6 +24,10 @@ const int speedMin = 255;
 bool enableRightUpperArmPitch = false;
 bool isRightHandOpen = false; // Tracks whether the hand is open
 
+bool enableFwdReverseS1 = false;
+bool enableFwdReverseS2 = false;
+
+
 Cytron_SmartDriveDuo smartDriveDuo30(PWM_INDEPENDENT, INAUR1, INAUR2, ANAUR1, ANAUR2);
 
 // ------ //
@@ -40,14 +44,14 @@ int ch6Value;
 int ch7Value;
 int ch8Value;
 
-// Pin definitions
+// Forward Reverse Sevo Pin definitions
 const int ENA = 10;  // Motor A enable (already used)
 const int IN1 = 8;   // Motor A IN1 (already used)
 const int IN2 = 9;   // Motor A IN2 (already used)
 
-// const int ENB = 13;  // Motor B enable (PWM)
-// const int IN3 = 11;  // Motor B IN3
-// const int IN4 = 12;  // Motor B IN4
+const int ENB = 13;  // Motor B enable (PWM)
+const int IN3 = 11;  // Motor B IN3
+const int IN4 = 12;  // Motor B IN4
 
 // ----- Variables -----
 char inChar = 0;             // Serial character input
@@ -62,7 +66,9 @@ void setup() {
   pinMode(ENA, OUTPUT);
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
-
+  pinMode(ENB, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
 
   pwm.begin();
   pwm.setPWMFreq(100); 
@@ -141,35 +147,58 @@ void loop() {
 
     bool rcAction = false;
 
-    if (ch1Value >= 1000 && ch1Value <= 1250) {
-      upperArmRight_RollLeft(speedMin);
+    if( (!enableFwdReverseS1) && (!enableFwdReverseS2) && (ch3Value >= 1900) ) ////FWD REV STOP////////////////////////////////
+    {
+      enableFwdReverseS1 =  true;
       rcAction = true;
-    } else if (ch1Value >= 1750 && ch1Value <= 2000) {
-      upperArmRight_RollRight(speedMin);
+    } else if( (enableFwdReverseS1) && (!enableFwdReverseS2) && (ch3Value <= 1700) && (ch3Value >= 1300)) {
+      enableFwdReverseS2 =  true;
       rcAction = true;
-    } else if (ch2Value >= 1000 && ch2Value <= 1250) {
-      foreArmRight_PitchDown();
+    } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1900) && (ch3Value <= 2000)){
+      moveForward(speedMin);
       rcAction = true;
-    } else if (ch2Value >= 1750 && ch2Value <= 2000) {
-      foreArmRight_PitchUp();
+    } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1000) && (ch3Value <= 1300)){
+      moveReverse(speedMin);
+      rcAction = true;                               ////FWD REV STOP////////////////////////////////
+    } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1900) && (ch3Value <= 2000)){
+      moveForward(speedMin);
       rcAction = true;
-    } else if ((enableRightUpperArmPitch) && (ch3Value <= 1100 )){
-      enableRightUpperArmPitch = true;
-      upperArmRight_PitchDown();
+    } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1000) && (ch3Value <= 1300)){
+      moveReverse(speedMin);
+      rcAction = true;                               ////FWD REV STOP////////////////////////////////
+    } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch4Value >= 1000) && (ch4Value <= 1200)){
+      moveLeft(speedMin);
       rcAction = true;
-    } else if ((enableRightUpperArmPitch) && (ch3Value >= 1900 )){
-      enableRightUpperArmPitch = true;
-      upperArmRight_PitchUp();
-      rcAction = true;
-    } else if ((enableRightUpperArmPitch == false) && (ch3Value >= 1300 && ch3Value <= 1700)) {
-      enableRightUpperArmPitch = true;
-    } else if (ch5Value >= 1750 && ch5Value <= 2000) {
-      rightHand_Close();
-      rcAction = true;
-    } else if (ch5Value >= 1000 && ch5Value <= 1250) {
-      rightHand_Open();
-      rcAction = true;
-    }
+    } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch4Value >= 1800) && (ch4Value <= 2000)){
+      moveRight(speedMin);
+      rcAction = true;                               ////FWD REV STOP////////////////////////////////
+    } 
+    // else if (ch1Value >= 1750 && ch1Value <= 2000) {
+    //   upperArmRight_RollRight(speedMin);
+    //   rcAction = true;
+    // } else if (ch2Value >= 1000 && ch2Value <= 1250) {
+    //   foreArmRight_PitchDown();
+    //   rcAction = true;
+    // } else if (ch2Value >= 1750 && ch2Value <= 2000) {
+    //   foreArmRight_PitchUp();
+    //   rcAction = true;
+    // } else if ((enableRightUpperArmPitch) && (ch3Value <= 1100 )){
+    //   enableRightUpperArmPitch = true;
+    //   upperArmRight_PitchDown();
+    //   rcAction = true;
+    // } else if ((enableRightUpperArmPitch) && (ch3Value >= 1900 )){
+    //   enableRightUpperArmPitch = true;
+    //   upperArmRight_PitchUp();
+    //   rcAction = true;
+    // } else if ((enableRightUpperArmPitch == false) && (ch3Value >= 1300 && ch3Value <= 1700)) {
+    //   enableRightUpperArmPitch = true;
+    // } else if (ch5Value >= 1750 && ch5Value <= 2000) {
+    //   rightHand_Close();
+    //   rcAction = true;
+    // } else if (ch5Value >= 1000 && ch5Value <= 1250) {
+    //   rightHand_Open();
+    //   rcAction = true;
+    // }
 
     if (!rcAction) {
       allMotors_Stop();
@@ -181,7 +210,7 @@ void loop() {
 void allMotors_Stop() {
   upperArmRight_PitchStop();
   upperArmRight_RollStop();
-
+  moveForwardReverse_Stop();
 }
 
 void rightHand_Open() 
@@ -221,6 +250,62 @@ void rightHand_Close()
   // Mark the hand as closed
   isRightHandOpen = false;
 }
+
+void moveForward(int speed) {
+  Serial.println("Command: moveForward");
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, speed);
+
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENB, speed);
+}
+
+void moveReverse(int speed) {
+  Serial.println("Command: moveReverse");
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  analogWrite(ENA, speed);  
+
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENB, speed);  
+}
+
+void moveLeft(int speed) {
+  Serial.println("Command: moveLeft");
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, speed);  
+
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENB, speed);  
+}
+
+void moveRight(int speed) {
+  Serial.println("Command: moveRight");
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  analogWrite(ENA, speed);  
+
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENB, speed);  
+}
+
+void moveForwardReverse_Stop() {
+  Serial.println("Command: moveForwardReverse_Stop");
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, 0);  
+
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENB, 0);    
+}
+
 
 void upperArmRight_PitchStop() 
 {
@@ -281,56 +366,4 @@ void foreArmRight_PitchDown()
   smartDriveDuo30.control(0, speedRight);  
   Serial.println(":: foreArmRight_PitchDown");
 }
-
-/*
-
-
-void upperArmJointRollRight(int speed) {
-  Serial.println("Command: upperArmJointRollRight");
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, HIGH);
-  analogWrite(ENA, speed);
-}
-
-void foreArmJointPitchUp(int speed) {
-  Serial.println("Command: foreArmJointPitchUp");
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
-  analogWrite(ENB, speed);
-}
-
-void foreArmJointPitchDown(int speed) {
-  Serial.println("Command: foreArmJointPitchUp");
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, HIGH);
-  analogWrite(ENB, speed);
-}
-
-
-// Motor control functions
-void forward(int speed) {
-  Serial.println("Command: Forward");
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-  analogWrite(ENA, speed); // PWM speed control
-}
-
-void reverse(int speed) {
-  Serial.println("Command: Reverse");
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, HIGH);
-  analogWrite(ENA, speed); // PWM speed control
-}
-
-
-
-
-void stopForeArmJointMotor() {
-  Serial.println("Command: Stop");
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, LOW);
-  digitalWrite(ENB, LOW); // Disable motor
-}
-*/
-
 
