@@ -1,3 +1,15 @@
+/*
+L298N Pin	Connect To (MKR WiFi 1010)	Description
+ENA	                  D4	PWM speed / enable
+IN1	                  D2	Motor direction 1
+IN2	                  D3	Motor direction 2
+12V	External power (motor supply, e.g. 9–12 V)	Power for motor
+GND	Common ground with MKR	Ground reference
+OUT1, OUT2	Motor terminals	Motor output
+5V (from L298 board)	Do NOT connect to MKR 5 V	(L298 onboard regulator may not match MKR’s 3.3 V logic)
+
+*/
+
 #include <Wire.h>
 #include <mcp_can.h>
 #include <SPI.h>
@@ -13,9 +25,15 @@ const int IN2 = 3;
 const int ENA = 4;  // PWM pin (speed / enable)
 
 const float Kp = 1.6;      // proportional gain — tune on your setup
-const int TOLERANCE = 5;   // degrees tolerance
+const int TOLERANCE = 20;   // degrees tolerance
 const int MAX_PWM = 255;   // MKR analogWrite range (0-255)
-const int MIN_PWM = 150;    // minimum PWM to overcome stiction
+const int MIN_PWM = 200;    // minimum PWM to overcome stiction
+const int DES_PWM = 100;    // minimum PWM to overcome stiction
+
+// --- smoothing / ramping ---
+const int MAX_PWM_STEP = 200;   // max change in PWM per loop (tune smaller for smoother)
+static int lastPwm = 0;        // last applied PWM magnitude
+static int lastDir = 0;        // last applied direction (-1,0,1)
 
 // allowed range (only inputs inside this range are accepted)
 const float ALLOWED_MIN = 100.0;
@@ -23,6 +41,7 @@ const float ALLOWED_MAX = 330.0;
 
 float targetAngle = 0.0;
 bool haveTarget = false;
+
 
 // for unwrap / continuous angle tracking
 float lastRawAngle = NAN;
@@ -259,7 +278,7 @@ void loop() {
       } else {
         targetAngle = a;
         haveTarget = true;
-        Serial.print("CAN Target set: ");
+        Serial.print("CAN Target Received & set ============================== ");
         Serial.println(targetAngle, 2);
       }
     }
@@ -346,10 +365,41 @@ void loop() {
     // report on-target
     sendStatusFrame(raw, continuousAngle, true);
   } else {
-    int pwm = (int)(Kp * absErr);
-    pwm = constrain(pwm, MIN_PWM, MAX_PWM);
-    int dir = (err > 0) ? 1 : -1;
-    driveMotor(dir, pwm);
+    int dir = (err > 0) ? 1 : -1; // positive error -> increase continuous angle (low->high)
+    // Choose PWM bounds depending on direction:
+    // - moving low -> high (dir > 0): use MIN_PWM..MAX_PWM
+    // - moving high -> low (dir < 0): allow DES_PWM..MAX_PWM (DES_PWM can be lower than MIN_PWM)
+    int pwmRaw = (int)(Kp * absErr);
+    int pwm;
+    if (dir > 0) {
+      pwm = constrain(pwmRaw, MIN_PWM, MAX_PWM);
+    } else {
+      pwm = constrain(pwmRaw, DES_PWM, MAX_PWM);
+    }
+
+    if (pwm == 0) pwm = DES_PWM;
+
+    // --- apply slew/ramp and safe direction switch ---
+    int targetPwm = pwm;
+
+    // If direction change requested, ramp to zero first before switching
+    if (dir != lastDir && lastPwm > 0) {
+      // keep previous direction until we've ramped to zero
+      int stepDown = min(MAX_PWM_STEP, lastPwm);
+      targetPwm = lastPwm - stepDown;
+      dir = lastDir; // use previous direction for this step
+    } else {
+      // limit step size toward target
+      int delta = targetPwm - lastPwm;
+      if (delta > MAX_PWM_STEP) targetPwm = lastPwm + MAX_PWM_STEP;
+      else if (delta < -MAX_PWM_STEP) targetPwm = lastPwm - MAX_PWM_STEP;
+      // allow direction change when we've reached zero
+      if (lastPwm == 0) lastDir = dir;
+    }
+
+    driveMotor(dir, targetPwm);
+    lastPwm = targetPwm;
+
     Serial.print("CurC: ");
     Serial.print(continuousAngle, 2);
     Serial.print("°  TgtC: ");
@@ -357,7 +407,7 @@ void loop() {
     Serial.print("°  Err: ");
     Serial.print(err, 2);
     Serial.print("°  PWM: ");
-    Serial.println(pwm);
+    Serial.println(targetPwm);
     // report moving / not-on-target
     sendStatusFrame(raw, continuousAngle, false);
   }
