@@ -46,7 +46,7 @@ void setup() {
   Serial.println("  f = forward");
   Serial.println("  r = reverse");
   Serial.println("  s = stop");
-  Serial.println("  <angle> = rotate to target angle (degrees, relative)");
+  Serial.println("  <counts> = rotate by encoder counts (relative, +/-)");
 }
 
 // ----- LOOP -----
@@ -83,14 +83,24 @@ void loop() {
       printRevs(); // show relative encoder delta for this command
     } 
     else {
-      // assume numeric target angle (relative)
-      float angleDeg = cmd.toFloat();
-      targetAngleDeg = currentAngleDeg + angleDeg;
-      targetCount = (long)((targetAngleDeg / 360.0) * COUNTS_PER_REV + (targetAngleDeg >= 0.0 ? 0.5 : -0.5));
+      // assume numeric encoder-count delta (relative)
+      long deltaCounts = cmd.toInt();            // relative encoder counts (+/-)
+      // set absolute target as current encoder count + delta
+      noInterrupts();
+      long curEnc = encoderCount;
+      interrupts();
+      targetCount = curEnc + deltaCounts;
+      // also compute the equivalent absolute angle for info
+      targetAngleDeg = ((float)targetCount / COUNTS_PER_REV) * 360.0;
       movingToTarget = true;
-      Serial.print("Target angle set (absolute): ");
-      Serial.println(targetAngleDeg);
-      printRevs(); // show relative encoder delta at command time
+      Serial.print("Target set: delta counts = ");
+      Serial.print(deltaCounts);
+      Serial.print("  targetCount = ");
+      Serial.print(targetCount);
+      Serial.print("  (angle ");
+      Serial.print(targetAngleDeg, 2);
+      Serial.println(" deg)");
+      printRevs(); // show encoder count at command time
     }
   }
 

@@ -1,3 +1,12 @@
+/*
+
+VCC -> 5V (or 3.3V if your AS5600 board is 3.3V-only). Check module specs.
+GND -> GND
+SDA -> A4 (UNO SDA)
+SCL -> A5 (UNO SCL)
+INT (if present/used) -> optional digital pin (e.g., D2) — not used by this sketch
+*/
+
 #include <Wire.h>
 
 #define AS5600_ADDR 0x36   // I2C address for AS5600
