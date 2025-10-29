@@ -1,4 +1,12 @@
 /*
+
+AS5600 to MKR WiFi 1010 (I2C Communication):
+AS5600 VCC → MKR *5V
+AS5600 GND → MKR GND
+AS5600 SCL → MKR SCL (Pin A21)
+AS5600 SDA → MKR SDA (Pin A22)
+
+
 L298N Pin	Connect To (MKR WiFi 1010)	Description
 ENA	                  D4	PWM speed / enable
 IN1	                  D2	Motor direction 1
@@ -76,10 +84,10 @@ void setup() {
 }
 
 uint16_t readAngleRaw() {
-  Wire.beginTransmission(AS5600_ADDR);
+  Wire.beginTransmission((uint8_t)AS5600_ADDR); // Explicitly cast AS5600_ADDR to uint8_t
   Wire.write(0x0E);  // ANGLE register high byte
   Wire.endTransmission(false);
-  Wire.requestFrom(AS5600_ADDR, (uint8_t)2);
+  Wire.requestFrom((uint8_t)AS5600_ADDR, (uint8_t)2); // Explicitly cast both arguments to uint8_t
   if (Wire.available() == 2) {
     uint8_t high = Wire.read();
     uint8_t low  = Wire.read();
@@ -221,196 +229,71 @@ void sendStatusFrame(float rawDeg, float continuousDeg, bool onTarget) {
   CAN.sendMsgBuf(0x101, 0, 5, data);
 }
 
+// Modify the code to accept time in milliseconds as input and calculate revolutions and residual angle
+
 void loop() {
-  // read angle command from serial (line-based). Example: "180.3"
+  // read time input from serial (line-based). Example: "5000" for 5000 ms
   if (Serial.available() > 0) {
     String s = Serial.readStringUntil('\n');
     s.trim();
     if (s.length() > 0) {
-      float a = s.toFloat(); // parses floats like 180.3
-      if (!isnan(a)) {
-        // normalize 0..360
-        while (a < 0) a += 360.0;
-        while (a >= 360.0) a -= 360.0;
+      long inputTime = s.toInt(); // parse time in milliseconds
+      if (inputTime > 0) {
+        Serial.print("Running motor for ");
+        Serial.print(inputTime);
+        Serial.println(" ms...");
 
-        // accept only inputs inside allowed range
-        if (a < ALLOWED_MIN || a > ALLOWED_MAX) {
-          haveTarget = false;
-          Serial.print("Rejected: input ");
-          Serial.print(a, 2);
-          Serial.print("° is outside allowed range [");
-          Serial.print(ALLOWED_MIN, 1);
-          Serial.print("°, ");
-          Serial.print(ALLOWED_MAX, 1);
-          Serial.println("°]. Allowed: [150,350].");
-        } else {
-          targetAngle = a;
-          haveTarget = true;
-          Serial.print("Target set: ");
-          Serial.println(targetAngle, 2);
+        // Initialize counters
+        float initialAngle = readAngleDeg();
+        if (isnan(initialAngle)) {
+          Serial.println("AS5600 read error");
+          return;
         }
+        float lastAngle = initialAngle;
+        int revolutions = 0;
+        unsigned long startTime = millis();
+
+        // Run motor for the specified time
+        while (millis() - startTime < inputTime) {
+          float currentAngle = readAngleDeg();
+          if (isnan(currentAngle)) {
+            Serial.println("AS5600 read error");
+            break;
+          }
+
+          // Calculate angle difference
+          float delta = currentAngle - lastAngle;
+          if (delta > 180.0) delta -= 360.0;
+          else if (delta < -180.0) delta += 360.0;
+
+          // Update revolutions
+          if (delta > 0) revolutions += (int)(delta / 360.0);
+          else revolutions -= (int)(-delta / 360.0);
+
+          lastAngle = currentAngle;
+          delay(20); // Small delay to avoid excessive polling
+        }
+
+        // Calculate residual angle
+        float finalAngle = readAngleDeg();
+        if (isnan(finalAngle)) {
+          Serial.println("AS5600 read error");
+          return;
+        }
+        float residualAngle = fmod(finalAngle, 360.0);
+        if (residualAngle < 0) residualAngle += 360.0;
+
+        // Output results
+        Serial.print("Revolutions: ");
+        Serial.println(revolutions);
+        Serial.print("Residual Angle: ");
+        Serial.print(residualAngle, 2);
+        Serial.println("°");
       } else {
-        Serial.println("Invalid angle input");
+        Serial.println("Invalid time input. Please enter a positive number.");
       }
     }
   }
 
-  // --- CAN input handling ---
-  // Expect CAN frame ID 0x100 with first two bytes = big-endian 16-bit angle in tenths of degree
-  // (e.g. 1803 -> 180.3°). Adjust decoding if your sender uses a different encoding.
-  if (!digitalRead(CAN_INT_PIN)) { // INT goes low when a message arrives
-    long unsigned int rxId;
-    unsigned char len = 0;
-    unsigned char rxBuf[8];
-    CAN.readMsgBuf(&rxId, &len, rxBuf);
-    if (rxId == 0x100 && len >= 2) {
-      uint16_t rawVal = ((uint16_t)rxBuf[0] << 8) | rxBuf[1];
-      float a = rawVal / 10.0f; // convert tenths -> degrees
-      // normalize 0..360
-      while (a < 0) a += 360.0;
-      while (a >= 360.0) a -= 360.0;
-
-      if (a < ALLOWED_MIN || a > ALLOWED_MAX) {
-        haveTarget = false;
-        Serial.print("CAN Rejected: ");
-        Serial.print(a, 2);
-        Serial.println("° outside allowed range.");
-      } else {
-        targetAngle = a;
-        haveTarget = true;
-        Serial.print("CAN Target Received & set ============================== ");
-        Serial.println(targetAngle, 2);
-      }
-    }
-  }
-
-  float raw = readAngleDeg();
-  if (isnan(raw)) {
-    Serial.println("AS5600 read error");
-    delay(150);
-    return;
-  }
-
-  // UNWRAP / continuous angle tracking:
-  if (!haveAngleInit) {
-    continuousAngle = raw;
-    lastRawAngle = raw;
-    haveAngleInit = true;
-  } else {
-    float delta = raw - lastRawAngle;
-    // map delta into (-180..180]
-    if (delta > 180.0) delta -= 360.0;
-    else if (delta <= -180.0) delta += 360.0;
-    continuousAngle += delta;
-    lastRawAngle = raw;
-  }
-
-  Serial.print("Raw: ");
-  Serial.print(raw, 2);
-  Serial.print("°  Continuous: ");
-  Serial.print(continuousAngle, 2);
-  Serial.println("°");
-
-  // send periodic status (receiver -> sender)
-  // set onTarget below and send appropriate flag in both branches
-  if (!haveTarget) {
-    stopMotor();
-    // report not-on-target
-    sendStatusFrame(raw, continuousAngle, false);
-    delay(50);
-    return;
-  }
-
-  // find a targetContinuous that does NOT require passing through blocked intervals
-  // search several wraps of the requested target (n = -3..3)
-  bool foundSafe = false;
-  float bestCandidate = NAN;
-  float bestErr = 1e9;
-  for (int n = -3; n <= 3; ++n) {
-    float cand = targetAngle + 360.0f * n;
-    // check path from continuousAngle to cand does NOT cross blocked intervals
-    if (!pathCrossesBlocked(continuousAngle, cand, true)) {
-      float e = fabs(cand - continuousAngle);
-      if (e < bestErr) {
-        bestErr = e;
-        bestCandidate = cand;
-        foundSafe = true;
-      }
-    }
-  }
-
-  float targetContinuous;
-  if (foundSafe) {
-    targetContinuous = bestCandidate;
-  } else {
-    haveTarget = false;
-    stopMotor();
-    Serial.println("No safe path to target without entering blocked range — command cancelled.");
-    // report cancelled / not-on-target
-    sendStatusFrame(raw, continuousAngle, false);
-    delay(200);
-    return;
-  }
-
-  float err = targetContinuous - continuousAngle; // signed error (deg)
-  float absErr = fabs(err);
-
-  if (absErr <= TOLERANCE) {
-    stopMotor();
-    Serial.print("On target: ");
-    Serial.print(continuousAngle, 2);
-    Serial.print("°  (target ");
-    Serial.print(targetContinuous, 2);
-    Serial.println("°)");
-    // report on-target
-    sendStatusFrame(raw, continuousAngle, true);
-  } else {
-    int dir = (err > 0) ? 1 : -1; // positive error -> increase continuous angle (low->high)
-    // Choose PWM bounds depending on direction:
-    // - moving low -> high (dir > 0): use MIN_PWM..MAX_PWM
-    // - moving high -> low (dir < 0): allow DES_PWM..MAX_PWM (DES_PWM can be lower than MIN_PWM)
-    int pwmRaw = (int)(Kp * absErr);
-    int pwm;
-    if (dir > 0) {
-      pwm = constrain(pwmRaw, MIN_PWM, MAX_PWM);
-    } else {
-      pwm = constrain(pwmRaw, DES_PWM, MAX_PWM);
-    }
-
-    if (pwm == 0) pwm = DES_PWM;
-
-    // --- apply slew/ramp and safe direction switch ---
-    int targetPwm = pwm;
-
-    // If direction change requested, ramp to zero first before switching
-    if (dir != lastDir && lastPwm > 0) {
-      // keep previous direction until we've ramped to zero
-      int stepDown = min(MAX_PWM_STEP, lastPwm);
-      targetPwm = lastPwm - stepDown;
-      dir = lastDir; // use previous direction for this step
-    } else {
-      // limit step size toward target
-      int delta = targetPwm - lastPwm;
-      if (delta > MAX_PWM_STEP) targetPwm = lastPwm + MAX_PWM_STEP;
-      else if (delta < -MAX_PWM_STEP) targetPwm = lastPwm - MAX_PWM_STEP;
-      // allow direction change when we've reached zero
-      if (lastPwm == 0) lastDir = dir;
-    }
-
-    driveMotor(dir, targetPwm);
-    lastPwm = targetPwm;
-
-    Serial.print("CurC: ");
-    Serial.print(continuousAngle, 2);
-    Serial.print("°  TgtC: ");
-    Serial.print(targetContinuous, 2);
-    Serial.print("°  Err: ");
-    Serial.print(err, 2);
-    Serial.print("°  PWM: ");
-    Serial.println(targetPwm);
-    // report moving / not-on-target
-    sendStatusFrame(raw, continuousAngle, false);
-  }
-
-  delay(20); // loop rate — adjust as needed
+  delay(50); // Loop delay
 }
