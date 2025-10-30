@@ -9,6 +9,10 @@
 #define L298_IN1 2
 #define L298_IN2 3
 
+// PWM speed levels
+#define PWM_LOW 100
+#define PWM_HIGH 100
+
 volatile long revCount = 0;
 uint16_t lastRaw = 0;
 
@@ -127,7 +131,7 @@ void loop() {
       Serial.println("Reached (within buffer).\n");
       hasTarget = false; // Done
     } else {
-      int pwm = (absDiff < pwmThreshold) ? 100 : 150;
+      int pwm = (absDiff < pwmThreshold) ? PWM_LOW : PWM_HIGH;
       if (diffCounts > 0) motorCW(pwm);
       else                motorCCW(pwm);
 
