@@ -101,13 +101,29 @@ void setup() {
 }
 
 void loop() {
-
   doAngleTracking();
 
-  // ---- Check for serial request ----
+  // ---- Check if we have a full command line ----
   if (Serial.available()) {
-    char command = Serial.read();   // Read received character
-    if (command == 'd') {
+    String input = Serial.readStringUntil('\n');  // Read until newline
+    input.trim();  // Remove spaces or carriage return
+
+    if (input.length() == 0) return; // ignore empty input
+
+    // ---- Check if it's numeric ----
+    if (input.charAt(0) >= '0' && input.charAt(0) <= '9') {
+      int number = input.toInt();
+      if (number >= 200 && number <= 3500) {
+        Serial.print("Received number: ");
+        Serial.println(number);
+        // TODO: handle your logic with 'number'
+      } else {
+        Serial.println("Number out of range (200-3500)");
+      }
+    }
+
+    // ---- Single character command ----
+    else if (input == "d") {
       uint16_t raw = readRawAngle();
       float angle = raw * 360.0 / 4096.0;
       float totalDeg = revCount * 360.0 + angle;
@@ -118,10 +134,17 @@ void loop() {
       Serial.print(" deg   Total: ");
       Serial.println(totalDeg, 2);
     }
-    else if (command == 'f') {
+
+    else if (input == "f") {
       doForward();
       doStop();
     }
-    
+
+    // ---- Unknown command ----
+    else {
+      Serial.print("Unknown command: ");
+      Serial.println(input);
+    }
   }
 }
+
