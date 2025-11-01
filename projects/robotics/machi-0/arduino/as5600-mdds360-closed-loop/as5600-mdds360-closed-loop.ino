@@ -14,15 +14,24 @@ const int speedMin = 50;
 signed int speedLeft = 0;    // Final left motor speed
 signed int speedRight = 0;   // Final right motor speed
 
-// void doForward() {
-//   for (int i = 0; i <= 1000; i++) {
-//     speedLeft = speedMin;
-//     speedRight = -speedMin;
-//     smartDriveDuo30.control(speedLeft, speedRight);
-//     delay(1); // Adjust delay for smoother ramping
-//   }
-//   Serial.println(":: FORWARD");
-// }
+
+#define AS5600_ADDR 0x36
+#define ANGLE_HIGH  0x0E
+#define ANGLE_LOW   0x0F
+
+volatile long revCount = 0;
+uint16_t lastRaw = 0;
+
+void doAngleTracking()
+{
+  // ---- Continuous multi-turn tracking ----
+  uint16_t raw = readRawAngle();
+  int diff = raw - lastRaw;
+  // Handle rollover (+ to – direction)
+  if (diff > 2048)       revCount--;
+  else if (diff < -2048) revCount++;
+  lastRaw = raw;
+}
 
 void doForward() {
   int rampMapCount = 4000;
@@ -31,6 +40,9 @@ void doForward() {
     speedLeft = rampSpeed;
     speedRight = -rampSpeed;
     smartDriveDuo30.control(speedLeft, speedRight);
+
+    doAngleTracking();
+
     delay(1); // Adjust delay for smoother ramping
   }
   Serial.println(":: FORWARD");
@@ -52,12 +64,7 @@ void doStop() {
   Serial.println(":: STOP");
 }
 
-#define AS5600_ADDR 0x36
-#define ANGLE_HIGH  0x0E
-#define ANGLE_LOW   0x0F
 
-volatile long revCount = 0;
-uint16_t lastRaw = 0;
 
 uint16_t readRawAngle() {
   Wire.beginTransmission(AS5600_ADDR);
@@ -95,31 +102,26 @@ void setup() {
 
 void loop() {
 
-  // ---- Continuous multi-turn tracking ----
-  uint16_t raw = readRawAngle();
-
-  int diff = raw - lastRaw;
-
-  // Handle rollover (+ to – direction)
-  if (diff > 2048)       revCount--;
-  else if (diff < -2048) revCount++;
-
-  lastRaw = raw;
+  doAngleTracking();
 
   // ---- Check for serial request ----
   if (Serial.available()) {
-    Serial.read();   // discard received character
-    float angle = raw * 360.0 / 4096.0;
-    float totalDeg = revCount * 360.0 + angle;
-    Serial.print("Revs: ");
-    Serial.print(revCount);
-    Serial.print("   Angle: ");
-    Serial.print(angle, 2);
-    Serial.print(" deg   Total: ");
-    Serial.println(totalDeg, 2);
-
-    doForward();
-    doStop();
-
+    char command = Serial.read();   // Read received character
+    if (command == 'd') {
+      uint16_t raw = readRawAngle();
+      float angle = raw * 360.0 / 4096.0;
+      float totalDeg = revCount * 360.0 + angle;
+      Serial.print("Revs: ");
+      Serial.print(revCount);
+      Serial.print("   Angle: ");
+      Serial.print(angle, 2);
+      Serial.print(" deg   Total: ");
+      Serial.println(totalDeg, 2);
+    }
+    else if (command == 'f') {
+      doForward();
+      doStop();
+    }
+    
   }
 }
