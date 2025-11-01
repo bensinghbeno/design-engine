@@ -9,6 +9,8 @@
 #define AN2 6
 #define IN2 7
 
+#define BUFFER_POSE 500
+
 Cytron_SmartDriveDuo smartDriveDuo30(PWM_INDEPENDENT, IN1, IN2, AN1, AN2);
 const int speedMin = 50;
 signed int speedLeft = 0;    // Final left motor speed
@@ -33,6 +35,60 @@ void doAngleTracking()
   lastRaw = raw;
 }
 
+void setTarget(int targetPos)
+{
+  Serial.println("setTarget() :: ");
+
+  if(doForwardPose(targetPos))
+  {
+    Serial.println("=== F-target Reached, Will Stop Motor ===");
+    doStop();
+  }
+  else
+  {
+    doStop();
+  }
+}
+
+bool doForwardPose(int fPos) {
+  Serial.print("doForwardPose() : ");
+  Serial.println(fPos);  
+  int rampMapCount = 4000;
+  bool quitF = false;
+  for (int i = 0; ((!quitF) && (i <= (rampMapCount))); i++) {
+    int rampSpeed = map(i, 0, rampMapCount, 0, speedMin); // Ramp speed from 0 to speedMin
+    speedLeft = rampSpeed;
+    speedRight = -rampSpeed;
+    smartDriveDuo30.control(speedLeft, speedRight);
+
+    doAngleTracking();
+
+    delay(1); // Adjust delay for smoother ramping
+
+    float cPos = getCurrentPos();
+    if(fPos > cPos)
+    {
+      quitF = true;
+      return true;
+    }
+    else
+    {
+        Serial.print("Continue doForwardPose(), Current Pos : ");
+        Serial.println(cPos);  
+    }
+
+  }
+  return false;
+}
+
+float getCurrentPos()
+{
+      uint16_t raw = readRawAngle();
+      float angle = raw * 360.0 / 4096.0;
+      float totalDeg = revCount * 360.0 + angle;
+      return totalDeg;
+}
+
 void doForward() {
   int rampMapCount = 4000;
   for (int i = 0; i <= (rampMapCount); i++) {
@@ -48,6 +104,7 @@ void doForward() {
   Serial.println(":: FORWARD");
 }
 
+
 void doReverse() {
   speedLeft = speedMin;
   speedRight = -speedMin;
@@ -61,7 +118,7 @@ void doStop() {
   speedRight = 0;
   smartDriveDuo30.control(speedLeft, speedRight);  // <-- ADD THIS LINE
   smartDriveDuo30.control(speedLeft, speedRight);  
-  Serial.println(":: STOP");
+  Serial.println("doStop() Motor :: ");
 }
 
 
@@ -111,14 +168,14 @@ void loop() {
     if (input.length() == 0) return; // ignore empty input
 
     // ---- Check if it's numeric ----
-    if (input.charAt(0) >= '0' && input.charAt(0) <= '9') {
+    if ((input.charAt(0) >= '0' && input.charAt(0) <= '9') || input.charAt(0) == '-') {
       int number = input.toInt();
-      if (number >= 200 && number <= 3500) {
+      if (number >= -3500 && number <= 1000) {
         Serial.print("Received number: ");
         Serial.println(number);
-        // TODO: handle your logic with 'number'
+        setTarget(number);
       } else {
-        Serial.println("Number out of range (200-3500)");
+        Serial.println("Number out of range (-3500 to 3500)");
       }
     }
 
