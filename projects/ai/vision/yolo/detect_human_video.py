@@ -1,3 +1,4 @@
+import argparse
 import cv2
 import torch
 import sys
@@ -10,71 +11,59 @@ seek_forward_frames = 100  # Number of frames to seek forward
 save_frame_count = 0  # Counter for saved frames
 
 def main():
-    if len(sys.argv) < 4:
-        print("Usage: python detect_human_video.py <mode> <path> <fps> [--yolov8m | --yolov8n | --yolov11n]")
-        print("Modes: --video <video_path>, --image <image_path>")
+    parser = argparse.ArgumentParser(description="YOLO Human Detection")
+    parser.add_argument("--image", help="Path to the image file")
+    parser.add_argument("--video", help="Path to the video file")
+    parser.add_argument("--fps", type=int, default=30, help="Frames per second for video processing")
+    parser.add_argument("--weights", required=True, help="Path to YOLOv5 weights file")
+    parser.add_argument("--output", default=None, help="Optional output video path for saving results")
+    parser.add_argument("--yolov8m", action="store_true", help="Use YOLOv8m model")
+    parser.add_argument("--yolov8n", action="store_true", help="Use YOLOv8n model")
+    parser.add_argument("--yolov11n", action="store_true", help="Use YOLOv11n model")
+    parser.add_argument("--yolov5", action="store_true", help="Use YOLOv5 model")
+    args = parser.parse_args()
+
+    # Ensure only one of --image or --video is provided
+    if not args.image and not args.video:
+        print("Error: You must specify either --image or --video.")
+        sys.exit(1)
+    if args.image and args.video:
+        print("Error: You cannot specify both --image and --video at the same time.")
         sys.exit(1)
 
-    mode = sys.argv[1]
-    path = sys.argv[2]
-    fps = int(sys.argv[3])  # Read FPS from command-line argument
-
-    # Check for model selection flags
-    use_yolov8m = '--yolov8m' in sys.argv
-    use_yolov8n = '--yolov8n' in sys.argv
-    use_yolov11 = '--yolov11n' in sys.argv
-
-    if use_yolov8m:
-        model_path = "yolov8m.pt"  # YOLOv8 Medium model path
+    # Load the appropriate model based on the command-line arguments
+    if args.yolov8m:
+        model_path = "yolov8m.pt"
         print(f"Using YOLOv8m model: {model_path}")
-        print(f"Loading YOLOv8m model from {model_path} ...")
-        model = YOLO(model_path)  # Load YOLOv8m model
-
-        # Configure YOLOv8m model for partial body detection
-        model.conf = 0.2   # Lower confidence threshold
-        model.iou = 0.6    # Allow more overlap
-        model.classes = [0]  # Detect only 'person' (class 0 in COCO)
-    elif use_yolov8n:
-        model_path = "/home/ben/Documents/toyo/ulpc/dev/mobilenet-custom/gemini/yolov8n/runs/detect/train/weights/best.pt"  # Custom YOLOv8 Nano model path
+        model = YOLO(model_path)
+        model.conf = 0.2
+        model.iou = 0.6
+        model.classes = [0]
+    elif args.yolov8n:
+        model_path = "/home/ben/Documents/toyo/ulpc/dev/mobilenet-custom/gemini/yolov8n/runs/detect/train/weights/best.pt"
         print(f"Using YOLOv8n model: {model_path}")
-        print(f"Loading YOLOv8n model from {model_path} ...")
-        model = YOLO(model_path)  # Load YOLOv8n model
-
-        # Configure YOLOv8n model for partial body detection
-        model.conf = 0.2   # Lower confidence threshold
-        model.iou = 0.6    # Allow more overlap
-        model.classes = [0]  # Detect only 'person' (class 0 in COCO)
-    elif use_yolov11:
-        model_name = "yolo11n.pt"  # YOLOv11n model path
-        print(f"Using YOLOv11n model: {model_name}")
-        print(f"Loading YOLOv11n model from {model_name} ...")
-        model = YOLO(model_name)  # Automatically downloads if not available
-
-        # YOLOv11-specific settings
-        conf_threshold = 0.25  # Lower confidence threshold to catch partial bodies
-        frame_resize = 0.75    # Resize factor for large videos
+        model = YOLO(model_path)
+        model.conf = 0.2
+        model.iou = 0.6
+        model.classes = [0]
+    elif args.yolov11n:
+        model_path = "yolo11n.pt"
+        print(f"Using YOLOv11n model: {model_path}")
+        model = YOLO(model_path)
+        model.conf = 0.25
+    elif args.yolov5:
+        print(f"Using YOLOv5 model: {args.weights}")
+        model = torch.hub.load("ultralytics/yolov5", "custom", path=args.weights)
+        model.classes = [0]
     else:
-        model_path = "/home/ben/dev/ai/vision/exports/yolov5-coco2017/weights/yv5-320-4g.pt"
-        print(f"Using YOLOv5 model: {model_path}")
-        print(f"Loading YOLOv5 model from {model_path} ...")
-        model = torch.hub.load('ultralytics/yolov5', 'custom', path=model_path, force_reload=False)
-
-        # Configure YOLOv5 model for partial body detection
-        model.conf = 0.05      # Lower confidence threshold
-        model.iou = 0.15       # Retain overlapping boxes
-        model.agnostic = True
-        model.multi_label = True
-        model.augment = True   # Multi-scale + flip inference
-
-    MAX_BOX_SIZE = 800  # Maximum box size in pixels
-
-    if mode == '--video':
-        process_video(path, model, MAX_BOX_SIZE, fps, use_yolov8m or use_yolov8n, use_yolov11)
-    elif mode == '--image':
-        process_image(path, model, MAX_BOX_SIZE, use_yolov8m or use_yolov8n, use_yolov11)
-    else:
-        print("Error: Invalid mode. Use --video or --image.")
+        print("Error: No valid model specified. Use --yolov8m, --yolov8n, --yolov11n, or --yolov5.")
         sys.exit(1)
+
+    # Process video or image based on the arguments
+    if args.video:
+        process_video(args.video, model, 800, args.fps, args.yolov8m or args.yolov8n, args.yolov11n)
+    elif args.image:
+        process_image(args.image, model, 800, args.yolov8m or args.yolov8n, args.yolov11n)
 
 def process_video(video_path, model, max_box_size, fps, use_yolov8, use_yolov11):
     global is_paused, rewind_frames, seek_forward_frames, save_frame_count
@@ -108,26 +97,16 @@ def process_video(video_path, model, max_box_size, fps, use_yolov8, use_yolov11)
                 detections = results[0].boxes
             else:
                 results = model(frame, size=640)
-                detections = results.xyxy[0].cpu().numpy()
+                detections = results.pandas().xyxy[0]  # YOLOv5 pandas output
 
-            for box in detections:
-                if use_yolov8 or use_yolov11:
-                    cls_id = int(box.cls[0])
-                    conf = float(box.conf[0])
-                    x1, y1, x2, y2 = map(int, box.xyxy[0])
-                else:
-                    x1, y1, x2, y2, conf, cls = map(int, box[:4]) + box[4:]
+            for _, det in detections.iterrows():
+                xmin, ymin, xmax, ymax = int(det.xmin), int(det.ymin), int(det.xmax), int(det.ymax)
+                conf = det.confidence
 
-                if cls_id == 0:  # 'person'
-                    # Filter out extremely large boxes
-                    if (x2 - x1) > max_box_size or (y2 - y1) > max_box_size:
-                        continue
-
-                    # Draw bounding box
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                    cv2.putText(frame, f"person {conf:.2f}",
-                                (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.6, (0, 255, 0), 2)
+                # Draw bounding box
+                cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+                cv2.putText(frame, f"Human {conf:.2f}", (xmin, ymin - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
             cv2.imshow("Partial Human Detection", frame)
 
@@ -165,24 +144,16 @@ def process_image(image_path, model, max_box_size, use_yolov8, use_yolov11):
         detections = results[0].boxes
     else:
         results = model(image, size=640)
-        detections = results.xyxy[0].cpu().numpy()
+        detections = results.pandas().xyxy[0]  # YOLOv5 pandas output
 
-    for box in detections:
-        if use_yolov8 or use_yolov11:
-            cls = int(box.cls[0])
-            conf = float(box.conf[0])
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
-        else:
-            x1, y1, x2, y2, conf, cls = map(int, box[:4]) + box[4:]
+    for _, det in detections.iterrows():
+        xmin, ymin, xmax, ymax = int(det.xmin), int(det.ymin), int(det.xmax), int(det.ymax)
+        conf = det.confidence
 
-        if cls == 0:  # 'person'
-            if (x2 - x1) > max_box_size or (y2 - y1) > max_box_size:
-                continue
-
-            cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(image, f"person {conf:.2f}",
-                        (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX,
-                        0.6, (0, 255, 0), 2)
+        # Draw bounding box
+        cv2.rectangle(image, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+        cv2.putText(image, f"Human {conf:.2f}", (xmin, ymin - 5),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
     cv2.imshow("Partial Human Detection", image)
     cv2.waitKey(0)
@@ -208,6 +179,70 @@ def save_current_frame(frame):
     filename = f"saved_frame_{save_frame_count}.jpg"
     cv2.imwrite(filename, frame)
     print(f"✅ Frame saved as {filename}")
+
+def process_yolov5(weights, video_path, output_path=None):
+    """Process video using YOLOv5."""
+    print("[INFO] Loading YOLOv5 model...")
+    model = torch.hub.load("ultralytics/yolov5", "custom", path=weights)
+
+    # Only detect class 0 ("person")
+    model.classes = [0]
+
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print("[ERROR] Cannot open video:", video_path)
+        return
+
+    # Prepare writer if output is required
+    writer = None
+    if output_path:
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        fps = int(cap.get(cv2.CAP_PROP_FPS))
+        w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        writer = cv2.VideoWriter(output_path, fourcc, fps, (w, h))
+
+    print("[INFO] Processing video... Press 'q' to quit.")
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Run YOLOv5 inference
+        results = model(frame)
+
+        # Convert to pandas-friendly format
+        detections = results.pandas().xyxy[0]  # xmin, ymin, xmax, ymax, confidence, class
+
+        # Draw bounding boxes
+        for _, det in detections.iterrows():
+            xmin, ymin, xmax, ymax = int(det.xmin), int(det.ymin), int(det.xmax), int(det.ymax)
+            conf = det.confidence
+
+            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+            cv2.putText(frame,
+                        f"Human {conf:.2f}",
+                        (xmin, ymin - 5),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.6,
+                        (0, 255, 0),
+                        2)
+
+        # Show frame
+        cv2.imshow("Human Detection", frame)
+
+        # Save output if writer exists
+        if writer:
+            writer.write(frame)
+
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            break
+
+    cap.release()
+    if writer:
+        writer.release()
+    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()
