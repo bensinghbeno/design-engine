@@ -1,0 +1,12 @@
+{
+  "yolov5_dir": "/home/ben/dev/ai/vision/yolo/yolov5",
+  "img": 320,
+  "batch": 16,
+  "epochs": 50,
+  "weights": "yolov5n.pt",         
+  "cfg": "models/yolov5n.yaml",     
+  "device": 0,
+  "data": "c2017-27cls-4GFlops-yolov5.yaml",
+  "target_flops_g": 4.0
+}
+
