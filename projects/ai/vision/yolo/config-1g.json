@@ -1,0 +1,12 @@
+{
+  "yolov5_dir": "/home/ben/dev/ai/vision/yolo/yolov5",
+  "img": 256,
+  "batch": 16,
+  "epochs": 50,
+  "weights": "yolov5n.pt",
+  "cfg": "models/yolov5-person-off-performance.yaml",
+  "device": 0,
+  "data": "coco-person.yaml",
+  "target_flops_g": 1.0
+}
+
