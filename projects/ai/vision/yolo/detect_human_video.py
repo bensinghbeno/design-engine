@@ -108,6 +108,11 @@ def process_video(video_path, model, max_box_size, fps, use_yolov8, use_yolov11)
                 cv2.putText(frame, f"Human {conf:.2f}", (xmin, ymin - 5),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
+            # Display the current frame number
+            current_frame_num = int(cap.get(cv2.CAP_PROP_POS_FRAMES)) - 1
+            cv2.putText(frame, f"Frame: {current_frame_num}", (10, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
             cv2.imshow("Partial Human Detection", frame)
 
         key = cv2.waitKey(frame_delay) & 0xFF
@@ -246,4 +251,3 @@ def process_yolov5(weights, video_path, output_path=None):
 
 if __name__ == "__main__":
     main()
-
