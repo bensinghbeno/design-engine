@@ -14,11 +14,15 @@ BLDCDriver3PWM driver = BLDCDriver3PWM(9, 5, 6, 8);
 
 
 //target variable
-float target_velocity = 10;
+float target_velocity = 0; // rad/s - will be calculated from RPM
 
 // instantiate the commander
 Commander command = Commander(Serial);
-void doTarget(char* cmd) { command.scalar(&target_velocity, cmd); }
+void doRPM(char* cmd) { 
+  float rpm_target;
+  command.scalar(&rpm_target, cmd); 
+  target_velocity = rpm_target * _RPM_TO_RADS; // Convert RPM to rad/s
+}
 void doLimit(char* cmd) { command.scalar(&motor.voltage_limit, cmd); }
 
 void setup() {
@@ -59,11 +63,11 @@ void setup() {
   }
 
   // add target command T
-  command.add('T', doTarget, "target velocity");
+  command.add('R', doRPM, "target RPM");
   command.add('L', doLimit, "voltage limit");
 
   Serial.println("Motor ready!");
-  Serial.println("Set target velocity [rad/s]");
+  Serial.println("Set target RPM (e.g. R500 for 500 RPM)");
   _delay(1000);
 }
 
