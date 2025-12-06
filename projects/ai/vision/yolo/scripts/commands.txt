@@ -1,0 +1,3 @@
+yolo detect train data=/home/ben/dev/ai/vision/datasets/coco-mini-yolo/data.yaml model=yolov8n.pt epochs=50 imgsz=640
+
+yolo detect train data=/home/ben/dev/ai/vision/datasets/coco2017-yolo-10k-person/data.yaml   model=yolov8n.pt epochs=50 imgsz=640
