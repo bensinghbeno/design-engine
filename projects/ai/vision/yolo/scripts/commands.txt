@@ -1,3 +1,11 @@
 yolo detect train data=/home/ben/dev/ai/vision/datasets/coco-mini-yolo/data.yaml model=yolov8n.pt epochs=50 imgsz=640
 
 yolo detect train data=/home/ben/dev/ai/vision/datasets/coco2017-yolo-10k-person/data.yaml   model=yolov8n.pt epochs=50 imgsz=640
+
+yolo detect train data=/home/ben/dev/ai/vision/datasets/coco2017-yolo-10k-person/data.yaml   model=yolov8n.pt epochs=50 imgsz=320
+
+yolo detect train data=/home/ben/dev/ai/vision/datasets/coco2017-yolo-3k-person/data.yaml  model=/home/ben/dev/design-engine/projects/ai/vision/yolo/configs/yolov8n-person-augment.yaml  epochs=80 imgsz=640 batch=16 device=0  rect=True
+
+yolo detect train data=/home/ben/dev/ai/vision/datasets/coco2017-yolo-3k-person/data.yaml   model=yolov8m.pt epochs=50 imgsz=256
+
+
