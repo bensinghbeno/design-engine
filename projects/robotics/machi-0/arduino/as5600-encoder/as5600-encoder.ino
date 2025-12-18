@@ -1,6 +1,6 @@
 /*
 
-VCC -> 5V (or 3.3V if your AS5600 board is 3.3V-only). Check module specs.
+VCC -> 3.3V Arduino
 GND -> GND
 SDA -> A4 (UNO SDA)
 SCL -> A5 (UNO SCL)
@@ -17,11 +17,24 @@ uint16_t prevRaw = 0;
 int32_t totalTicks = 0;   // signed cumulative tick count since zero
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Wire.begin();  // Join I2C bus (UNO: SDA=A4, SCL=A5)
   delay(500);
   Serial.println("AS5600 Magnetic Encoder Test - Revolutions tracking");
-  Serial.println("Start: angle = 0, revolutions = 0");
+  
+  // Wait until AS5600 is detected
+  Serial.print("Scanning for AS5600 at address 0x");
+  Serial.print(AS5600_ADDR, HEX);
+  Serial.println("...");
+  
+  while (true) {
+    Wire.beginTransmission(AS5600_ADDR);
+    if (Wire.endTransmission() == 0) {
+      Serial.println("AS5600 found!");
+      break; // Exit the loop once the sensor is detected
+    }
+    delay(1000); // Wait a second before retrying
+  }
 }
 
 uint16_t readAngleRaw() {
