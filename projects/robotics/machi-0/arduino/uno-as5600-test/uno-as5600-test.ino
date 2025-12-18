@@ -1,11 +1,19 @@
+/*
+VCC ->  3.3V UNO
+GND -> GND
+SDA -> A4 (UNO SDA)
+SCL -> A5 (UNO SCL)
+INT (if present/used) -> optional digital pin (e.g., D2) — not used by this sketch
+*/
+
 #include <Wire.h>
 
 void setup() {
   Serial.begin(115200);
   delay(1000);
-  Serial.println("\nI2C Scanner for Nano ESP32 (trying GPIO8,9)");
+  Serial.println("\nI2C Scanner for Arduino Uno/Nano");
 
-  Wire.begin(11,12);
+  Wire.begin();
   Wire.setClock(100000);      // Use 100 kHz for reliability
 }
 
