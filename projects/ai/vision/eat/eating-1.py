@@ -2,8 +2,8 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import time
-import pygame
-import threading
+import argparse
+import vlc
 
 mp_pose = mp.solutions.pose
 mp_face = mp.solutions.face_mesh
@@ -12,31 +12,28 @@ mp_drawing = mp.solutions.drawing_utils
 pose = mp_pose.Pose(min_detection_confidence=0.5)
 face = mp_face.FaceMesh(max_num_faces=1)
 
-pygame.mixer.init()
+# Parse command line arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("--video", type=str, required=True, help="Path to mp4 video")
+args = parser.parse_args()
 
 cap = cv2.VideoCapture(0)
+
+# Setup VLC Player
+vlc_instance = vlc.Instance("--input-repeat=65535") # Loop video indefinitely
+player = vlc_instance.media_player_new()
+media = vlc_instance.media_new(args.video)
+player.set_media(media)
 
 HAND_MOUTH_THRESHOLD = 0.55   # normalized distance
 HAND_MOUTH_VISUAL_THRESHOLD = 0.55
 CHEW_THRESHOLD = 0.00005      # Variance threshold: Increase (e.g. 0.0001) if too sensitive
 CHEW_FRAMES = 10
-MUSIC_DURATION = 1.0
+PLAY_DURATION = 60
 
 mouth_movement = []
 chewing_detected = False
-audio_processing = False
-
-def play_music():
-    global audio_processing
-    try:
-        pygame.mixer.music.load("/home/ben/Music/trip.mp3")
-        pygame.mixer.music.play()
-        time.sleep(MUSIC_DURATION)
-        pygame.mixer.music.stop()
-    except Exception as e:
-        print(f"Audio error: {e}")
-    finally:
-        audio_processing = False
+play_until = 0
 
 def distance(a, b):
     return np.linalg.norm(np.array(a) - np.array(b))
@@ -111,11 +108,21 @@ while cap.isOpened():
             cv2.putText(frame, "EATING DETECTED",
                         (50, 50), cv2.FONT_HERSHEY_SIMPLEX,
                         1, (0, 255, 0), 2)
+            
+            # Reset/Extend timer
+            play_until = time.time() + PLAY_DURATION
 
-            if not pygame.mixer.music.get_busy() and not audio_processing:
-                audio_processing = True
-                threading.Thread(target=play_music).start()
-
+    # Video Playback Logic
+    if time.time() < play_until:
+        if not player.is_playing():
+            player.play()
+        status_text = f"Time left: {int(play_until - time.time())}s"
+    else:
+        if player.is_playing():
+            player.pause()
+        status_text = "PAUSED - EAT TO RESUME"
+    
+    cv2.putText(frame, status_text, (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
     cv2.imshow("Eating Detection", frame)
 
     key = cv2.waitKey(1) & 0xFF
@@ -123,4 +130,5 @@ while cap.isOpened():
         break
 
 cap.release()
+player.stop()
 cv2.destroyAllWindows()
