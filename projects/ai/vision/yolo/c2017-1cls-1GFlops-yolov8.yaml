@@ -1,0 +1,10 @@
+path: /path/2/3k-coco2017
+
+train: images/train
+val: images/val
+
+nc: 1
+names: [
+    person
+]
+
