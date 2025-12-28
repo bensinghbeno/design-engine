@@ -9,6 +9,7 @@ bool initialized = false;
 uint16_t prevRaw = 0;
 int32_t totalTicks = 0; // signed cumulative tick count since zero
 
+
 // Function to read the raw angle from AS5600
 uint16_t readAngleRaw()
 {
@@ -170,6 +171,7 @@ void setup()
   command.add('X', doDisable, "disable outputs (safe mode)");
   command.add('E', doEnable, "enable motor/driver");
   command.add('C', doClockwise, "run clockwise at RPM for 5 sec");
+  command.add('D', doDisplayAngle, "display Angle");
 }
 
 // Helper function to replace delay() since Timer0 is used by PWM on pins 5 & 6
@@ -181,21 +183,26 @@ void delay_safe(unsigned long ms)
   }
 }
 
-void loop()
+void doDisplayAngle()
 {
+  doDisable('X');
 
   uint16_t raw = readAngleRaw();
   if (raw == 0xFFFF)
   {
     Serial.println("Read error");
-    delay_safe(200);
     return;
   }
-    
+
   // Display the raw angle in degrees
   float rawAngleDegrees = (raw * 360.0f) / COUNTS_PER_REV;
-  Serial.print("Initial Raw angle in degrees :: ");
+  Serial.print("Raw angle in degrees :: ");
   Serial.println(rawAngleDegrees, 2);
-  delay_safe(3000);
+}
+
+void loop()
+{
+  motor.move(target_velocity);
+  command.run();
 
 }
