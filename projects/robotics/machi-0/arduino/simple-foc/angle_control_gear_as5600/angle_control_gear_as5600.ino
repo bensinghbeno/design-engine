@@ -43,6 +43,13 @@ void doEnable(char* cmd) {
   Serial.println(sensor.getAngle() * 180.0 / PI);
 }
 
+void doDisable(char* cmd) {
+  timer_active = false;
+  motor.disable();
+  motor.controller = MotionControlType::angle;
+  Serial.println(F("Disabled."));
+}
+
 void doCW(char* cmd) {
   if (!is_calibrated) {
     motor.initFOC();
@@ -128,6 +135,7 @@ void setup() {
 
   // add enable command E
   command.add('E', doEnable, "enable motor");
+  command.add('X', doDisable, "disable motor");
   command.add('C', doCW, "CW 5s");
   command.add('A', doCCW, "CCW 5s");
 
