@@ -62,37 +62,6 @@ void doLimit(char *cmd)
   command.scalar(&motor.voltage_limit, cmd);
 }
 
-// Command handler for running motor clockwise at a specific RPM for 5 seconds
-void doClockwise(char *cmd)
-{
-  float rpm;
-  command.scalar(&rpm, cmd); // Parse the RPM value from the command
-
-  // Set target velocity in radians per second
-  target_velocity = rpm * _RPM_TO_RADS;
-
-  // Enable motor and driver
-  driver.enable();
-  motor.enable();
-
-  // Run motor for 5 seconds
-  unsigned long start_time = millis();
-  while (millis() - start_time < 5000)
-  {
-    motor.move(target_velocity);
-  }
-
-  // Stop the motor after 5 seconds
-  target_velocity = 0;
-  motor.move(target_velocity);
-
-  // Disable motor and driver
-  motor.disable();
-  driver.disable();
-
-  Serial.println("Motor stopped and disabled.");
-}
-
 // Disable motor + driver (full safe idle)
 void doDisable(char *cmd)
 {
@@ -165,13 +134,16 @@ void setup()
   Serial.println("   Send 'E' to ENABLE control.");
   Serial.println("==============================");
 
+  doDisplayAngle();
+
   // Commander commands
   command.add('R', doRPM, "target RPM");
   command.add('L', doLimit, "voltage limit");
   command.add('X', doDisable, "disable outputs (safe mode)");
   command.add('E', doEnable, "enable motor/driver");
-  command.add('C', doClockwise, "run clockwise at RPM for 5 sec");
+  command.add('C', doClockwiseRPM, "run clockwise at RPM for 5 sec");
   command.add('D', doDisplayAngle, "display Angle");
+  command.add('A', doAntiClockwiseRPM, "run counterclockwise at RPM for 5 sec");
 }
 
 // Helper function to replace delay() since Timer0 is used by PWM on pins 5 & 6
@@ -196,8 +168,68 @@ void doDisplayAngle()
 
   // Display the raw angle in degrees
   float rawAngleDegrees = (raw * 360.0f) / COUNTS_PER_REV;
-  Serial.print("Raw angle in degrees :: ");
+  Serial.print("Current angle in degrees :: ");
   Serial.println(rawAngleDegrees, 2);
+}
+
+// Command handler for running motor clockwise at a specific RPM for 5 seconds
+void doClockwiseRPM(char* cmd) {
+  float rpm_target;
+  command.scalar(&rpm_target, cmd); 
+  target_velocity = rpm_target * _RPM_TO_RADS;
+
+  // Enable motor and driver
+  driver.enable();
+  motor.enable();
+
+  // Move motor at target velocity for 5 seconds
+  unsigned long start_time = millis();
+  while (millis() - start_time < 5000) {
+    motor.move(target_velocity);
+  }
+
+  // Stop the motor after 5 seconds
+  target_velocity = 0;
+  motor.move(target_velocity);
+
+  // Disable motor and driver
+  motor.disable();
+  driver.disable();
+
+  Serial.print("Motor ran clockwise at RPM: ");
+  Serial.print(rpm_target);
+  Serial.println(" for 5 seconds.");
+  doDisplayAngle();
+}
+
+// Command handler for running motor counterclockwise at a specific RPM for 5 seconds
+void doAntiClockwiseRPM(char* cmd) {
+  float rpm_target;
+  command.scalar(&rpm_target, cmd); 
+  target_velocity = -rpm_target * _RPM_TO_RADS; // Negative for counterclockwise
+
+  // Enable motor and driver
+  driver.enable();
+  motor.enable();
+
+  // Move motor at target velocity for 5 seconds
+  unsigned long start_time = millis();
+  while (millis() - start_time < 5000) {
+    motor.move(target_velocity);
+  }
+
+  // Stop the motor after 5 seconds
+  target_velocity = 0;
+  motor.move(target_velocity);
+
+  // Disable motor and driver
+  motor.disable();
+  driver.disable();
+
+  Serial.print("Motor ran counterclockwise at RPM: ");
+  Serial.print(rpm_target);
+  Serial.println(" for 5 seconds.");
+  doDisplayAngle();
 }
 
 void loop()
@@ -206,3 +238,4 @@ void loop()
   command.run();
 
 }
+
