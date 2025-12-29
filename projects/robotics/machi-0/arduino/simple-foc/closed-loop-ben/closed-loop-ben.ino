@@ -16,8 +16,10 @@ float current_angle = 0.0;     // Current angle in degrees
 float target_velocity = 0.0;   // Velocity command sent to motor
 
 // Settings
-const float MOVE_RPM = 5.0;    // Speed to move towards target
-const float TOLERANCE = 2.0;   // Stop if within +/- 2 degrees
+const float MOVE_RPM = 20.0;    // Speed to move towards target
+const float TOLERANCE = 0.2;   // Stop if within +/- 2 degrees
+const float FORBIDDEN_MIN = 30.0;
+const float FORBIDDEN_MAX = 90.0;
 
 // Commander interface
 Commander command = Commander(Serial);
@@ -58,7 +60,19 @@ float getAngleDegrees() {
 
 // --- Command: Set Target Angle ---
 void doTarget(char* cmd) {
-  command.scalar(&target_angle, cmd);
+  float new_target;
+  command.scalar(&new_target, cmd);
+  
+  // Normalize to 0-360
+  while (new_target >= 360.0) new_target -= 360.0;
+  while (new_target < 0.0) new_target += 360.0;
+
+  if (new_target > FORBIDDEN_MIN && new_target < FORBIDDEN_MAX) {
+    Serial.println("REJECTED: Target in forbidden zone (30-90)!");
+    return;
+  }
+
+  target_angle = new_target;
   Serial.print("Target set to: ");
   Serial.println(target_angle);
 }
@@ -135,12 +149,12 @@ void loop() {
   }
   current_angle = angle;
 
-  // 2. Calculate Error (Shortest Path Logic)
-  float error = target_angle - current_angle;
-  
-  // Normalize error to range [-180, 180] for shortest path
-  while (error > 180.0) error -= 360.0;
-  while (error < -180.0) error += 360.0;
+  // 2. Calculate Error (Avoid Forbidden Zone Logic)
+  // Map angles [0, 30] to [360, 390] so the safe range is contiguous [90, 390]
+  float current_mapped = (current_angle <= FORBIDDEN_MIN) ? current_angle + 360.0 : current_angle;
+  float target_mapped = (target_angle <= FORBIDDEN_MIN) ? target_angle + 360.0 : target_angle;
+
+  float error = target_mapped - current_mapped;
 
   // 3. Control Logic (Bang-Bang with Deadband)
   if (abs(error) > TOLERANCE) {
