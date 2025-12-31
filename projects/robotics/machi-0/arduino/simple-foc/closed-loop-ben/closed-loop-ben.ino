@@ -96,6 +96,22 @@ void doSequenceB(char* cmd) {
   Serial.println("Starting Sequence B...");
 }
 
+// --- Command: Initialize ---
+void doInit(char* cmd) {
+  motor.enable();
+  move_rpm = 1.0;
+  target_angle = 180.0;
+  Serial.println("Initializing: Moving to 180 degrees at 1 RPM.");
+}
+
+// --- Command: Emergency Stop ---
+void doStop(char* cmd) {
+  seq_b_active = false;
+  motor.disable();
+  target_velocity = 0;
+  Serial.println("STOP: Motor disabled.");
+}
+
 void setup() {
   Serial.begin(115200);
   
@@ -134,22 +150,18 @@ void setup() {
     while(1);
   }
 
-  // 4. Set Initial Target to Current Position (Prevent jump at start)
-  float start_angle = getAngleDegrees();
-  if (start_angle >= 0) {
-    target_angle = start_angle;
-  }
-  // 4. Set Initial Target to 180 Degrees
-  target_angle = 180.0;
-  Serial.println("Startup: Moving to 180 degrees.");
+  // 4. Disable Motor at Startup
+  motor.disable();
 
   // 5. Setup Serial Commands
   command.add('T', doTarget, "Set Target Angle (deg)");
   command.add('D', doDisplayAngle, "Display Current Angle");
   command.add('B', doSequenceB, "Sequence B: 180->Wait->270->Wait->180");
+  command.add('I', doInit, "Initialize: Enable & Move to 180 @ 1RPM");
+  command.add('X', doStop, "Emergency Stop: Disable Motor");
 
   Serial.println("Custom Closed Loop Ready.");
-  Serial.println("Send 'T 90' to move to 90 degrees.");
+  Serial.println("Send 'I' to enable and move to 180 degrees.");
   doDisplayAngle('D');
 }
 
