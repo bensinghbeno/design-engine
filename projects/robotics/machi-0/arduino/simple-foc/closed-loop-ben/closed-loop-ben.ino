@@ -21,7 +21,7 @@ int seq_b_step = 0;
 unsigned long seq_b_timer = 0;
 
 // Settings
-float move_rpm = 20.0;    // Speed to move towards target
+float move_rpm = 10.0;    // Speed to move towards target
 const float TOLERANCE = 0.2;   // Stop if within +/- 2 degrees
 const float FORBIDDEN_MIN = 30.0;
 const float FORBIDDEN_MAX = 90.0;
@@ -77,6 +77,7 @@ void doTarget(char* cmd) {
     return;
   }
 
+  move_rpm = 10.0;
   target_angle = new_target;
   Serial.print("Target set to: ");
   Serial.println(target_angle);
