@@ -15,8 +15,13 @@ float target_angle = 0.0;      // Target angle in degrees
 float current_angle = 0.0;     // Current angle in degrees
 float target_velocity = 0.0;   // Velocity command sent to motor
 
+// Sequence B State
+bool seq_b_active = false;
+int seq_b_step = 0;
+unsigned long seq_b_timer = 0;
+
 // Settings
-const float MOVE_RPM = 20.0;    // Speed to move towards target
+float move_rpm = 20.0;    // Speed to move towards target
 const float TOLERANCE = 0.2;   // Stop if within +/- 2 degrees
 const float FORBIDDEN_MIN = 30.0;
 const float FORBIDDEN_MAX = 90.0;
@@ -84,6 +89,13 @@ void doDisplayAngle(char* cmd) {
   Serial.println(angle, 2);
 }
 
+// --- Command: Sequence B ---
+void doSequenceB(char* cmd) {
+  seq_b_active = true;
+  seq_b_step = 0;
+  Serial.println("Starting Sequence B...");
+}
+
 void setup() {
   Serial.begin(115200);
   
@@ -127,10 +139,14 @@ void setup() {
   if (start_angle >= 0) {
     target_angle = start_angle;
   }
+  // 4. Set Initial Target to 180 Degrees
+  target_angle = 180.0;
+  Serial.println("Startup: Moving to 180 degrees.");
 
   // 5. Setup Serial Commands
   command.add('T', doTarget, "Set Target Angle (deg)");
   command.add('D', doDisplayAngle, "Display Current Angle");
+  command.add('B', doSequenceB, "Sequence B: 180->Wait->270->Wait->180");
 
   Serial.println("Custom Closed Loop Ready.");
   Serial.println("Send 'T 90' to move to 90 degrees.");
@@ -149,6 +165,55 @@ void loop() {
   }
   current_angle = angle;
 
+  // --- Sequence B Logic ---
+  if (seq_b_active) {
+    // Calculate error for sequence check
+    float c_mapped = (current_angle <= FORBIDDEN_MIN) ? current_angle + 360.0 : current_angle;
+    float t_mapped = (target_angle <= FORBIDDEN_MIN) ? target_angle + 360.0 : target_angle;
+    float seq_error = t_mapped - c_mapped;
+
+    switch (seq_b_step) {
+      case 0: // Init: Move to 180 @ 1 RPM
+        target_angle = 180.0;
+        move_rpm = 1.0;
+        seq_b_step = 1;
+        break;
+      case 1: // Wait for arrival at 180
+        if (abs(seq_error) < TOLERANCE) {
+          seq_b_timer = millis();
+          seq_b_step = 2;
+        }
+        break;
+      case 2: // Wait 3s
+        if (millis() - seq_b_timer >= 3000) {
+          target_angle = 270.0;
+          move_rpm = 5.0;
+          seq_b_step = 3;
+        }
+        break;
+      case 3: // Wait for arrival at 270
+        if (abs(seq_error) < TOLERANCE) {
+          seq_b_timer = millis();
+          seq_b_step = 4;
+        }
+        break;
+      case 4: // Wait 3s
+        if (millis() - seq_b_timer >= 3000) {
+          target_angle = 180.0;
+          move_rpm = 5.0;
+          seq_b_step = 5;
+        }
+        break;
+      case 5: // Wait for arrival at 180
+        if (abs(seq_error) < TOLERANCE) {
+          seq_b_active = false;
+          move_rpm = 20.0; // Reset default
+          Serial.println("Sequence B Complete");
+        }
+        break;
+    }
+  }
+
   // 2. Calculate Error (Avoid Forbidden Zone Logic)
   // Map angles [0, 30] to [360, 390] so the safe range is contiguous [90, 390]
   float current_mapped = (current_angle <= FORBIDDEN_MIN) ? current_angle + 360.0 : current_angle;
@@ -159,9 +224,9 @@ void loop() {
   // 3. Control Logic (Bang-Bang with Deadband)
   if (abs(error) > TOLERANCE) {
     if (error > 0) {
-      target_velocity = MOVE_RPM * _RPM_TO_RADS; // Clockwise
+      target_velocity = move_rpm * _RPM_TO_RADS; // Clockwise
     } else {
-      target_velocity = -MOVE_RPM * _RPM_TO_RADS; // Counter-Clockwise
+      target_velocity = -move_rpm * _RPM_TO_RADS; // Counter-Clockwise
     }
   } else {
     target_velocity = 0; // Stop at target
