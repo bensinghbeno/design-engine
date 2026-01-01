@@ -4,6 +4,7 @@
 // --- AS5600 Sensor Configuration ---
 const uint8_t AS5600_ADDR = 0x36;
 #define COUNTS_PER_REV 4096
+#define ANGLE_PHY_ZERO 324.0
 
 // --- Motor & Driver Configuration ---
 // Using 11 Pole Pairs to match your working open-loop reference
@@ -101,7 +102,7 @@ void doSequenceB(char* cmd) {
 void doInit(char* cmd) {
   motor.enable();
   move_rpm = 1.0;
-  target_angle = 180.0;
+  target_angle = ANGLE_PHY_ZERO;
   Serial.println("Initializing: Moving to 180 degrees at 1 RPM.");
 }
 
@@ -111,6 +112,12 @@ void doStop(char* cmd) {
   motor.disable();
   target_velocity = 0;
   Serial.println("STOP: Motor disabled.");
+}
+
+// --- Command: Enable Motor ---
+void doEnable(char* cmd) {
+  motor.enable();
+  Serial.println("Motor enabled.");
 }
 
 void setup() {
@@ -160,6 +167,7 @@ void setup() {
   command.add('B', doSequenceB, "Sequence B: 180->Wait->270->Wait->180");
   command.add('I', doInit, "Initialize: Enable & Move to 180 @ 1RPM");
   command.add('X', doStop, "Emergency Stop: Disable Motor");
+  command.add('E', doEnable, "Enable Motor");
 
   Serial.println("Custom Closed Loop Ready.");
   Serial.println("Send 'I' to enable and move to 180 degrees.");
