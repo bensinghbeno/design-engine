@@ -19,6 +19,7 @@ float target_velocity = 0.0;   // Velocity command sent to motor
 // Sequence B State
 bool seq_b_active = false;
 int seq_b_step = 0;
+bool system_enabled = false;
 unsigned long seq_b_timer = 0;
 
 // Settings
@@ -78,6 +79,7 @@ void doTarget(char* cmd) {
     return;
   }
 
+  system_enabled = true;
   move_rpm = 10.0;
   target_angle = new_target;
   Serial.print("Target set to: ");
@@ -95,20 +97,23 @@ void doDisplayAngle(char* cmd) {
 void doSequenceB(char* cmd) {
   seq_b_active = true;
   seq_b_step = 0;
+  system_enabled = true;
   Serial.println("Starting Sequence B...");
 }
 
 // --- Command: Initialize ---
 void doInit(char* cmd) {
   motor.enable();
-  move_rpm = 1.0;
+  system_enabled = true;
+  move_rpm = 10;
   target_angle = ANGLE_PHY_ZERO;
-  Serial.println("Initializing: Moving to 180 degrees at 1 RPM.");
+  Serial.println("Initializing: Moving to ANGLE_PHY_ZERO degrees at 1 RPM.");
 }
 
 // --- Command: Emergency Stop ---
 void doStop(char* cmd) {
   seq_b_active = false;
+  system_enabled = false;
   motor.disable();
   target_velocity = 0;
   Serial.println("STOP: Motor disabled.");
@@ -116,6 +121,7 @@ void doStop(char* cmd) {
 
 // --- Command: Enable Motor ---
 void doEnable(char* cmd) {
+  system_enabled = true;
   motor.enable();
   Serial.println("Motor enabled.");
 }
@@ -171,7 +177,7 @@ void setup() {
 
   Serial.println("Custom Closed Loop Ready.");
   Serial.println("Send 'I' to enable and move to 180 degrees.");
-  doDisplayAngle('D');
+  doDisplayAngle(nullptr);
 }
 
 void loop() {
@@ -243,14 +249,30 @@ void loop() {
   float error = target_mapped - current_mapped;
 
   // 3. Control Logic (Bang-Bang with Deadband)
-  if (abs(error) > TOLERANCE) {
-    if (error > 0) {
-      target_velocity = move_rpm * _RPM_TO_RADS; // Clockwise
+  if (system_enabled) {
+    if (abs(error) > TOLERANCE) {
+      // Only set full torque if not already set (prevents noise from repeated enable calls)
+      if (motor.voltage_limit != 6.0f) {
+        motor.voltage_limit = 6.0; 
+        motor.enable();
+      }
+      
+      if (error > 0) {
+        target_velocity = move_rpm * _RPM_TO_RADS; // Clockwise
+      } else {
+        target_velocity = -move_rpm * _RPM_TO_RADS; // Counter-Clockwise
+      }
     } else {
-      target_velocity = -move_rpm * _RPM_TO_RADS; // Counter-Clockwise
+      target_velocity = 0; // Stop at target
+      // Only reduce torque if not already reduced
+      if (motor.voltage_limit != 2.0f) {
+        motor.voltage_limit = 0.1; 
+        motor.enable();
+      }
     }
   } else {
-    target_velocity = 0; // Stop at target
+    target_velocity = 0;
+    motor.disable();
   }
 
   // 4. Move Motor & Check Commands
