@@ -26,7 +26,8 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 signed int speedLeft = 0;  
 signed int speedRight = 0;   
-const int speedMin = 255;
+const int BASEJ_YAW_SPEED_MIN = 100;
+const int BASEJ_ROLL_SPEED_MIN = 100;
 bool enableRightUpperArmPitch = false;
 bool isRightHandOpen = false; // Tracks whether the hand is open
 
@@ -168,16 +169,16 @@ void loop() {
       enableFwdReverseS2 =  true;
       rcAction = true;
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1950) && (ch3Value <= 2000)){
-      rightBaseJointRollUp(speedMin);      
+      rightBaseJointRollUp(BASEJ_ROLL_SPEED_MIN);      
       rcAction = true;
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1000) && (ch3Value <= 1050)){
-      rightBaseJointRollDown(speedMin);      
+      rightBaseJointRollDown(BASEJ_ROLL_SPEED_MIN);      
       rcAction = true;                         
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch4Value >= 1000) && (ch4Value <= 1200)){
-      rightBaseJointYawLeft(speedMin);
+      rightBaseJointYawLeft(BASEJ_YAW_SPEED_MIN);
       rcAction = true;
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch4Value >= 1800) && (ch4Value <= 2000)){
-      rightBaseJointYawRight(speedMin);
+      rightBaseJointYawRight(BASEJ_YAW_SPEED_MIN);
       rcAction = true;                           
     } else if (ch2Value >= 1750 && ch2Value <= 2000) {
       elbowPitchUp();
@@ -422,16 +423,16 @@ void upperArmRight_RollStop()
 
 void upperArmRight_PitchUp()
 {
-  speedLeft = speedMin;
-  speedRight = -speedMin;
+  speedLeft = BASEJ_ROLL_SPEED_MIN;
+  speedRight = -BASEJ_ROLL_SPEED_MIN;
   smartDriveDuo30.control(speedLeft, 0);  
   Serial.println(":: upperRightArm_PitchDown");
 }
 
 void upperArmRight_PitchDown()
 {
-  speedLeft = -speedMin;
-  speedRight = speedMin;
+  speedLeft = -BASEJ_ROLL_SPEED_MIN;
+  speedRight = BASEJ_ROLL_SPEED_MIN;
   smartDriveDuo30.control(speedLeft, 0); 
   Serial.println(":: upperRightArm_PitchDown");
 }
@@ -451,17 +452,4 @@ void upperArmRight_RollRight(int speed) {
   analogWrite(ENA, speed);
 }
 
-void foreArmRight_PitchUp()
-{
-  speedRight = speedMin;
-  smartDriveDuo30.control(0, speedRight);  
-  Serial.println(":: foreArmRight_PitchUp");
-}
-
-void foreArmRight_PitchDown()
-{
-  speedRight = -speedMin;
-  smartDriveDuo30.control(0, speedRight);  
-  Serial.println(":: foreArmRight_PitchDown");
-}
 
