@@ -44,7 +44,6 @@ int ch6Value;
 int ch7Value;
 int ch8Value;
 
-// Forward Reverse Sevo Pin definitions
 const int ENA = 10;  // Motor A enable (already used)
 const int IN1 = 8;   // Motor A IN1 (already used)
 const int IN2 = 9;   // Motor A IN2 (already used)
@@ -79,6 +78,7 @@ void setup() {
   ibus.begin(Serial1);      // iBUS RX on Serial1 (Pin 19 on Mega)  
   Serial.println("Enter command: 0=Stop, 1=Forward 1s, 2=Reverse 1s");
 }
+
 // ===== MAIN LOOP =====
 void loop() {
 
@@ -206,6 +206,7 @@ void loop() {
   }
 
 }
+
 
 void allMotors_Stop() {
   upperArmRight_PitchStop();
