@@ -5,12 +5,22 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
+
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+
+
+
 // Create the PCA9685 object
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 #define SERVO_CHANNEL 0  // Using CH0 on PCA9685
-#define SERVOMIN 150     // Minimum pulse length out of 4096
-#define SERVOMAX 300     // Maximum pulse length out of 4096  
+#define SERVOMIN 100     // Minimum pulse length out of 4096
+#define SERVOMAX 500     // Maximum pulse length out of 4096
+#define SERVOMID 300     // Maximum pulse length out of 4096
+#define RAMPSTEP 1     
+#define RAMPDELAY 10     
+
 
 // ----- Cytron_SmartDriveDuo ArmUpperRightMotor -----
 #define INAUR1 4
@@ -57,6 +67,12 @@ char inChar = 0;             // Serial character input
 bool commandSet = false;     // Track whether any command was activated
 const int rcThrottleDelay  = 1000; // ms
 
+// State variables for non-blocking elbow pitch control
+bool elbowPitchUpActive = false;
+bool elbowPitchDownActive = false;
+int elbowPulse = SERVOMID; // Start at the middle position
+unsigned long lastElbowUpdate = 0;
+
 void setup() {
 
   allMotors_Stop();
@@ -70,7 +86,7 @@ void setup() {
   pinMode(IN4, OUTPUT);
 
   pwm.begin();
-  pwm.setPWMFreq(100); 
+  pwm.setPWMFreq(50); 
   
 
   // Start serial communication
@@ -78,6 +94,7 @@ void setup() {
   ibus.begin(Serial1);      // iBUS RX on Serial1 (Pin 19 on Mega)  
   Serial.println("Enter command: 0=Stop, 1=Forward 1s, 2=Reverse 1s");
 }
+
 
 // ===== MAIN LOOP =====
 void loop() {
@@ -155,10 +172,12 @@ void loop() {
       enableFwdReverseS2 =  true;
       rcAction = true;
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1950) && (ch3Value <= 2000)){
-      rightBaseJointRollUp(speedMin);
+      //rightBaseJointRollUp(speedMin);
+      elbowPitchUp();
       rcAction = true;
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1000) && (ch3Value <= 1050)){
-      rightBaseJointRollDown(speedMin);
+      //rightBaseJointRollDown(speedMin);
+      elbowPitchDown();
       rcAction = true;                               ////FWD REV STOP////////////////////////////////
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch4Value >= 1000) && (ch4Value <= 1200)){
       rightBaseJointYawLeft(speedMin);
@@ -199,13 +218,91 @@ void loop() {
     }
   }
 
+  // Call the non-blocking elbow pitch functions
+  elbowPitchUpNonBlocking();
+  elbowPitchDownNonBlocking();
 }
+
+
+void elbowPitchUp()
+{
+  elbowPitchUpActive = true;
+  Serial.println("Starting Elbow Pitch Up");
+}
+
+void elbowPitchDown()
+{
+  elbowPitchDownActive = true;
+  Serial.println("Starting Elbow Pitch Down");
+}
+
+void elbowPitchUpNonBlocking() {
+  if (elbowPitchUpActive) {
+    unsigned long currentMillis = millis();
+    if (currentMillis - lastElbowUpdate >= RAMPDELAY) {
+      lastElbowUpdate = currentMillis;
+
+      // Increment the pulse width
+      if (elbowPulse <= SERVOMAX) {
+        pwm.setPWM(SERVO_CHANNEL, 0, elbowPulse);
+        elbowPulse += RAMPSTEP; // Increment pulse
+      } else {
+        // Stop the movement when the maximum is reached
+        elbowPitchUpActive = false;
+        Serial.println("Elbow Pitch Up Complete");
+      }
+    }
+  }
+}
+
+void elbowPitchDownNonBlocking() {
+  if (elbowPitchDownActive) {
+    unsigned long currentMillis = millis();
+    if (currentMillis - lastElbowUpdate >= RAMPDELAY) {
+      lastElbowUpdate = currentMillis;
+
+      // Decrement the pulse width
+      if (elbowPulse >= SERVOMIN) {
+        pwm.setPWM(SERVO_CHANNEL, 0, elbowPulse);
+        elbowPulse -= RAMPSTEP; // Decrement pulse
+      } else {
+        // Stop the movement when the minimum is reached
+        elbowPitchDownActive = false;
+        Serial.println("Elbow Pitch Down Complete");
+      }
+    }
+  }
+}
+
+
+void elbowPitchMidPos()
+{
+  // Stop servo
+  Serial.println("Min Pos Stopping");
+  pwm.setPWM(SERVO_CHANNEL, 0, SERVOMID);
+  delay(100);
+  pwm.setPWM(SERVO_CHANNEL, 0, SERVOMID);
+  delay(100);
+  pwm.setPWM(SERVO_CHANNEL, 0, SERVOMID);
+
+  pwm.setPWM(SERVO_CHANNEL, 0, 0); // Stop position
+  delay(2000); // Hold for 2 seconds
+}
+
+void elbowPitchStop()
+{
+      // Stop servo
+    Serial.println("Stopping stopElbowPitchServo");
+    pwm.setPWM(SERVO_CHANNEL, 0, 0); // Stop position
+    elbowPitchUpActive = false;
+    elbowPitchDownActive = false;}
 
 
 void allMotors_Stop() {
   upperArmRight_PitchStop();
   upperArmRight_RollStop();
   moveForwardReverse_Stop();
+  elbowPitchStop();
 }
 
 
