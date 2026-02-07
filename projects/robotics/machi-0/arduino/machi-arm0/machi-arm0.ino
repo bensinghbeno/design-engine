@@ -6,20 +6,16 @@
 #include <Adafruit_PWMServoDriver.h>
 
 
-#include <Wire.h>
-#include <Adafruit_PWMServoDriver.h>
 
-
-
-// Create the PCA9685 object
+// Right Elbow Pitch Servo on PCA9685
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-
 #define SERVO_CHANNEL 0  // Using CH0 on PCA9685
 #define SERVOMIN 100     // Minimum pulse length out of 4096
 #define SERVOMAX 500     // Maximum pulse length out of 4096
 #define SERVOMID 300     // Maximum pulse length out of 4096
-#define RAMPSTEP 1     
-#define RAMPDELAY 10     
+#define RAMPSTEP 10     
+#define RAMPDELAY 1     
+//
 
 
 // ----- Cytron_SmartDriveDuo ArmUpperRightMotor -----
@@ -164,7 +160,7 @@ void loop() {
 
     bool rcAction = false;
 
-    if( (!enableFwdReverseS1) && (!enableFwdReverseS2) && (ch3Value >= 1900) ) ////FWD REV STOP////////////////////////////////
+    if( (!enableFwdReverseS1) && (!enableFwdReverseS2) && (ch3Value >= 1900) ) 
     {
       enableFwdReverseS1 =  true;
       rcAction = true;
@@ -172,27 +168,25 @@ void loop() {
       enableFwdReverseS2 =  true;
       rcAction = true;
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1950) && (ch3Value <= 2000)){
-      //rightBaseJointRollUp(speedMin);
-      elbowPitchUp();
+      rightBaseJointRollUp(speedMin);      
       rcAction = true;
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1000) && (ch3Value <= 1050)){
-      //rightBaseJointRollDown(speedMin);
-      elbowPitchDown();
-      rcAction = true;                               ////FWD REV STOP////////////////////////////////
+      rightBaseJointRollDown(speedMin);      
+      rcAction = true;                         
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch4Value >= 1000) && (ch4Value <= 1200)){
       rightBaseJointYawLeft(speedMin);
       rcAction = true;
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch4Value >= 1800) && (ch4Value <= 2000)){
       rightBaseJointYawRight(speedMin);
-      rcAction = true;                               ////FWD REV STOP////////////////////////////////
+      rcAction = true;                           
+    } else if (ch2Value >= 1750 && ch2Value <= 2000) {
+      elbowPitchUp();
+      rcAction = true;
+    } else if (ch2Value >= 1000 && ch2Value <= 1250) {
+      elbowPitchDown();
+      rcAction = true;
     } 
-    // else if (ch1Value >= 1750 && ch1Value <= 2000) {
-    //   upperArmRight_RollRight(speedMin);
-    //   rcAction = true;
-    // } else if (ch2Value >= 1000 && ch2Value <= 1250) {
-    //   foreArmRight_PitchDown();
-    //   rcAction = true;
-    // } else if (ch2Value >= 1750 && ch2Value <= 2000) {
+    //else if (ch2Value >= 1750 && ch2Value <= 2000) {
     //   foreArmRight_PitchUp();
     //   rcAction = true;
     // } else if ((enableRightUpperArmPitch) && (ch3Value <= 1100 )){
