@@ -154,23 +154,17 @@ void loop() {
     } else if( (enableFwdReverseS1) && (!enableFwdReverseS2) && (ch3Value <= 1700) && (ch3Value >= 1300)) {
       enableFwdReverseS2 =  true;
       rcAction = true;
-    } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1900) && (ch3Value <= 2000)){
-      moveForward(speedMin);
+    } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1950) && (ch3Value <= 2000)){
+      rightBaseJointRollUp(speedMin);
       rcAction = true;
-    } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1000) && (ch3Value <= 1300)){
-      moveReverse(speedMin);
-      rcAction = true;                               ////FWD REV STOP////////////////////////////////
-    } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1900) && (ch3Value <= 2000)){
-      moveForward(speedMin);
-      rcAction = true;
-    } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1000) && (ch3Value <= 1300)){
-      moveReverse(speedMin);
+    } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch3Value >= 1000) && (ch3Value <= 1050)){
+      rightBaseJointRollDown(speedMin);
       rcAction = true;                               ////FWD REV STOP////////////////////////////////
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch4Value >= 1000) && (ch4Value <= 1200)){
-      moveLeft(speedMin);
+      rightBaseJointYawLeft(speedMin);
       rcAction = true;
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch4Value >= 1800) && (ch4Value <= 2000)){
-      moveRight(speedMin);
+      rightBaseJointYawRight(speedMin);
       rcAction = true;                               ////FWD REV STOP////////////////////////////////
     } 
     // else if (ch1Value >= 1750 && ch1Value <= 2000) {
@@ -214,6 +208,39 @@ void allMotors_Stop() {
   moveForwardReverse_Stop();
 }
 
+
+void rightBaseJointRollUp(int speed) {
+  Serial.println("Command: rightBaseJointRollUp");
+
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  analogWrite(ENA, speed);    
+}
+
+void rightBaseJointRollDown(int speed) {
+  Serial.println("Command: rightBaseJointRollDown");
+
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, speed);
+}
+
+void rightBaseJointYawLeft(int speed) {
+  Serial.println("Command: rightBaseJointYawLeft");
+
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENB, speed);
+}
+
+void rightBaseJointYawRight(int speed) {
+  Serial.println("Command: rightBaseJointYawRight");
+
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENB, speed);
+}
+
 void rightHand_Open() 
 {
   if (isRightHandOpen) {
@@ -252,27 +279,6 @@ void rightHand_Close()
   isRightHandOpen = false;
 }
 
-void moveForward(int speed) {
-  Serial.println("Command: moveForward");
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-  analogWrite(ENA, speed);
-
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, HIGH);
-  analogWrite(ENB, speed);
-}
-
-void moveReverse(int speed) {
-  Serial.println("Command: moveReverse");
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, HIGH);
-  analogWrite(ENA, speed);  
-
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
-  analogWrite(ENB, speed);  
-}
 
 void moveLeft(int speed) {
   Serial.println("Command: moveLeft");
