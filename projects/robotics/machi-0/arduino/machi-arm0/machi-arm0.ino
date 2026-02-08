@@ -9,28 +9,23 @@
 
 // Right Elbow Pitch Servo on PCA9685
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-#define SERVO_CHANNEL 0  // Using CH0 on PCA9685
-#define SERVO_CHANNEL4 4  // Using CH0 on PCA9685
+#define SERVO_CHANNEL 15  // Using CH0 on PCA9685
 #define SERVOMIN 100     // Minimum pulse length out of 4096
-#define SERVOMAX 500     // Maximum pulse length out of 4096
+#define SERVOMAX 400     // Maximum pulse length out of 4096
 #define SERVOMID 300     // Maximum pulse length out of 4096
 #define RAMPSTEP 10     
 #define RAMPDELAY 1     
 //
 
 // Right Gripper Servo on PCA9685
-#define GRIPPER_CHANNEL 4  // Using CH4 on PCA9685
-#define R_GRIPPER_SERVOMIN 300     // Minimum pulse length out of 4096
-#define R_GRIPPER_SERVOMAX 400     // Maximum pulse length out of 4096
-#define R_GRIPPER_SERVOMID 300     // Maximum pulse length out of 4096
-#define R_GRIPPER_RAMPSTEP 10     
-#define R_GRIPPER_RAMPDELAY 1     
+#define GRIPPER_CHANNEL 0  // Using CH4 on PCA9685
+// #define R_GRIPPER_SERVOMIN 100     // Minimum pulse length out of 4096
+// #define R_GRIPPER_SERVOMAX 500     // Maximum pulse length out of 4096
+// #define R_GRIPPER_SERVOMID 300     // Maximum pulse length out of 4096
+// #define R_GRIPPER_RAMPSTEP 10     
+// #define R_GRIPPER_RAMPDELAY 2     
 
-// State variables for non-blocking gripper control
-bool gripperCloseActive = false;
-bool gripperOpenActive = false;
-int gripperPulse = SERVOMID; // Start at the middle position
-unsigned long lastGripperUpdate = 0;
+
 //
 
 
@@ -86,6 +81,12 @@ bool elbowPitchUpActive = false;
 bool elbowPitchDownActive = false;
 int elbowPulse = SERVOMID; // Start at the middle position
 unsigned long lastElbowUpdate = 0;
+
+// State variables for non-blocking gripper control
+bool gripperOpenActive = false;
+bool gripperCloseActive = false;
+int gripperPulse = SERVOMID; // Start at the middle position
+unsigned long lastGripperUpdate = 0;
 
 
 
@@ -243,13 +244,13 @@ void loop() {
     } else if (ch2Value >= 1000 && ch2Value <= 1250) {
       elbowPitchDown();
       rcAction = true;
-    } /*else if (ch7Value >= 1300 && ch7Value <= 2000) {
-      rcAction = true;
-      gripperClose();
-    } else if (ch7Value >= 1000 && ch7Value < 1300) {
+    } else if (ch7Value >= 1500 && ch7Value <= 2000) {
       rcAction = true;
       gripperOpen();
-    }  */
+    }else if (ch8Value >= 1500 && ch8Value <= 2000) {
+      rcAction = true;
+      gripperClose();
+    }
     //else if (ch2Value >= 1750 && ch2Value <= 2000) {
     //   foreArmRight_PitchUp();
     //   rcAction = true;
@@ -271,7 +272,8 @@ void loop() {
     //   rcAction = true;
     // }
 
-    if (!rcAction) {
+    if (!rcAction)
+    {
       allMotors_Stop();
     }
   }
@@ -285,17 +287,59 @@ void loop() {
   gripperOpenNonBlocking();
 }
 
+void gripperOpen()
+{
+  gripperOpenActive = true;
+  Serial.println("Starting Gripper Open");
+}
+
+void gripperOpenNonBlocking() {
+  if (gripperOpenActive) {
+    unsigned long currentMillis = millis();
+    if (currentMillis - lastGripperUpdate >= RAMPDELAY) {
+      lastGripperUpdate = currentMillis;
+      // Decrement the pulse width
+      if (gripperPulse > SERVOMIN) {
+        gripperPulse -= RAMPSTEP; // Decrement pulse
+        pwm.setPWM(GRIPPER_CHANNEL, 0, gripperPulse);
+      } else {
+        // Stop the movement when the minimum is reached
+        gripperOpenActive = false;
+        Serial.println("Gripper Open Complete");
+      }
+    }
+  }
+}
+
+void gripperClose()
+{
+  gripperCloseActive = true;
+  Serial.println("Starting Gripper Close");
+}
+
+void gripperCloseNonBlocking() {
+  if (gripperCloseActive) {
+    unsigned long currentMillis = millis();
+    if (currentMillis - lastGripperUpdate >= RAMPDELAY) {
+      lastGripperUpdate = currentMillis;
+      // Increment the pulse width
+      if (gripperPulse < SERVOMAX) {
+        gripperPulse += RAMPSTEP; // Increment pulse
+        pwm.setPWM(GRIPPER_CHANNEL, 0, gripperPulse);
+      } else {
+        // Stop the movement when the maximum is reached
+        gripperCloseActive = false;
+        Serial.println("Gripper Close Complete");
+      }
+    }
+  }
+}
+
 
 void elbowPitchUp()
 {
   elbowPitchUpActive = true;
   Serial.println("Starting Elbow Pitch Up");
-}
-
-void elbowPitchDown()
-{
-  elbowPitchDownActive = true;
-  Serial.println("Starting Elbow Pitch Down");
 }
 
 void elbowPitchUpNonBlocking() {
@@ -316,6 +360,14 @@ void elbowPitchUpNonBlocking() {
     }
   }
 }
+
+void elbowPitchDown()
+{
+  elbowPitchDownActive = true;
+  Serial.println("Starting Elbow Pitch Down");
+}
+
+
 
 void elbowPitchDownNonBlocking() {
   if (elbowPitchDownActive) {
@@ -355,11 +407,11 @@ void rightGripperMidPos()
 {
   // Stop servo
   Serial.println("Min Pos Stopping");
-  pwm.setPWM(GRIPPER_CHANNEL, 0, R_GRIPPER_SERVOMID);
+  pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMID);
   delay(100);
-  pwm.setPWM(GRIPPER_CHANNEL, 0, R_GRIPPER_SERVOMID);
+  pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMID);
   delay(100);
-  pwm.setPWM(GRIPPER_CHANNEL, 0, R_GRIPPER_SERVOMID);
+  pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMID);
   pwm.setPWM(GRIPPER_CHANNEL, 0, 0); // Stop position
   delay(100); // Hold for 2 seconds
 }
@@ -371,7 +423,20 @@ void elbowPitchStop()
     Serial.println("Stopping stopElbowPitchServo");
     pwm.setPWM(SERVO_CHANNEL, 0, 0); // Stop position
     elbowPitchUpActive = false;
-    elbowPitchDownActive = false;}
+    elbowPitchDownActive = false;
+}
+
+void gripperStop()
+{
+      // Stop servo
+    Serial.println("Stopping stopGripperServo");
+    pwm.setPWM(GRIPPER_CHANNEL, 0, 0); // Stop position
+    pwm.setPWM(GRIPPER_CHANNEL, 0, 0); // Stop position
+    gripperCloseActive = false;
+    gripperOpenActive = false;
+}
+
+
 
 
 void allMotors_Stop() {
@@ -379,6 +444,7 @@ void allMotors_Stop() {
   upperArmRight_RollStop();
   moveForwardReverse_Stop();
   elbowPitchStop();
+  gripperStop();
 }
 
 
@@ -533,57 +599,33 @@ void upperArmRight_RollRight(int speed) {
   analogWrite(ENA, speed);
 }
 
-// Function to start closing the gripper
-void gripperOpen() {
-  gripperOpenActive = true;
-  Serial.println("Starting Gripper Open");
-}
 
-// Non-blocking function to open the gripper
-void gripperOpenNonBlocking() {
-  if (gripperOpenActive) {
-    unsigned long currentMillis = millis();
-    if (currentMillis - lastGripperUpdate >= R_GRIPPER_RAMPDELAY) {
-      lastGripperUpdate = currentMillis;
 
-      // Increment the pulse width
-      if (gripperPulse <= R_GRIPPER_SERVOMIN) {
-        pwm.setPWM(GRIPPER_CHANNEL, 0, gripperPulse);
-        gripperPulse += R_GRIPPER_RAMPSTEP; // Increment pulse
-      } else {
-        // Stop the movement when the maximum is reached
-        gripperOpenActive = false;
-        Serial.println("Gripper Open Complete");
-      }
-    }
-  }
-}
+// // Function to start opening the gripper
+// void gripperClose() {
+//   gripperCloseActive = true;
+//   Serial.println("Starting Gripper Close");
+// }
 
-// Function to start opening the gripper
-void gripperClose() {
-  gripperCloseActive = true;
-  Serial.println("Starting Gripper Close");
-}
+  // // Non-blocking function to close the gripper
+  // void gripperCloseNonBlocking() {
+  //   if (gripperCloseActive) {
+  //     unsigned long currentMillis = millis();
+  //     if (currentMillis - lastGripperUpdate >= R_GRIPPER_RAMPDELAY) {
+  //       lastGripperUpdate = currentMillis;
 
-// Non-blocking function to close the gripper
-void gripperCloseNonBlocking() {
-  if (gripperCloseActive) {
-    unsigned long currentMillis = millis();
-    if (currentMillis - lastGripperUpdate >= R_GRIPPER_RAMPDELAY) {
-      lastGripperUpdate = currentMillis;
-
-      // Decrement the pulse width
-      if (gripperPulse >= R_GRIPPER_SERVOMAX) {
-        pwm.setPWM(GRIPPER_CHANNEL, 0, gripperPulse);
-        gripperPulse -= R_GRIPPER_RAMPSTEP; // Decrement pulse
-      } else {
-        // Stop the movement when the minimum is reached
-        gripperCloseActive = false;
-        Serial.println("Gripper Close Complete");
-      }
-    }
-  }
-}
+  //       // Decrement the pulse width
+  //       if (gripperPulse >= R_GRIPPER_SERVOMAX) {
+  //         pwm.setPWM(GRIPPER_CHANNEL, 0, gripperPulse);
+  //         gripperPulse -= R_GRIPPER_RAMPSTEP; // Decrement pulse
+  //       } else {
+  //         // Stop the movement when the minimum is reached
+  //         gripperCloseActive = false;
+  //         Serial.println("Gripper Close Complete");
+  //       }
+  //     }
+  //   }
+  // }
 
 
 
