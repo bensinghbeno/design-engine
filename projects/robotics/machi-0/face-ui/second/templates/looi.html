@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        :root {
+            --neon: #00f2ff;
+            --neon-bg: rgba(0, 242, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+        body { 
+            margin: 0; background: radial-gradient(circle, #111 0%, #000 100%); 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; overflow: hidden;
+        }
+
+        /* The Face Container with Scanline Overlay */
+        .viewport {
+            position: relative; width: 600px; height: 400px;
+            background: var(--glass); border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: inset 0 0 50px #000;
+            overflow: hidden;
+        }
+        .viewport::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%; pointer-events: none;
+        }
+
+        svg { width: 100%; height: 100%; filter: drop-shadow(0 0 15px var(--neon-bg)); }
+
+        /* Rich Eye Styling */
+        .eye-bg { fill: #111; stroke: var(--neon); stroke-width: 2; }
+        .iris { fill: var(--neon); filter: blur(1px); transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); }
+        .iris-glow { fill: var(--neon); filter: blur(12px); opacity: 0.6; }
+        .pupil { fill: #000; }
+
+        /* Complex Mouth with Neon Pulse */
+        .mouth {
+            fill: none; stroke: var(--neon); stroke-width: 8; stroke-linecap: round;
+            filter: drop-shadow(0 0 5px var(--neon)); transition: all 0.5s ease;
+        }
+
+        /* --- Animations --- */
+        .talking .mouth { animation: speech-ripple 0.4s infinite alternate; }
+        @keyframes speech-ripple {
+            0% { d: path("M 220 280 Q 300 280 380 280"); opacity: 0.8; }
+            100% { d: path("M 240 260 Q 300 320 360 260"); opacity: 1; filter: drop-shadow(0 0 12px var(--neon)); }
+        }
+
+        .happy .eye-group { transform: translateY(15px) scaleY(0.5); }
+        .happy .mouth { d: path("M 200 270 Q 300 350 400 270"); stroke: #00ff88; }
+
+        .surprised .eye-group { transform: scale(1.4); }
+        .surprised .mouth { d: path("M 280 290 A 20 20 0 1 0 320 290 A 20 20 0 1 0 280 290"); }
+
+        .angry .eye-group { transform: rotate(15deg) scaleY(0.8); }
+        .angry .iris { fill: #ff2a00; }
+
+        .blink { transform: scaleY(0) !important; }
+    </style>
+</head>
+<body class="default">
+    <div class="viewport">
+        <svg viewBox="0 0 600 400">
+            <g class="eye-group" id="left-eye" style="transform-origin: 200px 180px;">
+                <circle class="eye-bg" cx="200" cy="180" r="60" />
+                <circle class="iris-glow" id="lg" cx="200" cy="180" r="35" />
+                <circle class="iris" id="li" cx="200" cy="180" r="28" />
+                <circle class="pupil" id="lp" cx="200" cy="180" r="10" />
+            </g>
+
+            <g class="eye-group" id="right-eye" style="transform-origin: 400px 180px;">
+                <circle class="eye-bg" cx="400" cy="180" r="60" />
+                <circle class="iris-glow" id="rg" cx="400" cy="180" r="35" />
+                <circle class="iris" id="ri" cx="400" cy="180" r="28" />
+                <circle class="pupil" id="rp" cx="400" cy="180" r="10" />
+            </g>
+
+            <path id="mouth" class="mouth" d="M 220 290 Q 300 290 380 290" />
+        </svg>
+    </div>
+
+    <script>
+        var socket = io();
+        socket.on('change_emotion', (data) => { document.body.className = data.emotion; });
+
+        // Advanced Parallax Tracking
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5);
+            const y = (e.clientY / window.innerHeight - 0.5);
+            
+            // Move pupils more than iris for 3D depth effect
+            updatePart('lp', x * 40, y * 40); updatePart('rp', x * 40, y * 40);
+            updatePart('li', x * 25, y * 25); updatePart('ri', x * 25, y * 25);
+            updatePart('lg', x * 20, y * 20); updatePart('rg', x * 20, y * 20);
+        });
+
+        function updatePart(id, x, y) {
+            document.getElementById(id).style.transform = `translate(${x}px, ${y}px)`;
+        }
+
+        function blink() {
+            const eyes = document.querySelectorAll('.eye-group');
+            if (!document.body.classList.contains('surprised')) {
+                eyes.forEach(e => e.classList.add('blink'));
+                setTimeout(() => eyes.forEach(e => e.classList.remove('blink')), 100);
+            }
+            setTimeout(blink, Math.random() * 5000 + 2000);
+        }
+        blink();
+    </script>
+</body>
+</html>
