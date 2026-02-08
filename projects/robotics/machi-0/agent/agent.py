@@ -26,7 +26,7 @@ def speak(text):
     model_name = "en-us-lessac-medium.onnx"
     
     # Building the command with the correct filename
-    command = f'echo "{text}" | piper --model ./{model_name} --output_raw | play -t raw -r 22050 -e signed-integer -b 16 -c 1 -'
+    command = f'echo "{text}" | piper --model ./{model_name} --length_scale 2 --output_raw | play -t raw -r 22050 -e signed-integer -b 16 -c 1 -'
     
     import subprocess
     subprocess.run(command, shell=True)
@@ -71,6 +71,17 @@ with sr.Microphone() as source:
             audio = r.listen(source)
             text = r.recognize_google(audio)
             print(f"Ben: {text}")
-            talk_to_agent(text)
+            
+            lower_text = text.lower()
+            if "check" in lower_text:
+                # Extract the question by removing 'check' and any leading trigger phrases
+                question = lower_text.replace("hey machi", "").replace("check", "").strip()
+                if question:
+                    talk_to_agent(question)
+                else:
+                    print("No valid question detected before 'check'. Ignoring input.")
+            else:
+                print("Keyword 'check' not detected. Ignoring input.")
         except Exception as e:
+            print(f"Error: {e}")
             continue
