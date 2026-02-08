@@ -1,117 +1,159 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Looi High-Fidelity UI</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <style>
-        :root {
-            --neon: #00f2ff;
-            --neon-bg: rgba(0, 242, 255, 0.1);
-            --glass: rgba(255, 255, 255, 0.05);
-        }
+        :root { --neon: #00f2ff; --bg: #080808; }
         body { 
-            margin: 0; background: radial-gradient(circle, #111 0%, #000 100%); 
+            margin: 0; background: radial-gradient(circle, #1a1a1a 0%, #000 100%); 
             display: flex; justify-content: center; align-items: center; 
             height: 100vh; overflow: hidden;
         }
 
-        /* The Face Container with Scanline Overlay */
+        /* Glass Viewport with CRT effect */
         .viewport {
-            position: relative; width: 600px; height: 400px;
-            background: var(--glass); border-radius: 40px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: inset 0 0 50px #000;
+            position: relative; width: 90vw; height: 80vh;
+            background: rgba(255,255,255,0.03); border-radius: 50px;
+            border: 2px solid rgba(255,255,255,0.1);
+            box-shadow: inset 0 0 100px #000, 0 0 30px rgba(0,0,0,0.5);
             overflow: hidden;
         }
         .viewport::after {
-            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
             background-size: 100% 4px, 3px 100%; pointer-events: none;
         }
 
-        svg { width: 100%; height: 100%; filter: drop-shadow(0 0 15px var(--neon-bg)); }
+        svg { width: 100%; height: 100%; filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.2)); }
 
-        /* Rich Eye Styling */
-        .eye-bg { fill: #111; stroke: var(--neon); stroke-width: 2; }
+        /* Eye Components */
+        .eye-shell { fill: #111; stroke: rgba(255,255,255,0.2); stroke-width: 1; }
         .iris { fill: var(--neon); filter: blur(1px); transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); }
-        .iris-glow { fill: var(--neon); filter: blur(12px); opacity: 0.6; }
+        .iris-glow { fill: var(--neon); filter: blur(15px); opacity: 0.4; }
         .pupil { fill: #000; }
 
-        /* Complex Mouth with Neon Pulse */
+        /* Mouth */
         .mouth {
+            fill: none; stroke: var(--neon); stroke-width: 10; stroke-linecap: round;
+            filter: drop-shadow(0 0 8px var(--neon)); transition: all 0.5s cubic-bezier(0.1, 0.9, 0.2, 1.2);
+        }
+
+        /* Eyebrows */
+        .eyebrow {
             fill: none; stroke: var(--neon); stroke-width: 8; stroke-linecap: round;
-            filter: drop-shadow(0 0 5px var(--neon)); transition: all 0.5s ease;
+            filter: drop-shadow(0 0 5px var(--neon)); transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
         }
 
-        /* --- Animations --- */
-        .talking .mouth { animation: speech-ripple 0.4s infinite alternate; }
-        @keyframes speech-ripple {
-            0% { d: path("M 220 280 Q 300 280 380 280"); opacity: 0.8; }
-            100% { d: path("M 240 260 Q 300 320 360 260"); opacity: 1; filter: drop-shadow(0 0 12px var(--neon)); }
+        /* States */
+        .talking .mouth { animation: speak-wave 0.3s infinite alternate; }
+        @keyframes speak-wave {
+            0% { d: path("M 230 280 Q 300 280 370 280"); opacity: 0.7; }
+            100% { d: path("M 250 260 Q 300 330 350 260"); opacity: 1; stroke-width: 12; }
         }
 
-        .happy .eye-group { transform: translateY(15px) scaleY(0.5); }
-        .happy .mouth { animation: happy-anim 0.6s infinite alternate; stroke: #00ff88; }
-        @keyframes happy-anim {
-            0% { d: path("M 200 270 Q 300 340 400 270"); }
-            100% { d: path("M 190 260 Q 300 360 410 260"); }
+        .happy .eye-group { transform: scaleY(0.4) translateY(30px); }
+        .happy .mouth { animation: happy-smile 0.6s infinite alternate; stroke: #00ffaa; }
+        .happy .eyebrow { transform: translateY(-15px); stroke: #00ffaa; }
+        @keyframes happy-smile {
+            0% { d: path("M 200 260 Q 300 360 400 260"); }
+            100% { d: path("M 190 250 Q 300 380 410 250"); }
         }
 
-        .surprised .eye-group { transform: scale(1.4); }
-        .surprised .mouth { d: path("M 280 290 A 20 20 0 1 0 320 290 A 20 20 0 1 0 280 290"); }
-
+        .angry .iris { fill: #ff3300; }
         .angry .eye-group { transform: rotate(15deg) scaleY(0.8); }
-        .angry .iris { fill: #ff2a00; }
+        .angry .eye-group:first-of-type { transform: rotate(-15deg) scaleY(0.8); }
+        .angry .eyebrow.left { transform: rotate(20deg); transform-origin: 200px 100px; }
+        .angry .eyebrow.right { transform: rotate(-20deg); transform-origin: 400px 100px; }
 
         .blink { transform: scaleY(0) !important; }
+
+        .tap-notice { 
+            position: absolute; bottom: 20px; color: white; opacity: 0.5; 
+            font-family: monospace; font-size: 12px; pointer-events: none;
+        }
     </style>
 </head>
 <body class="default">
     <div class="viewport">
         <svg viewBox="0 0 600 400">
-            <g class="eye-group" id="left-eye" style="transform-origin: 200px 180px;">
-                <circle class="eye-bg" cx="200" cy="180" r="60" />
-                <circle class="iris-glow" id="lg" cx="200" cy="180" r="35" />
-                <circle class="iris" id="li" cx="200" cy="180" r="28" />
-                <circle class="pupil" id="lp" cx="200" cy="180" r="10" />
+            <g class="eye-group" style="transform-origin: 200px 170px;">
+                <circle class="eye-shell" cx="200" cy="170" r="65" />
+                <circle class="iris-glow" id="lg" cx="200" cy="170" r="40" />
+                <circle class="iris" id="li" cx="200" cy="170" r="30" />
+                <circle class="pupil" id="lp" cx="200" cy="170" r="10" />
             </g>
-
-            <g class="eye-group" id="right-eye" style="transform-origin: 400px 180px;">
-                <circle class="eye-bg" cx="400" cy="180" r="60" />
-                <circle class="iris-glow" id="rg" cx="400" cy="180" r="35" />
-                <circle class="iris" id="ri" cx="400" cy="180" r="28" />
-                <circle class="pupil" id="rp" cx="400" cy="180" r="10" />
+            <g class="eye-group" style="transform-origin: 400px 170px;">
+                <circle class="eye-shell" cx="400" cy="170" r="65" />
+                <circle class="iris-glow" id="rg" cx="400" cy="170" r="40" />
+                <circle class="iris" id="ri" cx="400" cy="170" r="30" />
+                <circle class="pupil" id="rp" cx="400" cy="170" r="10" />
             </g>
-
-            <path id="mouth" class="mouth" d="M 220 290 Q 300 290 380 290" />
+            <path class="eyebrow left" d="M 150 100 Q 200 80 250 100" />
+            <path class="eyebrow right" d="M 350 100 Q 400 80 450 100" />
+            <path id="mouth" class="mouth" d="M 230 280 Q 300 280 370 280" />
         </svg>
     </div>
+    <div class="tap-notice">TAP SCREEN ONCE TO ENABLE AUDIO</div>
 
     <script>
-        var socket = io();
-        socket.on('change_emotion', (data) => { document.body.className = data.emotion; });
+        const socket = io();
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let talkInterval;
 
-        // Advanced Parallax Tracking
+        // --- Procedural Robot Audio Engine ---
+        function playBeep(freq, type, duration, vol) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playEmotionSound(emotion) {
+            clearInterval(talkInterval);
+            if (emotion === 'talking') {
+                talkInterval = setInterval(() => {
+                    playBeep(400 + Math.random() * 600, 'square', 0.1, 0.05);
+                }, 150);
+            } else if (emotion === 'happy') {
+                playBeep(600, 'sine', 0.2, 0.1);
+                setTimeout(() => playBeep(800, 'sine', 0.3, 0.1), 100);
+            } else if (emotion === 'angry') {
+                playBeep(150, 'sawtooth', 0.4, 0.1);
+            }
+        }
+
+        // --- Socket Control ---
+        socket.on('change_emotion', (data) => {
+            document.body.className = data.emotion;
+            playEmotionSound(data.emotion);
+        });
+
+        // Unlock Audio on first tap
+        document.body.addEventListener('touchstart', () => audioCtx.resume());
+        document.body.addEventListener('mousedown', () => audioCtx.resume());
+
+        // Parallax Eye Tracking
         document.addEventListener('mousemove', (e) => {
             const x = (e.clientX / window.innerWidth - 0.5);
             const y = (e.clientY / window.innerHeight - 0.5);
-            
-            // Move pupils more than iris for 3D depth effect
-            updatePart('lp', x * 40, y * 40); updatePart('rp', x * 40, y * 40);
-            updatePart('li', x * 25, y * 25); updatePart('ri', x * 25, y * 25);
-            updatePart('lg', x * 20, y * 20); updatePart('rg', x * 20, y * 20);
+            const parts = [['lp', 45], ['rp', 45], ['li', 30], ['ri', 30], ['lg', 20], ['rg', 20]];
+            parts.forEach(([id, factor]) => {
+                document.getElementById(id).style.transform = `translate(${x*factor}px, ${y*factor}px)`;
+            });
         });
-
-        function updatePart(id, x, y) {
-            document.getElementById(id).style.transform = `translate(${x}px, ${y}px)`;
-        }
 
         function blink() {
             const eyes = document.querySelectorAll('.eye-group');
-            if (!document.body.classList.contains('surprised')) {
-                eyes.forEach(e => e.classList.add('blink'));
-                setTimeout(() => eyes.forEach(e => e.classList.remove('blink')), 100);
-            }
+            eyes.forEach(e => e.classList.add('blink'));
+            setTimeout(() => eyes.forEach(e => e.classList.remove('blink')), 100);
             setTimeout(blink, Math.random() * 5000 + 2000);
         }
         blink();
