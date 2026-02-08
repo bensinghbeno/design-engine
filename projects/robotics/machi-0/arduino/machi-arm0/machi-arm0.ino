@@ -88,6 +88,10 @@ bool gripperCloseActive = false;
 int gripperPulse = SERVOMID; // Start at the middle position
 unsigned long lastGripperUpdate = 0;
 
+// Declare variables to track the start time for gripper open and close
+unsigned long gripperOpenStartTime = 0;
+unsigned long gripperCloseStartTime = 0;
+
 
 
 // void setup() {
@@ -244,10 +248,10 @@ void loop() {
     } else if (ch2Value >= 1000 && ch2Value <= 1250) {
       elbowPitchDown();
       rcAction = true;
-    } else if (ch7Value >= 1500 && ch7Value <= 2000) {
+    } else if (ch1Value >= 1000 && ch1Value <= 1100) {
       rcAction = true;
       gripperOpen();
-    }else if (ch8Value >= 1500 && ch8Value <= 2000) {
+    }else if (ch1Value >= 1900 && ch1Value <= 2000) {
       rcAction = true;
       gripperClose();
     }
@@ -283,14 +287,17 @@ void loop() {
   elbowPitchDownNonBlocking();
 
   // Call the non-blocking gripper functions
-  gripperCloseNonBlocking();
-  gripperOpenNonBlocking();
+  //gripperCloseNonBlocking();
+  //gripperOpenNonBlocking();
 }
 
-void gripperOpen()
-{
-  gripperOpenActive = true;
-  Serial.println("Starting Gripper Open");
+// Adjust slower speeds for the gripper by reducing them by 50%
+#define GRIPPER_OPEN_SPEED 295 // Adjusted speed for opening
+#define GRIPPER_CLOSE_SPEED 313 // Adjusted speed for closing
+
+void gripperOpen() {
+  pwm.setPWM(GRIPPER_CHANNEL, 0, GRIPPER_OPEN_SPEED); // Use even slower speed for opening
+  Serial.println("Gripper opening at further reduced speed");
 }
 
 void gripperOpenNonBlocking() {
@@ -298,23 +305,22 @@ void gripperOpenNonBlocking() {
     unsigned long currentMillis = millis();
     if (currentMillis - lastGripperUpdate >= RAMPDELAY) {
       lastGripperUpdate = currentMillis;
-      // Decrement the pulse width
-      if (gripperPulse > SERVOMIN) {
-        gripperPulse -= RAMPSTEP; // Decrement pulse
-        pwm.setPWM(GRIPPER_CHANNEL, 0, gripperPulse);
-      } else {
-        // Stop the movement when the minimum is reached
+
+      // Check if 3 seconds have passed
+      if (currentMillis - gripperOpenStartTime >= 3000) {
+        pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMID); // Stop the servo
         gripperOpenActive = false;
-        Serial.println("Gripper Open Complete");
+        Serial.println("Gripper Open Stopped after 3 seconds");
+      } else {
+        pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMIN); // Continuous servo: SERVOMIN for open
       }
     }
   }
 }
 
-void gripperClose()
-{
-  gripperCloseActive = true;
-  Serial.println("Starting Gripper Close");
+void gripperClose() {
+  pwm.setPWM(GRIPPER_CHANNEL, 0, GRIPPER_CLOSE_SPEED); // Use even slower speed for closing
+  Serial.println("Gripper closing at further reduced speed");
 }
 
 void gripperCloseNonBlocking() {
@@ -322,14 +328,14 @@ void gripperCloseNonBlocking() {
     unsigned long currentMillis = millis();
     if (currentMillis - lastGripperUpdate >= RAMPDELAY) {
       lastGripperUpdate = currentMillis;
-      // Increment the pulse width
-      if (gripperPulse < SERVOMAX) {
-        gripperPulse += RAMPSTEP; // Increment pulse
-        pwm.setPWM(GRIPPER_CHANNEL, 0, gripperPulse);
-      } else {
-        // Stop the movement when the maximum is reached
+
+      // Check if 3 seconds have passed
+      if (currentMillis - gripperCloseStartTime >= 3000) {
+        pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMID); // Stop the servo
         gripperCloseActive = false;
-        Serial.println("Gripper Close Complete");
+        Serial.println("Gripper Close Stopped after 3 seconds");
+      } else {
+        pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMAX); // Continuous servo: SERVOMAX for close
       }
     }
   }
