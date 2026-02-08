@@ -9,24 +9,23 @@
 
 // Right Elbow Pitch Servo on PCA9685
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-#define SERVO_CHANNEL 15  // Using CH0 on PCA9685
-#define SERVOMIN 250     // Minimum pulse length out of 4096
-#define SERVOMAX 350     // Maximum pulse length out of 4096
-#define SERVOMID 300     // Maximum pulse length out of 4096
+#define EL_SERVO_CHANNEL 15  // Using CH0 on PCA9685
+#define EL_SERVOMIN 100     // Minimum pulse length out of 4096
+#define EL_SERVOMAX 500     // Maximum pulse length out of 4096
+#define EL_SERVOMID 300     // Maximum pulse length out of 4096
 #define RAMPSTEP 10     
 #define RAMPDELAY 1     
 //
 
 // Right Gripper Servo on PCA9685
-#define GRIPPER_CHANNEL 0  // Using CH4 on PCA9685
-// #define R_GRIPPER_SERVOMIN 100     // Minimum pulse length out of 4096
-// #define R_GRIPPER_SERVOMAX 500     // Maximum pulse length out of 4096
-// #define R_GRIPPER_SERVOMID 300     // Maximum pulse length out of 4096
-// #define R_GRIPPER_RAMPSTEP 10     
-// #define R_GRIPPER_RAMPDELAY 2     
+#define GR_CHANNEL 0  // Using CH0 on PCA9685
+// Adjust slower speeds for the gripper by reducing them by 50%
+#define GRIPPER_OPEN_SPEED 295 // Adjusted speed for opening
+#define GRIPPER_CLOSE_SPEED 313 // Adjusted speed for closing
+#define GR_SERVOMID 300     // Maximum pulse length out of 4096
 
 
-//
+
 
 
 
@@ -79,46 +78,9 @@ const int rcThrottleDelay  = 1000; // ms
 // State variables for non-blocking elbow pitch control
 bool elbowPitchUpActive = false;
 bool elbowPitchDownActive = false;
-int elbowPulse = SERVOMID; // Start at the middle position
+int elbowPulse = EL_SERVOMID; // Start at the middle position
 unsigned long lastElbowUpdate = 0;
 
-// State variables for non-blocking gripper control
-bool gripperOpenActive = false;
-bool gripperCloseActive = false;
-int gripperPulse = SERVOMID; // Start at the middle position
-unsigned long lastGripperUpdate = 0;
-
-// Declare variables to track the start time for gripper open and close
-unsigned long gripperOpenStartTime = 0;
-unsigned long gripperCloseStartTime = 0;
-
-
-
-// void setup() {
-
-//   allMotors_Stop();
-
-//   //Set motor control pins as output
-//   pinMode(ENA, OUTPUT);
-//   pinMode(IN1, OUTPUT);
-//   pinMode(IN2, OUTPUT);
-//   pinMode(ENB, OUTPUT);
-//   pinMode(IN3, OUTPUT);
-//   pinMode(IN4, OUTPUT);
-
-//   pwm.begin();
-//   pwm.setPWMFreq(50); 
-  
-
-//   // Start serial communication
-//   Serial.begin(115200);
-//   ibus.begin(Serial1);      // iBUS RX on Serial1 (Pin 19 on Mega)  
-//   Serial.println("Enter command: 0=Stop, 1=Forward 1s, 2=Reverse 1s");
-
-//   //Init Motors
-//   elbowPitchMidPos();
-//   rightGripperMidPos();
-// }
 
 void setup() {
   Serial.begin(115200);
@@ -291,54 +253,17 @@ void loop() {
   //gripperOpenNonBlocking();
 }
 
-// Adjust slower speeds for the gripper by reducing them by 50%
-#define GRIPPER_OPEN_SPEED 295 // Adjusted speed for opening
-#define GRIPPER_CLOSE_SPEED 313 // Adjusted speed for closing
+
 
 void gripperOpen() {
-  pwm.setPWM(GRIPPER_CHANNEL, 0, GRIPPER_OPEN_SPEED); // Use even slower speed for opening
+  pwm.setPWM(GR_CHANNEL, 0, GRIPPER_OPEN_SPEED); // Use even slower speed for opening
   Serial.println("Gripper opening at further reduced speed");
 }
 
-void gripperOpenNonBlocking() {
-  if (gripperOpenActive) {
-    unsigned long currentMillis = millis();
-    if (currentMillis - lastGripperUpdate >= RAMPDELAY) {
-      lastGripperUpdate = currentMillis;
-
-      // Check if 3 seconds have passed
-      if (currentMillis - gripperOpenStartTime >= 3000) {
-        pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMID); // Stop the servo
-        gripperOpenActive = false;
-        Serial.println("Gripper Open Stopped after 3 seconds");
-      } else {
-        pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMIN); // Continuous servo: SERVOMIN for open
-      }
-    }
-  }
-}
 
 void gripperClose() {
-  pwm.setPWM(GRIPPER_CHANNEL, 0, GRIPPER_CLOSE_SPEED); // Use even slower speed for closing
+  pwm.setPWM(GR_CHANNEL, 0, GRIPPER_CLOSE_SPEED); // Use even slower speed for closing
   Serial.println("Gripper closing at further reduced speed");
-}
-
-void gripperCloseNonBlocking() {
-  if (gripperCloseActive) {
-    unsigned long currentMillis = millis();
-    if (currentMillis - lastGripperUpdate >= RAMPDELAY) {
-      lastGripperUpdate = currentMillis;
-
-      // Check if 3 seconds have passed
-      if (currentMillis - gripperCloseStartTime >= 3000) {
-        pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMID); // Stop the servo
-        gripperCloseActive = false;
-        Serial.println("Gripper Close Stopped after 3 seconds");
-      } else {
-        pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMAX); // Continuous servo: SERVOMAX for close
-      }
-    }
-  }
 }
 
 
@@ -355,8 +280,8 @@ void elbowPitchUpNonBlocking() {
       lastElbowUpdate = currentMillis;
 
       // Increment the pulse width
-      if (elbowPulse <= SERVOMAX) {
-        pwm.setPWM(SERVO_CHANNEL, 0, elbowPulse);
+      if (elbowPulse <= EL_SERVOMAX) {
+        pwm.setPWM(EL_SERVO_CHANNEL, 0, elbowPulse);
         elbowPulse += RAMPSTEP; // Increment pulse
       } else {
         // Stop the movement when the maximum is reached
@@ -382,8 +307,8 @@ void elbowPitchDownNonBlocking() {
       lastElbowUpdate = currentMillis;
 
       // Decrement the pulse width
-      if (elbowPulse >= SERVOMIN) {
-        pwm.setPWM(SERVO_CHANNEL, 0, elbowPulse);
+      if (elbowPulse >= EL_SERVOMIN) {
+        pwm.setPWM(EL_SERVO_CHANNEL, 0, elbowPulse);
         elbowPulse -= RAMPSTEP; // Decrement pulse
       } else {
         // Stop the movement when the minimum is reached
@@ -399,13 +324,12 @@ void elbowPitchMidPos()
 {
   // Stop servo
   Serial.println("Min Pos Stopping");
-  pwm.setPWM(SERVO_CHANNEL, 0, SERVOMID);
+  pwm.setPWM(EL_SERVO_CHANNEL, 0, EL_SERVOMID);
   delay(100);
-  pwm.setPWM(SERVO_CHANNEL, 0, SERVOMID);
+  pwm.setPWM(EL_SERVO_CHANNEL, 0, EL_SERVOMID);
   delay(100);
-  pwm.setPWM(SERVO_CHANNEL, 0, SERVOMID);
-
-  pwm.setPWM(SERVO_CHANNEL, 0, 0); // Stop position
+  pwm.setPWM(EL_SERVO_CHANNEL, 0, EL_SERVOMID);
+  pwm.setPWM(EL_SERVO_CHANNEL, 0, 0); // Stop position
   delay(2000); // Hold for 2 seconds
 }
 
@@ -413,12 +337,12 @@ void rightGripperMidPos()
 {
   // Stop servo
   Serial.println("Min Pos Stopping");
-  pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMID);
+  pwm.setPWM(GR_CHANNEL, 0, GR_SERVOMID);
   delay(100);
-  pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMID);
+  pwm.setPWM(GR_CHANNEL, 0, GR_SERVOMID);
   delay(100);
-  pwm.setPWM(GRIPPER_CHANNEL, 0, SERVOMID);
-  pwm.setPWM(GRIPPER_CHANNEL, 0, 0); // Stop position
+  pwm.setPWM(GR_CHANNEL, 0, GR_SERVOMID);
+  pwm.setPWM(GR_CHANNEL, 0, 0); // Stop position
   delay(100); // Hold for 2 seconds
 }
 
@@ -427,7 +351,7 @@ void elbowPitchStop()
 {
       // Stop servo
     Serial.println("Stopping stopElbowPitchServo");
-    pwm.setPWM(SERVO_CHANNEL, 0, 0); // Stop position
+    pwm.setPWM(EL_SERVO_CHANNEL, 0, 0); // Stop position
     elbowPitchUpActive = false;
     elbowPitchDownActive = false;
 }
@@ -436,10 +360,8 @@ void gripperStop()
 {
       // Stop servo
     Serial.println("Stopping stopGripperServo");
-    pwm.setPWM(GRIPPER_CHANNEL, 0, 0); // Stop position
-    pwm.setPWM(GRIPPER_CHANNEL, 0, 0); // Stop position
-    gripperCloseActive = false;
-    gripperOpenActive = false;
+    pwm.setPWM(GR_CHANNEL, 0, 0); // Stop position
+    pwm.setPWM(GR_CHANNEL, 0, 0); // Stop position
 }
 
 
@@ -484,44 +406,6 @@ void rightBaseJointYawRight(int speed) {
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
   analogWrite(ENB, speed);
-}
-
-void rightHand_Open() 
-{
-  if (isRightHandOpen) {
-    Serial.println(":: rightHand_Open - Already Open");
-    return; // Do nothing if the hand is already open
-  }
-
-  Serial.println(":: rightHand_Open");
-
-  // Gradually move the servo to the open position
-  for (int pulse = SERVOMIN; pulse <= SERVOMAX; pulse += 10) { // Increment in small steps
-    pwm.setPWM(SERVO_CHANNEL, 0, pulse);
-    delay(20); // Small delay for smooth movement
-  }
-
-  // Mark the hand as open
-  isRightHandOpen = true;
-}
-
-void rightHand_Close() 
-{
-  if (!isRightHandOpen) {
-    Serial.println(":: rightHand_Close - Already Closed");
-    return; // Do nothing if the hand is already closed
-  }
-
-  Serial.println(":: rightHand_Close");
-
-  // Gradually move the servo to the closed position
-  for (int pulse = SERVOMAX; pulse >= SERVOMIN; pulse -= 10) { // Decrement in small steps
-    pwm.setPWM(SERVO_CHANNEL, 0, pulse);
-    delay(20); // Small delay for smooth movement
-  }
-
-  // Mark the hand as closed
-  isRightHandOpen = false;
 }
 
 
