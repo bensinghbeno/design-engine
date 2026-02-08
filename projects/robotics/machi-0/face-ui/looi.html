@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Looi Agent UI</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            cursor: default; /* Change to 'none' later for the robot look */
+        }
+
+        .face {
+            display: flex;
+            gap: 80px;
+        }
+
+        .eye {
+            width: 140px;
+            height: 140px;
+            background-color: #fff;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: height 0.1s ease-in-out, transform 0.2s ease;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .pupil {
+            width: 50px;
+            height: 50px;
+            background-color: #000;
+            border-radius: 50%;
+            position: absolute;
+            transition: transform 0.05s linear;
+        }
+
+        /* Blink State */
+        .blink {
+            height: 5px !important;
+        }
+
+        /* Hover effect for testing */
+        .face:hover .eye {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="face">
+        <div class="eye" id="left-eye">
+            <div class="pupil"></div>
+        </div>
+        <div class="eye" id="right-eye">
+            <div class="pupil"></div>
+        </div>
+    </div>
+
+    <script>
+        const pupils = document.querySelectorAll('.pupil');
+        const eyes = document.querySelectorAll('.eye');
+
+        // Eye Tracking
+        document.addEventListener('mousemove', (e) => {
+            pupils.forEach(pupil => {
+                const rect = pupil.getBoundingClientRect();
+                const eyeX = rect.left + rect.width / 2;
+                const eyeY = rect.top + rect.height / 2;
+                
+                const angle = Math.atan2(e.clientY - eyeY, e.clientX - eyeX);
+                const distance = Math.min(35, Math.hypot(e.clientX - eyeX, e.clientY - eyeY) / 12);
+                
+                const moveX = Math.cos(angle) * distance;
+                const moveY = Math.sin(angle) * distance;
+                
+                pupil.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            });
+        });
+
+        // Automatic Blinking
+        function triggerBlink() {
+            eyes.forEach(eye => eye.classList.add('blink'));
+            setTimeout(() => {
+                eyes.forEach(eye => eye.classList.remove('blink'));
+            }, 120);
+            
+            // Random interval between 2-6 seconds
+            setTimeout(triggerBlink, Math.random() * 4000 + 2000);
+        }
+
+        triggerBlink();
+    </script>
+</body>
+</html>
