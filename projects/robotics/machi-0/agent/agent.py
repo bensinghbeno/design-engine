@@ -60,12 +60,22 @@ def talk_to_agent(user_input):
     print(f"Looi: {answer}")
     speak(answer)
 
+# Define a dictionary of commands and their corresponding actions
+COMMANDS = {
+    "default": lambda: subprocess.run("curl localhost:5000/emotion/default", shell=True),
+    "talking": lambda: subprocess.run("curl localhost:5000/emotion/talking", shell=True),
+    "smile": lambda: subprocess.run("curl localhost:5000/emotion/happy", shell=True),
+    "angry": lambda: subprocess.run("curl localhost:5000/emotion/angry", shell=True),
+    # Add more commands here as needed
+}
+
 # --- MAIN LOOP ---
 r = sr.Recognizer()
 with sr.Microphone() as source:
     # Adjust for ambient noise
     r.adjust_for_ambient_noise(source)
     print("Looi is listening (Speak now)...")
+    COMMANDS["default"]()  # Trigger 'default' command when idle
     while True:
         try:
             audio = r.listen(source)
@@ -77,11 +87,21 @@ with sr.Microphone() as source:
                 # Extract the question by removing 'check' and any leading trigger phrases
                 question = lower_text.replace("hey machi", "").replace("check", "").strip()
                 if question:
+                    COMMANDS["talking"]()  # Trigger 'talking' command when speaking
                     talk_to_agent(question)
+                    COMMANDS["default"]()  # Return to 'default' after speaking
                 else:
                     print("No valid question detected before 'check'. Ignoring input.")
+            elif "run command" in lower_text:
+                # Extract the command and execute it
+                command = lower_text.replace("hey machi", "").replace("run command", "").strip()
+                if command in COMMANDS:
+                    print(f"Executing command: {command}")
+                    COMMANDS[command]()
+                else:
+                    print(f"Unknown command: {command}")
             else:
-                print("Keyword 'check' not detected. Ignoring input.")
+                print("No valid keyword detected. Ignoring input.")
         except Exception as e:
             print(f"Error: {e}")
             continue
