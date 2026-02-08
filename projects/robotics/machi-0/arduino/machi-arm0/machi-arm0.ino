@@ -10,8 +10,8 @@
 // Right Elbow Pitch Servo on PCA9685
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVO_CHANNEL 15  // Using CH0 on PCA9685
-#define SERVOMIN 100     // Minimum pulse length out of 4096
-#define SERVOMAX 400     // Maximum pulse length out of 4096
+#define SERVOMIN 250     // Minimum pulse length out of 4096
+#define SERVOMAX 350     // Maximum pulse length out of 4096
 #define SERVOMID 300     // Maximum pulse length out of 4096
 #define RAMPSTEP 10     
 #define RAMPDELAY 1     
