@@ -51,7 +51,11 @@
         }
 
         .happy .eye-group { transform: translateY(15px) scaleY(0.5); }
-        .happy .mouth { d: path("M 200 270 Q 300 350 400 270"); stroke: #00ff88; }
+        .happy .mouth { animation: happy-anim 0.6s infinite alternate; stroke: #00ff88; }
+        @keyframes happy-anim {
+            0% { d: path("M 200 270 Q 300 340 400 270"); }
+            100% { d: path("M 190 260 Q 300 360 410 260"); }
+        }
 
         .surprised .eye-group { transform: scale(1.4); }
         .surprised .mouth { d: path("M 280 290 A 20 20 0 1 0 320 290 A 20 20 0 1 0 280 290"); }
