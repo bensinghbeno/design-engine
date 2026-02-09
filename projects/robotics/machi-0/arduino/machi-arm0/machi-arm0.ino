@@ -13,7 +13,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define EL_SERVOMIN 100     // Minimum pulse length out of 4096
 #define EL_SERVOMAX 500     // Maximum pulse length out of 4096
 #define EL_SERVOMID 300     // Maximum pulse length out of 4096
-#define RAMPSTEP 10     
+#define RAMPSTEP 5     
 #define RAMPDELAY 1     
 //
 
@@ -26,19 +26,18 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 
 
-
-
-
 // ----- Cytron_SmartDriveDuo ArmUpperRightMotor -----
 #define INAUR1 4 
 #define ANAUR1 5
 #define ANAUR2 6
 #define INAUR2 7
 
+// Speeds set for 14 Volts
+
+const int BASEJ_ROLL_SPEED_MIN = 50;
+const int BASEJ_YAW_SPEED_MIN = 100; // Increased from 100 to 125 for better torque
 signed int speedLeft = 0;  
 signed int speedRight = 0;   
-const int BASEJ_YAW_SPEED_MIN = 150;
-const int BASEJ_ROLL_SPEED_MIN = 100;
 bool enableRightUpperArmPitch = false;
 bool isRightHandOpen = false; // Tracks whether the hand is open
 
@@ -109,7 +108,7 @@ void setup() {
   allMotors_Stop();
   Serial.println("Motors Stopped...");
   Serial.println("Setting Initial Positions...");
-  elbowPitchMidPos();
+  //elbowPitchMidPos();
   rightGripperMidPos();
 
  
@@ -199,10 +198,10 @@ void loop() {
       rightBaseJointRollDown(BASEJ_ROLL_SPEED_MIN);      
       rcAction = true;                         
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch4Value >= 1000) && (ch4Value <= 1200)){
-      rightBaseJointYawLeft(BASEJ_YAW_SPEED_MIN);
+      rightBaseJointYawRight(BASEJ_YAW_SPEED_MIN);
       rcAction = true;
     } else if ( (enableFwdReverseS1) && (enableFwdReverseS2) && (ch4Value >= 1800) && (ch4Value <= 2000)){
-      rightBaseJointYawRight(BASEJ_YAW_SPEED_MIN);
+      rightBaseJointYawLeft(BASEJ_YAW_SPEED_MIN);
       rcAction = true;                           
     } else if (ch2Value >= 1750 && ch2Value <= 2000) {
       elbowPitchUp();
@@ -217,26 +216,6 @@ void loop() {
       rcAction = true;
       gripperClose();
     }
-    //else if (ch2Value >= 1750 && ch2Value <= 2000) {
-    //   foreArmRight_PitchUp();
-    //   rcAction = true;
-    // } else if ((enableRightUpperArmPitch) && (ch3Value <= 1100 )){
-    //   enableRightUpperArmPitch = true;
-    //   upperArmRight_PitchDown();
-    //   rcAction = true;
-    // } else if ((enableRightUpperArmPitch) && (ch3Value >= 1900 )){
-    //   enableRightUpperArmPitch = true;
-    //   upperArmRight_PitchUp();
-    //   rcAction = true;
-    // } else if ((enableRightUpperArmPitch == false) && (ch3Value >= 1300 && ch3Value <= 1700)) {
-    //   enableRightUpperArmPitch = true;
-    // } else if (ch5Value >= 1750 && ch5Value <= 2000) {
-    //   rightHand_Close();
-    //   rcAction = true;
-    // } else if (ch5Value >= 1000 && ch5Value <= 1250) {
-    //   rightHand_Open();
-    //   rcAction = true;
-    // }
 
     if (!rcAction)
     {
@@ -269,8 +248,10 @@ void gripperClose() {
 
 void elbowPitchUp()
 {
-  elbowPitchUpActive = true;
-  Serial.println("Starting Elbow Pitch Up");
+  if (!elbowPitchUpActive && !elbowPitchDownActive) { // Ensure no other movement is active
+    elbowPitchUpActive = true;
+    Serial.println("Starting Elbow Pitch Up");
+  }
 }
 
 void elbowPitchUpNonBlocking() {
@@ -280,11 +261,11 @@ void elbowPitchUpNonBlocking() {
       lastElbowUpdate = currentMillis;
 
       // Increment the pulse width
-      if (elbowPulse <= EL_SERVOMAX) {
-        pwm.setPWM(EL_SERVO_CHANNEL, 0, elbowPulse);
+      if (elbowPulse < EL_SERVOMAX) {
         elbowPulse += RAMPSTEP; // Increment pulse
+        pwm.setPWM(EL_SERVO_CHANNEL, 0, elbowPulse);
       } else {
-        // Stop the movement when the maximum is reached
+        elbowPulse = EL_SERVOMAX; // Ensure it stays at max
         elbowPitchUpActive = false;
         Serial.println("Elbow Pitch Up Complete");
       }
@@ -294,8 +275,10 @@ void elbowPitchUpNonBlocking() {
 
 void elbowPitchDown()
 {
-  elbowPitchDownActive = true;
-  Serial.println("Starting Elbow Pitch Down");
+  if (!elbowPitchDownActive && !elbowPitchUpActive) { // Ensure no other movement is active
+    elbowPitchDownActive = true;
+    Serial.println("Starting Elbow Pitch Down");
+  }
 }
 
 
@@ -307,11 +290,11 @@ void elbowPitchDownNonBlocking() {
       lastElbowUpdate = currentMillis;
 
       // Decrement the pulse width
-      if (elbowPulse >= EL_SERVOMIN) {
-        pwm.setPWM(EL_SERVO_CHANNEL, 0, elbowPulse);
+      if (elbowPulse > EL_SERVOMIN) {
         elbowPulse -= RAMPSTEP; // Decrement pulse
+        pwm.setPWM(EL_SERVO_CHANNEL, 0, elbowPulse);
       } else {
-        // Stop the movement when the minimum is reached
+        elbowPulse = EL_SERVOMIN; // Ensure it stays at min
         elbowPitchDownActive = false;
         Serial.println("Elbow Pitch Down Complete");
       }
@@ -351,6 +334,10 @@ void elbowPitchStop()
 {
       // Stop servo
     Serial.println("Stopping stopElbowPitchServo");
+    pwm.setPWM(EL_SERVO_CHANNEL, 0, 0); // Stop position
+    delay(100);
+    pwm.setPWM(EL_SERVO_CHANNEL, 0, 0); // Stop position
+    delay(100);
     pwm.setPWM(EL_SERVO_CHANNEL, 0, 0); // Stop position
     elbowPitchUpActive = false;
     elbowPitchDownActive = false;
@@ -392,6 +379,7 @@ void rightBaseJointRollDown(int speed) {
   analogWrite(ENA, speed);
 }
 
+// Revert yaw functions to their original implementation
 void rightBaseJointYawLeft(int speed) {
   Serial.println("Command: rightBaseJointYawLeft");
 
@@ -488,34 +476,6 @@ void upperArmRight_RollRight(int speed) {
   digitalWrite(IN2, HIGH);
   analogWrite(ENA, speed);
 }
-
-
-
-// // Function to start opening the gripper
-// void gripperClose() {
-//   gripperCloseActive = true;
-//   Serial.println("Starting Gripper Close");
-// }
-
-  // // Non-blocking function to close the gripper
-  // void gripperCloseNonBlocking() {
-  //   if (gripperCloseActive) {
-  //     unsigned long currentMillis = millis();
-  //     if (currentMillis - lastGripperUpdate >= R_GRIPPER_RAMPDELAY) {
-  //       lastGripperUpdate = currentMillis;
-
-  //       // Decrement the pulse width
-  //       if (gripperPulse >= R_GRIPPER_SERVOMAX) {
-  //         pwm.setPWM(GRIPPER_CHANNEL, 0, gripperPulse);
-  //         gripperPulse -= R_GRIPPER_RAMPSTEP; // Decrement pulse
-  //       } else {
-  //         // Stop the movement when the minimum is reached
-  //         gripperCloseActive = false;
-  //         Serial.println("Gripper Close Complete");
-  //       }
-  //     }
-  //   }
-  // }
 
 
 
