@@ -23,29 +23,29 @@
     {
       "type": "wokwi-text",
       "id": "L1",
-      "top": -38.4,
-      "left": -124.8,
+      "top": -19.2,
+      "left": -76.8,
       "attrs": { "text": "PUL+", "size": "small" }
     },
     {
       "type": "wokwi-text",
       "id": "L2",
-      "top": -9.6,
-      "left": -124.8,
+      "top": 9.6,
+      "left": -76.8,
       "attrs": { "text": "PUL-", "size": "small" }
     },
     {
       "type": "wokwi-text",
       "id": "L3",
-      "top": 19.2,
-      "left": -124.8,
+      "top": -19.2,
+      "left": -96.8,
       "attrs": { "text": "DIR+", "size": "small" }
     },
     {
       "type": "wokwi-text",
       "id": "L4",
-      "top": 48,
-      "left": -124.8,
+      "top": 9.6,
+      "left": -96.8,
       "attrs": { "text": "DIR-", "size": "small" }
     },
     {
@@ -79,29 +79,29 @@
     {
       "type": "wokwi-text",
       "id": "L9",
-      "top": 67.2,
-      "left": -57.6,
+      "top": -19.2,
+      "left": 76.8,
       "attrs": { "text": "A+", "size": "small" }
     },
     {
       "type": "wokwi-text",
       "id": "L10",
-      "top": 28.8,
-      "left": -57.6,
+      "top": 9.6,
+      "left": 76.8,
       "attrs": { "text": "A-", "size": "small" }
     },
     {
       "type": "wokwi-text",
       "id": "L11",
-      "top": 0,
-      "left": -57.6,
+      "top": -19.2,
+      "left": 96.8,
       "attrs": { "text": "B+", "size": "small" }
     },
     {
       "type": "wokwi-text",
       "id": "L12",
-      "top": -19.2,
-      "left": -57.6,
+      "top": 9.6,
+      "left": 96.8,
       "attrs": { "text": "B-", "size": "small" }
     }
   ],
