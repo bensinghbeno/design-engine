@@ -1,6 +1,6 @@
 {
     "name": "Machi",
-    "shopping_list": ["Thermal paste", "USB-C cable", "Coffee beans"],
+    "counter": ["3 Beef Jerkeys", "3 Soda cans ", "2 Skinny Pops"],
     "version": "2.0",
     "personality": "Witty and helpful robot"
 }
