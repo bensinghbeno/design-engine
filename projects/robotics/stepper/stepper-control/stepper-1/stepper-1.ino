@@ -1,26 +1,19 @@
-// DM542TE Control - Common Anode Wiring
-// 1600 steps/rev | 1.1A RMS (Safe for Plastic Gearbox)
-
 const int stepPin = 3;
 const int dirPin = 2;
 
-const int STEPS_PER_REV = 1600;
-const int DIR_CW = LOW;  // Clockwise
-const int DIR_ACW = HIGH; // Anti-Clockwise
-const unsigned int PULSE_WIDTH_US = 10;
+const int STEPS_PER_REV = 400; // Updated to 400 for DM542TE (SW5-SW8=ON)
+const int DIR_CW = LOW;
+const int DIR_ACW = HIGH;
+const unsigned int PULSE_WIDTH_US = 50; // Increased for better signal stability
+const int GEAR_RATIO = 10; // 10:1 Gearbox integration
 
 void setup() {
   pinMode(stepPin, OUTPUT);
   pinMode(dirPin, OUTPUT);
-  
-  // In Common Anode, keeping pins HIGH means the internal LED is OFF
   digitalWrite(stepPin, HIGH);
   digitalWrite(dirPin, HIGH);
-
   Serial.begin(115200);
-  Serial.println("DM542TE System Online.");
-  Serial.println("Enter command: C<rpm> for Clockwise, A<rpm> for Anti-Clockwise");
-  Serial.println("Example: C5 for 5 RPM Clockwise, A10 for 10 RPM Anti-Clockwise");
+  Serial.println("32V TORQUE MODE: 400 steps/rev | Soft Start | 10:1 Gearbox");
 }
 
 void loop() {
@@ -31,55 +24,56 @@ void loop() {
 
     if (cmd.length() > 1) {
       char directionCmd = cmd.charAt(0);
-      String rpmStr = cmd.substring(1);
-      long rpm = rpmStr.toInt();
+      long rpm = cmd.substring(1).toInt();
 
       if (rpm > 0) {
-        int direction;
-        if (directionCmd == 'C') {
-          direction = DIR_CW;
-          Serial.print("Moving Clockwise at ");
-        } else if (directionCmd == 'A') {
-          direction = DIR_ACW;
-          Serial.print("Moving Anti-Clockwise at ");
-        } else {
-          Serial.println("Invalid direction. Use 'C' or 'A'.");
-          return;
-        }
-
-        Serial.print(rpm);
-        Serial.println(" RPM (1 revolution)...");
-
-        // stepInterval is the total time for one step cycle (HIGH and LOW pulse) in microseconds
-        // stepInterval = (seconds_per_minute * microseconds_per_second) / (steps_per_rev * rpm)
-        // The denominator must be cast to a larger type (unsigned long) to prevent overflow during multiplication.
-        // On an Arduino Uno/Nano, an 'int' is 16 bits, and `1600 * 100` already exceeds its maximum value.
-        unsigned long stepInterval = (60UL * 1000000UL) / ((unsigned long)STEPS_PER_REV * rpm);
-
-        if (stepInterval <= PULSE_WIDTH_US) {
-          Serial.println("Error: RPM is too high. Resulting step interval is too short.");
-          return;
-        }
-        moveStepper(direction, STEPS_PER_REV, stepInterval);
-
-      } else {
-        Serial.println("Invalid RPM. Must be a positive number.");
+        int direction = (directionCmd == 'C') ? DIR_CW : DIR_ACW;
+        // Calculation for 400 steps
+        // Adjusted for Gearbox: motor must spin 10x faster than arm
+        long motorRPM = rpm * GEAR_RATIO;
+        unsigned long targetInterval = (60UL * 1000000UL) / ((unsigned long)STEPS_PER_REV * motorRPM);
+        
+        moveTimed(direction, targetInterval);
       }
-    } else if (cmd.length() > 0) {
-        Serial.println("Invalid command format. Example: C5");
     }
   }
 }
 
-void moveStepper(int direction, int totalSteps, unsigned long interval) {
+void moveTimed(int direction, unsigned long targetInterval) {
   digitalWrite(dirPin, direction);
-  delay(10); // Short delay for driver to register direction change
+  delay(100); 
 
-  for (int i = 0; i < totalSteps; i++) {
-    digitalWrite(stepPin, LOW);  // PULSE START (LED ON)
-    delayMicroseconds(PULSE_WIDTH_US);       // Pulse width
-    digitalWrite(stepPin, HIGH); // PULSE END (LED OFF)
-    delayMicroseconds(interval - PULSE_WIDTH_US); // Time until next pulse
+  unsigned long runTimeMicros = 5000000UL; // Still 5 seconds
+  unsigned long startTime = micros();
+
+  // SOFT START: Start with a slower interval (approx 4000us) to prevent jerking
+  // If target is slower than start speed, just use target.
+  unsigned long currentInterval = 4000; 
+  if (targetInterval > currentInterval) currentInterval = targetInterval;
+
+  while (micros() - startTime < runTimeMicros) {
+    // RAMPING: Gently decrease interval (increase speed) until we hit target
+    if (currentInterval > targetInterval) {
+      currentInterval -= 10; // Ramping step
+      if (currentInterval < targetInterval) currentInterval = targetInterval;
+    }
+
+    // Generate a slower pulse
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(PULSE_WIDTH_US);
+    digitalWrite(stepPin, HIGH);
+    
+    unsigned long pause = currentInterval - PULSE_WIDTH_US;
+    if ((micros() - startTime) + pause > runTimeMicros) break;
+    
+    // Fix: delayMicroseconds acts erratically > 16383us on standard AVR boards.
+    // For low RPM (High Torque), we must use delay() for the bulk of the time.
+    if (pause > 16000) {
+      delay(pause / 1000);
+      delayMicroseconds(pause % 1000);
+    } else {
+      delayMicroseconds(pause);
+    }
   }
-  Serial.println("Done.");
+  Serial.println("Run complete.");
 }
