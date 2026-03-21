@@ -4,6 +4,8 @@ import requests
 import speech_recognition as sr
 from openai import OpenAI
 import subprocess
+import argparse
+import sys
 
 # --- CONFIGURATION ---
 CONTEXT_FILE = 'context.json'
@@ -69,39 +71,60 @@ COMMANDS = {
     # Add more commands here as needed
 }
 
-# --- MAIN LOOP ---
-r = sr.Recognizer()
-with sr.Microphone() as source:
-    # Adjust for ambient noise
-    r.adjust_for_ambient_noise(source)
-    print("Looi is listening (Speak now)...")
-    COMMANDS["default"]()  # Trigger 'default' command when idle
-    while True:
-        try:
-            audio = r.listen(source)
-            text = r.recognize_google(audio)
-            print(f"Ben: {text}")
-            
-            lower_text = text.lower()
-            if "check" in lower_text:
-                # Extract the question by removing 'check' and any leading trigger phrases
-                question = lower_text.replace("hey machi", "").replace("check", "").strip()
-                if question:
-                    COMMANDS["talking"]()  # Trigger 'talking' command when speaking
-                    talk_to_agent(question)
-                    COMMANDS["default"]()  # Return to 'default' after speaking
-                else:
-                    print("No valid question detected before 'check'. Ignoring input.")
-            elif "run command" in lower_text:
-                # Extract the command and execute it
-                command = lower_text.replace("hey machi", "").replace("run command", "").strip()
-                if command in COMMANDS:
-                    print(f"Executing command: {command}")
-                    COMMANDS[command]()
-                else:
-                    print(f"Unknown command: {command}")
-            else:
-                print("No valid keyword detected. Ignoring input.")
-        except Exception as e:
-            print(f"Error: {e}")
-            continue
+def main():
+    parser = argparse.ArgumentParser(description="Looi Agent Interaction")
+    parser.add_argument('--input', type=str, choices=['text', 'mic'], required=True,
+                        help="Specify input mode: 'text' for text input, 'mic' for microphone input")
+    args = parser.parse_args()
+
+    if not args.input:
+        print("Error: --input argument is required. Use --input text or --input mic.")
+        sys.exit(1)
+
+    if args.input == 'text':
+        while True:
+            try:
+                user_input = input("Ben: ")
+                if user_input.lower() in ['exit', 'quit']:
+                    print("Exiting...")
+                    break
+                talk_to_agent(user_input)
+            except KeyboardInterrupt:
+                print("\nExiting...")
+                break
+    elif args.input == 'mic':
+        r = sr.Recognizer()
+        with sr.Microphone() as source:
+            r.adjust_for_ambient_noise(source)
+            print("Looi is listening (Speak now)...")
+            COMMANDS["default"]()  # Trigger 'default' command when idle
+            while True:
+                try:
+                    audio = r.listen(source)
+                    text = r.recognize_google(audio)
+                    print(f"Ben: {text}")
+
+                    lower_text = text.lower()
+                    if "check" in lower_text:
+                        question = lower_text.replace("hey machi", "").replace("check", "").strip()
+                        if question:
+                            COMMANDS["talking"]()
+                            talk_to_agent(question)
+                            COMMANDS["default"]()
+                        else:
+                            print("No valid question detected before 'check'. Ignoring input.")
+                    elif "run command" in lower_text:
+                        command = lower_text.replace("hey machi", "").replace("run command", "").strip()
+                        if command in COMMANDS:
+                            print(f"Executing command: {command}")
+                            COMMANDS[command]()
+                        else:
+                            print(f"Unknown command: {command}")
+                    else:
+                        print("No valid keyword detected. Ignoring input.")
+                except Exception as e:
+                    print(f"Error: {e}")
+                    continue
+
+if __name__ == "__main__":
+    main()
