@@ -1,5 +1,6 @@
 const int stepPin = 3;
 const int dirPin = 2;
+const int enablePin = 4; // Pin to enable/disable the driver
 
 const int STEPS_PER_REV = 400; // Updated to 400 for DM542TE (SW5-SW8=ON)
 const int DIR_CW = LOW;
@@ -7,11 +8,17 @@ const int DIR_ACW = HIGH;
 const unsigned int PULSE_WIDTH_US = 50; // Increased for better signal stability
 const int GEAR_RATIO = 10; // 10:1 Gearbox integration
 
+#define COMMAND_RUN_TIME 7 // Define the amount of seconds a command will run
+
+bool holdEnabled = false;
+
 void setup() {
   pinMode(stepPin, OUTPUT);
   pinMode(dirPin, OUTPUT);
+  pinMode(enablePin, OUTPUT);
   digitalWrite(stepPin, HIGH);
   digitalWrite(dirPin, HIGH);
+  digitalWrite(enablePin, LOW); // Disable driver initially to prevent motor locking
   Serial.begin(115200);
   Serial.println("32V TORQUE MODE: 400 steps/rev | Soft Start | 10:1 Gearbox");
 }
@@ -22,19 +29,35 @@ void loop() {
     cmd.trim();
     cmd.toUpperCase();
 
+    if (cmd == "E") {
+      holdEnabled = true;
+      digitalWrite(enablePin, HIGH);
+      Serial.println("HOLD ENABLED: Motor will remain engaged after command execution.");
+      return;
+    } else if (cmd == "X") {
+      holdEnabled = false;
+      digitalWrite(enablePin, LOW);
+      Serial.println("HOLD DISABLED: Motor will disengage after command execution.");
+      return;
+    }
+
+    digitalWrite(enablePin, HIGH); // Enable driver (ENA- LOW) when a command is received
+
     if (cmd.length() > 1) {
       char directionCmd = cmd.charAt(0);
       long rpm = cmd.substring(1).toInt();
 
       if (rpm > 0) {
         int direction = (directionCmd == 'C') ? DIR_CW : DIR_ACW;
-        // Calculation for 400 steps
-        // Adjusted for Gearbox: motor must spin 10x faster than arm
         long motorRPM = rpm * GEAR_RATIO;
         unsigned long targetInterval = (60UL * 1000000UL) / ((unsigned long)STEPS_PER_REV * motorRPM);
-        
+
         moveTimed(direction, targetInterval);
       }
+    }
+
+    if (!holdEnabled) {
+      digitalWrite(enablePin, LOW); // Disable driver (ENA- HIGH) after command execution
     }
   }
 }
@@ -43,7 +66,7 @@ void moveTimed(int direction, unsigned long targetInterval) {
   digitalWrite(dirPin, direction);
   delay(100); 
 
-  unsigned long runTimeMicros = 5000000UL; // Still 5 seconds
+  unsigned long runTimeMicros = COMMAND_RUN_TIME * 1000000UL; // Use the macro for run time
   unsigned long startTime = micros();
 
   // SOFT START: Start with a slower interval (approx 4000us) to prevent jerking
