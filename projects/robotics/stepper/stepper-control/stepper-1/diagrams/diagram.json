@@ -3,7 +3,7 @@
   "author": "Bensingh",
   "editor": "wokwi",
   "parts": [
-    { "type": "wokwi-arduino-uno", "id": "uno", "top": 144.6, "left": -231, "attrs": {} },
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 173.4, "left": -240.6, "attrs": {} },
     { "type": "chip-dm542te", "id": "driver", "top": -37.38, "left": -139.2, "attrs": {} },
     {
       "type": "wokwi-stepper-motor",
@@ -16,36 +16,36 @@
       "type": "wokwi-vcc",
       "id": "pwr_pos",
       "top": 87.16,
-      "left": 240,
+      "left": 249.6,
       "attrs": { "label": "24-48VDC" }
     },
     { "type": "wokwi-gnd", "id": "pwr_neg", "top": 124.8, "left": 249, "attrs": {} },
     {
       "type": "wokwi-text",
       "id": "L1",
-      "top": -19.2,
-      "left": -76.8,
+      "top": -38.4,
+      "left": -134.4,
       "attrs": { "text": "PUL+", "size": "small" }
     },
     {
       "type": "wokwi-text",
       "id": "L2",
-      "top": 9.6,
-      "left": -76.8,
+      "top": -9.6,
+      "left": -124.8,
       "attrs": { "text": "PUL-", "size": "small" }
     },
     {
       "type": "wokwi-text",
       "id": "L3",
-      "top": -19.2,
-      "left": -96.8,
+      "top": 19.2,
+      "left": -124.8,
       "attrs": { "text": "DIR+", "size": "small" }
     },
     {
       "type": "wokwi-text",
       "id": "L4",
-      "top": 9.6,
-      "left": -96.8,
+      "top": 28.8,
+      "left": -172.8,
       "attrs": { "text": "DIR-", "size": "small" }
     },
     {
@@ -79,35 +79,49 @@
     {
       "type": "wokwi-text",
       "id": "L9",
-      "top": -19.2,
-      "left": 76.8,
+      "top": 67.2,
+      "left": -57.6,
       "attrs": { "text": "A+", "size": "small" }
     },
     {
       "type": "wokwi-text",
       "id": "L10",
-      "top": 9.6,
-      "left": 76.8,
+      "top": 38.4,
+      "left": -48,
       "attrs": { "text": "A-", "size": "small" }
     },
     {
       "type": "wokwi-text",
       "id": "L11",
-      "top": -19.2,
-      "left": 96.8,
+      "top": 9.6,
+      "left": -57.6,
       "attrs": { "text": "B+", "size": "small" }
     },
     {
       "type": "wokwi-text",
       "id": "L12",
-      "top": 9.6,
-      "left": 96.8,
+      "top": -19.2,
+      "left": -57.6,
       "attrs": { "text": "B-", "size": "small" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "L13",
+      "top": 76.8,
+      "left": -124.8,
+      "attrs": { "text": "ENA+", "size": "small" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "L14",
+      "top": 105.6,
+      "left": -124.8,
+      "attrs": { "text": "ENA-", "size": "small" }
     }
   ],
   "connections": [
-    [ "uno:5V", "driver:PUL+", "red", [ "v-57.7", "h-140.2", "v-249.6" ] ],
-    [ "uno:5V", "driver:DIR+", "red", [ "v-28.9", "h-121", "v-259.2" ] ],
+    [ "uno:5V", "driver:PUL+", "red", [ "v-76.9", "h-169", "v-316.8" ] ],
+    [ "uno:5V", "driver:DIR+", "red", [ "v-76.9", "h-169", "v-259.2" ] ],
     [ "uno:3", "driver:PUL-", "orange", [ "v48", "h-168.8", "v-163.2" ] ],
     [ "uno:2", "driver:DIR-", "blue", [ "v86.4", "h-168.7", "v-153.6" ] ],
     [ "driver:A+", "stepper:A+", "black", [ "h347.41" ] ],
@@ -115,7 +129,9 @@
     [ "driver:B+", "stepper:B+", "red", [ "h30.61", "h326.4" ] ],
     [ "driver:B-", "stepper:B-", "blue", [ "h366.62" ] ],
     [ "pwr_pos:VCC", "driver:VCC", "red", [ "h-263.6", "v-410.84" ] ],
-    [ "pwr_neg:GND", "driver:GND", "black", [ "h-283.4", "v-423.2" ] ]
+    [ "pwr_neg:GND", "driver:GND", "black", [ "h-283.4", "v-423.2" ] ],
+    [ "driver:ENA+", "uno:5V", "red", [ "h-115.2", "v201.6", "h169" ] ],
+    [ "driver:ENA-", "uno:4", "yellow", [ "h-28.8", "v38.4", "h140.1" ] ]
   ],
   "dependencies": {}
 }
