@@ -1,3 +1,7 @@
+
+// Voltage Source
+// 24 Volts, 2.7 A
+
 const int stepPin = 3;
 const int dirPin = 2;
 const int enablePin = 4; // Pin to enable/disable the driver
@@ -8,7 +12,7 @@ const int DIR_ACW = HIGH;
 const unsigned int PULSE_WIDTH_US = 50; // Increased for better signal stability
 const int GEAR_RATIO = 10; // 10:1 Gearbox integration
 
-#define COMMAND_RUN_TIME 7 // Define the amount of seconds a command will run
+#define COMMAND_RUN_TIME 3 // Define the amount of seconds a command will run
 
 bool holdEnabled = false;
 
