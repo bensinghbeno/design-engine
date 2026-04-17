@@ -51,15 +51,6 @@ void setup() {
 
 // ===== MAIN LOOP =====
 void loop() {
-  commandSet = false;  // Reset command flag
-
-  // --- RC Input Check (Priority Only If No Serial Command Issued) ---
-    if (!commandSet)
-    {
-      int ch1Value = ibus.readChannel(0); // CH1 (Steering)
-      int ch2Value = ibus.readChannel(1); // CH2 (Throttle)
-
-
           // Scan iBus channels
       ch1Value = ibus.readChannel(0); 
       Serial.print("Ch1 ");
@@ -114,6 +105,5 @@ void loop() {
 
 
     delay(10);
-  }
 
 }
