@@ -1,0 +1,5 @@
+Terminal 1 — start the publisher:
+bashsource /opt/ros/noetic/setup.bash
+python3 test_publisher.py
+Blender — open and run ros_blender_bridge.py
+Both TestCube and Joint_Base_Motor1_Yaw should spin a full 360° every 5 seconds, exactly matching your original rotate script.
