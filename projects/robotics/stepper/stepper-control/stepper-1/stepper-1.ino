@@ -1,3 +1,4 @@
+#include <Arduino.h> // Ensure Arduino constants and functions are defined
 
 // Voltage Source
 // 24 Volts, 2.7 A
@@ -12,22 +13,75 @@ const int DIR_ACW = HIGH;
 const unsigned int PULSE_WIDTH_US = 50; // Increased for better signal stability
 const int GEAR_RATIO = 10; // 10:1 Gearbox integration
 
-#define COMMAND_RUN_TIME 3 // Define the amount of seconds a command will run
+#define COMMAND_RUN_TIME 500 // Define the amount of milliseconds a command will run
 
-bool holdEnabled = false;
+// Set holdEnabled to true by default
+bool holdEnabled = true;
+
+const int buttonPinDirection = 7; // Button to control direction
+const int buttonPinStop = 6; // Button to control start/stop
+const int BUTTON_RPM = 10; // RPM for button-controlled rotation
 
 void setup() {
   pinMode(stepPin, OUTPUT);
   pinMode(dirPin, OUTPUT);
   pinMode(enablePin, OUTPUT);
+  pinMode(buttonPinDirection, INPUT_PULLUP); // Enable internal pull-up resistor for pin 7
+  pinMode(buttonPinStop, INPUT_PULLUP); // Enable internal pull-up resistor for pin 6
   digitalWrite(stepPin, HIGH);
   digitalWrite(dirPin, HIGH);
-  digitalWrite(enablePin, LOW); // Disable driver initially to prevent motor locking
+  digitalWrite(enablePin, HIGH); // Enable driver initially to hold the motor
   Serial.begin(115200);
-  Serial.println("32V TORQUE MODE: 400 steps/rev | Soft Start | 10:1 Gearbox");
+  digitalWrite(enablePin, HIGH); // Enable driver (ENA- LOW) when a command is received
+  delay(200); // Short delay to ensure the driver is ready
+  Serial.println("Stepper Motor Control Initialized. Send commands in the format: C100 for CW at 100 RPM, A100 for ACW at 100 RPM.");
 }
 
-void loop() {
+void loop() 
+{
+    int directionState = digitalRead(buttonPinDirection);
+    int stopState = digitalRead(buttonPinStop);
+
+    if (stopState == HIGH) 
+    {
+       digitalWrite(enablePin, LOW); // Stop rotating
+    } 
+    else 
+    {
+      digitalWrite(enablePin, HIGH); // Enable rotation
+
+      if (directionState == HIGH) {
+        Serial.println("Rotating Clockwise");
+      } else {
+        Serial.println("Rotating Anticlockwise");
+      }
+
+      int direction = (directionState == HIGH) ? DIR_CW : DIR_ACW;
+      long motorRPM = BUTTON_RPM * GEAR_RATIO;
+      unsigned long targetInterval = (60UL * 1000000UL) / ((unsigned long)STEPS_PER_REV * motorRPM);
+
+      // Rotate at 10 RPM until the stop button is released (Pin goes HIGH)
+      digitalWrite(dirPin, direction);
+      while (digitalRead(buttonPinStop) == LOW) {
+        digitalWrite(stepPin, LOW);
+        delayMicroseconds(PULSE_WIDTH_US);
+        digitalWrite(stepPin, HIGH);
+        
+        unsigned long pause = targetInterval - PULSE_WIDTH_US;
+        // Handle potential long delays for very low RPM
+        if (pause > 16000) {
+          delay(pause / 1000);
+          delayMicroseconds(pause % 1000);
+        } else {
+          delayMicroseconds(pause);
+        }
+      }
+
+      Serial.println("Button released. Stopping.");
+      return; 
+    }
+    
+
   if (Serial.available() > 0) {
     String cmd = Serial.readStringUntil('\n');
     cmd.trim();
@@ -45,8 +99,6 @@ void loop() {
       return;
     }
 
-    digitalWrite(enablePin, HIGH); // Enable driver (ENA- LOW) when a command is received
-
     if (cmd.length() > 1) {
       char directionCmd = cmd.charAt(0);
       long rpm = cmd.substring(1).toInt();
@@ -56,9 +108,11 @@ void loop() {
         long motorRPM = rpm * GEAR_RATIO;
         unsigned long targetInterval = (60UL * 1000000UL) / ((unsigned long)STEPS_PER_REV * motorRPM);
 
-        moveTimed(direction, targetInterval);
+        moveTimed(direction, targetInterval, COMMAND_RUN_TIME);
       }
     }
+
+
 
     if (!holdEnabled) {
       digitalWrite(enablePin, LOW); // Disable driver (ENA- HIGH) after command execution
@@ -66,11 +120,11 @@ void loop() {
   }
 }
 
-void moveTimed(int direction, unsigned long targetInterval) {
+void moveTimed(int direction, unsigned long targetInterval, unsigned long durationMillis) {
   digitalWrite(dirPin, direction);
   delay(100); 
 
-  unsigned long runTimeMicros = COMMAND_RUN_TIME * 1000000UL; // Use the macro for run time
+  unsigned long runTimeMicros = durationMillis * 1000UL; // Convert milliseconds to microseconds
   unsigned long startTime = micros();
 
   // SOFT START: Start with a slower interval (approx 4000us) to prevent jerking
