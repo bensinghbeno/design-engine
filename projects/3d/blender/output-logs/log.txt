@@ -1,0 +1,13 @@
+--- FULL COMPONENT SPECIFICATIONS ---
+Object Name:    cycloid-disc
+Total Width (X): 69.4279 mm
+Total Depth (Y): 69.4279 mm
+Total Height (Z):8.0000 mm (Disc Thickness)
+------------------------------
+Max Radius:     34.9716 mm (Lobe Peak)
+Min Radius:     14.2700 mm (Likely Center Bore)
+Outer Diameter:  69.4279 mm
+------------------------------
+Vertex Count:   5378
+Polygon Count:  10772
+--------------------------------------
