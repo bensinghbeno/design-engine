@@ -20,7 +20,7 @@ bool holdEnabled = true;
 
 const int buttonPinDirection = 7; // Button to control direction
 const int buttonPinStop = 6; // Button to control start/stop
-const int BUTTON_RPM = 10; // RPM for button-controlled rotation
+const int BUTTON_RPM = 100; // RPM for button-controlled rotation
 
 void setup() {
   pinMode(stepPin, OUTPUT);
