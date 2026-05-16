@@ -11,7 +11,7 @@ const int STEPS_PER_REV = 400; // Updated to 400 for DM542TE (SW5-SW8=ON)
 const int DIR_CW = LOW;
 const int DIR_ACW = HIGH;
 const unsigned int PULSE_WIDTH_US = 50; // Increased for better signal stability
-const int GEAR_RATIO = 10; // 10:1 Gearbox integration
+const int GEAR_RATIO = 50; // 10:1 Gearbox integration
 
 #define COMMAND_RUN_TIME 500 // Define the amount of milliseconds a command will run
 
