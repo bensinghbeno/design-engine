@@ -1,0 +1,22 @@
+{
+  "config": 7,
+  "fixed_ring_diameter_mm": 81,
+  "number_of_external_pins": 46,
+  "external_pin_diameter_mm": 5.0,
+  "number_of_output_pins": 3,
+  "output_pin_diameter_mm": 10,
+  "output_disk_diameter_mm": 43.304,
+  "number_of_lobes": 45,
+  "eccentricity_mm": 0.6848,
+  "camshaft_hole_diameter_mm": 20,
+  "disk_thickness_mm": 2.06,
+  "outer_disk_diameter_mm": 76.87,
+  "transmission_ratio": 45.00,
+  "avg_pressure_angle_deg": 51.11,
+  "notes": {
+    "camshaft_hole_diameter": "approximate, from cycloid-disk-v7 geometry",
+    "disk_thickness": "measured from cycloid-disk-v7 Z range",
+    "outer_disk_diameter": "measured from cycloid-disk-v7 max radius",
+    "source": "identified from cycloid-disk-v7 Blender object and config-7 housing script"
+  }
+}
