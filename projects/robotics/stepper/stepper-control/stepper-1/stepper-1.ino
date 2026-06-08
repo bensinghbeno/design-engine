@@ -11,7 +11,7 @@ const int STEPS_PER_REV = 400; // Updated to 400 for DM542TE (SW5-SW8=ON)
 const int DIR_CW = LOW;
 const int DIR_ACW = HIGH;
 const unsigned int PULSE_WIDTH_US = 50; // Increased for better signal stability
-const int GEAR_RATIO = 50; // 10:1 Gearbox integration
+const int GEAR_RATIO = 1; // 10:1 Gearbox integration
 
 #define COMMAND_RUN_TIME 500 // Define the amount of milliseconds a command will run
 
@@ -20,7 +20,7 @@ bool holdEnabled = true;
 
 const int buttonPinDirection = 7; // Button to control direction
 const int buttonPinStop = 6; // Button to control start/stop
-const int BUTTON_RPM = 10; // RPM for button-controlled rotation
+const int BUTTON_RPM = 50; // RPM for button-controlled rotation
 
 void setup() {
   pinMode(stepPin, OUTPUT);
