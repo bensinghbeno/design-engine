@@ -1,0 +1,19 @@
+<launch>
+  <!-- Load T-shape URDF onto parameter server -->
+  <param name="t_shape_description"
+         textfile="/home/ben/dev/design-engine/projects/3d/gazebo/joint1/urdf/t_shape.urdf"/>
+
+  <!-- Start Gazebo with empty world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused"        value="false"/>
+    <arg name="use_sim_time"  value="true"/>
+    <arg name="gui"           value="true"/>
+    <arg name="headless"      value="false"/>
+    <arg name="debug"         value="false"/>
+  </include>
+
+  <!-- Spawn T-shape model at origin -->
+  <node name="spawn_t_shape" pkg="gazebo_ros" type="spawn_model"
+        args="-urdf -model t_shape -param t_shape_description -x 0 -y 0 -z 0"
+        output="screen" respawn="false"/>
+</launch>
