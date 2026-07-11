@@ -49,11 +49,11 @@
 
   <!-- Gazebo 11 named materials (guaranteed to render) -->
   <gazebo reference="stem">
-    <material>Gazebo/Blue</material>
+    <material>Gazebo/Wood</material>
   </gazebo>
 
   <gazebo reference="crossbar">
-    <material>Gazebo/Blue</material>
+    <material>Gazebo/Wood</material>
   </gazebo>
 
 </robot>
