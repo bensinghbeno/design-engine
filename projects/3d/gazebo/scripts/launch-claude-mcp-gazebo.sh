@@ -8,6 +8,9 @@ PROJECT=/home/ben/dev/design-engine/projects/3d/gazebo/joint1
 export PATH=/usr/bin:/usr/local/bin:$PATH
 export PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:/usr/lib/python3/dist-packages
 
+# Make custom materials (e.g. green gradient) discoverable by Gazebo
+export GAZEBO_RESOURCE_PATH=$PROJECT/media:${GAZEBO_RESOURCE_PATH}
+
 echo "[1/4] Stopping any existing ROS/Gazebo processes..."
 pkill -f gzserver  2>/dev/null
 pkill -f gzclient  2>/dev/null
