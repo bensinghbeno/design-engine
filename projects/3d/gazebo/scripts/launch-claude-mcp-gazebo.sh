@@ -4,6 +4,10 @@
 
 PROJECT=/home/ben/dev/design-engine/projects/3d/gazebo/joint1
 
+# Force system Python 3.8 ahead of conda so rosbridge (twisted/tornado) works
+export PATH=/usr/bin:/usr/local/bin:$PATH
+export PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:/usr/lib/python3/dist-packages
+
 echo "[1/4] Stopping any existing ROS/Gazebo processes..."
 pkill -f gzserver  2>/dev/null
 pkill -f gzclient  2>/dev/null
