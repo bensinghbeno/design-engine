@@ -1,130 +1,88 @@
 <?xml version="1.0"?>
+<!-- T-shape assembly built from Blender-exported STL meshes.
+     Meshes are in Blender units (~10x); imported at scale 0.1 (1 BU = 0.1 m).
+     Each STL origin placed at that link's joint point during export:
+       stem.stl      : origin bottom-center, extends +Z
+       crossbar.stl  : origin center (on stem top), spans Y
+       connector.stl : origin pin center, axis along X
+       arm.stl       : origin at HOLE CENTER, body hangs -Z
+     World ref points (Blender/10 = m):
+       stem (0,0,0) | crossbar (0,0,0.4) | connector (0.15,0.40,0.4056)
+       arm hole (0.22,0.40,0.4056) -->
 <robot name="t_shape">
+
+  <material name="wood">  <color rgba="0.72 0.52 0.30 1"/></material>
+  <material name="grey">  <color rgba="0.55 0.55 0.55 1"/></material>
+  <material name="green"> <color rgba="0.20 0.60 0.20 1"/></material>
 
   <link name="world"/>
 
   <joint name="world_to_stem" type="fixed">
-    <parent link="world"/>
-    <child link="stem"/>
+    <parent link="world"/><child link="stem"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
 
   <link name="stem">
-    <visual>
-      <origin xyz="0 0 0.5" rpy="0 0 0"/>
-      <geometry><box size="0.1 0.1 1.0"/></geometry>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0.5" rpy="0 0 0"/>
-      <geometry><box size="0.1 0.1 1.0"/></geometry>
-    </collision>
-    <inertial>
-      <origin xyz="0 0 0.5"/>
-      <mass value="1.0"/>
-      <inertia ixx="0.084167" ixy="0" ixz="0" iyy="0.084167" iyz="0" izz="0.001667"/>
-    </inertial>
+    <visual><origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><mesh filename="file:///home/ben/dev/design-engine/projects/3d/gazebo/joint1/meshes/stem.stl" scale="0.1 0.1 0.1"/></geometry>
+      <material name="wood"/></visual>
+    <collision><origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><mesh filename="file:///home/ben/dev/design-engine/projects/3d/gazebo/joint1/meshes/stem.stl" scale="0.1 0.1 0.1"/></geometry></collision>
+    <inertial><origin xyz="0 0 0.5"/><mass value="1.0"/>
+      <inertia ixx="0.084167" ixy="0" ixz="0" iyy="0.084167" iyz="0" izz="0.001667"/></inertial>
   </link>
 
   <joint name="stem_to_crossbar" type="fixed">
-    <parent link="stem"/>
-    <child link="crossbar"/>
+    <parent link="stem"/><child link="crossbar"/>
     <origin xyz="0 0 1.0" rpy="0 0 0"/>
   </joint>
 
   <link name="crossbar">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry><box size="0.8 0.1 0.1"/></geometry>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry><box size="0.8 0.1 0.1"/></geometry>
-    </collision>
-    <inertial>
-      <origin xyz="0 0 0"/>
-      <mass value="1.0"/>
-      <inertia ixx="0.001667" ixy="0" ixz="0" iyy="0.054167" iyz="0" izz="0.054167"/>
-    </inertial>
+    <visual><origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><mesh filename="file:///home/ben/dev/design-engine/projects/3d/gazebo/joint1/meshes/crossbar.stl" scale="0.1 0.1 0.1"/></geometry>
+      <material name="wood"/></visual>
+    <collision><origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><mesh filename="file:///home/ben/dev/design-engine/projects/3d/gazebo/joint1/meshes/crossbar.stl" scale="0.1 0.1 0.1"/></geometry></collision>
+    <inertial><origin xyz="0 0 0"/><mass value="1.0"/>
+      <inertia ixx="0.001667" ixy="0" ixz="0" iyy="0.054167" iyz="0" izz="0.054167"/></inertial>
   </link>
 
-  <!-- ===== Realistic pin joint ===== -->
-  <!-- "connector": a cylindrical pin. One END is embedded INSIDE the crossbar
-       (near its right end, but kept within the bar's border so it does NOT poke
-       out of the end face). It runs along +Y and its free portion passes THROUGH
-       the hole in the arm's top end. -->
   <joint name="crossbar_to_connector" type="fixed">
-    <parent link="crossbar"/>
-    <child link="connector"/>
-    <origin xyz="0.35 0 0" rpy="0 0 0"/>
+    <parent link="crossbar"/><child link="connector"/>
+    <origin xyz="0.15 0.40 0.0056" rpy="0 0 0"/>
   </joint>
 
   <link name="connector">
-    <visual>
-      <!-- cylinder default axis is Z; rotate about X to lay it along Y.
-           length 0.20, centered at y=0.05  ->  spans y = -0.05 .. +0.15.
-           y=-0.05..+0.05 is buried inside the crossbar; y=+0.06..+0.15 sticks
-           out and threads through the arm's hole. -->
-      <origin xyz="0 0.05 0" rpy="1.5708 0 0"/>
-      <geometry><cylinder radius="0.02" length="0.20"/></geometry>
-    </visual>
-    <collision>
-      <origin xyz="0 0.05 0" rpy="1.5708 0 0"/>
-      <geometry><cylinder radius="0.02" length="0.20"/></geometry>
-    </collision>
-    <inertial>
-      <origin xyz="0 0.05 0"/>
-      <mass value="0.15"/>
-      <inertia ixx="0.0005" ixy="0" ixz="0" iyy="0.00003" iyz="0" izz="0.0005"/>
-    </inertial>
+    <visual><origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><mesh filename="file:///home/ben/dev/design-engine/projects/3d/gazebo/joint1/meshes/connector.stl" scale="0.1 0.1 0.1"/></geometry>
+      <material name="grey"/></visual>
+    <collision><origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><mesh filename="file:///home/ben/dev/design-engine/projects/3d/gazebo/joint1/meshes/connector.stl" scale="0.1 0.1 0.1"/></geometry></collision>
+    <inertial><origin xyz="0 0 0"/><mass value="0.15"/>
+      <inertia ixx="0.00003" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.0005"/></inertial>
   </link>
 
-  <!-- Revolute joint: arm rotates about the connector centerline
-       (the line x=0.35, z=0, running along Y). Arm is offset to +Y so it hangs
-       BESIDE the crossbar with the connector passing through its hole. -->
   <joint name="connector_to_arm" type="revolute">
-    <parent link="crossbar"/>
-    <child link="arm"/>
-    <origin xyz="0.35 0.11 0" rpy="0 0 0"/>
-    <axis xyz="0 1 0"/>
+    <parent link="crossbar"/><child link="arm"/>
+    <origin xyz="0.22 0.40 0.0056" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
     <limit lower="-3.14159" upper="3.14159" effort="100.0" velocity="10.0"/>
     <dynamics damping="0.02" friction="0.0"/>
   </joint>
 
-  <!-- Hanging arm: rectangular, half the T-stem length (0.5), extends downward.
-       The connector passes through the hole at its top (z=0). -->
   <link name="arm">
-    <visual>
-      <origin xyz="0 0 -0.25" rpy="0 0 0"/>
-      <geometry><box size="0.1 0.1 0.5"/></geometry>
-    </visual>
-    <collision>
-      <origin xyz="0 0 -0.25" rpy="0 0 0"/>
-      <geometry><box size="0.1 0.1 0.5"/></geometry>
-    </collision>
-    <inertial>
-      <origin xyz="0 0 -0.25"/>
-      <mass value="0.5"/>
-      <inertia ixx="0.010833" ixy="0" ixz="0" iyy="0.010833" iyz="0" izz="0.000833"/>
-    </inertial>
+    <visual><origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><mesh filename="file:///home/ben/dev/design-engine/projects/3d/gazebo/joint1/meshes/arm.stl" scale="0.1 0.1 0.1"/></geometry>
+      <material name="green"/></visual>
+    <collision><origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><mesh filename="file:///home/ben/dev/design-engine/projects/3d/gazebo/joint1/meshes/arm.stl" scale="0.1 0.1 0.1"/></geometry></collision>
+    <inertial><origin xyz="0 0 -0.155"/><mass value="0.5"/>
+      <inertia ixx="0.010833" ixy="0" ixz="0" iyy="0.010833" iyz="0" izz="0.000833"/></inertial>
   </link>
 
-  <!-- Gazebo 11 named materials (guaranteed to render) -->
-  <gazebo reference="stem">
-    <material>Gazebo/Wood</material>
-  </gazebo>
-
-  <gazebo reference="crossbar">
-    <material>Gazebo/Wood</material>
-  </gazebo>
-
-  <!-- Steel-look pin -->
-  <gazebo reference="connector">
-    <material>Gazebo/Grey</material>
-  </gazebo>
-
-  <!-- Custom green gradient (loaded via GAZEBO_RESOURCE_PATH -> media/) -->
-  <gazebo reference="arm">
-    <material>T_Shape/GreenGradient</material>
-  </gazebo>
+  <gazebo reference="stem">      <material>Gazebo/Wood</material></gazebo>
+  <gazebo reference="crossbar">  <material>Gazebo/Wood</material></gazebo>
+  <gazebo reference="connector"> <material>Gazebo/Grey</material></gazebo>
+  <gazebo reference="arm">       <material>Gazebo/Green</material></gazebo>
 
 </robot>
