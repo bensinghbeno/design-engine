@@ -1,0 +1,194 @@
+# Position controllers for the Unitree G1.
+#
+# Uses hardware_interface/PositionJointInterface, which gazebo_ros_control's
+# DefaultRobotHWSim drives with a PID loop. Gains are tuned per body region:
+# legs carry the whole 35 kg so they need the stiffest gains, arms much less.
+#
+# Loaded by launch/g1_stand.launch under the /g1 namespace.
+
+# ---------------------------------------------------------------------------
+# gazebo_ros_control PID gains.
+#
+# These are NOT optional. Without them DefaultRobotHWSim falls back to
+# ControlMethod POSITION, which calls Joint::SetPosition() and teleports each
+# joint to its target every tick, bypassing physics entirely - the robot would
+# hold poses perfectly but would be immovable, ignoring any applied force.
+#
+# Supplying gains here switches it to POSITION_PID, which drives joints with
+# SetForce() instead, so the robot both holds its pose AND still reacts to
+# pushes / apply_body_wrench.
+# ---------------------------------------------------------------------------
+g1:
+  gazebo_ros_control:
+    pid_gains:
+      # legs - stiff, they carry the full 35 kg
+      left_hip_pitch_joint:    {p: 800.0, i: 5.0, d: 20.0, i_clamp: 50.0}
+      left_hip_roll_joint:     {p: 800.0, i: 5.0, d: 20.0, i_clamp: 50.0}
+      left_hip_yaw_joint:      {p: 800.0, i: 5.0, d: 20.0, i_clamp: 50.0}
+      left_knee_joint:         {p: 1200.0, i: 5.0, d: 30.0, i_clamp: 50.0}
+      left_ankle_pitch_joint:  {p: 400.0, i: 2.0, d: 10.0, i_clamp: 20.0}
+      left_ankle_roll_joint:   {p: 400.0, i: 2.0, d: 10.0, i_clamp: 20.0}
+      right_hip_pitch_joint:   {p: 800.0, i: 5.0, d: 20.0, i_clamp: 50.0}
+      right_hip_roll_joint:    {p: 800.0, i: 5.0, d: 20.0, i_clamp: 50.0}
+      right_hip_yaw_joint:     {p: 800.0, i: 5.0, d: 20.0, i_clamp: 50.0}
+      right_knee_joint:        {p: 1200.0, i: 5.0, d: 30.0, i_clamp: 50.0}
+      right_ankle_pitch_joint: {p: 400.0, i: 2.0, d: 10.0, i_clamp: 20.0}
+      right_ankle_roll_joint:  {p: 400.0, i: 2.0, d: 10.0, i_clamp: 20.0}
+      # waist
+      # NOTE: i MUST stay 0 here. With i>0 the integral winds up against the
+      # 88 Nm effort limit and produces a violent limit cycle - the torso
+      # yaws left/right forever and no setpoint will stop it.
+      # Measured damping ratio at p=300/d=12 is ~1.9 (overdamped), so the
+      # oscillation was windup, not underdamping.
+      waist_yaw_joint:         {p: 300.0, i: 0.0, d: 12.0, i_clamp: 0.0}
+      waist_roll_joint:        {p: 200.0, i: 0.0, d: 8.0, i_clamp: 0.0}
+      waist_pitch_joint:       {p: 200.0, i: 0.0, d: 8.0, i_clamp: 0.0}
+      # arms - softer, so they still yield when you push them
+      left_shoulder_pitch_joint:  {p: 150.0, i: 1.0, d: 5.0, i_clamp: 10.0}
+      left_shoulder_roll_joint:   {p: 150.0, i: 1.0, d: 5.0, i_clamp: 10.0}
+      left_shoulder_yaw_joint:    {p: 100.0, i: 1.0, d: 3.0, i_clamp: 10.0}
+      left_elbow_joint:           {p: 100.0, i: 1.0, d: 3.0, i_clamp: 10.0}
+      left_wrist_roll_joint:      {p: 30.0, i: 0.5, d: 1.0, i_clamp: 5.0}
+      left_wrist_pitch_joint:     {p: 20.0, i: 0.5, d: 1.0, i_clamp: 5.0}
+      left_wrist_yaw_joint:       {p: 20.0, i: 0.5, d: 1.0, i_clamp: 5.0}
+      right_shoulder_pitch_joint: {p: 150.0, i: 1.0, d: 5.0, i_clamp: 10.0}
+      right_shoulder_roll_joint:  {p: 150.0, i: 1.0, d: 5.0, i_clamp: 10.0}
+      right_shoulder_yaw_joint:   {p: 100.0, i: 1.0, d: 3.0, i_clamp: 10.0}
+      right_elbow_joint:          {p: 100.0, i: 1.0, d: 3.0, i_clamp: 10.0}
+      right_wrist_roll_joint:     {p: 30.0, i: 0.5, d: 1.0, i_clamp: 5.0}
+      right_wrist_pitch_joint:    {p: 20.0, i: 0.5, d: 1.0, i_clamp: 5.0}
+      right_wrist_yaw_joint:      {p: 20.0, i: 0.5, d: 1.0, i_clamp: 5.0}
+
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 100
+
+  # NOTE: position_controllers/JointPositionController is a plain forwarding
+  # controller - it passes the command straight to the PositionJointInterface.
+  # It does NOT run a PID of its own, so the per-controller `pid:` blocks below
+  # are inert. The gains that actually matter are the gazebo_ros_control
+  # pid_gains above.
+
+  # ---------------- legs (stiff: they hold the robot up) ----------------
+  left_hip_pitch_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: left_hip_pitch_joint
+    pid: {p: 800.0, i: 5.0, d: 20.0, i_clamp: 50.0}
+  left_hip_roll_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: left_hip_roll_joint
+    pid: {p: 800.0, i: 5.0, d: 20.0, i_clamp: 50.0}
+  left_hip_yaw_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: left_hip_yaw_joint
+    pid: {p: 800.0, i: 5.0, d: 20.0, i_clamp: 50.0}
+  left_knee_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: left_knee_joint
+    pid: {p: 1200.0, i: 5.0, d: 30.0, i_clamp: 50.0}
+  left_ankle_pitch_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: left_ankle_pitch_joint
+    pid: {p: 400.0, i: 2.0, d: 10.0, i_clamp: 20.0}
+  left_ankle_roll_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: left_ankle_roll_joint
+    pid: {p: 400.0, i: 2.0, d: 10.0, i_clamp: 20.0}
+
+  right_hip_pitch_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: right_hip_pitch_joint
+    pid: {p: 800.0, i: 5.0, d: 20.0, i_clamp: 50.0}
+  right_hip_roll_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: right_hip_roll_joint
+    pid: {p: 800.0, i: 5.0, d: 20.0, i_clamp: 50.0}
+  right_hip_yaw_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: right_hip_yaw_joint
+    pid: {p: 800.0, i: 5.0, d: 20.0, i_clamp: 50.0}
+  right_knee_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: right_knee_joint
+    pid: {p: 1200.0, i: 5.0, d: 30.0, i_clamp: 50.0}
+  right_ankle_pitch_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: right_ankle_pitch_joint
+    pid: {p: 400.0, i: 2.0, d: 10.0, i_clamp: 20.0}
+  right_ankle_roll_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: right_ankle_roll_joint
+    pid: {p: 400.0, i: 2.0, d: 10.0, i_clamp: 20.0}
+
+  # ---------------- waist ----------------
+  waist_yaw_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: waist_yaw_joint
+    pid: {p: 600.0, i: 3.0, d: 15.0, i_clamp: 30.0}
+  waist_roll_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: waist_roll_joint
+    pid: {p: 400.0, i: 2.0, d: 10.0, i_clamp: 20.0}
+  waist_pitch_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: waist_pitch_joint
+    pid: {p: 400.0, i: 2.0, d: 10.0, i_clamp: 20.0}
+
+  # ---------------- arms (softer: light limbs, and you want to push them) ----
+  left_shoulder_pitch_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: left_shoulder_pitch_joint
+    pid: {p: 150.0, i: 1.0, d: 5.0, i_clamp: 10.0}
+  left_shoulder_roll_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: left_shoulder_roll_joint
+    pid: {p: 150.0, i: 1.0, d: 5.0, i_clamp: 10.0}
+  left_shoulder_yaw_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: left_shoulder_yaw_joint
+    pid: {p: 100.0, i: 1.0, d: 3.0, i_clamp: 10.0}
+  left_elbow_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: left_elbow_joint
+    pid: {p: 100.0, i: 1.0, d: 3.0, i_clamp: 10.0}
+  left_wrist_roll_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: left_wrist_roll_joint
+    pid: {p: 30.0, i: 0.5, d: 1.0, i_clamp: 5.0}
+  left_wrist_pitch_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: left_wrist_pitch_joint
+    pid: {p: 20.0, i: 0.5, d: 1.0, i_clamp: 5.0}
+  left_wrist_yaw_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: left_wrist_yaw_joint
+    pid: {p: 20.0, i: 0.5, d: 1.0, i_clamp: 5.0}
+
+  right_shoulder_pitch_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: right_shoulder_pitch_joint
+    pid: {p: 150.0, i: 1.0, d: 5.0, i_clamp: 10.0}
+  right_shoulder_roll_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: right_shoulder_roll_joint
+    pid: {p: 150.0, i: 1.0, d: 5.0, i_clamp: 10.0}
+  right_shoulder_yaw_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: right_shoulder_yaw_joint
+    pid: {p: 100.0, i: 1.0, d: 3.0, i_clamp: 10.0}
+  right_elbow_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: right_elbow_joint
+    pid: {p: 100.0, i: 1.0, d: 3.0, i_clamp: 10.0}
+  right_wrist_roll_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: right_wrist_roll_joint
+    pid: {p: 30.0, i: 0.5, d: 1.0, i_clamp: 5.0}
+  right_wrist_pitch_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: right_wrist_pitch_joint
+    pid: {p: 20.0, i: 0.5, d: 1.0, i_clamp: 5.0}
+  right_wrist_yaw_joint_position_controller:
+    type: position_controllers/JointPositionController
+    joint: right_wrist_yaw_joint
+    pid: {p: 20.0, i: 0.5, d: 1.0, i_clamp: 5.0}
