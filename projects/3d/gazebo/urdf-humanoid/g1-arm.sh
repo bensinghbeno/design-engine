@@ -180,10 +180,9 @@ joint_positions: [$a, 0.3, 1.0]" >/dev/null
     ;;
 
   reset)
-    # Delegated to reset_arms.py: doing this with one `rosservice call` per
-    # joint takes ~45 s, since each CLI invocation spins up a fresh node.
-    echo "Resetting arms to hanging rest..."
-    /usr/bin/python3 "$(dirname "$0")/reset_arms.py"
+    # Same thing as init-sim.sh - kept here as an alias so muscle memory works.
+    echo "Resetting sim to startup state..."
+    /usr/bin/python3 "$(dirname "$0")/init_sim.py"
     ;;
 
   *) echo "Unknown mode '$MODE'. Try --help"; exit 1;;
