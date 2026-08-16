@@ -8,6 +8,7 @@
 #   bash g1-arm.sh pose   [-j JOINT] [-p RAD]
 #   bash g1-arm.sh wave
 #   bash g1-arm.sh read
+#   bash g1-arm.sh reset
 #   bash g1-arm.sh joints
 #
 # Modes:
@@ -16,13 +17,14 @@
 #   pose    instantly set a JOINT to an angle (pauses physics, sets, resumes)
 #   wave    scripted demo: raises then lowers the left arm
 #   read    print current angle of every arm joint
+#   reset   swing all arms back down to hanging rest
 #   joints  list all G1 joint names
 #
 # Options:
 #   -l, --link   LINK    default left_elbow_link
 #   -j, --joint  JOINT   default left_shoulder_pitch_joint
 #   -f, --force  N       force in newtons        (default 30)
-#   -t, --torque NM      torque in newton-metres (default 15)
+#   -t, --torque NM      torque in newton-metres (default 3; >10 hits the stop)
 #   -p, --position RAD   target angle in radians (default -1.0)
 #   -a, --axis   x|y|z   force direction         (default y)
 #   -s, --seconds SEC    how long to apply       (default 0.5)
@@ -32,11 +34,20 @@ export PATH=/usr/bin:/usr/local/bin:$PATH
 export PYTHONNOUSERSITE=1   # stale ~/.local cffi breaks rosservice otherwise
 source /opt/ros/noetic/setup.bash 2>/dev/null
 
-MODEL=g1
+# Auto-detect the spawned model name. The torso rig spawns as "g1_torso" while
+# the pinned/stand rigs spawn as "g1", and apply_body_wrench needs the exact
+# "<model>::<link>" string or it fails with "body does not exist".
+MODEL=$(timeout 8 rosservice call /gazebo/get_world_properties 2>/dev/null \
+        | grep -oE '^ *- (g1[a-z_]*)' | awk '{print $2}' | head -1)
+[ -z "$MODEL" ] && MODEL=g1
+
 LINK=left_elbow_link
 JOINT=left_shoulder_pitch_joint
 FORCE=30
-TORQUE=15
+# 15 Nm pins a shoulder straight to its limit stop (the arm only weighs a few
+# kg, and the joint's own effort limit is 25 Nm). 3 Nm gives visible motion
+# without saturating.
+TORQUE=3
 POSITION=-1.0
 AXIS=y
 SECS=0.5
@@ -94,14 +105,25 @@ case "$MODE" in
     esac
     echo "Pushing $MODEL::$LINK with ${FORCE}N along $AXIS for ${SECS}s"
     rosservice call /gazebo/clear_body_wrenches "body_name: '$MODEL::$LINK'" >/dev/null 2>&1
-    rosservice call /gazebo/apply_body_wrench "body_name: '$MODEL::$LINK'
+    RESP=$(rosservice call /gazebo/apply_body_wrench "body_name: '$MODEL::$LINK'
 reference_frame: ''
 reference_point: {x: 0.0, y: 0.0, z: 0.0}
 wrench:
   force:  {x: $FX, y: $FY, z: $FZ}
   torque: {x: 0.0, y: 0.0, z: 0.0}
 start_time: {secs: 0, nsecs: 0}
-duration: {secs: $S, nsecs: $NS}"
+duration: {secs: $S, nsecs: $NS}" 2>&1)
+    echo "$RESP"
+    if echo "$RESP" | grep -q 'success: False'; then
+      echo
+      echo "  Body not found. Links fused by fixed joints are merged into their"
+      echo "  parent and are not addressable. Valid pushable links:"
+      for L in left_shoulder_pitch_link left_shoulder_roll_link left_elbow_link \
+               left_wrist_yaw_link right_elbow_link right_wrist_yaw_link; do
+        echo "    $MODEL::$L"
+      done
+      exit 1
+    fi
     echo; echo "  t(s)   $JOINT"
     for i in $(seq 1 10); do
       printf "  %4.1f   %s\n" "$(echo "$i*0.4" | bc -l)" "$(read_joint "$JOINT")"
@@ -122,6 +144,12 @@ duration: {secs: $S, nsecs: $NS}"
       printf "  %4.1f   %s\n" "$(echo "$i*0.4" | bc -l)" "$(read_joint "$JOINT")"
       sleep 0.4
     done
+    FINAL=$(read_joint "$JOINT")
+    LIM=$(grep -A2 "joint name=\"$JOINT\"" "$(dirname "$0")/urdf/g1_torso.urdf" 2>/dev/null | grep -o 'upper="[^"]*"' | head -1 | sed 's/upper="//;s/"//')
+    if [ -n "$LIM" ] && [ -n "$FINAL" ]; then
+      SAT=$(echo "$FINAL > $LIM - 0.02" | bc -l 2>/dev/null)
+      [ "$SAT" = "1" ] && echo "  NOTE: joint is parked at its upper limit ($LIM rad) - reduce --torque."
+    fi
     ;;
 
   pose)
@@ -149,6 +177,13 @@ joint_positions: [$a, 0.3, 1.0]" >/dev/null
       sleep 0.6
     done
     echo "Done."
+    ;;
+
+  reset)
+    # Delegated to reset_arms.py: doing this with one `rosservice call` per
+    # joint takes ~45 s, since each CLI invocation spins up a fresh node.
+    echo "Resetting arms to hanging rest..."
+    /usr/bin/python3 "$(dirname "$0")/reset_arms.py"
     ;;
 
   *) echo "Unknown mode '$MODE'. Try --help"; exit 1;;
