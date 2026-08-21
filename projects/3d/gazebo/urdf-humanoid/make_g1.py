@@ -135,9 +135,113 @@ def add_pole(root, pole_height, pole_radius):
     ET.SubElement(gz, "material").text = "Gazebo/Grey"
 
 
+# Simplified collision proxies, sized from the real mesh bounding boxes
+# (see calc_collision_boxes.py). Each entry is:
+#     link: (shape, dims, xyz, rpy)
+#       box      dims = (sx, sy, sz)
+#       cylinder dims = (radius, length)   default axis is z
+#       sphere   dims = (radius,)
+#
+# Why not just self-collide the meshes: the torso STL is 44,658 triangles and
+# the hand is 45,748. ODE's trimesh-trimesh path is both very slow and prone
+# to tunnelling/jitter, so self-collision against raw meshes is unusable.
+# These proxies are deliberately a little smaller than the visual mesh so
+# links that merely graze each other do not sit in permanent contact.
+HALF_PI = 1.5708
+
+COLLISION_PROXIES = {
+    "torso_link":  ("box", (0.135, 0.195, 0.295), (0.0085, 0.0, 0.1452), (0, 0, 0)),
+    "head_link":   ("box", (0.125, 0.140, 0.185), (0.0038, 0.0, 0.4277), (0, 0, 0)),
+}
+for _s, _sign in (("left", 1.0), ("right", -1.0)):
+    COLLISION_PROXIES.update({
+        # upper arm: slim cylinder down the link's z axis
+        f"{_s}_shoulder_yaw_link":
+            ("cylinder", (0.030, 0.115), (0.0078, -0.0042 * _sign, -0.0411), (0, 0, 0)),
+        # forearm: cylinder laid along the link's x axis
+        f"{_s}_elbow_link":
+            ("cylinder", (0.030, 0.110), (0.0351, 0.0018 * _sign, -0.0078), (0, HALF_PI, 0)),
+        f"{_s}_wrist_roll_link":
+            ("sphere", (0.026,), (0.0280, 0.0, 0.0), (0, 0, 0)),
+        f"{_s}_wrist_pitch_link":
+            ("cylinder", (0.026, 0.085), (0.0230, 0.0, 0.0), (0, HALF_PI, 0)),
+        f"{_s}_wrist_yaw_link":
+            ("sphere", (0.026,), (0.0118, 0.0031 * _sign, 0.0), (0, 0, 0)),
+        # the rubber hands ship with NO collision at all - give them one
+        f"{_s}_rubber_hand":
+            ("box", (0.115, 0.058, 0.095), (0.0659, -0.0146 * _sign, 0.0102), (0, 0, 0)),
+    })
+
+# Links allowed to self-collide. Deliberately excludes shoulder_pitch and
+# shoulder_roll: those sit partly inside the torso shell, so enabling them
+# puts the solver in permanent contact and the arm jitters instead of hanging.
+SELF_COLLIDE_LINKS = ["torso_link", "head_link"]
+for _s in ("left", "right"):
+    SELF_COLLIDE_LINKS += [
+        f"{_s}_shoulder_yaw_link", f"{_s}_elbow_link",
+        f"{_s}_wrist_roll_link", f"{_s}_wrist_pitch_link",
+        f"{_s}_wrist_yaw_link", f"{_s}_rubber_hand",
+    ]
+
+
+def _geom(parent, shape, dims):
+    g = ET.SubElement(parent, "geometry")
+    if shape == "box":
+        ET.SubElement(g, "box", {"size": f"{dims[0]} {dims[1]} {dims[2]}"})
+    elif shape == "cylinder":
+        ET.SubElement(g, "cylinder",
+                      {"radius": str(dims[0]), "length": str(dims[1])})
+    elif shape == "sphere":
+        ET.SubElement(g, "sphere", {"radius": str(dims[0])})
+
+
+def add_self_collision(root):
+    """Swap heavy mesh collisions for primitives and turn on self-collision."""
+    links = {l.get("name"): l for l in root.findall("link")}
+
+    replaced = 0
+    added = 0
+    for name, (shape, dims, xyz, rpy) in COLLISION_PROXIES.items():
+        link = links.get(name)
+        if link is None:
+            continue
+        existing = link.findall("collision")
+        for c in existing:
+            link.remove(c)
+        col = ET.SubElement(link, "collision", {"name": f"{name}_collision"})
+        ET.SubElement(col, "origin", {
+            "xyz": f"{xyz[0]} {xyz[1]} {xyz[2]}",
+            "rpy": f"{rpy[0]} {rpy[1]} {rpy[2]}"})
+        _geom(col, shape, dims)
+        if existing:
+            replaced += 1
+        else:
+            added += 1
+
+    # Gazebo needs self_collide per link, plus contact params that keep the
+    # solver stable. Without kp/kd the default stiffness makes light arm links
+    # bounce off the torso instead of resting against it.
+    enabled = 0
+    for name in SELF_COLLIDE_LINKS:
+        if name not in links:
+            continue
+        gz = ET.SubElement(root, "gazebo", {"reference": name})
+        ET.SubElement(gz, "self_collide").text = "true"
+        ET.SubElement(gz, "mu1").text = "0.7"
+        ET.SubElement(gz, "mu2").text = "0.7"
+        ET.SubElement(gz, "kp").text = "500000.0"
+        ET.SubElement(gz, "kd").text = "100.0"
+        ET.SubElement(gz, "maxVel").text = "0.1"
+        ET.SubElement(gz, "minDepth").text = "0.001"
+        enabled += 1
+
+    return replaced, added, enabled
+
+
 def build(src_name, pinned, height, damping, friction, out_name,
           controlled=False, lock_waist=False,
-          torso_only=False, pole_height=1.0, pole_radius=0.05):
+          torso_only=False, pole_height=1.0, pole_radius=0.05,
+          self_collide=False):
     src = os.path.join(SRC_DIR, src_name)
     if not os.path.isfile(src):
         sys.exit(f"ERROR: source URDF not found: {src}")
@@ -188,6 +292,11 @@ def build(src_name, pinned, height, damping, friction, out_name,
         n_dead_links, n_dead_joints = prune_legs(root)
         add_pole(root, pole_height, pole_radius)
 
+    # --- 2d. self-collision: primitive proxies + per-link self_collide ---
+    sc_repl = sc_add = sc_on = 0
+    if self_collide:
+        sc_repl, sc_add, sc_on = add_self_collision(root)
+
     # --- 3. optionally weld the pelvis to the world ---
     if pinned and not torso_only:
         names = {l.get("name") for l in root.findall("link")}
@@ -225,6 +334,9 @@ def build(src_name, pinned, height, damping, friction, out_name,
     if torso_only:
         print(f"    legs removed         : {n_dead_links} links, {n_dead_joints} joints")
         print(f"    static pole          : h={pole_height} m r={pole_radius} m")
+    if self_collide:
+        print(f"    collision proxies    : {sc_repl} replaced, {sc_add} added")
+        print(f"    self_collide links   : {sc_on}")
     if lock_waist:
         print(f"    waist joints locked  : {locked} (now fixed)")
     if controlled:
@@ -251,13 +363,18 @@ def main():
                         "static pole; arms hang free under gravity")
     p.add_argument("--pole-height", dest="pole_height", type=float, default=1.0)
     p.add_argument("--pole-radius", dest="pole_radius", type=float, default=0.05)
+    p.add_argument("--no-self-collide", dest="self_collide",
+                   action="store_false", default=True,
+                   help="disable arm/torso self-collision (arms pass through "
+                        "the body, which is the stock URDF behaviour)")
     a = p.parse_args()
 
     if a.torso:
         print("[torso on pole: legs removed, passive arms]")
         build(a.src, False, 0, a.damping, a.friction, "g1_torso.urdf",
               controlled=False, lock_waist=True, torso_only=True,
-              pole_height=a.pole_height, pole_radius=a.pole_radius)
+              pole_height=a.pole_height, pole_radius=a.pole_radius,
+              self_collide=a.self_collide)
         return
 
     if not (a.pinned or a.free or a.stand):
