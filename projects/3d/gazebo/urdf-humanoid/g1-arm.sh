@@ -34,12 +34,19 @@ export PATH=/usr/bin:/usr/local/bin:$PATH
 export PYTHONNOUSERSITE=1   # stale ~/.local cffi breaks rosservice otherwise
 source /opt/ros/noetic/setup.bash 2>/dev/null
 
-# Auto-detect the spawned model name. The torso rig spawns as "g1_torso" while
-# the pinned/stand rigs spawn as "g1", and apply_body_wrench needs the exact
-# "<model>::<link>" string or it fails with "body does not exist".
-MODEL=$(timeout 8 rosservice call /gazebo/get_world_properties 2>/dev/null \
-        | grep -oE '^ *- (g1[a-z_]*)' | awk '{print $2}' | head -1)
-[ -z "$MODEL" ] && MODEL=g1
+# Auto-detect the spawned model name, lazily. The torso rig spawns as
+# "g1_torso" while the pinned/stand rigs spawn as "g1", and apply_body_wrench
+# needs the exact "<model>::<link>" string or it fails with "body does not
+# exist". Only push/pose/wave/reset need it - torque/read/joints address
+# joints by name, so detecting it there just adds a needless slow rosservice
+# call (this is what made "torque" feel like it hung for several seconds).
+MODEL=""
+ensure_model() {
+  [ -n "$MODEL" ] && return
+  MODEL=$(timeout 8 rosservice call /gazebo/get_world_properties 2>/dev/null \
+          | grep -oE '^ *- (g1[a-z_]*)' | awk '{print $2}' | head -1)
+  [ -z "$MODEL" ] && MODEL=g1
+}
 
 LINK=left_elbow_link
 JOINT=left_shoulder_pitch_joint
@@ -97,6 +104,7 @@ case "$MODE" in
     ;;
 
   push)
+    ensure_model
     rosservice call /gazebo/unpause_physics >/dev/null 2>&1
     FX=0; FY=0; FZ=0
     case "$(echo "$AXIS" | tr A-Z a-z)" in
@@ -132,13 +140,20 @@ duration: {secs: $S, nsecs: $NS}" 2>&1)
     ;;
 
   torque)
-    rosservice call /gazebo/unpause_physics >/dev/null 2>&1
     echo "Applying ${TORQUE}Nm to $JOINT for ${SECS}s"
-    rosservice call /gazebo/clear_joint_forces "joint_name: '$JOINT'" >/dev/null 2>&1
-    rosservice call /gazebo/apply_joint_effort "joint_name: '$JOINT'
-effort: $TORQUE
-start_time: {secs: 0, nsecs: 0}
-duration: {secs: $S, nsecs: $NS}"
+    # One Python process = one rospy import + one node init, instead of two
+    # separate `rosservice call` boots (each ~1s). This is what removes the
+    # multi-second lag before the arm starts moving.
+    /usr/bin/python3 - "$JOINT" "$TORQUE" "$S" "$NS" <<'PY'
+import sys, rospy
+from gazebo_msgs.srv import ApplyJointEffort, JointRequest
+joint, effort, secs, nsecs = sys.argv[1], float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
+rospy.init_node('g1_torque', anonymous=True, disable_signals=True)
+rospy.wait_for_service('/gazebo/apply_joint_effort', timeout=5)
+rospy.ServiceProxy('/gazebo/clear_joint_forces', JointRequest)(joint)
+rospy.ServiceProxy('/gazebo/apply_joint_effort', ApplyJointEffort)(
+    joint, effort, rospy.Time(0, 0), rospy.Duration(secs, nsecs))
+PY
     echo; echo "  t(s)   angle(rad)"
     for i in $(seq 1 10); do
       printf "  %4.1f   %s\n" "$(echo "$i*0.4" | bc -l)" "$(read_joint "$JOINT")"
@@ -153,6 +168,7 @@ duration: {secs: $S, nsecs: $NS}"
     ;;
 
   pose)
+    ensure_model
     echo "Setting $JOINT -> $POSITION rad"
     rosservice call /gazebo/pause_physics >/dev/null 2>&1
     rosservice call /gazebo/set_model_configuration "model_name: '$MODEL'
@@ -166,6 +182,7 @@ joint_positions: [$POSITION]"
     ;;
 
   wave)
+    ensure_model
     echo "Waving left arm (pose steps, physics paused each step)..."
     for a in -1.4 -0.9 -1.4 -0.9 -1.4; do
       rosservice call /gazebo/pause_physics >/dev/null 2>&1
