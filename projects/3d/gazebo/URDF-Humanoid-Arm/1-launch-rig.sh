@@ -6,6 +6,7 @@
 #   bash 1-launch-rig.sh --no-gui
 #   bash 1-launch-rig.sh --stem-height 2.0
 #   bash 1-launch-rig.sh --crossbar-length 1.4 --crossbar-thickness 0.1
+#   bash 1-launch-rig.sh --arm-side -1        # hang the arm off the other end
 
 ARM="$(cd "$(dirname "$0")" && pwd)"
 
@@ -20,6 +21,7 @@ STEM_D=0.10
 CB_L=1.00
 CB_T=0.08
 CB_D=0.08
+ARM_SIDE=1
 while [ $# -gt 0 ]; do
   case "$1" in
     --no-gui)             GUI=false;  shift;;
@@ -29,7 +31,8 @@ while [ $# -gt 0 ]; do
     --crossbar-length)    CB_L="$2";   shift 2;;
     --crossbar-thickness) CB_T="$2";   shift 2;;
     --crossbar-depth)     CB_D="$2";   shift 2;;
-    -h|--help)     sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'; exit 0;;
+    --arm-side)           ARM_SIDE="$2"; shift 2;;
+    -h|--help)     sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0;;
     *) echo "Unknown option: $1" >&2; exit 1;;
   esac
 done
@@ -56,4 +59,5 @@ roslaunch "$ARM/launch/rig.launch" \
   stem_depth:=$STEM_D \
   crossbar_length:=$CB_L \
   crossbar_thickness:=$CB_T \
-  crossbar_depth:=$CB_D
+  crossbar_depth:=$CB_D \
+  arm_side:=$ARM_SIDE

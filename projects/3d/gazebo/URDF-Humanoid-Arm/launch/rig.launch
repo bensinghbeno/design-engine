@@ -18,6 +18,7 @@
   <arg name="crossbar_length"    default="1.00"/>
   <arg name="crossbar_thickness" default="0.08"/>
   <arg name="crossbar_depth"     default="0.08"/>
+  <arg name="arm_side"           default="1"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="paused"       value="$(arg paused)"/>
@@ -33,7 +34,8 @@
                   stem_depth:=$(arg stem_depth)
                   crossbar_length:=$(arg crossbar_length)
                   crossbar_thickness:=$(arg crossbar_thickness)
-                  crossbar_depth:=$(arg crossbar_depth)"/>
+                  crossbar_depth:=$(arg crossbar_depth)
+                  arm_side:=$(arg arm_side)"/>
 
   <node name="spawn_arm_rig" pkg="gazebo_ros" type="spawn_model"
         args="-urdf -param robot_description -model $(arg model)"
