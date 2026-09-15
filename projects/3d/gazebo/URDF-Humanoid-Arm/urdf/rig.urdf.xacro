@@ -1,0 +1,171 @@
+<?xml version="1.0"?>
+<!--
+  Stage 2: a vertical stem welded to the world, with a horizontal crossbar
+  sitting on top of it. A plain "T".
+
+  Convention used throughout: every link's own frame sits at the point where
+  it attaches to its parent, and the geometry is offset from there. That
+  keeps the joint origins trivial and lets the rig rescale cleanly when the
+  parameters change.
+
+    stem     - frame at ground level, box pushed up by stem_height/2 so it
+               stands ON the ground instead of being half buried. Its top
+               face therefore lands at exactly z = stem_height.
+    crossbar - frame at the top of the stem, box pushed up by its own half
+               thickness so it rests ON the stem rather than straddling the
+               top face.
+
+  Every link needs a non-zero <inertial> or Gazebo silently drops it, even
+  though both of these are static.
+
+  Build standalone:
+    xacro urdf/rig.urdf.xacro > rig.urdf
+-->
+<robot name="arm_rig" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ================= parameters ================= -->
+
+  <!-- vertical stem -->
+  <xacro:arg name="stem_height" default="1.5"/>
+  <xacro:arg name="stem_width"  default="0.10"/>
+  <xacro:arg name="stem_depth"  default="0.10"/>
+
+  <!-- horizontal crossbar: spans left-right along +/-Y -->
+  <xacro:arg name="crossbar_length"    default="1.00"/>
+  <xacro:arg name="crossbar_thickness" default="0.08"/>
+  <xacro:arg name="crossbar_depth"     default="0.08"/>
+
+  <xacro:property name="sh" value="$(arg stem_height)"/>
+  <xacro:property name="sw" value="$(arg stem_width)"/>
+  <xacro:property name="sd" value="$(arg stem_depth)"/>
+  <xacro:property name="stem_mass" value="10.0"/>
+
+  <xacro:property name="cl" value="$(arg crossbar_length)"/>
+  <xacro:property name="ct" value="$(arg crossbar_thickness)"/>
+  <xacro:property name="cd" value="$(arg crossbar_depth)"/>
+  <xacro:property name="crossbar_mass" value="4.0"/>
+
+  <material name="grey">
+    <color rgba="0.4 0.4 0.45 1.0"/>
+  </material>
+
+  <material name="steel_blue">
+    <color rgba="0.25 0.35 0.5 1.0"/>
+  </material>
+
+  <!-- ================= links ================= -->
+
+  <!-- Anchor. A link literally named "world" is what tells Gazebo to weld
+       the model to the ground plane. -->
+  <link name="world"/>
+
+  <!-- vertical stem -->
+  <link name="stem">
+    <visual>
+      <origin xyz="0 0 ${sh/2}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${sd} ${sw} ${sh}"/>
+      </geometry>
+      <material name="grey"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${sh/2}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${sd} ${sw} ${sh}"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 ${sh/2}" rpy="0 0 0"/>
+      <mass value="${stem_mass}"/>
+      <!-- solid cuboid about its own centre -->
+      <inertia
+        ixx="${stem_mass*(sw*sw + sh*sh)/12.0}" ixy="0.0" ixz="0.0"
+        iyy="${stem_mass*(sd*sd + sh*sh)/12.0}" iyz="0.0"
+        izz="${stem_mass*(sd*sd + sw*sw)/12.0}"/>
+    </inertial>
+  </link>
+
+  <!-- horizontal crossbar.
+       Long axis is Y, so the box is (depth, length, thickness) in X Y Z.
+       No rpy needed: the geometry is simply authored wide instead of tall. -->
+  <link name="crossbar">
+    <visual>
+      <origin xyz="0 0 ${ct/2}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${cd} ${cl} ${ct}"/>
+      </geometry>
+      <material name="steel_blue"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${ct/2}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${cd} ${cl} ${ct}"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 ${ct/2}" rpy="0 0 0"/>
+      <mass value="${crossbar_mass}"/>
+      <inertia
+        ixx="${crossbar_mass*(cl*cl + ct*ct)/12.0}" ixy="0.0" ixz="0.0"
+        iyy="${crossbar_mass*(cd*cd + ct*ct)/12.0}" iyz="0.0"
+        izz="${crossbar_mass*(cd*cd + cl*cl)/12.0}"/>
+    </inertial>
+  </link>
+
+  <!-- ================= joints ================= -->
+
+  <joint name="world_to_stem" type="fixed">
+    <parent link="world"/>
+    <child  link="stem"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Lands the crossbar frame exactly on the top face of the stem. -->
+  <joint name="stem_to_crossbar" type="fixed">
+    <parent link="stem"/>
+    <child  link="crossbar"/>
+    <origin xyz="0 0 ${sh}" rpy="0 0 0"/>
+  </joint>
+
+  <!--
+    STAGE 3 goes here - an arm hanging off one end of the crossbar. Swap
+    fixed for revolute and give it an axis, limits and dynamics, e.g.
+
+      <joint name="crossbar_to_upper_arm" type="revolute">
+        <parent link="crossbar"/>
+        <child  link="upper_arm"/>
+        <origin xyz="0 ${cl/2} 0" rpy="0 0 0"/>
+        <axis   xyz="0 1 0"/>
+        <limit lower="-3.14" upper="3.14" effort="100" velocity="5"/>
+        <dynamics damping="0.2" friction="0.1"/>
+      </joint>
+  -->
+
+  <!-- ================= gazebo ================= -->
+
+  <gazebo reference="stem">
+    <material>Gazebo/Grey</material>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+  </gazebo>
+
+  <gazebo reference="crossbar">
+    <material>Gazebo/SkyBlue</material>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+  </gazebo>
+
+  <!-- Exposes /gazebo/get_link_state, /gazebo/apply_body_wrench, etc. so the
+       rig can be poked from the command line later. -->
+  <gazebo>
+    <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
+      <robotNamespace>/</robotNamespace>
+      <updateRate>50.0</updateRate>
+    </plugin>
+  </gazebo>
+
+</robot>

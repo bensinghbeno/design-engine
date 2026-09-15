@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!--
+  Spawn the pole rig in an empty Gazebo world.
+
+  Usage:
+    roslaunch rig.launch
+    roslaunch rig.launch gui:=false
+    roslaunch rig.launch pole_height:=2.0
+-->
+<launch>
+
+  <arg name="gui"         default="true"/>
+  <arg name="paused"      default="false"/>
+  <arg name="model"       default="arm_rig"/>
+  <arg name="stem_height" default="1.5"/>
+  <arg name="stem_width"  default="0.10"/>
+  <arg name="stem_depth"  default="0.10"/>
+  <arg name="crossbar_length"    default="1.00"/>
+  <arg name="crossbar_thickness" default="0.08"/>
+  <arg name="crossbar_depth"     default="0.08"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused"       value="$(arg paused)"/>
+    <arg name="gui"          value="$(arg gui)"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="debug"        value="false"/>
+  </include>
+
+  <param name="robot_description"
+         command="$(find xacro)/xacro '$(find urdf_humanoid_arm)/urdf/rig.urdf.xacro'
+                  stem_height:=$(arg stem_height)
+                  stem_width:=$(arg stem_width)
+                  stem_depth:=$(arg stem_depth)
+                  crossbar_length:=$(arg crossbar_length)
+                  crossbar_thickness:=$(arg crossbar_thickness)
+                  crossbar_depth:=$(arg crossbar_depth)"/>
+
+  <node name="spawn_arm_rig" pkg="gazebo_ros" type="spawn_model"
+        args="-urdf -param robot_description -model $(arg model)"
+        respawn="false" output="screen"/>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher"
+        type="robot_state_publisher" output="screen"/>
+
+</launch>

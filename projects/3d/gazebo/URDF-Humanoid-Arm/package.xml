@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>urdf_humanoid_arm</name>
+  <version>0.1.0</version>
+  <description>Minimal rig: a rectangular pole welded to the world in Gazebo Classic. Crossbar and arm joints get added on top of this later.</description>
+  <maintainer email="ben@example.com">ben</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+</package>
