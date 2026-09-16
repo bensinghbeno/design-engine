@@ -15,13 +15,17 @@
     crossbar  - frame at the top of the stem, box pushed up by its own half
                 thickness so it rests ON the stem rather than straddling the
                 top face.
-    upper_arm - frame at the shoulder pivot, box pushed DOWN by half its
-                length so it hangs below the joint.
+    upper_arm - frame at the shoulder pivot, box hung DOWN and OUTBOARD of
+                it, so the pivot lands on the arm's top inner edge.
 
-  The arm hangs OUTBOARD of the crossbar, not underneath it: the end face of
-  the crossbar meets the inner side face of the arm, and the top face of the
-  arm is level with the top face of the crossbar. Hence the pivot is offset
-  by half the arm width past the crossbar end.
+  Where the two meet: the pivot sits at the centre of the crossbar's end
+  face - halfway up it, right on the end - and that same point is the arm's
+  top inner edge. So the arm's top face is half a crossbar-thickness BELOW
+  the top of the bar and cannot poke up through it.
+
+  That clearance holds while swinging too, as long as
+  upper_arm_depth <= crossbar_thickness: the top corners sweep a radius of
+  upper_arm_depth/2 about the pivot, which stays inside the bar's top face.
 
   The shoulder rotates about Y - the green axis in Gazebo - so the arm
   swings forward/back in the X-Z plane.
@@ -75,9 +79,9 @@
   <xacro:arg name="arm_side" default="1"/>
   <xacro:property name="side" value="$(arg arm_side)"/>
 
-  <!-- Pivot sits half an arm-width PAST the crossbar end, so the crossbar's
-       end face lands flush against the arm's inner side face. -->
-  <xacro:property name="shoulder_y" value="${side*(cl/2.0 + uaw/2.0)}"/>
+  <!-- Pivot sits ON the crossbar's end face, halfway up it. -->
+  <xacro:property name="shoulder_y" value="${side*cl/2.0}"/>
+  <xacro:property name="shoulder_z" value="${ct/2.0}"/>
 
   <!-- passive shoulder: damping/friction only, no actuator -->
   <xacro:property name="shoulder_damping"  value="0.2"/>
@@ -159,11 +163,12 @@
   </link>
 
   <!-- upper arm.
-       Frame is at the shoulder pivot; geometry hangs DOWN from it, hence the
-       negative z offset. Length is half the stem height. -->
+       Frame is at the shoulder pivot, which sits on the arm's top INNER
+       edge - hence the geometry is offset both down (-z) and outboard
+       (+/-y) from it. Length is half the stem height. -->
   <link name="upper_arm">
     <visual>
-      <origin xyz="0 0 ${-ual/2}" rpy="0 0 0"/>
+      <origin xyz="0 ${side*uaw/2} ${-ual/2}" rpy="0 0 0"/>
       <geometry>
         <box size="${uad} ${uaw} ${ual}"/>
       </geometry>
@@ -171,14 +176,14 @@
     </visual>
 
     <collision>
-      <origin xyz="0 0 ${-ual/2}" rpy="0 0 0"/>
+      <origin xyz="0 ${side*uaw/2} ${-ual/2}" rpy="0 0 0"/>
       <geometry>
         <box size="${uad} ${uaw} ${ual}"/>
       </geometry>
     </collision>
 
     <inertial>
-      <origin xyz="0 0 ${-ual/2}" rpy="0 0 0"/>
+      <origin xyz="0 ${side*uaw/2} ${-ual/2}" rpy="0 0 0"/>
       <mass value="${upper_arm_mass}"/>
       <inertia
         ixx="${upper_arm_mass*(uaw*uaw + ual*ual)/12.0}" ixy="0.0" ixz="0.0"
@@ -202,8 +207,10 @@
     <origin xyz="0 0 ${sh}" rpy="0 0 0"/>
   </joint>
 
-  <!-- Shoulder. Sits just past the end of the crossbar so the bar's end face
-       butts against the arm's inner side face, with the two top faces level.
+  <!-- Shoulder. Pivot is at the centre of the crossbar's end face: right on
+       the end, halfway up the bar. That same point is the arm's top inner
+       edge, so the arm hangs just below the bar's top surface instead of
+       being level with it.
 
        Rotation is about Y (the GREEN axis), so the arm swings forward and
        back in the X-Z plane - perpendicular to the crossbar. Because the
@@ -217,7 +224,7 @@
   <joint name="shoulder_joint" type="continuous">
     <parent link="crossbar"/>
     <child  link="upper_arm"/>
-    <origin xyz="0 ${shoulder_y} ${ct}" rpy="0 0 0"/>
+    <origin xyz="0 ${shoulder_y} ${shoulder_z}" rpy="0 0 0"/>
     <axis   xyz="0 1 0"/>
     <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
   </joint>
