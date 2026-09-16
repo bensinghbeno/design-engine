@@ -23,6 +23,9 @@
   arm is level with the top face of the crossbar. Hence the pivot is offset
   by half the arm width past the crossbar end.
 
+  The shoulder rotates about Y - the green axis in Gazebo - so the arm
+  swings forward/back in the X-Z plane.
+
   arm_side flips which end it hangs from: +1 or -1 along Y.
 
   The shoulder joint is deliberately passive: no controller, no PID, just
@@ -202,8 +205,10 @@
   <!-- Shoulder. Sits just past the end of the crossbar so the bar's end face
        butts against the arm's inner side face, with the two top faces level.
 
-       Rotation is about X, so the arm swings in the Y-Z plane - the same
-       plane the crossbar lies in.
+       Rotation is about Y (the GREEN axis), so the arm swings forward and
+       back in the X-Z plane - perpendicular to the crossbar. Because the
+       pivot axis runs along the crossbar's own long axis, the arm sweeps
+       clear of the bar instead of into it.
 
        "continuous" rather than "revolute": no limits, so the arm can be
        driven through a full 0-360 and wrap round. Still passive - no
@@ -213,7 +218,7 @@
     <parent link="crossbar"/>
     <child  link="upper_arm"/>
     <origin xyz="0 ${shoulder_y} ${ct}" rpy="0 0 0"/>
-    <axis   xyz="1 0 0"/>
+    <axis   xyz="0 1 0"/>
     <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
   </joint>
 
