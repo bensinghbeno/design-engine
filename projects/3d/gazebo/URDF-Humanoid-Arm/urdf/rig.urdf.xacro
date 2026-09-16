@@ -203,14 +203,17 @@
        butts against the arm's inner side face, with the two top faces level.
 
        Rotation is about X, so the arm swings in the Y-Z plane - the same
-       plane the crossbar lies in. Passive: no transmission, no controller,
-       so it simply falls and swings under gravity. -->
-  <joint name="shoulder_joint" type="revolute">
+       plane the crossbar lies in.
+
+       "continuous" rather than "revolute": no limits, so the arm can be
+       driven through a full 0-360 and wrap round. Still passive - no
+       transmission and no controller - so left alone it just falls and
+       swings under gravity. arm_gui.py drives it kinematically. -->
+  <joint name="shoulder_joint" type="continuous">
     <parent link="crossbar"/>
     <child  link="upper_arm"/>
     <origin xyz="0 ${shoulder_y} ${ct}" rpy="0 0 0"/>
     <axis   xyz="1 0 0"/>
-    <limit lower="${-pi}" upper="${pi}" effort="100.0" velocity="5.0"/>
     <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
   </joint>
 
