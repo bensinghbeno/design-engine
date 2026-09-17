@@ -38,6 +38,10 @@
 
   Every link needs a non-zero <inertial> or Gazebo silently drops it.
 
+  Masses are not hand-picked numbers: each is density x volume, with a
+  single shared density defaulting to construction softwood. Change a
+  dimension and the mass and inertia follow automatically.
+
   Build standalone:
     xacro urdf/rig.urdf.xacro > rig.urdf
 -->
@@ -55,25 +59,40 @@
   <xacro:arg name="crossbar_thickness" default="0.08"/>
   <xacro:arg name="crossbar_depth"     default="0.08"/>
 
+  <!-- Material density, kg/m^3. Every link's mass is density x volume, so
+       masses stay honest when the dimensions change.
+
+       Wood you can cut at home with a jigsaw:
+         450  poplar / pine (softest, lightest)
+         500  spruce-pine-fir - standard construction lumber   <- default
+         550  softwood ply
+         680  birch plywood (stiff, clean edges, heavier)
+         750  MDF (blunts blades, no grain, sags over long spans)
+         700  oak / ash (hardwood - slow going with a jigsaw)
+
+       Override per build with e.g. density:=680. -->
+  <xacro:arg name="density" default="500"/>
+  <xacro:property name="rho" value="$(arg density)"/>
+
   <xacro:property name="sh" value="$(arg stem_height)"/>
   <xacro:property name="sw" value="$(arg stem_width)"/>
   <xacro:property name="sd" value="$(arg stem_depth)"/>
-  <xacro:property name="stem_mass" value="10.0"/>
+  <xacro:property name="stem_mass" value="${rho*sd*sw*sh}"/>
 
   <xacro:property name="cl" value="$(arg crossbar_length)"/>
   <xacro:property name="ct" value="$(arg crossbar_thickness)"/>
   <xacro:property name="cd" value="$(arg crossbar_depth)"/>
-  <xacro:property name="crossbar_mass" value="4.0"/>
+  <xacro:property name="crossbar_mass" value="${rho*cd*cl*ct}"/>
 
   <!-- upper arm: hangs from the right end of the crossbar.
-       Half the stem length, per the build spec. -->
+       Length is a quarter of the stem height. -->
   <xacro:arg name="upper_arm_width" default="0.07"/>
   <xacro:arg name="upper_arm_depth" default="0.07"/>
 
-  <xacro:property name="ual" value="${sh/2.0}"/>
+  <xacro:property name="ual" value="${sh/4.0}"/>
   <xacro:property name="uaw" value="$(arg upper_arm_width)"/>
   <xacro:property name="uad" value="$(arg upper_arm_depth)"/>
-  <xacro:property name="upper_arm_mass" value="2.0"/>
+  <xacro:property name="upper_arm_mass" value="${rho*uad*uaw*ual}"/>
 
   <!-- which end of the crossbar the arm hangs from: +1 or -1 along Y -->
   <xacro:arg name="arm_side" default="1"/>
@@ -165,7 +184,7 @@
   <!-- upper arm.
        Geometry sits outboard of the pivot in Y and is raised by ct/2 in Z so
        its top face is level with the top of the crossbar rather than with
-       the pivot itself. Length is half the stem height. -->
+       the pivot itself. Length is a quarter of the stem height. -->
   <link name="upper_arm">
     <visual>
       <origin xyz="0 ${side*uaw/2} ${ct/2 - ual/2}" rpy="0 0 0"/>
