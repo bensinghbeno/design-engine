@@ -64,15 +64,40 @@ test('limits, XML, Xacro, graph and unsupported joints fail explicitly', () => {
   assert.throws(()=>parse('<!DOCTYPE robot><robot/>'),/DTD/);
   assert.throws(()=>parse('<robot><link></robot>'));
 });
-test('current rig expands and has the correct 0.335 m tip-circle radius', () => {
+test('serial actuator offsets produce the expected spherical-band reach', () => {
   const file = fileURLToPath(new URL('../../urdf/rig.urdf.xacro', import.meta.url));
   const xml = execFileSync('/opt/ros/noetic/bin/xacro',[file],{encoding:'utf8',env:{...process.env,
     PATH:'/opt/ros/noetic/bin:/usr/bin:/bin',PYTHONNOUSERSITE:'1',
     PYTHONPATH:'/opt/ros/noetic/lib/python3/dist-packages:/usr/lib/python3/dist-packages'}});
   const r = parse(xml), offset = suggestedTip(r,'upper_arm');
-  assert.equal(chain(r,'upper_arm').filter(j=>j.type!=='fixed').length,1);
-  near(offset[1],.035); near(offset[2],-.335);
-  const p = tipPosition(r,'upper_arm',offset); near(p.y,.535); near(p.z,1.205);
-  const next = sampler(r,'upper_arm',offset,state(r),200);
-  for (let i=0;i<200;i++) { const p = next(i); near(p.y,.535); near(Math.hypot(p.x,p.z-1.54),.335); }
+  assert.equal(chain(r,'upper_arm').filter(j=>j.type!=='fixed').length,2);
+  assert.deepEqual(chain(r,'upper_arm').filter(j=>j.type!=='fixed').map(j=>j.name), ['shoulder_yaw_joint','shoulder_joint']);
+  assert.deepEqual(r.joints.get('shoulder_yaw_joint').axis.toArray(),[0,0,1]);
+  near(offset[1],0); near(offset[2],-.335);
+  const p = tipPosition(r,'upper_arm',offset); near(p.y,.695); near(p.z,1.365);
+  const next = sampler(r,'upper_arm',offset,state(r),2000);
+  const points = Array.from({length:2000},(_,i)=>next(i));
+  for (const p of points) {
+    near(Math.hypot(p.x,p.y-.56,p.z-1.70),Math.hypot(.335,.135));
+    assert.ok(Math.hypot(p.x,p.y-.56)>=.135-1e-8, 'Outboard shaft offset leaves polar caps unreachable');
+  }
+  for (const axis of ['x','y','z']) {
+    const values = points.map(p=>p[axis]);
+    assert.ok(Math.max(...values)-Math.min(...values)>.64, `${axis} must span the spherical band`);
+  }
+  // Pitch points the arm horizontally; base yaw redirects it sideways.
+  const horizontal = tipPosition(r,'upper_arm',offset,{shoulder_joint:Math.PI/2});
+  near(horizontal.x,-.335); near(horizontal.y,.695); near(horizontal.z,1.70);
+  const sideways = tipPosition(r,'upper_arm',offset,{shoulder_joint:Math.PI/2,shoulder_yaw_joint:Math.PI/2});
+  near(sideways.x,-.135); near(sideways.y,.225); near(sideways.z,1.70);
+  // The physical output shaft offsets the arm, so yaw moves it even hanging down.
+  const yawOnly = tipPosition(r,'upper_arm',offset,{shoulder_yaw_joint:Math.PI/2});
+  near(yawOnly.x,-.135); near(yawOnly.y,.56); near(yawOnly.z,1.365);
+  const doc = new DOMParser().parseFromString(xml,'application/xml');
+  for (const l of Array.from(doc.getElementsByTagName('link'))) {
+    if (l.getAttribute('name') === 'world') continue;
+    assert.ok(Number(l.getElementsByTagName('mass')[0].getAttribute('value'))>0);
+    const inertia = l.getElementsByTagName('inertia')[0];
+    for (const axis of ['ixx','iyy','izz']) assert.ok(Number(inertia.getAttribute(axis))>0);
+  }
 });

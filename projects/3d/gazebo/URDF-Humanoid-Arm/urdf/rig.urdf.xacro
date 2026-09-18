@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <!--
-  Stage 3: vertical stem welded to the world, horizontal crossbar on top,
-  and an upper arm hanging from the RIGHT end of the crossbar on a free
-  revolute joint.
+  Two-axis shoulder: vertical stem welded to the world, horizontal crossbar
+  on top, then base yaw (vertical Z) followed by shoulder pitch (local Y).
+  Both joints are passive and continuous. Shoulder roll is not yet included.
 
   Convention used throughout: every link's own frame sits at the point where
   it attaches to its parent, and the geometry is offset from there. That
@@ -15,32 +15,37 @@
     crossbar  - frame at the top of the stem, box pushed up by its own half
                 thickness so it rests ON the stem rather than straddling the
                 top face.
-    upper_arm - box hung DOWN and OUTBOARD of the shoulder pivot, raised so
-                its top face is level with the top of the crossbar.
+        yaw_actuator - cyan cube fixed to the end face of the crossbar.
+        shoulder_yaw_link - gold vertical output shaft; rotates about Z and
+          passes up through the purple pitch actuator housing.
+        pitch_actuator - carried by the yaw shaft, above the yaw housing.
+        shoulder_pitch_shaft - gold local-Y output shaft through the pitch
+          housing and the upper arm. Only this shaft and arm pitch.
+        upper_arm - fixed to the outboard end of the pitch shaft.
 
-  Where the two meet: the pivot sits at the centre of the crossbar's end
-  face - halfway up it, right on the end. The arm's inner face is flush
-  against that end face and its top face is level with the bar's top, so the
-  arm covers the full height of the end face with no step.
+      The separated housings and exposed shafts show a serial actuator stack,
+      rather than two boxes moving together as decorative arm attachments.
+      Housings are cubes 20 percent larger than the largest stem/bar section.
+      The arm is now raised and spaced outboard to accommodate this hardware.
+      The axes still intersect, but the arm is offset along the pitch axis:
+      even at zero pitch, yaw now moves the tip. Full-turn geometric reach is
+      a spherical band, not the former complete sphere surface.
 
-  The pivot is therefore NOT at the arm's top face but half a crossbar
-  thickness below it, which is what stops the arm lifting clear of the bar
-  when it swings.
-
-  The shoulder rotates about Y - the green axis in Gazebo - so the arm
-  swings forward/back in the X-Z plane.
+      These are simplified solid housings, not machined bores, bearings or
+      gearbox internals. Shafts intentionally enter their housings. Full-turn
+      collision clearance and cable routing have not been designed.
 
   arm_side flips which end it hangs from: +1 or -1 along Y.
 
-  The shoulder joint is deliberately passive: no controller, no PID, just
+  The shoulder joints are deliberately passive: no controller, no PID, just
   damping and friction. The arm falls under gravity and swings like a real
   pendulum, which is the point of the rig.
 
   Every link needs a non-zero <inertial> or Gazebo silently drops it.
 
-  Masses are not hand-picked numbers: each is density x volume, with a
-  single shared density defaulting to construction softwood. Change a
-  dimension and the mass and inertia follow automatically.
+  Masses and inertias follow dimensions. Structural links use wood density;
+  actuator housings use an approximate effective assembly density and
+  shafts use steel density. These are not measured motor specifications.
 
   Build standalone:
     xacro urdf/rig.urdf.xacro > rig.urdf
@@ -59,8 +64,7 @@
   <xacro:arg name="crossbar_thickness" default="0.08"/>
   <xacro:arg name="crossbar_depth"     default="0.08"/>
 
-  <!-- Material density, kg/m^3. Every link's mass is density x volume, so
-       masses stay honest when the dimensions change.
+  <!-- Structural material density, kg/m^3. Mass is density x volume.
 
        Wood you can cut at home with a jigsaw:
          450  poplar / pine (softest, lightest)
@@ -94,15 +98,31 @@
   <xacro:property name="uad" value="$(arg upper_arm_depth)"/>
   <xacro:property name="upper_arm_mass" value="${rho*uad*uaw*ual}"/>
 
+  <!-- Effective actuator density approximates a hollow housing plus motor.
+       Change to measured mass / external volume when selecting hardware. -->
+  <xacro:arg name="actuator_density" default="1200"/>
+  <xacro:arg name="shaft_density" default="7800"/>
+  <xacro:property name="actuator_rho" value="$(arg actuator_density)"/>
+  <xacro:property name="shaft_rho" value="$(arg shaft_density)"/>
+  <xacro:property name="actuator_size" value="${1.2*max(sw, sd, ct, cd)}"/>
+  <xacro:property name="shaft_radius" value="${actuator_size/10.0}"/>
+  <xacro:property name="shaft_gap" value="${actuator_size/3.0}"/>
+  <xacro:property name="shaft_cap" value="${actuator_size/10.0}"/>
+  <xacro:property name="yaw_insert" value="${actuator_size/5.0}"/>
+  <xacro:property name="yaw_shaft_length" value="${yaw_insert+shaft_gap+actuator_size+shaft_cap}"/>
+  <xacro:property name="yaw_shaft_center" value="${yaw_shaft_length/2.0-yaw_insert}"/>
+  <xacro:property name="pitch_shaft_length" value="${actuator_size+shaft_gap+uaw+2*shaft_cap}"/>
+
   <!-- which end of the crossbar the arm hangs from: +1 or -1 along Y -->
   <xacro:arg name="arm_side" default="1"/>
   <xacro:property name="side" value="$(arg arm_side)"/>
 
-  <!-- Pivot sits ON the crossbar's end face, halfway up it. -->
-  <xacro:property name="shoulder_y" value="${side*cl/2.0}"/>
+  <xacro:property name="shoulder_y" value="${side*(cl/2.0+actuator_size/2.0)}"/>
   <xacro:property name="shoulder_z" value="${ct/2.0}"/>
+  <xacro:property name="pitch_height" value="${shaft_gap+actuator_size/2.0}"/>
+  <xacro:property name="arm_offset" value="${side*(actuator_size/2.0+shaft_gap+uaw/2.0)}"/>
 
-  <!-- passive shoulder: damping/friction only, no actuator -->
+  <!-- Actuator geometry only: joints still use passive damping/friction. -->
   <xacro:property name="shoulder_damping"  value="0.2"/>
   <xacro:property name="shoulder_friction" value="0.1"/>
 
@@ -117,6 +137,60 @@
   <material name="copper">
     <color rgba="0.72 0.45 0.20 1.0"/>
   </material>
+
+  <material name="actuator_cyan">
+    <color rgba="0.02 0.72 0.85 1"/>
+  </material>
+  <material name="actuator_purple">
+    <color rgba="0.60 0.16 0.82 1"/>
+  </material>
+  <material name="shaft_gold">
+    <color rgba="1.0 0.72 0.08 1"/>
+  </material>
+
+  <!-- Separate links retain the stator/output relationship and individual
+       colours in both URDF viewers and Gazebo's fixed-joint conversion. -->
+  <xacro:macro name="actuator_cube" params="name colour gazebo_colour">
+    <link name="${name}">
+      <visual>
+        <geometry><box size="${actuator_size} ${actuator_size} ${actuator_size}"/></geometry>
+        <material name="${colour}"/>
+      </visual>
+      <collision>
+        <geometry><box size="${actuator_size} ${actuator_size} ${actuator_size}"/></geometry>
+      </collision>
+      <inertial>
+        <mass value="${actuator_rho*actuator_size**3}"/>
+        <inertia ixx="${actuator_rho*actuator_size**5/6.0}" ixy="0" ixz="0"
+                 iyy="${actuator_rho*actuator_size**5/6.0}" iyz="0"
+                 izz="${actuator_rho*actuator_size**5/6.0}"/>
+      </inertial>
+    </link>
+    <gazebo reference="${name}"><material>${gazebo_colour}</material></gazebo>
+  </xacro:macro>
+
+  <xacro:macro name="output_shaft" params="name length xyz rpy">
+    <xacro:property name="mass" value="${shaft_rho*pi*shaft_radius**2*length}"/>
+    <link name="${name}">
+      <visual>
+        <origin xyz="${xyz}" rpy="${rpy}"/>
+        <geometry><cylinder radius="${shaft_radius}" length="${length}"/></geometry>
+        <material name="shaft_gold"/>
+      </visual>
+      <collision>
+        <origin xyz="${xyz}" rpy="${rpy}"/>
+        <geometry><cylinder radius="${shaft_radius}" length="${length}"/></geometry>
+      </collision>
+      <inertial>
+        <origin xyz="${xyz}" rpy="${rpy}"/>
+        <mass value="${mass}"/>
+        <inertia ixx="${mass*(3*shaft_radius**2+length**2)/12.0}" ixy="0" ixz="0"
+                 iyy="${mass*(3*shaft_radius**2+length**2)/12.0}" iyz="0"
+                 izz="${mass*shaft_radius**2/2.0}"/>
+      </inertial>
+    </link>
+    <gazebo reference="${name}"><material>Gazebo/Yellow</material></gazebo>
+  </xacro:macro>
 
   <!-- ================= links ================= -->
 
@@ -181,13 +255,19 @@
     </inertial>
   </link>
 
+  <xacro:actuator_cube name="yaw_actuator" colour="actuator_cyan" gazebo_colour="Gazebo/Turquoise"/>
+  <xacro:output_shaft name="shoulder_yaw_link" length="${yaw_shaft_length}"
+                      xyz="0 0 ${yaw_shaft_center}" rpy="0 0 0"/>
+  <xacro:actuator_cube name="pitch_actuator" colour="actuator_purple" gazebo_colour="Gazebo/Purple"/>
+  <xacro:output_shaft name="shoulder_pitch_shaft" length="${pitch_shaft_length}"
+                      xyz="0 ${side*(shaft_gap+uaw)/2.0} 0" rpy="${pi/2.0} 0 0"/>
+
   <!-- upper arm.
-       Geometry sits outboard of the pivot in Y and is raised by ct/2 in Z so
-       its top face is level with the top of the crossbar rather than with
-       the pivot itself. Length is a quarter of the stem height. -->
+       Fixed to the pitch output, separated from its housing by exposed
+       shaft. Length and pivot-to-tip distance remain unchanged. -->
   <link name="upper_arm">
     <visual>
-      <origin xyz="0 ${side*uaw/2} ${ct/2 - ual/2}" rpy="0 0 0"/>
+      <origin xyz="0 0 ${ct/2 - ual/2}" rpy="0 0 0"/>
       <geometry>
         <box size="${uad} ${uaw} ${ual}"/>
       </geometry>
@@ -195,14 +275,14 @@
     </visual>
 
     <collision>
-      <origin xyz="0 ${side*uaw/2} ${ct/2 - ual/2}" rpy="0 0 0"/>
+      <origin xyz="0 0 ${ct/2 - ual/2}" rpy="0 0 0"/>
       <geometry>
         <box size="${uad} ${uaw} ${ual}"/>
       </geometry>
     </collision>
 
     <inertial>
-      <origin xyz="0 ${side*uaw/2} ${ct/2 - ual/2}" rpy="0 0 0"/>
+      <origin xyz="0 0 ${ct/2 - ual/2}" rpy="0 0 0"/>
       <mass value="${upper_arm_mass}"/>
       <inertia
         ixx="${upper_arm_mass*(uaw*uaw + ual*ual)/12.0}" ixy="0.0" ixz="0.0"
@@ -226,31 +306,49 @@
     <origin xyz="0 0 ${sh}" rpy="0 0 0"/>
   </joint>
 
-  <!-- Shoulder. Pivot is at the centre of the crossbar's end face: right on
-       the end, halfway up the bar. The arm's inner face is flush against
-       that end face and its top is level with the bar's top, so the pivot
-       sits just inside the arm near its top inner edge.
-
-       Rotation is about Y (the GREEN axis), so the arm swings forward and
-       back in the X-Z plane - perpendicular to the crossbar. Because the
-       pivot axis runs along the crossbar's own long axis, the arm sweeps
-       clear of the bar instead of into it.
-
-       "continuous" rather than "revolute": no limits, so the arm can be
-       driven through a full 0-360 and wrap round. Still passive - no
-       transmission and no controller - so left alone it just falls and
-       swings under gravity. arm_gui.py drives it kinematically. -->
-  <joint name="shoulder_joint" type="continuous">
+  <!-- Cyan stator is bolted against the crossbar end face. -->
+  <joint name="crossbar_to_yaw_actuator" type="fixed">
     <parent link="crossbar"/>
-    <child  link="upper_arm"/>
+    <child link="yaw_actuator"/>
     <origin xyz="0 ${shoulder_y} ${shoulder_z}" rpy="0 0 0"/>
-    <axis   xyz="0 1 0"/>
+  </joint>
+
+  <!-- Yaw output rotates; the cyan housing remains fixed to the bar. -->
+  <joint name="shoulder_yaw_joint" type="continuous">
+    <parent link="yaw_actuator"/>
+    <child link="shoulder_yaw_link"/>
+    <origin xyz="0 0 ${actuator_size/2.0}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
     <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
+  </joint>
+
+  <!-- The vertical shaft passes through and carries the purple housing. -->
+  <joint name="yaw_output_to_pitch_actuator" type="fixed">
+    <parent link="shoulder_yaw_link"/>
+    <child link="pitch_actuator"/>
+    <origin xyz="0 0 ${pitch_height}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Pitch output rotates about local Y inside the carried stator.
+       Keep both existing continuous-joint names for the two-slider GUI. -->
+  <joint name="shoulder_joint" type="continuous">
+    <parent link="pitch_actuator"/>
+    <child link="shoulder_pitch_shaft"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
+  </joint>
+
+  <!-- Shaft continues through the arm, leaving a visible gold end cap. -->
+  <joint name="pitch_output_to_upper_arm" type="fixed">
+    <parent link="shoulder_pitch_shaft"/>
+    <child link="upper_arm"/>
+    <origin xyz="0 ${arm_offset} 0" rpy="0 0 0"/>
   </joint>
 
   <!--
     STAGE 4 goes here - forearm on an elbow joint, hanging off the bottom
-    of the upper arm at xyz="0 0 ${-ual}".
+    of the upper arm at xyz="0 0 ${ct/2 - ual}" in its pitch link frame.
   -->
 
   <!-- ================= gazebo ================= -->

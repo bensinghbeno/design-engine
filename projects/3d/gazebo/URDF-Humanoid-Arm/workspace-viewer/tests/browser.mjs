@@ -13,8 +13,9 @@ try {
   await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Workspace ready'),null,{timeout:30000});
   assert.equal(await page.locator('#robot-name').textContent(),'arm_rig');
   assert.equal(await page.locator('#count').textContent(),'20,000');
-  assert.match(await page.locator('#dof').textContent(),/1 sampled DOF/);
-  assert.equal(await page.locator('#by').textContent(),'0.535 → 0.535');
+  assert.match(await page.locator('#dof').textContent(),/2 sampled DOF/);
+  const yBounds = (await page.locator('#by').textContent()).split(' → ').map(Number);
+  assert.ok(yBounds[1]-yBounds[0]>.64, 'Yaw plus pitch must sweep in Y, not just a circle');
   console.log('PASS: actual rig loads, WebGL starts, cloud and bounds appear.');
 
   await page.selectOption('#samples','2000');

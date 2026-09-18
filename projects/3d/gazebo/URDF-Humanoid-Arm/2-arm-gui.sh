@@ -1,8 +1,9 @@
 #!/bin/bash
-# Slider GUI for the upper arm's shoulder angle (0-360 degrees).
+# Yaw and pitch sliders, each -180 to +180 degrees with zero centred.
 #
-# Launch the rig FIRST in another terminal:
-#   bash 1-launch-rig.sh
+# The rig launcher normally opens this GUI automatically. For a separate GUI,
+# launch the rig FIRST in another terminal without its automatic sliders:
+#   bash 1-launch-rig.sh --no-slider
 #
 # Then:
 #   bash 2-arm-gui.sh

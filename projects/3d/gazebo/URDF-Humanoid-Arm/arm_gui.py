@@ -1,33 +1,16 @@
 #!/usr/bin/env python3
-"""
-Slider GUI for the upper arm's shoulder joint.
+"""Centered yaw and pitch sliders for the rig's two-axis shoulder.
 
-One slider spanning -180 to +180 degrees, with 0 - straight down, the
-gravity rest pose - in the middle. Drag left to swing the arm back, right
-to swing it forward. End to end is still a full 360 turn, just centred on
-rest instead of starting there.
+Both sliders span -180..+180 degrees. Yaw rotates the whole pitch mount
+about vertical Z; pitch rotates the arm about the mount's local Y.
+The pair of target angles is reasserted together at approximately 30 Hz
+through /gazebo/set_model_configuration. This is kinematic positioning,
+not a torque controller or a collision-safe motion planner.
 
-How the "hold" works
---------------------
-The shoulder is a passive joint - no controller, no PID, nothing driving it.
-Left alone the arm just falls and swings. To make a slider actually hold a
-pose we re-assert the target angle at ~30 Hz through
-/gazebo/set_model_configuration. Each call sets the position AND zeroes the
-velocity, so the arm is driven kinematically to wherever the slider says and
-stays there.
-
-That also means this is a kinematic override, not a torque command. The arm
-will happily be driven through the crossbar if you ask it to - there is no
-force being applied and no contact resolution while the hold is running.
-
-Buttons
--------
-  Reset     snap back to 0 degrees (straight down, slider centred).
-  Release   stop holding and let the arm fall under gravity. The slider then
-            follows the joint's real angle instead of driving it, so you can
-            watch it swing and settle.
-
-Run via 2-arm-gui.sh so the ROS environment is set up correctly.
+Reset centres both sliders. Release stops positioning both joints and
+tracks their measured angles; dragging either slider re-engages Hold.
+ROS calls run on a worker; only the main thread accesses Tk widgets.
+Run via 1-launch-rig.sh or, with Gazebo already running, 2-arm-gui.sh.
 """
 import sys
 import threading
@@ -41,7 +24,10 @@ from tkinter import ttk
 
 import math
 
-JOINT = "shoulder_joint"
+JOINTS = (
+    ("shoulder_yaw_joint", "Yaw · vertical Z (blue)"),
+    ("shoulder_joint", "Pitch · local Y (green)"),
+)
 DEFAULT_MODEL = "arm_rig"
 HOLD_HZ = 30.0
 
@@ -76,8 +62,16 @@ class ArmGui:
         self.root = root
         self.model = detect_model()
         self.holding = True
-        self.target_deg = 0.0
+        self.target_deg = {name: 0.0 for name, _ in JOINTS}
+        self.actual_deg = {name: None for name, _ in JOINTS}
+        self.service_error = ""
         self.lock = threading.Lock()
+        self.stop_event = threading.Event()
+        self.running = True
+        self.scales = {}
+        self.scale_vars = {}
+        self.value_labels = {}
+        self.actual_labels = {}
 
         self.setcfg = rospy.ServiceProxy("/gazebo/set_model_configuration",
                                          SetModelConfiguration)
@@ -86,7 +80,6 @@ class ArmGui:
 
         self._build_ui()
 
-        self.running = True
         self.thread = threading.Thread(target=self._hold_loop, daemon=True)
         self.thread.start()
 
@@ -94,64 +87,68 @@ class ArmGui:
 
     # ---------------- ui ----------------
     def _build_ui(self):
-        self.root.title("Upper arm - shoulder angle")
-        self.root.geometry("520x220")
+        self.root.title("Upper arm - yaw and pitch")
+        self.root.geometry("600x440")
+        self.root.minsize(520, 420)
 
         frm = ttk.Frame(self.root, padding=12)
         frm.pack(fill="both", expand=True)
 
-        ttk.Label(frm, text=f"model: {self.model}   joint: {JOINT}",
+        ttk.Label(frm, text=f"model: {self.model}   |   yaw → pitch",
                   foreground="#666").pack(anchor="w")
+        for name, title in JOINTS:
+            group = ttk.LabelFrame(frm, text=title, padding=10)
+            group.pack(fill="x", pady=(12, 0))
+            row = ttk.Frame(group)
+            row.pack(fill="x")
+            ttk.Label(row, text="-180", width=5).pack(side="left")
+            # Setting the variable (instead of Scale.set) does not invoke
+            # the drag callback, so feedback cannot accidentally enable Hold.
+            variable = tk.DoubleVar(master=self.root, value=0.0)
+            scale = ttk.Scale(row, from_=ANGLE_MIN, to=ANGLE_MAX,
+                              variable=variable, orient="horizontal",
+                              command=lambda raw, joint=name: self._on_slide(joint, raw))
+            scale.pack(side="left", fill="x", expand=True, padx=6)
+            ttk.Label(row, text="+180", width=5).pack(side="left")
+            ticks = ttk.Frame(group)
+            ticks.pack(fill="x", padx=42)
+            for column, text in enumerate(("-180", "-90", "0", "+90", "+180")):
+                ticks.columnconfigure(column, weight=1, uniform="ticks")
+                ttk.Label(ticks, text=text, foreground="#888").grid(row=0, column=column)
+            target = ttk.Label(group, text="target    +0.0 deg",
+                               font=("TkDefaultFont", 12, "bold"))
+            target.pack(anchor="w", pady=(5, 0))
+            actual = ttk.Label(group, text="actual    -- deg", foreground="#666")
+            actual.pack(anchor="w")
+            self.scales[name] = scale
+            self.scale_vars[name] = variable
+            self.value_labels[name] = target
+            self.actual_labels[name] = actual
 
-        row = ttk.Frame(frm)
-        row.pack(fill="x", pady=(12, 0))
-
-        ttk.Label(row, text="-180", width=5).pack(side="left")
-        self.scale = ttk.Scale(row, from_=ANGLE_MIN, to=ANGLE_MAX,
-                               orient="horizontal", command=self._on_slide)
-        self.scale.set(0.0)
-        self.scale.pack(side="left", fill="x", expand=True, padx=6)
-        ttk.Label(row, text="+180", width=5).pack(side="left")
-
-        # tick strip so the centre detent is obvious
-        ticks = ttk.Frame(frm)
-        ticks.pack(fill="x", padx=(38, 38))
-        for txt, anchor in (("-180", "w"), ("-90", "center"), ("0", "center"),
-                            ("+90", "center"), ("+180", "e")):
-            ttk.Label(ticks, text=txt, foreground="#999",
-                      font=("TkDefaultFont", 8)).pack(
-                          side="left", expand=True, anchor=anchor)
-
-        self.value_lbl = ttk.Label(frm, text="target    +0.0 deg",
-                                   font=("TkDefaultFont", 13, "bold"))
-        self.value_lbl.pack(anchor="w", pady=(10, 0))
-
-        self.actual_lbl = ttk.Label(frm, text="actual    -- deg",
-                                    foreground="#666")
-        self.actual_lbl.pack(anchor="w")
+        ttk.Label(frm, text="Yaw turns the pitch actuator; pitch turns the arm.",
+                  foreground="#666").pack(anchor="w", pady=(8, 0))
 
         btns = ttk.Frame(frm)
         btns.pack(fill="x", pady=(14, 0))
-        ttk.Button(btns, text="Reset", command=self.reset).pack(side="left")
+        ttk.Button(btns, text="Reset both", command=self.reset).pack(side="left")
         self.hold_btn = ttk.Button(btns, text="Release",
                                    command=self.toggle_hold)
         self.hold_btn.pack(side="left", padx=8)
 
-        self.status = ttk.Label(frm, text="holding", foreground="#0a0")
-        self.status.pack(side="left", padx=8)
+        self.status = ttk.Label(frm, text="holding both joints", foreground="#0a0",
+                                wraplength=540)
+        self.status.pack(anchor="w", pady=(8, 0))
 
-    def _on_slide(self, raw):
+    def _on_slide(self, joint, raw):
         with self.lock:
-            self.target_deg = float(raw)
-            if not self.holding:
-                # dragging the slider re-engages the hold
-                self.holding = True
-                self._set_status(True)
-        self.value_lbl.config(text=f"target    {float(raw):+6.1f} deg")
+            self.target_deg[joint] = float(raw)
+            self.holding = True
+        self._set_status(True)
+        self.value_labels[joint].config(text=f"target    {float(raw):+6.1f} deg")
 
     def _set_status(self, holding):
         if holding:
-            self.status.config(text="holding", foreground="#0a0")
+            self.status.config(text="holding both joints", foreground="#0a0")
             self.hold_btn.config(text="Release")
         else:
             self.status.config(text="free - falling under gravity",
@@ -159,11 +156,12 @@ class ArmGui:
             self.hold_btn.config(text="Hold")
 
     def reset(self):
-        self.scale.set(0.0)
         with self.lock:
-            self.target_deg = 0.0
+            self.target_deg = {name: 0.0 for name, _ in JOINTS}
             self.holding = True
-        self.value_lbl.config(text="target    +0.0 deg")
+        for name, _ in JOINTS:
+            self.scale_vars[name].set(0.0)
+            self.value_labels[name].config(text="target    +0.0 deg")
         self._set_status(True)
 
     def toggle_hold(self):
@@ -174,45 +172,66 @@ class ArmGui:
 
     # ---------------- gazebo ----------------
     def _hold_loop(self):
-        """Re-assert the target angle continuously so the pose sticks."""
-        rate = rospy.Rate(HOLD_HZ)
-        while self.running and not rospy.is_shutdown():
+        """Command both joints together and publish feedback to the UI cache."""
+        names = [name for name, _ in JOINTS]
+        while not self.stop_event.is_set() and not rospy.is_shutdown():
             with self.lock:
                 holding = self.holding
-                deg = self.target_deg
+                positions = [math.radians(self.target_deg[name]) for name in names]
+            error = ""
             if holding:
                 try:
-                    self.setcfg(model_name=self.model,
-                                urdf_param_name="robot_description",
-                                joint_names=[JOINT],
-                                joint_positions=[math.radians(deg)])
+                    response = self.setcfg(model_name=self.model,
+                                           urdf_param_name="robot_description",
+                                           joint_names=names,
+                                           joint_positions=positions)
+                    if not response.success:
+                        error = response.status_message or "Joint command rejected. Restart the rig with yaw enabled."
+                except Exception as exc:
+                    error = f"Gazebo command unavailable: {exc}"
+            actual = {}
+            for name in names:
+                try:
+                    response = self.getj(f"{self.model}::{name}")
+                    actual[name] = (wrap180(math.degrees(response.position[0]))
+                                    if response.success and response.position else None)
                 except Exception:
-                    pass
-            try:
-                rate.sleep()
-            except Exception:
-                break
+                    actual[name] = None
+            if any(value is None for value in actual.values()) and not error:
+                error = "Joint feedback unavailable. Restart the rig if yaw was just added."
+            with self.lock:
+                self.actual_deg = actual
+                self.service_error = error
+            # Wall time avoids hanging on a paused simulation clock.
+            self.stop_event.wait(1.0 / HOLD_HZ)
 
     def _poll_actual(self):
-        """Show the joint's real angle, and track it while released."""
-        try:
-            p = self.getj(JOINT)
-            if p.success:
-                deg = wrap180(math.degrees(p.position[0]))
-                self.actual_lbl.config(text=f"actual    {deg:+6.1f} deg")
-                with self.lock:
-                    free = not self.holding
-                if free:
-                    # follow the arm instead of driving it
-                    self.scale.set(deg)
-                    self.target_deg = deg
-                    self.value_lbl.config(text=f"target    {deg:+6.1f} deg")
-        except Exception:
-            self.actual_lbl.config(text="actual    -- deg (no sim?)")
-        self.root.after(100, self._poll_actual)
+        """Main-thread Tk updates only; no blocking ROS calls here."""
+        if not self.running:
+            return
+        with self.lock:
+            actual = self.actual_deg.copy()
+            holding = self.holding
+            error = self.service_error
+            if not holding:
+                self.target_deg.update({name: deg for name, deg in actual.items() if deg is not None})
+        for name, deg in actual.items():
+            text = "actual    -- deg (no feedback)" if deg is None else f"actual    {deg:+6.1f} deg"
+            self.actual_labels[name].config(text=text)
+            if not holding and deg is not None:
+                self.scale_vars[name].set(deg)
+                self.value_labels[name].config(text=f"target    {deg:+6.1f} deg")
+        self._set_status(holding)
+        if error:
+            self.status.config(text=error, foreground="#a60")
+        self.poll_id = self.root.after(100, self._poll_actual)
 
     def shutdown(self):
         self.running = False
+        self.stop_event.set()
+        if hasattr(self, "poll_id"):
+            self.root.after_cancel(self.poll_id)
+        self.thread.join(timeout=1.0)
 
 
 def main():
