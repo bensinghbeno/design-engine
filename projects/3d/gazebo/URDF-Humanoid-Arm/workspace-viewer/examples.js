@@ -1,0 +1,9 @@
+// Educational fixtures: arrangements, not DOF count alone, determine shape.
+const link = (name, length) => `<link name="${name}">${length ? `<visual><origin xyz="0 0 ${-length/2}"/><geometry><box size="0.045 0.045 ${length}"/></geometry></visual>` : ''}</link>`;
+const joint = (name, parent, target, axis, z = 0, min = -Math.PI, max = Math.PI) => `<joint name="${name}" type="revolute"><parent link="${parent}"/><child link="${target}"/><origin xyz="0 0 ${z}"/><axis xyz="${axis}"/><limit lower="${min}" upper="${max}" effort="10" velocity="2"/></joint>`;
+export const examples = {
+  circle: {title: '1 DOF · circle', tip: 'arm', offset: [0,0,-0.8], xml: `<robot name="One hinge">${link('base')}${link('arm',0.8)}${joint('pitch','base','arm','0 1 0')}</robot>`},
+  sphere: {title: '2 DOF · sphere surface', tip: 'arm', offset: [0,0,-0.8], xml: `<robot name="Two-axis shoulder">${link('base')}${link('mount')}${link('arm',0.8)}${joint('pitch','base','mount','0 1 0')}${joint('roll','mount','arm','1 0 0',0,-Math.PI/2,Math.PI/2)}</robot>`},
+  planar: {title: '2 DOF · planar area', tip: 'forearm', offset: [0,0,-0.45], xml: `<robot name="Two parallel hinges">${link('base')}${link('arm',0.55)}${link('forearm',0.45)}${joint('pitch','base','arm','0 1 0')}${joint('elbow','arm','forearm','0 1 0',-0.55)}</robot>`},
+  volume: {title: '3 DOF · spatial volume', tip: 'forearm', offset: [0,0,-0.45], xml: `<robot name="Shoulder and elbow">${link('base')}${link('mount')}${link('arm',0.55)}${link('forearm',0.45)}${joint('pitch','base','mount','0 1 0')}${joint('roll','mount','arm','1 0 0',0,-Math.PI/2,Math.PI/2)}${joint('elbow','arm','forearm','0 1 0',-0.55,0,Math.PI)}</robot>`},
+};

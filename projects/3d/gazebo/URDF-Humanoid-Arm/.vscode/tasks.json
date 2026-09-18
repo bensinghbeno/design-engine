@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Workspace viewer",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"/home/ben/dev/design-engine/projects/3d/gazebo/URDF-Humanoid-Arm/3-workspace-viewer.sh"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}

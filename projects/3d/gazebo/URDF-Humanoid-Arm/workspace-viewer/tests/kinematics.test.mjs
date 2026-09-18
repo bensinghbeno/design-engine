@@ -1,0 +1,78 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {DOMParser} from '@xmldom/xmldom';
+import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+import {parseRobot, tipPosition, suggestedTip, sampler, chain} from '../kinematics.js';
+import {examples} from '../examples.js';
+
+const parse = xml => parseRobot(xml, DOMParser);
+const near = (a,b,eps=1e-8) => assert.ok(Math.abs(a-b)<eps, `${a} != ${b}`);
+const state = r => Object.fromEntries([...r.joints.values()].filter(j => j.type !== 'fixed').map(j => [j.name,{min:j.min,max:j.max,value:0,enabled:true}]));
+function samples(key, count=2500) {
+  const e = examples[key], r = parse(e.xml), next = sampler(r,e.tip,e.offset,state(r),count);
+  return Array.from({length:count},(_,i) => next(i));
+}
+
+test('one Y hinge traces a circle; positive Y rotates downward tip toward -X', () => {
+  const e = examples.circle, r = parse(e.xml);
+  const p = tipPosition(r,e.tip,e.offset,{pitch:Math.PI/2}); near(p.x,-.8); near(p.y,0); near(p.z,0);
+  for (const p of samples('circle')) { near(p.length(),.8); near(p.y,0); }
+});
+test('two-axis shoulder spans sphere surface at constant radius', () => {
+  const points = samples('sphere');
+  for (const p of points) near(p.length(),.8);
+  for (const key of ['x','y','z']) {
+    assert.ok(Math.min(...points.map(p=>p[key])) < -.75);
+    assert.ok(Math.max(...points.map(p=>p[key])) > .75);
+  }
+});
+test('two parallel hinges span a planar annulus, not a sphere', () => {
+  const points = samples('planar');
+  for (const p of points) { near(p.y,0); assert.ok(p.length()>=.1-1e-9 && p.length()<=1+1e-9); }
+  assert.ok(points.some(p=>p.length()<.12)); assert.ok(points.some(p=>p.length()>.98));
+});
+test('three-joint shoulder/elbow gives spatial reach with varying radius', () => {
+  const points = samples('volume');
+  for (const p of points) assert.ok(p.length()>=.1-1e-9 && p.length()<=1+1e-9);
+  assert.ok(points.some(p=>p.length()<.15)); assert.ok(points.some(p=>p.length()>.95));
+  assert.ok(points.some(p=>p.y>.4)); assert.ok(points.some(p=>p.y<-.4));
+});
+test('locked joints remain at their preview angle', () => {
+  const e = examples.sphere, r = parse(e.xml), s = state(r);
+  s.roll.enabled = false; s.roll.value = .4;
+  const next = sampler(r,e.tip,e.offset,s,100);
+  for (let i=0;i<100;i++) near(next(i).y,.8*Math.sin(.4));
+});
+test('URDF RPY and local prismatic axes are composed in the right order', () => {
+  const r = parse(`<robot name="test"><link name="base"/><link name="end"/><joint name="slide" type="prismatic"><parent link="base"/><child link="end"/><origin xyz="1 2 3" rpy="0 0 ${Math.PI/2}"/><axis xyz="1 0 0"/><limit lower="0" upper="2"/></joint></robot>`);
+  const p = tipPosition(r,'end',[0,0,0],{slide:1}); near(p.x,1); near(p.y,3); near(p.z,3);
+});
+test('fixed transforms and arbitrary rotation axes work', () => {
+  const r = parse(`<robot name="test"><link name="base"/><link name="fixed"/><link name="end"/>
+    <joint name="offset" type="fixed"><parent link="base"/><child link="fixed"/><origin xyz="1 2 3" rpy="0.2 0.3 0.4"/></joint>
+    <joint name="rotate" type="continuous"><parent link="fixed"/><child link="end"/><axis xyz="1 1 1"/></joint></robot>`);
+  const p = tipPosition(r,'end',[1,2,3],{rotate:.9}); near(p.distanceTo(tipPosition(r,'end',[0,0,0])),Math.sqrt(14));
+});
+test('limits, XML, Xacro, graph and unsupported joints fail explicitly', () => {
+  assert.throws(()=>parse('<robot name="bad"><link name="a"/><link name="b"/></robot>'),/root/);
+  assert.throws(()=>parse(examples.circle.xml.replace('axis xyz="0 1 0"','axis xyz="0 0 0"')),/zero/);
+  assert.throws(()=>parse(examples.circle.xml.replace('type="revolute"','type="floating"')),/unsupported/);
+  assert.throws(()=>parse(examples.circle.xml.replace('<axis', '<mimic joint="other"/><axis')),/mimic/);
+  assert.throws(()=>parse(examples.circle.xml.replace('size="0.045','size="-0.045')),/positive/);
+  assert.throws(()=>parse('<robot><link name="${name}"/></robot>'),/Xacro/);
+  assert.throws(()=>parse('<!DOCTYPE robot><robot/>'),/DTD/);
+  assert.throws(()=>parse('<robot><link></robot>'));
+});
+test('current rig expands and has the correct 0.335 m tip-circle radius', () => {
+  const file = fileURLToPath(new URL('../../urdf/rig.urdf.xacro', import.meta.url));
+  const xml = execFileSync('/opt/ros/noetic/bin/xacro',[file],{encoding:'utf8',env:{...process.env,
+    PATH:'/opt/ros/noetic/bin:/usr/bin:/bin',PYTHONNOUSERSITE:'1',
+    PYTHONPATH:'/opt/ros/noetic/lib/python3/dist-packages:/usr/lib/python3/dist-packages'}});
+  const r = parse(xml), offset = suggestedTip(r,'upper_arm');
+  assert.equal(chain(r,'upper_arm').filter(j=>j.type!=='fixed').length,1);
+  near(offset[1],.035); near(offset[2],-.335);
+  const p = tipPosition(r,'upper_arm',offset); near(p.y,.535); near(p.z,1.205);
+  const next = sampler(r,'upper_arm',offset,state(r),200);
+  for (let i=0;i<200;i++) { const p = next(i); near(p.y,.535); near(Math.hypot(p.x,p.z-1.54),.335); }
+});
