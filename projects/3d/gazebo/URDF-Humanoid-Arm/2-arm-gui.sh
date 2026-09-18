@@ -1,5 +1,5 @@
 #!/bin/bash
-# Yaw and pitch sliders, each -180 to +180 degrees with zero centred.
+# Pitch, roll and yaw sliders, each -180 to +180 degrees with zero centred.
 #
 # The rig launcher normally opens this GUI automatically. For a separate GUI,
 # launch the rig FIRST in another terminal without its automatic sliders:

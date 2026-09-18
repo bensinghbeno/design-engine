@@ -13,9 +13,13 @@ try {
   await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Workspace ready'),null,{timeout:30000});
   assert.equal(await page.locator('#robot-name').textContent(),'arm_rig');
   assert.equal(await page.locator('#count').textContent(),'20,000');
-  assert.match(await page.locator('#dof').textContent(),/2 sampled DOF/);
+  assert.match(await page.locator('#dof').textContent(),/3 sampled DOF/);
   const yBounds = (await page.locator('#by').textContent()).split(' → ').map(Number);
-  assert.ok(yBounds[1]-yBounds[0]>.64, 'Yaw plus pitch must sweep in Y, not just a circle');
+  assert.ok(yBounds[1]-yBounds[0]>.95, 'Pitch plus roll must aim the arm in space');
+  const rigXml = await page.locator('#xml').inputValue();
+  for (const name of ['pitch_actuator','roll_actuator','yaw_actuator','shoulder_roll_joint']) {
+    assert.ok(rigXml.includes(`name="${name}"`), `${name} must be loaded`);
+  }
   console.log('PASS: actual rig loads, WebGL starts, cloud and bounds appear.');
 
   await page.selectOption('#samples','2000');

@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Centered yaw and pitch sliders for the rig's two-axis shoulder.
+"""Centered pitch, roll and yaw sliders for the G1-style shoulder chain.
 
-Both sliders span -180..+180 degrees. Yaw rotates the whole pitch mount
-about vertical Z; pitch rotates the arm about the mount's local Y.
-The pair of target angles is reasserted together at approximately 30 Hz
+All sliders span -180..+180 degrees. Pitch (local Y) carries roll (local X),
+which carries yaw (local Z). Yaw twists the arm about its own centreline.
+This follows G1 joint order, not its exact geometry or travel limits.
+The three target angles are reasserted together at approximately 30 Hz
 through /gazebo/set_model_configuration. This is kinematic positioning,
 not a torque controller or a collision-safe motion planner.
 
-Reset centres both sliders. Release stops positioning both joints and
-tracks their measured angles; dragging either slider re-engages Hold.
+Reset centres all sliders. Release stops positioning all joints and
+tracks their measured angles; dragging any slider re-engages Hold.
 ROS calls run on a worker; only the main thread accesses Tk widgets.
 Run via 1-launch-rig.sh or, with Gazebo already running, 2-arm-gui.sh.
 """
@@ -25,8 +26,9 @@ from tkinter import ttk
 import math
 
 JOINTS = (
-    ("shoulder_yaw_joint", "Yaw · vertical Z (blue)"),
-    ("shoulder_joint", "Pitch · local Y (green)"),
+    ("shoulder_joint", "1 · Pitch · local Y · purple actuator"),
+    ("shoulder_roll_joint", "2 · Roll · local X · green actuator"),
+    ("shoulder_yaw_joint", "3 · Yaw / arm twist · local Z · cyan actuator"),
 )
 DEFAULT_MODEL = "arm_rig"
 HOLD_HZ = 30.0
@@ -87,14 +89,14 @@ class ArmGui:
 
     # ---------------- ui ----------------
     def _build_ui(self):
-        self.root.title("Upper arm - yaw and pitch")
-        self.root.geometry("600x440")
-        self.root.minsize(520, 420)
+        self.root.title("Upper arm - pitch, roll and yaw")
+        self.root.geometry("620x610")
+        self.root.minsize(560, 590)
 
         frm = ttk.Frame(self.root, padding=12)
         frm.pack(fill="both", expand=True)
 
-        ttk.Label(frm, text=f"model: {self.model}   |   yaw → pitch",
+        ttk.Label(frm, text=f"model: {self.model}   |   pitch → roll → yaw",
                   foreground="#666").pack(anchor="w")
         for name, title in JOINTS:
             group = ttk.LabelFrame(frm, text=title, padding=10)
@@ -125,17 +127,17 @@ class ArmGui:
             self.value_labels[name] = target
             self.actual_labels[name] = actual
 
-        ttk.Label(frm, text="Yaw turns the pitch actuator; pitch turns the arm.",
+        ttk.Label(frm, text="Pitch and roll aim the arm; yaw twists it along its length.",
                   foreground="#666").pack(anchor="w", pady=(8, 0))
 
         btns = ttk.Frame(frm)
         btns.pack(fill="x", pady=(14, 0))
-        ttk.Button(btns, text="Reset both", command=self.reset).pack(side="left")
+        ttk.Button(btns, text="Reset all", command=self.reset).pack(side="left")
         self.hold_btn = ttk.Button(btns, text="Release",
                                    command=self.toggle_hold)
         self.hold_btn.pack(side="left", padx=8)
 
-        self.status = ttk.Label(frm, text="holding both joints", foreground="#0a0",
+        self.status = ttk.Label(frm, text="holding all joints", foreground="#0a0",
                                 wraplength=540)
         self.status.pack(anchor="w", pady=(8, 0))
 
@@ -148,7 +150,7 @@ class ArmGui:
 
     def _set_status(self, holding):
         if holding:
-            self.status.config(text="holding both joints", foreground="#0a0")
+            self.status.config(text="holding all joints", foreground="#0a0")
             self.hold_btn.config(text="Release")
         else:
             self.status.config(text="free - falling under gravity",
@@ -172,7 +174,7 @@ class ArmGui:
 
     # ---------------- gazebo ----------------
     def _hold_loop(self):
-        """Command both joints together and publish feedback to the UI cache."""
+        """Command all joints together and publish feedback to the UI cache."""
         names = [name for name, _ in JOINTS]
         while not self.stop_event.is_set() and not rospy.is_shutdown():
             with self.lock:
@@ -186,7 +188,7 @@ class ArmGui:
                                            joint_names=names,
                                            joint_positions=positions)
                     if not response.success:
-                        error = response.status_message or "Joint command rejected. Restart the rig with yaw enabled."
+                        error = response.status_message or "Joint command rejected. Restart the rig with all three shoulder joints."
                 except Exception as exc:
                     error = f"Gazebo command unavailable: {exc}"
             actual = {}
@@ -198,7 +200,7 @@ class ArmGui:
                 except Exception:
                     actual[name] = None
             if any(value is None for value in actual.values()) and not error:
-                error = "Joint feedback unavailable. Restart the rig if yaw was just added."
+                error = "Joint feedback unavailable. Restart the rig after shoulder changes."
             with self.lock:
                 self.actual_deg = actual
                 self.service_error = error

@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <!--
-  Two-axis shoulder: vertical stem welded to the world, horizontal crossbar
-  on top, then base yaw (vertical Z) followed by shoulder pitch (local Y).
-  Both joints are passive and continuous. Shoulder roll is not yet included.
+  G1-style shoulder order: crossbar -> pitch (local Y) -> roll (local X)
+  -> yaw (local Z) -> upper arm. Three passive, continuous joints.
+  This copies the serial axis order, NOT the G1's exact dimensions, tilted
+  joint frames, travel limits, motor specifications or internal construction.
 
   Convention used throughout: every link's own frame sits at the point where
   it attaches to its parent, and the geometry is offset from there. That
@@ -15,25 +16,22 @@
     crossbar  - frame at the top of the stem, box pushed up by its own half
                 thickness so it rests ON the stem rather than straddling the
                 top face.
-        yaw_actuator - cyan cube fixed to the end face of the crossbar.
-        shoulder_yaw_link - gold vertical output shaft; rotates about Z and
-          passes up through the purple pitch actuator housing.
-        pitch_actuator - carried by the yaw shaft, above the yaw housing.
-        shoulder_pitch_shaft - gold local-Y output shaft through the pitch
-          housing and the upper arm. Only this shaft and arm pitch.
-        upper_arm - fixed to the outboard end of the pitch shaft.
+    pitch_actuator - purple cube bolted to the crossbar end face.
+    shoulder_pitch_shaft - gold local-Y output through the green roll cube.
+    roll_actuator - green cube carried by pitch, outboard of the crossbar.
+    shoulder_roll_shaft - gold local-X output through the cyan yaw cube.
+    yaw_actuator - cyan cube carried by roll, stepped forward and down.
+    shoulder_yaw_link - gold local-Z output down into the upper arm.
+    upper_arm - hangs below yaw, with its centreline on the yaw axis.
 
-      The separated housings and exposed shafts show a serial actuator stack,
-      rather than two boxes moving together as decorative arm attachments.
-      Housings are cubes 20 percent larger than the largest stem/bar section.
-      The arm is now raised and spaced outboard to accommodate this hardware.
-      The axes still intersect, but the arm is offset along the pitch axis:
-      even at zero pitch, yaw now moves the tip. Full-turn geometric reach is
-      a spherical band, not the former complete sphere surface.
-
-      These are simplified solid housings, not machined bores, bearings or
-      gearbox internals. Shafts intentionally enter their housings. Full-turn
-      collision clearance and cable routing have not been designed.
+  Each output carries everything downstream, but not its own housing.
+  Yaw twists the upper arm without moving its centreline tip; pitch and roll
+  aim the arm. Yaw is no longer fixed vertical after pitch or roll moves.
+  Housings are cubes 20 percent larger than the largest stem/bar section.
+  Off-centre shaft mounting steps the yaw housing downward, keeping both
+  horizontal shaft bores separate. These are simplified solid housings,
+  not machined bores, bearings or gearbox internals. Shafts intentionally
+  enter their housings. Full-turn clearance and cable routing are not designed.
 
   arm_side flips which end it hangs from: +1 or -1 along Y.
 
@@ -108,10 +106,14 @@
   <xacro:property name="shaft_radius" value="${actuator_size/10.0}"/>
   <xacro:property name="shaft_gap" value="${actuator_size/3.0}"/>
   <xacro:property name="shaft_cap" value="${actuator_size/10.0}"/>
-  <xacro:property name="yaw_insert" value="${actuator_size/5.0}"/>
-  <xacro:property name="yaw_shaft_length" value="${yaw_insert+shaft_gap+actuator_size+shaft_cap}"/>
-  <xacro:property name="yaw_shaft_center" value="${yaw_shaft_length/2.0-yaw_insert}"/>
-  <xacro:property name="pitch_shaft_length" value="${actuator_size+shaft_gap+uaw+2*shaft_cap}"/>
+  <xacro:property name="shaft_insert" value="${actuator_size/5.0}"/>
+  <xacro:property name="transfer_shaft_length" value="${shaft_insert+shaft_gap+actuator_size+shaft_cap}"/>
+  <xacro:property name="transfer_shaft_center" value="${transfer_shaft_length/2.0-shaft_insert}"/>
+  <xacro:property name="next_housing_offset" value="${shaft_gap+actuator_size/2.0}"/>
+  <xacro:property name="roll_axis_drop" value="${actuator_size/3.0}"/>
+  <xacro:property name="arm_insert" value="${min(ual/4.0, actuator_size/3.0)}"/>
+  <xacro:property name="yaw_shaft_length" value="${shaft_insert+shaft_gap+arm_insert}"/>
+  <xacro:property name="yaw_shaft_center" value="${yaw_shaft_length/2.0-shaft_insert}"/>
 
   <!-- which end of the crossbar the arm hangs from: +1 or -1 along Y -->
   <xacro:arg name="arm_side" default="1"/>
@@ -119,8 +121,6 @@
 
   <xacro:property name="shoulder_y" value="${side*(cl/2.0+actuator_size/2.0)}"/>
   <xacro:property name="shoulder_z" value="${ct/2.0}"/>
-  <xacro:property name="pitch_height" value="${shaft_gap+actuator_size/2.0}"/>
-  <xacro:property name="arm_offset" value="${side*(actuator_size/2.0+shaft_gap+uaw/2.0)}"/>
 
   <!-- Actuator geometry only: joints still use passive damping/friction. -->
   <xacro:property name="shoulder_damping"  value="0.2"/>
@@ -143,6 +143,9 @@
   </material>
   <material name="actuator_purple">
     <color rgba="0.60 0.16 0.82 1"/>
+  </material>
+  <material name="actuator_green">
+    <color rgba="0.18 0.80 0.28 1"/>
   </material>
   <material name="shaft_gold">
     <color rgba="1.0 0.72 0.08 1"/>
@@ -255,19 +258,22 @@
     </inertial>
   </link>
 
+  <xacro:actuator_cube name="pitch_actuator" colour="actuator_purple" gazebo_colour="Gazebo/Purple"/>
+  <xacro:output_shaft name="shoulder_pitch_shaft" length="${transfer_shaft_length}"
+                      xyz="0 ${side*transfer_shaft_center} 0" rpy="${pi/2.0} 0 0"/>
+  <xacro:actuator_cube name="roll_actuator" colour="actuator_green" gazebo_colour="Gazebo/Green"/>
+  <xacro:output_shaft name="shoulder_roll_shaft" length="${transfer_shaft_length}"
+                      xyz="${transfer_shaft_center} 0 0" rpy="0 ${pi/2.0} 0"/>
   <xacro:actuator_cube name="yaw_actuator" colour="actuator_cyan" gazebo_colour="Gazebo/Turquoise"/>
   <xacro:output_shaft name="shoulder_yaw_link" length="${yaw_shaft_length}"
-                      xyz="0 0 ${yaw_shaft_center}" rpy="0 0 0"/>
-  <xacro:actuator_cube name="pitch_actuator" colour="actuator_purple" gazebo_colour="Gazebo/Purple"/>
-  <xacro:output_shaft name="shoulder_pitch_shaft" length="${pitch_shaft_length}"
-                      xyz="0 ${side*(shaft_gap+uaw)/2.0} 0" rpy="${pi/2.0} 0 0"/>
+                      xyz="0 0 ${-yaw_shaft_center}" rpy="0 0 0"/>
 
   <!-- upper arm.
-       Fixed to the pitch output, separated from its housing by exposed
-       shaft. Length and pivot-to-tip distance remain unchanged. -->
+       Fixed to yaw output, separated from its housing by exposed shaft.
+       Frame at its top centre, preserving the original box dimensions. -->
   <link name="upper_arm">
     <visual>
-      <origin xyz="0 0 ${ct/2 - ual/2}" rpy="0 0 0"/>
+      <origin xyz="0 0 ${-ual/2}" rpy="0 0 0"/>
       <geometry>
         <box size="${uad} ${uaw} ${ual}"/>
       </geometry>
@@ -275,14 +281,14 @@
     </visual>
 
     <collision>
-      <origin xyz="0 0 ${ct/2 - ual/2}" rpy="0 0 0"/>
+      <origin xyz="0 0 ${-ual/2}" rpy="0 0 0"/>
       <geometry>
         <box size="${uad} ${uaw} ${ual}"/>
       </geometry>
     </collision>
 
     <inertial>
-      <origin xyz="0 0 ${ct/2 - ual/2}" rpy="0 0 0"/>
+      <origin xyz="0 0 ${-ual/2}" rpy="0 0 0"/>
       <mass value="${upper_arm_mass}"/>
       <inertia
         ixx="${upper_arm_mass*(uaw*uaw + ual*ual)/12.0}" ixy="0.0" ixz="0.0"
@@ -306,49 +312,62 @@
     <origin xyz="0 0 ${sh}" rpy="0 0 0"/>
   </joint>
 
-  <!-- Cyan stator is bolted against the crossbar end face. -->
-  <joint name="crossbar_to_yaw_actuator" type="fixed">
+  <!-- Pitch is FIRST, as on the G1; the purple stator stays on the bar. -->
+  <joint name="crossbar_to_pitch_actuator" type="fixed">
     <parent link="crossbar"/>
-    <child link="yaw_actuator"/>
+    <child link="pitch_actuator"/>
     <origin xyz="0 ${shoulder_y} ${shoulder_z}" rpy="0 0 0"/>
   </joint>
 
-  <!-- Yaw output rotates; the cyan housing remains fixed to the bar. -->
-  <joint name="shoulder_yaw_joint" type="continuous">
-    <parent link="yaw_actuator"/>
-    <child link="shoulder_yaw_link"/>
-    <origin xyz="0 0 ${actuator_size/2.0}" rpy="0 0 0"/>
-    <axis xyz="0 0 1"/>
-    <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
-  </joint>
-
-  <!-- The vertical shaft passes through and carries the purple housing. -->
-  <joint name="yaw_output_to_pitch_actuator" type="fixed">
-    <parent link="shoulder_yaw_link"/>
-    <child link="pitch_actuator"/>
-    <origin xyz="0 0 ${pitch_height}" rpy="0 0 0"/>
-  </joint>
-
-  <!-- Pitch output rotates about local Y inside the carried stator.
-       Keep both existing continuous-joint names for the two-slider GUI. -->
+  <!-- Preserve the pitch joint name used by the GUI. -->
   <joint name="shoulder_joint" type="continuous">
     <parent link="pitch_actuator"/>
     <child link="shoulder_pitch_shaft"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="0 ${side*actuator_size/2.0} 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
   </joint>
 
-  <!-- Shaft continues through the arm, leaving a visible gold end cap. -->
-  <joint name="pitch_output_to_upper_arm" type="fixed">
+  <joint name="pitch_output_to_roll_actuator" type="fixed">
     <parent link="shoulder_pitch_shaft"/>
+    <child link="roll_actuator"/>
+    <origin xyz="0 ${side*next_housing_offset} 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Roll is SECOND; its bore is below the incoming pitch shaft. -->
+  <joint name="shoulder_roll_joint" type="continuous">
+    <parent link="roll_actuator"/>
+    <child link="shoulder_roll_shaft"/>
+    <origin xyz="${actuator_size/2.0} 0 ${-roll_axis_drop}" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
+  </joint>
+
+  <!-- The roll shaft passes through the upper part of the yaw cube. -->
+  <joint name="roll_output_to_yaw_actuator" type="fixed">
+    <parent link="shoulder_roll_shaft"/>
+    <child link="yaw_actuator"/>
+    <origin xyz="${next_housing_offset} 0 ${-roll_axis_drop}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Yaw is THIRD: twist about the hanging arm's own centreline. -->
+  <joint name="shoulder_yaw_joint" type="continuous">
+    <parent link="yaw_actuator"/>
+    <child link="shoulder_yaw_link"/>
+    <origin xyz="0 0 ${-actuator_size/2.0}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
+  </joint>
+
+  <joint name="yaw_output_to_upper_arm" type="fixed">
+    <parent link="shoulder_yaw_link"/>
     <child link="upper_arm"/>
-    <origin xyz="0 ${arm_offset} 0" rpy="0 0 0"/>
+    <origin xyz="0 0 ${-shaft_gap}" rpy="0 0 0"/>
   </joint>
 
   <!--
     STAGE 4 goes here - forearm on an elbow joint, hanging off the bottom
-    of the upper arm at xyz="0 0 ${ct/2 - ual}" in its pitch link frame.
+    of the upper arm at xyz="0 0 ${-ual}" in its own link frame.
   -->
 
   <!-- ================= gazebo ================= -->
