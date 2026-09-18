@@ -1,7 +1,10 @@
 <?xml version="1.0"?>
 <!--
   G1-style shoulder order: crossbar -> pitch (local Y) -> roll (local X)
-  -> yaw (local Z) -> upper arm. Three passive, continuous joints.
+  -> yaw (local Z) -> upper arm -> elbow (Y) -> forearm -> wrist roll (X)
+  -> wrist pitch (Y) -> wrist yaw (Z) -> parallel gripper.
+  Seven passive continuous arm joints, plus two prismatic fingers commanded
+  symmetrically as one aperture by the GUI. No physical coupling/controller.
   This copies the serial axis order, NOT the G1's exact dimensions, tilted
   joint frames, travel limits, motor specifications or internal construction.
 
@@ -20,7 +23,7 @@
     shoulder_pitch_shaft - gold local-Y output through the green roll cube.
     roll_actuator - green cube carried by pitch, outboard of the crossbar.
     shoulder_roll_shaft - gold local-X output through the cyan yaw cube.
-    yaw_actuator - cyan cube carried by roll, stepped forward and down.
+    yaw_actuator - cyan cube carried by roll, forward at the same height.
     shoulder_yaw_link - gold local-Z output down into the upper arm.
     upper_arm - hangs below yaw, with its centreline on the yaw axis.
 
@@ -28,10 +31,18 @@
   Yaw twists the upper arm without moving its centreline tip; pitch and roll
   aim the arm. Yaw is no longer fixed vertical after pitch or roll moves.
   Housings are cubes 20 percent larger than the largest stem/bar section.
-  Off-centre shaft mounting steps the yaw housing downward, keeping both
-  horizontal shaft bores separate. These are simplified solid housings,
-  not machined bores, bearings or gearbox internals. Shafts intentionally
-  enter their housings. Full-turn clearance and cable routing are not designed.
+  The roll output exits the green face centre and enters the cyan face
+  centre. These are simplified solid housings, not machined bores, bearings
+  or gearbox internals. The perpendicular shaft axes now intersect;
+  actual internal couplings remain to be designed. Shafts
+  intentionally enter housings. Full-turn clearance and cable routing are
+  not designed.
+
+  At zero angles the upper arm hangs down and the forearm points forward
+  along local +X, as in the G1 reference's forearm convention. Wrist roll
+  twists along that forearm axis. The gripper fingers also extend along +X.
+  gripper_tool is the midpoint between the fingertip ends, independent of
+  aperture; it is the default tracked point in Reach Lab.
 
   arm_side flips which end it hangs from: +1 or -1 along Y.
 
@@ -110,10 +121,24 @@
   <xacro:property name="transfer_shaft_length" value="${shaft_insert+shaft_gap+actuator_size+shaft_cap}"/>
   <xacro:property name="transfer_shaft_center" value="${transfer_shaft_length/2.0-shaft_insert}"/>
   <xacro:property name="next_housing_offset" value="${shaft_gap+actuator_size/2.0}"/>
-  <xacro:property name="roll_axis_drop" value="${actuator_size/3.0}"/>
   <xacro:property name="arm_insert" value="${min(ual/4.0, actuator_size/3.0)}"/>
   <xacro:property name="yaw_shaft_length" value="${shaft_insert+shaft_gap+arm_insert}"/>
   <xacro:property name="yaw_shaft_center" value="${yaw_shaft_length/2.0-shaft_insert}"/>
+
+    <!-- Forearm length follows the stem; all motor cubes retain the same size.
+      Finger stroke is fixed at 40 mm per side (80 mm total aperture). -->
+    <xacro:property name="fal" value="${sh/5.0}"/>
+    <xacro:property name="faw" value="${uaw*0.85}"/>
+    <xacro:property name="fah" value="${uad*0.85}"/>
+    <xacro:property name="elbow_shaft_length" value="${shaft_insert+shaft_gap+faw+shaft_cap}"/>
+    <xacro:property name="elbow_shaft_center" value="${elbow_shaft_length/2.0-shaft_insert}"/>
+    <xacro:property name="gripper_x" value="${actuator_size/2.0}"/>
+    <xacro:property name="finger_width" value="${actuator_size/10.0}"/>
+    <xacro:property name="finger_height" value="${actuator_size/5.0}"/>
+    <xacro:property name="finger_length" value="${actuator_size*5.0/6.0}"/>
+    <xacro:property name="gripper_y" value="${0.08+4*finger_width}"/>
+    <xacro:property name="gripper_z" value="${actuator_size/3.0}"/>
+    <xacro:property name="gripper_shaft_length" value="${shaft_insert+shaft_gap+gripper_z/2.0}"/>
 
   <!-- which end of the crossbar the arm hangs from: +1 or -1 along Y -->
   <xacro:arg name="arm_side" default="1"/>
@@ -150,6 +175,34 @@
   <material name="shaft_gold">
     <color rgba="1.0 0.72 0.08 1"/>
   </material>
+  <material name="actuator_orange"><color rgba="1.0 0.38 0.08 1"/></material>
+  <material name="actuator_blue"><color rgba="0.12 0.32 0.90 1"/></material>
+  <material name="actuator_red"><color rgba="0.90 0.14 0.25 1"/></material>
+  <material name="actuator_silver"><color rgba="0.68 0.75 0.82 1"/></material>
+  <material name="gripper_dark"><color rgba="0.13 0.16 0.21 1"/></material>
+
+  <xacro:macro name="solid_box" params="name x y z xyz density colour gazebo_colour">
+    <xacro:property name="box_mass" value="${density*x*y*z}"/>
+    <link name="${name}">
+      <visual>
+        <origin xyz="${xyz}"/>
+        <geometry><box size="${x} ${y} ${z}"/></geometry>
+        <material name="${colour}"/>
+      </visual>
+      <collision>
+        <origin xyz="${xyz}"/>
+        <geometry><box size="${x} ${y} ${z}"/></geometry>
+      </collision>
+      <inertial>
+        <origin xyz="${xyz}"/>
+        <mass value="${box_mass}"/>
+        <inertia ixx="${box_mass*(y*y+z*z)/12.0}" ixy="0" ixz="0"
+                 iyy="${box_mass*(x*x+z*z)/12.0}" iyz="0"
+                 izz="${box_mass*(x*x+y*y)/12.0}"/>
+      </inertial>
+    </link>
+    <gazebo reference="${name}"><material>${gazebo_colour}</material><mu1>0.8</mu1><mu2>0.8</mu2></gazebo>
+  </xacro:macro>
 
   <!-- Separate links retain the stator/output relationship and individual
        colours in both URDF viewers and Gazebo's fixed-joint conversion. -->
@@ -297,6 +350,33 @@
     </inertial>
   </link>
 
+  <!-- Elbow output passes across Y through the proximal forearm. -->
+  <xacro:actuator_cube name="elbow_actuator" colour="actuator_orange" gazebo_colour="Gazebo/Orange"/>
+  <xacro:output_shaft name="elbow_shaft" length="${elbow_shaft_length}"
+                      xyz="0 ${side*elbow_shaft_center} 0" rpy="${pi/2.0} 0 0"/>
+  <xacro:solid_box name="forearm" x="${fal}" y="${faw}" z="${fah}"
+                   xyz="${fal/2.0} 0 0" density="${rho}" colour="copper" gazebo_colour="Gazebo/Orange"/>
+  <xacro:actuator_cube name="wrist_roll_actuator" colour="actuator_blue" gazebo_colour="Gazebo/Blue"/>
+  <xacro:output_shaft name="wrist_roll_shaft" length="${transfer_shaft_length}"
+                      xyz="${transfer_shaft_center} 0 0" rpy="0 ${pi/2.0} 0"/>
+  <xacro:actuator_cube name="wrist_pitch_actuator" colour="actuator_red" gazebo_colour="Gazebo/Red"/>
+  <xacro:output_shaft name="wrist_pitch_shaft" length="${transfer_shaft_length}"
+                      xyz="0 ${side*transfer_shaft_center} 0" rpy="${pi/2.0} 0 0"/>
+  <xacro:actuator_cube name="wrist_yaw_actuator" colour="actuator_silver" gazebo_colour="Gazebo/White"/>
+  <xacro:output_shaft name="wrist_yaw_shaft" length="${gripper_shaft_length}"
+                      xyz="0 0 ${-(gripper_shaft_length/2.0-shaft_insert)}" rpy="0 0 0"/>
+  <xacro:solid_box name="gripper_base" x="${gripper_x}" y="${gripper_y}" z="${gripper_z}"
+                   xyz="0 0 0" density="${actuator_rho}" colour="gripper_dark" gazebo_colour="Gazebo/DarkGrey"/>
+  <xacro:solid_box name="gripper_left_finger" x="${finger_length}" y="${finger_width}" z="${finger_height}"
+                   xyz="${finger_length/2.0} 0 0" density="${actuator_rho}" colour="actuator_silver" gazebo_colour="Gazebo/White"/>
+  <xacro:solid_box name="gripper_right_finger" x="${finger_length}" y="${finger_width}" z="${finger_height}"
+                   xyz="${finger_length/2.0} 0 0" density="${actuator_rho}" colour="actuator_silver" gazebo_colour="Gazebo/White"/>
+  <!-- Virtual TCP, fixed to the gripper body; tiny inertia keeps Gazebo's
+       URDF conversion well-defined. No visual/collision at the tracked point. -->
+  <link name="gripper_tool">
+    <inertial><mass value="0.001"/><inertia ixx="1e-8" ixy="0" ixz="0" iyy="1e-8" iyz="0" izz="1e-8"/></inertial>
+  </link>
+
   <!-- ================= joints ================= -->
 
   <joint name="world_to_stem" type="fixed">
@@ -334,20 +414,20 @@
     <origin xyz="0 ${side*next_housing_offset} 0" rpy="0 0 0"/>
   </joint>
 
-  <!-- Roll is SECOND; its bore is below the incoming pitch shaft. -->
+  <!-- Roll is SECOND; the output is centred on the green cube's X face. -->
   <joint name="shoulder_roll_joint" type="continuous">
     <parent link="roll_actuator"/>
     <child link="shoulder_roll_shaft"/>
-    <origin xyz="${actuator_size/2.0} 0 ${-roll_axis_drop}" rpy="0 0 0"/>
+    <origin xyz="${actuator_size/2.0} 0 0" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
   </joint>
 
-  <!-- The roll shaft passes through the upper part of the yaw cube. -->
+  <!-- The roll shaft passes through the centre of the cyan yaw cube. -->
   <joint name="roll_output_to_yaw_actuator" type="fixed">
     <parent link="shoulder_roll_shaft"/>
     <child link="yaw_actuator"/>
-    <origin xyz="${next_housing_offset} 0 ${-roll_axis_drop}" rpy="0 0 0"/>
+    <origin xyz="${next_housing_offset} 0 0" rpy="0 0 0"/>
   </joint>
 
   <!-- Yaw is THIRD: twist about the hanging arm's own centreline. -->
@@ -365,10 +445,69 @@
     <origin xyz="0 0 ${-shaft_gap}" rpy="0 0 0"/>
   </joint>
 
-  <!--
-    STAGE 4 goes here - forearm on an elbow joint, hanging off the bottom
-    of the upper arm at xyz="0 0 ${-ual}" in its own link frame.
-  -->
+  <joint name="upper_arm_to_elbow_actuator" type="fixed">
+    <parent link="upper_arm"/><child link="elbow_actuator"/>
+    <origin xyz="0 0 ${-ual-actuator_size/2.0}"/>
+  </joint>
+  <joint name="elbow_joint" type="continuous">
+    <parent link="elbow_actuator"/><child link="elbow_shaft"/>
+    <origin xyz="0 ${side*actuator_size/2.0} 0"/><axis xyz="0 1 0"/>
+    <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
+  </joint>
+  <joint name="elbow_output_to_forearm" type="fixed">
+    <parent link="elbow_shaft"/><child link="forearm"/>
+    <origin xyz="${-fah/2.0} ${side*(shaft_gap+faw/2.0)} 0"/>
+  </joint>
+  <joint name="forearm_to_wrist_roll" type="fixed">
+    <parent link="forearm"/><child link="wrist_roll_actuator"/>
+    <origin xyz="${fal+actuator_size/2.0} 0 0"/>
+  </joint>
+  <joint name="wrist_roll_joint" type="continuous">
+    <parent link="wrist_roll_actuator"/><child link="wrist_roll_shaft"/>
+    <origin xyz="${actuator_size/2.0} 0 0"/><axis xyz="1 0 0"/>
+    <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
+  </joint>
+  <joint name="wrist_roll_to_pitch" type="fixed">
+    <parent link="wrist_roll_shaft"/><child link="wrist_pitch_actuator"/>
+    <origin xyz="${next_housing_offset} 0 0"/>
+  </joint>
+  <joint name="wrist_pitch_joint" type="continuous">
+    <parent link="wrist_pitch_actuator"/><child link="wrist_pitch_shaft"/>
+    <origin xyz="0 ${side*actuator_size/2.0} 0"/><axis xyz="0 1 0"/>
+    <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
+  </joint>
+  <joint name="wrist_pitch_to_yaw" type="fixed">
+    <parent link="wrist_pitch_shaft"/><child link="wrist_yaw_actuator"/>
+    <origin xyz="0 ${side*next_housing_offset} 0"/>
+  </joint>
+  <joint name="wrist_yaw_joint" type="continuous">
+    <parent link="wrist_yaw_actuator"/><child link="wrist_yaw_shaft"/>
+    <origin xyz="0 0 ${-actuator_size/2.0}"/><axis xyz="0 0 1"/>
+    <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
+  </joint>
+  <joint name="wrist_yaw_to_gripper" type="fixed">
+    <parent link="wrist_yaw_shaft"/><child link="gripper_base"/>
+    <origin xyz="0 0 ${-shaft_gap-gripper_z/2.0}"/>
+  </joint>
+  <!-- Gazebo Classic does not mechanically enforce URDF mimic. These two
+       independent sliders are synchronized by GUI commands, not a gearbox.
+       In Release they are free; this prototype does not simulate grip force. -->
+  <joint name="gripper_left_joint" type="prismatic">
+    <parent link="gripper_base"/><child link="gripper_left_finger"/>
+    <origin xyz="${gripper_x/2.0} ${finger_width/2.0} 0"/><axis xyz="0 1 0"/>
+    <limit lower="0" upper="0.04" effort="20" velocity="0.1"/>
+    <dynamics damping="2" friction="0.1"/>
+  </joint>
+  <joint name="gripper_right_joint" type="prismatic">
+    <parent link="gripper_base"/><child link="gripper_right_finger"/>
+    <origin xyz="${gripper_x/2.0} ${-finger_width/2.0} 0"/><axis xyz="0 -1 0"/>
+    <limit lower="0" upper="0.04" effort="20" velocity="0.1"/>
+    <dynamics damping="2" friction="0.1"/>
+  </joint>
+  <joint name="gripper_to_tool" type="fixed">
+    <parent link="gripper_base"/><child link="gripper_tool"/>
+    <origin xyz="${gripper_x/2.0+finger_length} 0 0"/>
+  </joint>
 
   <!-- ================= gazebo ================= -->
 

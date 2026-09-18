@@ -77,7 +77,7 @@ test('G1-style pitch and roll aim the arm while yaw twists its centreline', () =
   assert.deepEqual(r.joints.get('shoulder_roll_joint').axis.toArray(),[1,0,0]);
   assert.deepEqual(r.joints.get('shoulder_yaw_joint').axis.toArray(),[0,0,1]);
   near(offset[0],0); near(offset[1],0); near(offset[2],-.375);
-  const p = tipPosition(r,'upper_arm',offset); near(p.x,.16); near(p.y,.72); near(p.z,.985);
+  const p = tipPosition(r,'upper_arm',offset); near(p.x,.16); near(p.y,.72); near(p.z,1.065);
   const next = sampler(r,'upper_arm',offset,state(r),2000);
   const points = Array.from({length:2000},(_,i)=>next(i));
   // Offset shoulder axes do not describe the previous constant-radius band.
@@ -85,15 +85,15 @@ test('G1-style pitch and roll aim the arm while yaw twists its centreline', () =
   assert.ok(Math.max(...radii)-Math.min(...radii)>.18);
   for (const axis of ['x','y','z']) {
     const values = points.map(p=>p[axis]);
-    assert.ok(Math.max(...values)-Math.min(...values)>.95, `${axis} must span spatial reach`);
+    assert.ok(Math.max(...values)-Math.min(...values)>.90, `${axis} must span spatial reach`);
   }
   // Positive Y pitch takes the downward arm toward -X.
   const horizontal = tipPosition(r,'upper_arm',offset,{shoulder_joint:Math.PI/2});
-  near(horizontal.x,-.555); near(horizontal.y,.72); near(horizontal.z,1.38);
+  near(horizontal.x,-.475); near(horizontal.y,.72); near(horizontal.z,1.38);
   const sideways = tipPosition(r,'upper_arm',offset,{shoulder_roll_joint:Math.PI/2});
-  near(sideways.x,.16); near(sideways.y,1.235); near(sideways.z,1.50);
+  near(sideways.x,.16); near(sideways.y,1.195); near(sideways.z,1.54);
   const combined = tipPosition(r,'upper_arm',offset,{shoulder_joint:Math.PI/2,shoulder_roll_joint:Math.PI/2});
-  near(combined.x,-.04); near(combined.y,1.235); near(combined.z,1.38);
+  near(combined.x,0); near(combined.y,1.195); near(combined.z,1.38);
   // Yaw changes orientation, never the centreline tip, at arbitrary shoulder poses.
   for (const pitch of [-1.2,0,.7]) for (const roll of [-.6,0,1.1]) {
     const q = {shoulder_joint:pitch,shoulder_roll_joint:roll};

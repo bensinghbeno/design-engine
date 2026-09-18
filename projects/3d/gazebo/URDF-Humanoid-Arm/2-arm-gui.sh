@@ -1,5 +1,7 @@
 #!/bin/bash
-# Pitch, roll and yaw sliders, each -180 to +180 degrees with zero centred.
+# Seven G1-order arm sliders, each -180..+180 degrees with zero centred,
+# plus one 0..80 mm aperture slider commanding both physical gripper fingers.
+# Uses system Python (Tk + ROS); the editor's Python may not include Tk.
 #
 # The rig launcher normally opens this GUI automatically. For a separate GUI,
 # launch the rig FIRST in another terminal without its automatic sliders:

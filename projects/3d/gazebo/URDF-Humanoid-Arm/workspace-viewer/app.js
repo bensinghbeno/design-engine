@@ -6,6 +6,10 @@ import {examples} from './examples.js';
 const $ = id => document.getElementById(id);
 const status = text => { $('status').textContent = text; };
 let robot, states = {}, frames = new Map(), cloud, points = [], generation = 0;
+const fingerNames = ['gripper_left_joint','gripper_right_joint'];
+function hasParallelGripper() {
+  return robot?.name === 'arm_rig' && fingerNames.every(name => robot.joints.get(name)?.type === 'prismatic');
+}
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, 1, 0.001, 10000);
 camera.up.set(0,0,1); camera.position.set(3,3,2);
@@ -98,6 +102,9 @@ function jointControls() {
   const path = chain(robot, $('tip').value).filter(j => j.type !== 'fixed');
   if (!path.length) $('joints').textContent = 'This link has no movable ancestors: its workspace is a point.';
   for (const joint of path) {
+    // The project gripper is one symmetric aperture, not two unrelated
+    // sampled axes. Keep its aperture fixed while sampling arm reach.
+    if (hasParallelGripper() && fingerNames.includes(joint.name)) continue;
     const s = states[joint.name], factor = joint.type === 'prismatic' ? 1 : 180/Math.PI, unit = factor === 1 ? 'm' : '°';
     const panel = document.createElement('div'); panel.className = 'joint';
     const title = document.createElement('div'); title.className = 'joint-title';
@@ -125,17 +132,42 @@ function jointControls() {
     }
     panel.append(ranges); $('joints').append(panel);
   }
+  if (hasParallelGripper()) {
+    const panel = document.createElement('div'); panel.className = 'joint';
+    const label = document.createElement('label'); label.textContent = 'Gripper aperture · ';
+    const readout = document.createElement('output'); readout.id = 'gripper-aperture-readout';
+    const slider = document.createElement('input'); slider.type = 'range'; slider.id = 'gripper-aperture';
+    slider.min = 0;
+    slider.max = 2000*Math.min(...fingerNames.map(name=>robot.joints.get(name).max));
+    slider.step = '.1'; slider.value = 1000*fingerNames.reduce((sum,name)=>sum+states[name].value,0);
+    slider.setAttribute('aria-label','Gripper aperture (mm)');
+    const update = () => { readout.textContent = `${Number(slider.value).toFixed(1)} mm`; };
+    update(); label.append(readout);
+    slider.oninput = guard(() => {
+      for (const name of fingerNames) states[name].value = Number(slider.value)/2000;
+      update(); updatePose();
+      if (path.some(j=>fingerNames.includes(j.name))) invalidate();
+    });
+    const note = document.createElement('div'); note.className = 'axis-note';
+    note.textContent = 'Symmetric fingers; aperture held fixed during sampling. Tool point is between the fingertip ends.';
+    panel.append(label,slider,note); $('joints').append(panel);
+  }
   activeCount();
 }
 function load(xml, preferredTip, preferredOffset) {
   const parsed = parseRobot(xml); // Validate before replacing the current model.
   robot = parsed; states = {}; clearCloud();
   for (const j of robot.joints.values()) if (j.type !== 'fixed') states[j.name] = {min:j.min,max:j.max,value:Math.max(j.min,Math.min(j.max,0)),enabled:true};
+  if (hasParallelGripper()) for (const name of fingerNames) {
+    states[name].enabled = false;
+    states[name].value = robot.joints.get(name).max; // preview open gripper
+  }
   $('xml').value = xml; $('robot-name').textContent = robot.name;
   $('warnings').textContent = robot.warnings.join('\n');
   $('tip').replaceChildren(...[...robot.links.keys()].map(name => new Option(name,name)));
   const leaves = [...robot.links.keys()].filter(n => !robot.ordered.some(j => j.parent === n));
-  $('tip').value = preferredTip || (robot.links.has('upper_arm') ? 'upper_arm' : leaves.at(-1));
+  $('tip').value = preferredTip || (robot.links.has('gripper_tool') ? 'gripper_tool'
+    : robot.links.has('upper_arm') ? 'upper_arm' : leaves.at(-1));
   setOffset(preferredOffset || suggestedTip(robot,$('tip').value));
   renderRobot(); jointControls(); updatePose(); fit();
   status('Robot loaded. White marker = tracked point. Generate a workspace to trace its reach.');

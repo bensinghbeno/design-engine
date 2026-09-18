@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Centered pitch, roll and yaw sliders for the G1-style shoulder chain.
+"""Seven centered arm controls and one 0..80 mm gripper aperture control.
 
-All sliders span -180..+180 degrees. Pitch (local Y) carries roll (local X),
-which carries yaw (local Z). Yaw twists the arm about its own centreline.
-This follows G1 joint order, not its exact geometry or travel limits.
-The three target angles are reasserted together at approximately 30 Hz
-through /gazebo/set_model_configuration. This is kinematic positioning,
-not a torque controller or a collision-safe motion planner.
+G1-style order: shoulder pitch/roll/yaw, elbow, wrist roll/pitch/yaw.
+All arm sliders span -180..+180 degrees (not the G1's real travel limits).
+The seven angles and two independent finger positions are reasserted in
+one /gazebo/set_model_configuration call at approximately 30 Hz. Each
+finger travels half the aperture, 0..0.04 m, along opposite local Y axes.
+This is kinematic positioning, not torque control or collision-safe motion.
 
-Reset centres all sliders. Release stops positioning all joints and
-tracks their measured angles; dragging any slider re-engages Hold.
+Reset centres the arm and closes the gripper. Release stops positioning
+all nine joints and tracks feedback; dragging any control re-engages Hold.
 ROS calls run on a worker; only the main thread accesses Tk widgets.
 Run via 1-launch-rig.sh or, with Gazebo already running, 2-arm-gui.sh.
 """
@@ -26,10 +26,19 @@ from tkinter import ttk
 import math
 
 JOINTS = (
-    ("shoulder_joint", "1 · Pitch · local Y · purple actuator"),
-    ("shoulder_roll_joint", "2 · Roll · local X · green actuator"),
-    ("shoulder_yaw_joint", "3 · Yaw / arm twist · local Z · cyan actuator"),
+    ("shoulder_joint", "1 · Shoulder pitch · Y · purple"),
+    ("shoulder_roll_joint", "2 · Shoulder roll · X · green"),
+    ("shoulder_yaw_joint", "3 · Shoulder yaw / twist · Z · cyan"),
+    ("elbow_joint", "4 · Elbow · local Y"),
+    ("wrist_roll_joint", "5 · Wrist roll · X along forearm"),
+    ("wrist_pitch_joint", "6 · Wrist pitch · local Y"),
+    ("wrist_yaw_joint", "7 · Wrist yaw · local Z"),
 )
+GRIPPER_JOINTS = ("gripper_left_joint", "gripper_right_joint")
+PHYSICAL_JOINTS = tuple(name for name, _ in JOINTS) + GRIPPER_JOINTS
+JOINT_COLOURS = ("#8033aa", "#237a35", "#087e91", "#a34c13",
+                 "#315fa3", "#a33c6b", "#526576")
+APERTURE_MAX_MM = 80.0
 DEFAULT_MODEL = "arm_rig"
 HOLD_HZ = 30.0
 
@@ -66,6 +75,8 @@ class ArmGui:
         self.holding = True
         self.target_deg = {name: 0.0 for name, _ in JOINTS}
         self.actual_deg = {name: None for name, _ in JOINTS}
+        self.target_aperture_mm = 0.0
+        self.actual_aperture_mm = None
         self.service_error = ""
         self.lock = threading.Lock()
         self.stop_event = threading.Event()
@@ -89,18 +100,25 @@ class ArmGui:
 
     # ---------------- ui ----------------
     def _build_ui(self):
-        self.root.title("Upper arm - pitch, roll and yaw")
-        self.root.geometry("620x610")
-        self.root.minsize(560, 590)
+        self.root.title("G1-order arm · 7 joints + gripper")
+        self.root.geometry("880x740")
+        self.root.minsize(800, 710)
 
         frm = ttk.Frame(self.root, padding=12)
         frm.pack(fill="both", expand=True)
 
-        ttk.Label(frm, text=f"model: {self.model}   |   pitch → roll → yaw",
+        ttk.Label(frm, text=f"model: {self.model}   |   shoulder → elbow → wrist → gripper",
                   foreground="#666").pack(anchor="w")
-        for name, title in JOINTS:
-            group = ttk.LabelFrame(frm, text=title, padding=10)
-            group.pack(fill="x", pady=(12, 0))
+        controls = ttk.Frame(frm)
+        controls.pack(fill="both", expand=True, pady=(6, 0))
+        for column in range(2):
+            controls.columnconfigure(column, weight=1, uniform="controls")
+        for index, (name, title) in enumerate(JOINTS):
+            group = ttk.LabelFrame(controls, padding=8)
+            heading = ttk.Label(group, text=title, foreground=JOINT_COLOURS[index])
+            group.configure(labelwidget=heading)
+            group.grid(row=index % 4, column=index // 4, sticky="nsew", padx=4, pady=4)
+            controls.rowconfigure(index % 4, weight=1)
             row = ttk.Frame(group)
             row.pack(fill="x")
             ttk.Label(row, text="-180", width=5).pack(side="left")
@@ -127,8 +145,27 @@ class ArmGui:
             self.value_labels[name] = target
             self.actual_labels[name] = actual
 
-        ttk.Label(frm, text="Pitch and roll aim the arm; yaw twists it along its length.",
-                  foreground="#666").pack(anchor="w", pady=(8, 0))
+        group = ttk.LabelFrame(controls, text="8 · Gripper · full aperture", padding=8)
+        group.grid(row=3, column=1, sticky="nsew", padx=4, pady=4)
+        row = ttk.Frame(group)
+        row.pack(fill="x")
+        ttk.Label(row, text="0 mm", width=5).pack(side="left")
+        self.aperture_var = tk.DoubleVar(master=self.root, value=0.0)
+        self.aperture_scale = ttk.Scale(
+            row, from_=0.0, to=APERTURE_MAX_MM, variable=self.aperture_var,
+            orient="horizontal", command=self._on_aperture_slide)
+        self.aperture_scale.pack(side="left", fill="x", expand=True, padx=6)
+        ttk.Label(row, text="80 mm", width=6).pack(side="left")
+        ttk.Label(group, text="Closed ←   two fingers together   → Open",
+                  foreground="#666").pack(anchor="w")
+        self.aperture_target_label = ttk.Label(
+            group, text="target     0.0 mm", font=("TkDefaultFont", 12, "bold"))
+        self.aperture_target_label.pack(anchor="w", pady=(5, 0))
+        self.aperture_actual_label = ttk.Label(group, text="actual    -- mm", foreground="#666")
+        self.aperture_actual_label.pack(anchor="w")
+
+        ttk.Label(frm, text="Kinematic hold · not collision-safe. Release tracks feedback; drag any control to hold.",
+                  foreground="#666").pack(anchor="w", pady=(6, 0))
 
         btns = ttk.Frame(frm)
         btns.pack(fill="x", pady=(14, 0))
@@ -137,8 +174,8 @@ class ArmGui:
                                    command=self.toggle_hold)
         self.hold_btn.pack(side="left", padx=8)
 
-        self.status = ttk.Label(frm, text="holding all joints", foreground="#0a0",
-                                wraplength=540)
+        self.status = ttk.Label(frm, text="holding arm + gripper", foreground="#0a0",
+                    wraplength=760)
         self.status.pack(anchor="w", pady=(8, 0))
 
     def _on_slide(self, joint, raw):
@@ -148,9 +185,17 @@ class ArmGui:
         self._set_status(True)
         self.value_labels[joint].config(text=f"target    {float(raw):+6.1f} deg")
 
+    def _on_aperture_slide(self, raw):
+        aperture = max(0.0, min(APERTURE_MAX_MM, float(raw)))
+        with self.lock:
+            self.target_aperture_mm = aperture
+            self.holding = True
+        self._set_status(True)
+        self.aperture_target_label.config(text=f"target    {aperture:5.1f} mm")
+
     def _set_status(self, holding):
         if holding:
-            self.status.config(text="holding all joints", foreground="#0a0")
+            self.status.config(text="holding arm + gripper", foreground="#0a0")
             self.hold_btn.config(text="Release")
         else:
             self.status.config(text="free - falling under gravity",
@@ -160,10 +205,13 @@ class ArmGui:
     def reset(self):
         with self.lock:
             self.target_deg = {name: 0.0 for name, _ in JOINTS}
+            self.target_aperture_mm = 0.0
             self.holding = True
         for name, _ in JOINTS:
             self.scale_vars[name].set(0.0)
             self.value_labels[name].config(text="target    +0.0 deg")
+        self.aperture_var.set(0.0)
+        self.aperture_target_label.config(text="target     0.0 mm")
         self._set_status(True)
 
     def toggle_hold(self):
@@ -175,11 +223,13 @@ class ArmGui:
     # ---------------- gazebo ----------------
     def _hold_loop(self):
         """Command all joints together and publish feedback to the UI cache."""
-        names = [name for name, _ in JOINTS]
+        names = list(PHYSICAL_JOINTS)
         while not self.stop_event.is_set() and not rospy.is_shutdown():
             with self.lock:
                 holding = self.holding
-                positions = [math.radians(self.target_deg[name]) for name in names]
+                positions = [math.radians(self.target_deg[name]) for name, _ in JOINTS]
+                # Full aperture mm -> half aperture metres per physical finger.
+                positions.extend([self.target_aperture_mm / 2000.0] * 2)
             error = ""
             if holding:
                 try:
@@ -188,21 +238,29 @@ class ArmGui:
                                            joint_names=names,
                                            joint_positions=positions)
                     if not response.success:
-                        error = response.status_message or "Joint command rejected. Restart the rig with all three shoulder joints."
+                        error = response.status_message or "Joint command rejected. Restart the rig with all 7 arm joints and 2 fingers."
                 except Exception as exc:
                     error = f"Gazebo command unavailable: {exc}"
-            actual = {}
+            measured = {}
             for name in names:
                 try:
                     response = self.getj(f"{self.model}::{name}")
-                    actual[name] = (wrap180(math.degrees(response.position[0]))
-                                    if response.success and response.position else None)
-                except Exception:
-                    actual[name] = None
-            if any(value is None for value in actual.values()) and not error:
-                error = "Joint feedback unavailable. Restart the rig after shoulder changes."
+                    value = response.position[0] if response.success and response.position else None
+                    if value is None or not math.isfinite(value):
+                        detail = getattr(response, "status_message", "") or "missing or invalid position"
+                        raise ValueError(detail)
+                    measured[name] = value
+                except Exception as exc:
+                    measured[name] = None
+                    if not error:
+                        error = f"Joint feedback unavailable ({name}): {exc}"
+            actual = {name: (wrap180(math.degrees(measured[name]))
+                             if measured[name] is not None else None) for name, _ in JOINTS}
+            fingers = [measured[name] for name in GRIPPER_JOINTS]
+            aperture = sum(fingers) * 1000.0 if all(value is not None for value in fingers) else None
             with self.lock:
                 self.actual_deg = actual
+                self.actual_aperture_mm = aperture
                 self.service_error = error
             # Wall time avoids hanging on a paused simulation clock.
             self.stop_event.wait(1.0 / HOLD_HZ)
@@ -213,16 +271,27 @@ class ArmGui:
             return
         with self.lock:
             actual = self.actual_deg.copy()
+            aperture = self.actual_aperture_mm
             holding = self.holding
             error = self.service_error
             if not holding:
                 self.target_deg.update({name: deg for name, deg in actual.items() if deg is not None})
+                if aperture is not None:
+                    # Preserve raw actual feedback, but never command beyond travel.
+                    self.target_aperture_mm = max(0.0, min(APERTURE_MAX_MM, aperture))
+            target_aperture = self.target_aperture_mm
         for name, deg in actual.items():
             text = "actual    -- deg (no feedback)" if deg is None else f"actual    {deg:+6.1f} deg"
             self.actual_labels[name].config(text=text)
             if not holding and deg is not None:
                 self.scale_vars[name].set(deg)
                 self.value_labels[name].config(text=f"target    {deg:+6.1f} deg")
+        self.aperture_actual_label.config(
+            text="actual    -- mm (no feedback)" if aperture is None else f"actual    {aperture:5.1f} mm")
+        if not holding and aperture is not None:
+            # DoubleVar.set never invokes the Scale command: stay released.
+            self.aperture_var.set(target_aperture)
+            self.aperture_target_label.config(text=f"target    {target_aperture:5.1f} mm")
         self._set_status(holding)
         if error:
             self.status.config(text=error, foreground="#a60")

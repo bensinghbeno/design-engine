@@ -65,10 +65,30 @@ test('pitch housing touches bar; gold shafts connect all stages with exposed gap
   const rollEnds = ends('shoulder_roll_shaft').sort((a,b)=>a.x-b.x);
   near(rollEnds[0].x,centre('roll_actuator').x+.06-.024);
   near(rollEnds[1].x,centre('yaw_actuator').x+.06+.012);
-  near(rollEnds[0].z,centre('roll_actuator').z-.04);
-  near(rollEnds[1].z,centre('yaw_actuator').z+.04);
-  // The pitch and roll bores in the green cube have 16 mm surface clearance.
-  near(pitchEnds[0].z-rollEnds[0].z-2*.012,.016);
+  near(rollEnds[0].z,centre('roll_actuator').z);
+  near(rollEnds[1].z,centre('yaw_actuator').z);
+  near(rollEnds[0].y,centre('roll_actuator').y);
+  near(rollEnds[1].y,centre('yaw_actuator').y);
+});
+
+test('roll shaft stays centred on both actuator faces through shoulder motion and resizing', () => {
+  const variants = [robot, parseRobot(expand('arm_side:=-1'),DOMParser),
+    parseRobot(expand('stem_width:=0.2'),DOMParser)];
+  for (const rig of variants) for (const pitch of [0,.8,-1.3]) for (const roll of [0,.6,Math.PI/2]) {
+    const frames = forward(rig,{shoulder_joint:pitch,shoulder_roll_joint:roll,shoulder_yaw_joint:.5});
+    const visual = rig.links.get('shoulder_roll_shaft').visuals[0];
+    const shaftFrame = frames.get('shoulder_roll_shaft').clone().multiply(visual.origin);
+    const start = new Vector3(0,0,-visual.size[1]/2).applyMatrix4(shaftFrame);
+    const end = new Vector3(0,0,visual.size[1]/2).applyMatrix4(shaftFrame);
+    const direction = end.clone().sub(start).normalize();
+    for (const [name,sign] of [['roll_actuator',1],['yaw_actuator',-1]]) {
+      const size = rig.links.get(name).visuals[0].size[0];
+      const face = new Vector3(sign*size/2,0,0).applyMatrix4(frames.get(name));
+      const along = face.clone().sub(start).dot(direction);
+      near(start.clone().addScaledVector(direction,along).distanceTo(face),0);
+      assert.ok(along>=0 && along<=start.distanceTo(end), 'Shaft must actually cross the face centre');
+    }
+  }
 });
 
 test('each output carries only downstream stages, never its own actuator housing', () => {
@@ -106,7 +126,7 @@ test('actuator dimensions follow larger sections and arm_side mirrors the mounti
     near(a.x,b.x); near(a.y,-b.y); near(a.z,b.z);
   }
   const tip = tipPosition(mirrored,'upper_arm',suggestedTip(mirrored,'upper_arm'));
-  near(tip.x,.16); near(tip.y,-.72); near(tip.z,.985);
+  near(tip.x,.16); near(tip.y,-.72); near(tip.z,1.065);
   const transforms = forward(mirrored);
   const v = mirrored.links.get('shoulder_pitch_shaft').visuals[0];
   const ends = [-1,1].map(sign => new Vector3(0,0,sign*v.size[1]/2)
