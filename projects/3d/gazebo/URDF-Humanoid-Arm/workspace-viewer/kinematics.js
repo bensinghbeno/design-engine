@@ -131,9 +131,11 @@ export function suggestedTip(robot, link) {
   return new Vector3(0, 0, z).applyMatrix4(v.origin).toArray();
 }
 
-export function sampler(robot, link, offset, states, count) {
+// Keep the sampled configurations so orientation IK can start at a known
+// reachable pose for precisely the same (unrounded) workspace point.
+export function configurationSampler(robot, link, states, count) {
   const movable = chain(robot, link).filter(j => j.type !== 'fixed' && states[j.name].enabled && states[j.name].max > states[j.name].min);
-  const base = Object.fromEntries(Object.entries(states).map(([n, s]) => [n, s.value]));
+  const base = Object.fromEntries(Object.entries(states).map(([n, s]) => [n, s.enabled && s.max === s.min ? s.min : s.value]));
   let seed = 123456789;
   const random = () => { seed = (Math.imul(1664525, seed) + 1013904223) >>> 0; return seed / 4294967296; };
   return index => {
@@ -143,6 +145,11 @@ export function sampler(robot, link, offset, states, count) {
       const t = movable.length === 1 ? index / Math.max(1, count - 1) : random();
       q[j.name] = s.min + t * (s.max - s.min);
     }
-    return tipPosition(robot, link, offset, q);
+    return q;
   };
+}
+
+export function sampler(robot, link, offset, states, count) {
+  const configurations = configurationSampler(robot, link, states, count);
+  return index => tipPosition(robot, link, offset, configurations(index));
 }

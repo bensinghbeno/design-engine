@@ -1,6 +1,7 @@
 #!/bin/bash
-# Seven G1-order arm sliders, each -180..+180 degrees with zero centred,
+# Five G1-order arm sliders, each -180..+180 degrees with zero centred,
 # plus one 0..80 mm aperture slider commanding both physical gripper fingers.
+# Six controls in two columns; gripper attached directly to wrist roll.
 # Uses system Python (Tk + ROS); the editor's Python may not include Tk.
 #
 # The rig launcher normally opens this GUI automatically. For a separate GUI,

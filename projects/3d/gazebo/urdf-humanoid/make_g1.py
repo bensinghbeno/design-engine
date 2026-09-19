@@ -62,9 +62,31 @@ def add_ros_control(root):
     return n
 
 
+ELBOW_UPPER = 2.9671   # 170 deg; stock URDF caps flexion at 2.0944 (120 deg)
+
+
+def relax_elbow_limits(root):
+    """Widen each elbow's upper flexion limit so poses aren't capped at 120 deg.
+
+    Only raises the upper stop (the lower stop is left alone) and never shrinks
+    a limit that is already wider than the target.
+    """
+    n = 0
+    for joint in root.findall("joint"):
+        name = joint.get("name", "")
+        if "elbow" not in name or joint.get("type") != "revolute":
+            continue
+        lim = joint.find("limit")
+        if lim is None:
+            continue
+        if float(lim.get("upper", "0")) < ELBOW_UPPER:
+            lim.set("upper", f"{ELBOW_UPPER:.4f}")
+            n += 1
+    return n
+
+
 def prune_legs(root):
     """Delete both legs entirely (hip/knee/ankle chains).
-
     The legs hang off the pelvis as two independent branches, so removing
     every link whose ancestry passes through a hip joint - plus the joints
     themselves - leaves the rest of the tree intact.
@@ -297,6 +319,12 @@ def build(src_name, pinned, height, damping, friction, out_name,
     if self_collide:
         sc_repl, sc_add, sc_on = add_self_collision(root)
 
+    # --- 2e. relax the elbow flexion limit ---
+    # The stock URDF caps elbow flexion at 2.0944 rad (120 deg), which is too
+    # tight for pose experiments - a real elbow bends to ~170 deg. Widen the
+    # upper stop to 2.967 rad (170 deg) while leaving the lower stop alone.
+    n_elbow = relax_elbow_limits(root)
+
     # --- 3. optionally weld the pelvis to the world ---
     if pinned and not torso_only:
         names = {l.get("name") for l in root.findall("link")}
@@ -337,6 +365,8 @@ def build(src_name, pinned, height, damping, friction, out_name,
     if self_collide:
         print(f"    collision proxies    : {sc_repl} replaced, {sc_add} added")
         print(f"    self_collide links   : {sc_on}")
+    if n_elbow:
+        print(f"    elbow limits relaxed : {n_elbow} -> upper {ELBOW_UPPER:.4f} rad (170 deg)")
     if lock_waist:
         print(f"    waist joints locked  : {locked} (now fixed)")
     if controlled:

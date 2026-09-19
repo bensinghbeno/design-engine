@@ -151,10 +151,12 @@ class G1Gui:
         for row, j in enumerate(ARM_JOINTS):
             lo, hi = self.limits[j]
             c = self.center[j]
-            # Symmetric range about the rest centre, clamped to joint limits.
-            span = min(c - lo, hi - c)
-            span = max(span, 0.05)
-            smin, smax = c - span, c + span
+            # Use the joint's FULL travel as the slider range (end stops = URDF
+            # limits). The rest angle c is just the starting/centre reference we
+            # snap back to on Reset - we deliberately do NOT clamp to a symmetric
+            # window around c, or joints that rest near a limit (e.g. the elbows)
+            # would only expose their smaller side (~40 deg) of travel.
+            smin, smax = lo, hi
 
             ttk.Label(body, text=j, width=26, anchor='w').grid(
                 row=row, column=0, sticky='w', pady=2)
@@ -218,9 +220,8 @@ class G1Gui:
         for j in ARM_JOINTS:
             lo, hi = self.limits[j]
             c = self.center[j]
-            span = max(min(c - lo, hi - c), 0.05)
             scale, var = self.scales[j]
-            scale.config(from_=c - span, to=c + span)
+            scale.config(from_=lo, to=hi)   # full travel; c is just the reset point
             var.set(c)
             self.value_lbls[j].config(text=f"{c:+.3f}")
         self.status.config(text="rest updated - holding")

@@ -8,7 +8,8 @@ import {promisify} from 'node:util';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 8765);
 const run = promisify(execFile);
-const publicFiles = new Set(['index.html', 'app.js', 'kinematics.js', 'examples.js', 'style.css']);
+const publicFiles = new Set(['index.html', 'app.js', 'kinematics.js', 'examples.js', 'style.css',
+  'orientation.js', 'orientation-analysis.js', 'orientation-worker.js']);
 const vendorFiles = new Map([
   ['vendor/three.module.js', 'build/three.module.js'],
   ['vendor/three.core.js', 'build/three.core.js'],

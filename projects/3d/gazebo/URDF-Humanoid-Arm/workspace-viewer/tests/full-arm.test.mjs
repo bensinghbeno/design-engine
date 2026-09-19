@@ -25,13 +25,11 @@ const stages = [
   ['shoulder_roll_joint', 'roll_actuator', 'shoulder_roll_shaft', 'yaw_actuator', [1,0,0], 'Gazebo/Green', [.18,.80,.28,1]],
   ['shoulder_yaw_joint', 'yaw_actuator', 'shoulder_yaw_link', 'upper_arm', [0,0,1], 'Gazebo/Turquoise', [.02,.72,.85,1]],
   ['elbow_joint', 'elbow_actuator', 'elbow_shaft', 'forearm', [0,1,0], 'Gazebo/Orange', [1,.38,.08,1]],
-  ['wrist_roll_joint', 'wrist_roll_actuator', 'wrist_roll_shaft', 'wrist_pitch_actuator', [1,0,0], 'Gazebo/Blue', [.12,.32,.90,1]],
-  ['wrist_pitch_joint', 'wrist_pitch_actuator', 'wrist_pitch_shaft', 'wrist_yaw_actuator', [0,1,0], 'Gazebo/Red', [.90,.14,.25,1]],
-  ['wrist_yaw_joint', 'wrist_yaw_actuator', 'wrist_yaw_shaft', 'gripper_base', [0,0,1], 'Gazebo/White', [.68,.75,.82,1]],
+  ['wrist_roll_joint', 'wrist_roll_actuator', 'wrist_roll_shaft', 'gripper_base', [1,0,0], 'Gazebo/Blue', [.12,.32,.90,1]],
 ].map(([joint, housing, shaft, receiver, axis, colour, rgba]) => ({joint, housing, shaft, receiver, axis, colour, rgba}));
 const armJoints = stages.map(s => s.joint);
 const fingerJoints = ['gripper_left_joint', 'gripper_right_joint'];
-const pose = Object.fromEntries(armJoints.map((name, i) => [name, [.43,-.57,.71,-.83,.39,.61,-.47][i]]));
+const pose = Object.fromEntries(armJoints.map((name, i) => [name, [.43,-.57,.71,-.83,.39][i]]));
 const scaleArgs = ['stem_height:=3', 'stem_width:=0.2', 'stem_depth:=0.2',
   'crossbar_length:=2', 'crossbar_thickness:=0.16', 'crossbar_depth:=0.16',
   'upper_arm_width:=0.14', 'upper_arm_depth:=0.14',
@@ -83,7 +81,7 @@ function boxPenetration(rig, frames, name, ends) {
   return Math.max(0, hi-lo) * delta.length();
 }
 
-test('full arm: exactly seven continuous Y X Z Y X Y Z joints lead to the tool, plus two independent sliders', () => {
+test('full arm: exactly five continuous Y X Z Y X joints lead to the tool, plus two independent sliders', () => {
   const movable = [...robot.joints.values()].filter(j => j.type !== 'fixed');
   assert.deepEqual(movable.map(j => j.name).sort(), [...armJoints,...fingerJoints].sort());
   assert.deepEqual(chain(robot, 'gripper_tool').filter(j => j.type !== 'fixed').map(j => j.name), armJoints);
@@ -111,9 +109,16 @@ test('full arm: exactly seven continuous Y X Z Y X Y Z joints lead to the tool, 
   assert.equal(robot.joints.get('gripper_to_tool').parent, 'gripper_base');
   assert.equal(robot.links.get('gripper_tool').visuals.length, 0);
   assert.deepEqual(robot.warnings, []);
+  for (const prefix of ['wrist_pitch','wrist_yaw']) {
+    assert.ok(![...robot.links.keys(),...robot.joints.keys()].some(name=>name.startsWith(prefix)), `${prefix} hardware removed`);
+  }
+  const mounting = robot.joints.get('wrist_roll_to_gripper');
+  assert.equal(mounting.type,'fixed');
+  assert.equal(mounting.parent,'wrist_roll_shaft');
+  assert.equal(mounting.child,'gripper_base');
 });
 
-test('full arm: each of seven actuators is one correctly coloured cube and each output is gold', () => {
+test('full arm: each of five actuators is one correctly coloured cube and each output is gold', () => {
   assert.deepEqual([...robot.links.keys()].filter(name => name.endsWith('_actuator')).sort(), stages.map(s => s.housing).sort());
   for (const {name,rig,size} of variants) for (const stage of stages) {
     const visuals = rig.links.get(stage.housing).visuals;
@@ -193,8 +198,12 @@ for (const {joint,housing,shaft} of stages) test(`full arm motion: ${joint} carr
       if (downstream) matrixChanged(after.get(link), before.get(link), `${name} ${joint} must carry ${link}`);
       else matrixNear(after.get(link), before.get(link), `${name} ${joint} must not move ${link}`);
     }
-    assert.ok(tool(rig, pose).distanceTo(tool(rig, {...pose, [joint]: pose[joint]+.53})) > .001,
-      `${name} ${joint} changes tool position at the non-neutral pose`);
+    const toolDisplacement = tool(rig, pose).distanceTo(tool(rig, {...pose, [joint]: pose[joint]+.53}));
+    if (joint === 'wrist_roll_joint') {
+      near(toolDisplacement,0,`${name} coaxial wrist roll keeps fingertip midpoint fixed`);
+      assert.ok(point(after,'gripper_left_finger').distanceTo(point(before,'gripper_left_finger'))>.001,
+        `${name} wrist roll still rotates the jaws`);
+    } else assert.ok(toolDisplacement > .001, `${name} ${joint} changes tool position`);
     const bodyToTool = before.get('gripper_base').clone().invert().multiply(before.get('gripper_tool'));
     const movedBodyToTool = after.get('gripper_base').clone().invert().multiply(after.get('gripper_tool'));
     matrixNear(movedBodyToTool, bodyToTool, `${name} body/tool rigid relationship`);
@@ -321,8 +330,8 @@ test('full arm reach: shoulder plus elbow has local positional rank three, not m
   // Test a central-difference positional Jacobian with two shoulder columns
   // and the elbow column. Wrist angles stay fixed throughout differentiation.
   const candidates = [pose,
-    Object.fromEntries(armJoints.map((name, i) => [name, [-.8,.4,-.6,1.1,-.3,.8,.2][i]])),
-    Object.fromEntries(armJoints.map((name, i) => [name, [.9,.7,.3,-1.2,.6,-.5,.4][i]]))];
+    Object.fromEntries(armJoints.map((name, i) => [name, [-.8,.4,-.6,1.1,-.3][i]])),
+    Object.fromEntries(armJoints.map((name, i) => [name, [.9,.7,.3,-1.2,.6][i]]))];
   const names = ['shoulder_joint','shoulder_roll_joint','elbow_joint'];
   function derivatives(rig, q, h) {
     return names.map(name => tool(rig, {...q, [name]: q[name]+h})
@@ -354,7 +363,7 @@ test('full arm reach: elbow bending changes shoulder-to-tool distance with every
   }
 });
 
-test('full arm Gazebo: SDF retains all seven arm joints, both independent finger joints, and each part colour', t => {
+test('full arm Gazebo: SDF retains all five arm joints, both independent finger joints, and each part colour', t => {
   if (!existsSync('/usr/bin/gz')) return t.skip('Gazebo Classic is not installed');
   const directory = mkdtempSync(path.join(tmpdir(), 'full-arm-test-'));
   try {
@@ -365,7 +374,7 @@ test('full arm Gazebo: SDF retains all seven arm joints, both independent finger
     assert.equal(doc.documentElement.nodeName, 'sdf');
     const joints = elements(doc, 'joint');
     assert.deepEqual(joints.filter(j => j.getAttribute('type') !== 'fixed').map(j => j.getAttribute('name')).sort(), [...armJoints,...fingerJoints].sort(),
-      'fixed-joint lumping must not discard any of the nine movable joints');
+      'fixed-joint lumping must not discard any of the seven movable joints');
     for (const name of [...armJoints,...fingerJoints]) {
       const matches = joints.filter(j => j.getAttribute('name') === name);
       assert.equal(matches.length, 1, `${name} survives exactly once`);
@@ -386,8 +395,7 @@ test('full arm Gazebo: SDF retains all seven arm joints, both independent finger
     for (const [name,colour] of parts) {
       // Fixed children are lumped into upstream links; inspect visual names
       // and their own material scripts rather than requiring original links.
-      // Match the whole part name: pitch_actuator must not also match
-      // wrist_pitch_actuator (and likewise for roll/yaw).
+      // Match the whole part name so roll_actuator cannot match wrist_roll_actuator.
       const pattern = new RegExp(`(?:^|__)${name}_visual(?:_\\d+)?$`);
       const matches = visuals.filter(v => pattern.test(v.getAttribute('name')));
       assert.equal(matches.length, 1, `${name} retains one visible part after lumping: ${visuals.map(v => v.getAttribute('name')).join(', ')}`);

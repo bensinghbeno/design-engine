@@ -13,9 +13,9 @@ try {
   await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Workspace ready'),null,{timeout:30000});
   assert.equal(await page.locator('#robot-name').textContent(),'arm_rig');
   assert.equal(await page.locator('#count').textContent(),'20,000');
-  assert.match(await page.locator('#dof').textContent(),/7 sampled DOF/);
+  assert.match(await page.locator('#dof').textContent(),/5 sampled DOF/);
   assert.equal(await page.locator('#tip').inputValue(),'gripper_tool');
-  assert.equal(await page.locator('#joints input[type=checkbox]').count(),7);
+  assert.equal(await page.locator('#joints input[type=checkbox]').count(),5);
   assert.equal(await page.locator('#gripper-aperture').inputValue(),'80');
   await page.locator('#gripper-aperture').fill('40');
   assert.equal(await page.locator('#gripper-aperture-readout').textContent(),'40.0 mm');
@@ -24,13 +24,14 @@ try {
   assert.ok(yBounds[1]-yBounds[0]>.90, 'Pitch plus roll must aim the arm in space');
   const rigXml = await page.locator('#xml').inputValue();
   for (const name of ['pitch_actuator','roll_actuator','yaw_actuator','elbow_actuator',
-    'wrist_roll_actuator','wrist_pitch_actuator','wrist_yaw_actuator','gripper_left_joint','gripper_right_joint']) {
+    'wrist_roll_actuator','gripper_left_joint','gripper_right_joint']) {
     assert.ok(rigXml.includes(`name="${name}"`), `${name} must be loaded`);
   }
+  for (const prefix of ['wrist_pitch','wrist_yaw']) assert.ok(!rigXml.includes(`name="${prefix}`));
   console.log('PASS: actual rig loads, WebGL starts, cloud and bounds appear.');
   await page.selectOption('#tip','gripper_left_finger');
-  assert.match(await page.locator('#dof').textContent(),/7 sampled DOF \/ 8 on tip chain/);
-  assert.equal(await page.locator('#joints input[type=checkbox]').count(),7);
+  assert.match(await page.locator('#dof').textContent(),/5 sampled DOF \/ 6 on tip chain/);
+  assert.equal(await page.locator('#joints input[type=checkbox]').count(),5);
   await page.locator('#gripper-aperture').fill('0');
   assert.equal(await page.locator('#count').textContent(),'—');
   await page.selectOption('#tip','gripper_tool');

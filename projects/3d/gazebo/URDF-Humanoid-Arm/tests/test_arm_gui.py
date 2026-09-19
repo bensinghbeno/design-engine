@@ -14,9 +14,10 @@ from xml.etree import ElementTree
 
 
 ARM_NAMES = ["shoulder_joint", "shoulder_roll_joint", "shoulder_yaw_joint",
-             "elbow_joint", "wrist_roll_joint", "wrist_pitch_joint", "wrist_yaw_joint"]
+             "elbow_joint", "wrist_roll_joint"]
 FINGER_NAMES = ["gripper_left_joint", "gripper_right_joint"]
 PHYSICAL_NAMES = ARM_NAMES + FINGER_NAMES
+REMOVED_NAMES = {"wrist_pitch_joint", "wrist_yaw_joint"}
 
 
 rospy = ModuleType("rospy")
@@ -66,6 +67,10 @@ class ArmGuiTests(unittest.TestCase):
 
     def test_sliders_start_centered_and_independent(self):
         self.assertEqual(self.names, ARM_NAMES)
+        self.assertEqual(list(gui_module.PHYSICAL_JOINTS), PHYSICAL_NAMES)
+        self.assertEqual(len(gui_module.JOINT_COLOURS), 5)
+        self.assertTrue(REMOVED_NAMES.isdisjoint(self.gui.scales))
+        self.assertTrue(REMOVED_NAMES.isdisjoint(gui_module.PHYSICAL_JOINTS))
         for name in self.names:
             scale = self.gui.scales[name]
             self.assertEqual(float(scale["from"]), -180)
@@ -89,14 +94,14 @@ class ArmGuiTests(unittest.TestCase):
         self.assertEqual(float(self.gui.aperture_scale["from"]), 0)
         self.assertEqual(float(self.gui.aperture_scale["to"]), 80)
         self.assertEqual(self.gui.aperture_scale.get(), 0)
-        self.assertEqual(len(self.gui.scales), 7)
+        self.assertEqual(len(self.gui.scales), 5)
         self.gui.aperture_scale.set(60)
         self.assertEqual(self.gui.target_aperture_mm, 60)
         self.assertIn("60.0 mm", self.gui.aperture_target_label["text"])
         self.assertEqual(self.gui.target_deg, dict.fromkeys(self.names, 0))
 
-    def test_worker_commands_nine_joints_together_and_reads_scoped_names(self):
-        degrees = [-45, 30, 90, -60, 120, -150, 180]
+    def test_worker_commands_seven_joints_together_and_reads_scoped_names(self):
+        degrees = [-45, 30, 90, -60, 120]
         for name, angle in zip(self.names, degrees):
             self.gui.scales[name].set(angle)
         self.gui.aperture_scale.set(60)
@@ -115,7 +120,7 @@ class ArmGuiTests(unittest.TestCase):
                 self.gui.aperture_scale.set(aperture)
                 self.worker_once()
                 positions = self.setcfg.call_args.kwargs["joint_positions"]
-                self.assertEqual(positions, [0.0] * 7 + [travel, travel])
+                self.assertEqual(positions, [0.0] * 5 + [travel, travel])
 
     def test_reset_all_and_reengage_hold(self):
         for scale in self.gui.scales.values():
@@ -131,11 +136,11 @@ class ArmGuiTests(unittest.TestCase):
         self.worker_once()
         self.setcfg.assert_called_once_with(
             model_name="arm_rig", urdf_param_name="robot_description",
-            joint_names=PHYSICAL_NAMES, joint_positions=[0.0] * 9)
+            joint_names=PHYSICAL_NAMES, joint_positions=[0.0] * 7)
 
     def test_release_tracks_all_without_reholding(self):
         self.gui.toggle_hold()
-        degrees = [-90, 45, 60, -30, 120, 25, -80]
+        degrees = [-90, 45, 60, -30, 120]
         positions = dict(zip(PHYSICAL_NAMES, [math.radians(d) for d in degrees] + [0.01, 0.025]))
         self.getj.side_effect = lambda name: SimpleNamespace(
             success=True, position=[positions[name.split("::")[-1]]])
@@ -170,7 +175,7 @@ class ArmGuiTests(unittest.TestCase):
         self.assertEqual(self.gui.target_deg, dict.fromkeys(self.names, 15))
         self.worker_once()
         self.assertEqual(self.setcfg.call_args.kwargs["joint_positions"],
-                         [math.radians(15)] * 7 + [0.025, 0.025])
+                         [math.radians(15)] * 5 + [0.025, 0.025])
 
     def test_hold_button_uses_tracked_targets(self):
         self.gui.toggle_hold()
@@ -182,7 +187,7 @@ class ArmGuiTests(unittest.TestCase):
         self.assertTrue(self.gui.holding)
         self.assertEqual(self.gui.hold_btn["text"], "Release")
         self.assertEqual(self.setcfg.call_args.kwargs["joint_positions"],
-                         [math.radians(-30)] * 7 + [0.021, 0.021])
+                         [math.radians(-30)] * 5 + [0.021, 0.021])
 
     def test_holding_feedback_does_not_overwrite_targets(self):
         self.gui.scales["elbow_joint"].set(70)
@@ -221,11 +226,11 @@ class ArmGuiTests(unittest.TestCase):
         rig = Path(__file__).resolve().parents[1] / "urdf" / "rig.urdf.xacro"
         xml = subprocess.check_output(["/opt/ros/noetic/bin/xacro", str(rig)], env=env, timeout=15)
         all_joints = ElementTree.fromstring(xml).findall("joint")
+        self.assertTrue(REMOVED_NAMES.isdisjoint(joint.attrib["name"] for joint in all_joints))
         joints = {joint.attrib["name"]: joint for joint in all_joints
                   if joint.attrib["type"] != "fixed"}
         self.assertEqual(set(PHYSICAL_NAMES), set(joints))
-        axes = [(0, 1, 0), (1, 0, 0), (0, 0, 1), (0, 1, 0),
-                (1, 0, 0), (0, 1, 0), (0, 0, 1)]
+        axes = [(0, 1, 0), (1, 0, 0), (0, 0, 1), (0, 1, 0), (1, 0, 0)]
         for name, axis in zip(ARM_NAMES, axes):
             with self.subTest(joint=name):
                 self.assertEqual(joints[name].attrib["type"], "continuous")
@@ -244,6 +249,10 @@ class ArmGuiTests(unittest.TestCase):
         self.assertEqual(finger_axes[0], tuple(-value for value in finger_axes[1]))
         # Follow actual topology through fixed links, never XML element order.
         by_child = {joint.find("child").attrib["link"]: joint for joint in all_joints}
+        gripper_mount = by_child["gripper_base"]
+        self.assertEqual(gripper_mount.attrib["type"], "fixed")
+        self.assertEqual(gripper_mount.find("parent").attrib["link"],
+                 joints["wrist_roll_joint"].find("child").attrib["link"])
         for name in FINGER_NAMES:
             ancestors = []
             joint = joints[name]
@@ -257,10 +266,17 @@ class ArmGuiTests(unittest.TestCase):
                 joint = by_child.get(joint.find("parent").attrib["link"])
             self.assertEqual(list(reversed(ancestors)), ARM_NAMES + [name])
 
-    def test_eight_controls_and_status_fit_900px_screen(self):
+    def test_six_controls_in_two_columns_three_rows_and_status_fit_900px_screen(self):
         self.root.deiconify()
         self.root.update_idletasks()
         self.assertLessEqual(self.root.winfo_height(), 850)
+        scales = [*self.gui.scales.values(), self.gui.aperture_scale]
+        self.assertEqual(len(scales), 6)
+        for index, scale in enumerate(scales):
+            group = scale.master.master
+            self.assertEqual(group.grid_info()["row"], index % 3)
+            self.assertEqual(group.grid_info()["column"], index // 3)
+        self.assertEqual(scales[0].master.master.master.grid_size(), (2, 3))
         for widget in [*self.gui.scales.values(), *self.gui.value_labels.values(),
                        *self.gui.actual_labels.values(), self.gui.aperture_scale,
                        self.gui.aperture_target_label, self.gui.aperture_actual_label,
@@ -272,10 +288,10 @@ class ArmGuiTests(unittest.TestCase):
             self.assertLessEqual(right, self.root.winfo_width())
 
     def test_rejected_command_is_displayed(self):
-        self.setcfg.return_value = SimpleNamespace(success=False, status_message="Missing yaw joint")
+        self.setcfg.return_value = SimpleNamespace(success=False, status_message="Missing shoulder yaw joint")
         self.worker_once()
         self.poll()
-        self.assertEqual(self.gui.status["text"], "Missing yaw joint")
+        self.assertEqual(self.gui.status["text"], "Missing shoulder yaw joint")
 
     def test_service_failures_are_visible_and_nonfatal(self):
         self.setcfg.side_effect = RuntimeError("service offline")
@@ -311,7 +327,7 @@ class ArmGuiTests(unittest.TestCase):
         self.setcfg.return_value = SimpleNamespace(success=False, status_message="")
         self.worker_once()
         self.poll()
-        self.assertIn("7 arm joints and 2 fingers", self.gui.status["text"])
+        self.assertIn("5 arm joints and 2 fingers", self.gui.status["text"])
 
     def test_worker_uses_no_tk_on_real_background_thread(self):
         errors = []
@@ -335,7 +351,7 @@ class ArmGuiTests(unittest.TestCase):
             for method in (get_var, set_var, config, configure, after):
                 method.assert_not_called()
         self.setcfg.assert_called_once()
-        self.assertEqual(self.getj.call_count, 9)
+        self.assertEqual(self.getj.call_count, 7)
 
     def test_ui_poll_does_not_call_ros(self):
         self.poll()

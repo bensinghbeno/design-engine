@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Seven centered arm controls and one 0..80 mm gripper aperture control.
+"""Five centered arm controls and one 0..80 mm gripper aperture control.
 
-G1-style order: shoulder pitch/roll/yaw, elbow, wrist roll/pitch/yaw.
+G1-style order: shoulder pitch/roll/yaw, elbow, wrist roll, then gripper.
+The gripper attaches directly to wrist roll.
 All arm sliders span -180..+180 degrees (not the G1's real travel limits).
-The seven angles and two independent finger positions are reasserted in
+The five angles and two independent finger positions are reasserted in
 one /gazebo/set_model_configuration call at approximately 30 Hz. Each
 finger travels half the aperture, 0..0.04 m, along opposite local Y axes.
 This is kinematic positioning, not torque control or collision-safe motion.
 
 Reset centres the arm and closes the gripper. Release stops positioning
-all nine joints and tracks feedback; dragging any control re-engages Hold.
+all seven joints and tracks feedback; dragging any control re-engages Hold.
 ROS calls run on a worker; only the main thread accesses Tk widgets.
 Run via 1-launch-rig.sh or, with Gazebo already running, 2-arm-gui.sh.
 """
@@ -31,13 +32,10 @@ JOINTS = (
     ("shoulder_yaw_joint", "3 · Shoulder yaw / twist · Z · cyan"),
     ("elbow_joint", "4 · Elbow · local Y"),
     ("wrist_roll_joint", "5 · Wrist roll · X along forearm"),
-    ("wrist_pitch_joint", "6 · Wrist pitch · local Y"),
-    ("wrist_yaw_joint", "7 · Wrist yaw · local Z"),
 )
 GRIPPER_JOINTS = ("gripper_left_joint", "gripper_right_joint")
 PHYSICAL_JOINTS = tuple(name for name, _ in JOINTS) + GRIPPER_JOINTS
-JOINT_COLOURS = ("#8033aa", "#237a35", "#087e91", "#a34c13",
-                 "#315fa3", "#a33c6b", "#526576")
+JOINT_COLOURS = ("#8033aa", "#237a35", "#087e91", "#a34c13", "#315fa3")
 APERTURE_MAX_MM = 80.0
 DEFAULT_MODEL = "arm_rig"
 HOLD_HZ = 30.0
@@ -100,9 +98,9 @@ class ArmGui:
 
     # ---------------- ui ----------------
     def _build_ui(self):
-        self.root.title("G1-order arm · 7 joints + gripper")
-        self.root.geometry("880x740")
-        self.root.minsize(800, 710)
+        self.root.title("G1-order arm · 5 joints + gripper")
+        self.root.geometry("880x600")
+        self.root.minsize(800, 570)
 
         frm = ttk.Frame(self.root, padding=12)
         frm.pack(fill="both", expand=True)
@@ -117,8 +115,8 @@ class ArmGui:
             group = ttk.LabelFrame(controls, padding=8)
             heading = ttk.Label(group, text=title, foreground=JOINT_COLOURS[index])
             group.configure(labelwidget=heading)
-            group.grid(row=index % 4, column=index // 4, sticky="nsew", padx=4, pady=4)
-            controls.rowconfigure(index % 4, weight=1)
+            group.grid(row=index % 3, column=index // 3, sticky="nsew", padx=4, pady=4)
+            controls.rowconfigure(index % 3, weight=1)
             row = ttk.Frame(group)
             row.pack(fill="x")
             ttk.Label(row, text="-180", width=5).pack(side="left")
@@ -145,8 +143,8 @@ class ArmGui:
             self.value_labels[name] = target
             self.actual_labels[name] = actual
 
-        group = ttk.LabelFrame(controls, text="8 · Gripper · full aperture", padding=8)
-        group.grid(row=3, column=1, sticky="nsew", padx=4, pady=4)
+        group = ttk.LabelFrame(controls, text="6 · Gripper · full aperture", padding=8)
+        group.grid(row=2, column=1, sticky="nsew", padx=4, pady=4)
         row = ttk.Frame(group)
         row.pack(fill="x")
         ttk.Label(row, text="0 mm", width=5).pack(side="left")
@@ -238,7 +236,7 @@ class ArmGui:
                                            joint_names=names,
                                            joint_positions=positions)
                     if not response.success:
-                        error = response.status_message or "Joint command rejected. Restart the rig with all 7 arm joints and 2 fingers."
+                        error = response.status_message or "Joint command rejected. Restart the rig with all 5 arm joints and 2 fingers."
                 except Exception as exc:
                     error = f"Gazebo command unavailable: {exc}"
             measured = {}

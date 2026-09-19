@@ -29,14 +29,32 @@
         <button id="generate" class="primary">Generate workspace</button><button id="export" class="quiet" disabled>Export sampled points · CSV</button>
         <p class="hint">A point cloud of reachable positions, not a solid mesh. Sampling is not uniform in Cartesian space; density is not a dexterity score.</p>
       </section>
+      <section id="orientation-panel"><div class="eyebrow">05 / ORIENTATION FREEDOM</div>
+        <p class="hint">At selected reachable points, try the same root-frame orientations—including tool roll—using multi-start inverse kinematics. Orientation is the tip link's frame, translated by your offset.</p>
+        <label for="colour-mode">Workspace colours</label>
+        <select id="colour-mode"><option value="height">Height · position workspace</option><option value="coverage">Orientation coverage · tested spots</option></select>
+        <label for="probe-count">Reachable positions to test</label>
+        <select id="probe-count"><option value="20">20 · quick check</option><option value="80" selected>80 · balanced</option><option value="200">200 · detailed</option></select>
+        <label for="orientation-count">Orientations per position</label>
+        <select id="orientation-count"><option value="12">12 · coarse</option><option value="24" selected>24 · balanced</option><option value="48">48 · detailed</option></select>
+        <div class="range-pair"><label>Position tolerance (mm)<input id="position-tolerance" type="number" min="0.1" max="50" step="0.1" value="5"></label><label>Orientation tolerance (°)<input id="angle-tolerance" type="number" min="1" max="30" step="1" value="10"></label></div>
+        <div class="analysis-buttons"><button id="analyze" class="primary" disabled>Analyse orientation freedom</button><button id="cancel-analysis" disabled>Cancel</button></div>
+        <button id="export-coverage" class="quiet" disabled>Export tested spots · CSV</button>
+        <p id="orientation-progress" role="status" aria-live="polite">Generate a workspace first.</p>
+        <p class="hint">3 IK starts × up to 70 iterations per orientation. Balanced analysis can take tens of seconds. Only coloured spots were tested; grey points are untested. Selected joint ranges and locks apply.</p>
+        <p class="hint caution"><strong>Estimate, not a guarantee.</strong> Red means few solutions found, not proof of impossibility. Green means all <em>tested</em> orientations found—not every orientation or a continuous motion path. Collisions, grip symmetry, gravity and torque are not checked.</p>
+      </section>
       <details><summary>Edit expanded URDF</summary><p class="hint">Add or change links/joints, then apply. Xacro must be expanded first.</p><textarea id="xml" spellcheck="false" aria-label="URDF XML"></textarea><button id="apply">Apply URDF</button></details>
     </aside>
     <article>
       <div class="toolbar"><span id="dof">0 active DOF</span><div><label><input type="checkbox" id="show-robot" checked> Robot</label><label><input type="checkbox" id="show-cloud" checked> Workspace</label><button id="fit">Fit view</button></div></div>
-      <div id="viewport"><div class="legend"><span class="red">X</span> <span class="green">Y</span> <span class="blue">Z</span> &nbsp; Drag to orbit · scroll to zoom · right-drag to pan</div><div class="cloud-key">LOW Z <span></span> HIGH Z</div></div>
+      <div id="viewport"><div class="legend"><span class="red">X</span> <span class="green">Y</span> <span class="blue">Z</span> &nbsp; Drag to orbit · scroll to zoom · right-drag to pan</div><div id="height-key" class="cloud-key">LOW Z <span></span> HIGH Z</div>
+        <div id="coverage-key" hidden><strong>ORIENTATIONS FOUND · SAMPLED IK</strong><div class="coverage-gradient"></div><div class="coverage-labels"><span>0% · few</span><span>50% · some</span><span>100% · all tested</span></div><small>Grey = not tested · Click a coloured spot for details</small></div>
+      </div>
+      <div id="coverage-summary" hidden></div><div id="probe-detail" hidden></div>
       <div class="metrics"><div><small>SAMPLES</small><strong id="count">—</strong></div><div><small>X SPAN · m</small><strong id="bx">—</strong></div><div><small>Y SPAN · m</small><strong id="by">—</strong></div><div><small>Z SPAN · m</small><strong id="bz">—</strong></div></div>
       <div id="status" role="status" aria-live="polite">Loading viewer…</div><div id="warnings"></div>
-      <footer><strong>Position workspace ≠ full pose capability.</strong> Axes, offsets and limits determine the shape—not DOF count alone. This viewer ignores collisions, gravity, torque, structural flex and tool orientation constraints. It does not command Gazebo.</footer>
+      <footer><strong>Position workspace ≠ full pose capability.</strong> Axes, offsets and limits determine the shape—not DOF count alone. Height mode shows positions only; orientation mode estimates sampled pose coverage using IK. Both ignore collisions, gravity, torque and structural flex. This viewer does not command Gazebo.</footer>
     </article>
   </main>
   <script type="module" src="app.js"></script>
