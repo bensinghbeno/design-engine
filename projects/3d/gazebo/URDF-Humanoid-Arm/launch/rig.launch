@@ -20,6 +20,10 @@
   <arg name="crossbar_depth"     default="0.08"/>
   <arg name="arm_side"           default="1"/>
   <arg name="density"            default="500"/>
+  <arg name="spawn_table"        default="true"/>
+  <arg name="table_x"            default="0.68"/>
+  <arg name="table_y"            default="$(eval 0.85 * arg('arm_side'))"/>
+  <arg name="table_z"            default="0.67"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="paused"       value="$(arg paused)"/>
@@ -45,5 +49,16 @@
 
   <node name="robot_state_publisher" pkg="robot_state_publisher"
         type="robot_state_publisher" output="screen"/>
+
+  <!-- Staging table and bottle placed right below the gripper -->
+  <group if="$(arg spawn_table)">
+    <param name="table_description"
+           textfile="$(find urdf_humanoid_arm)/urdf/table_and_bottle.urdf"/>
+
+    <node name="spawn_table_and_bottle" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param table_description -model table_and_bottle
+                -x $(arg table_x) -y $(arg table_y) -z $(arg table_z)"
+          respawn="false" output="screen"/>
+  </group>
 
 </launch>

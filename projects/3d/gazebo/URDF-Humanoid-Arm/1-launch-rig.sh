@@ -9,6 +9,7 @@
 #   bash 1-launch-rig.sh
 #   bash 1-launch-rig.sh --no-gui             # headless, no Gazebo window
 #   bash 1-launch-rig.sh --no-slider          # Gazebo only, no slider GUI
+#   bash 1-launch-rig.sh --no-table           # Gazebo without staging table
 #   bash 1-launch-rig.sh --stem-height 2.0
 #   bash 1-launch-rig.sh --crossbar-length 1.4 --crossbar-thickness 0.1
 #   bash 1-launch-rig.sh --arm-side -1        # hang the arm off the other end
@@ -30,10 +31,12 @@ CB_D=0.08
 ARM_SIDE=1
 DENSITY=500
 SLIDER=true
+TABLE=true
 while [ $# -gt 0 ]; do
   case "$1" in
     --no-gui)             GUI=false;  shift;;
     --no-slider)          SLIDER=false; shift;;
+    --no-table)           TABLE=false; shift;;
     --stem-height)        STEM_H="$2"; shift 2;;
     --stem-width)         STEM_W="$2"; shift 2;;
     --stem-depth)         STEM_D="$2"; shift 2;;
@@ -100,4 +103,5 @@ roslaunch "$ARM/launch/rig.launch" \
   crossbar_thickness:=$CB_T \
   crossbar_depth:=$CB_D \
   arm_side:=$ARM_SIDE \
-  density:=$DENSITY
+  density:=$DENSITY \
+  spawn_table:=$TABLE

@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<robot name="table_and_bottle">
+  <material name="table_wood"><color rgba="0.63 0.43 0.26 1.0"/></material>
+  <material name="table_leg_steel"><color rgba="0.45 0.48 0.55 1.0"/></material>
+  <material name="bottle_clear"><color rgba="0.13 0.62 0.24 0.85"/></material>
+  <material name="bottle_cap"><color rgba="0.86 0.87 0.90 1.0"/></material>
+
+  <link name="table_top">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.52 0.42 0.04"/></geometry>
+      <material name="table_wood"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.52 0.42 0.04"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="3.0"/>
+      <inertia ixx="0.08" ixy="0" ixz="0" iyy="0.09" iyz="0" izz="0.15"/>
+    </inertial>
+  </link>
+
+  <link name="table_leg_1">
+    <visual><origin xyz="0 0 -0.33" rpy="0 0 0"/><geometry><box size="0.04 0.04 0.66"/></geometry><material name="table_leg_steel"/></visual>
+    <collision><origin xyz="0 0 -0.33" rpy="0 0 0"/><geometry><box size="0.04 0.04 0.66"/></geometry></collision>
+    <inertial><origin xyz="0 0 -0.33" rpy="0 0 0"/><mass value="0.7"/><inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.001"/></inertial>
+  </link>
+
+  <link name="table_leg_2">
+    <visual><origin xyz="0 0 -0.33" rpy="0 0 0"/><geometry><box size="0.04 0.04 0.66"/></geometry><material name="table_leg_steel"/></visual>
+    <collision><origin xyz="0 0 -0.33" rpy="0 0 0"/><geometry><box size="0.04 0.04 0.66"/></geometry></collision>
+    <inertial><origin xyz="0 0 -0.33" rpy="0 0 0"/><mass value="0.7"/><inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.001"/></inertial>
+  </link>
+
+  <link name="table_leg_3">
+    <visual><origin xyz="0 0 -0.33" rpy="0 0 0"/><geometry><box size="0.04 0.04 0.66"/></geometry><material name="table_leg_steel"/></visual>
+    <collision><origin xyz="0 0 -0.33" rpy="0 0 0"/><geometry><box size="0.04 0.04 0.66"/></geometry></collision>
+    <inertial><origin xyz="0 0 -0.33" rpy="0 0 0"/><mass value="0.7"/><inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.001"/></inertial>
+  </link>
+
+  <link name="table_leg_4">
+    <visual><origin xyz="0 0 -0.33" rpy="0 0 0"/><geometry><box size="0.04 0.04 0.66"/></geometry><material name="table_leg_steel"/></visual>
+    <collision><origin xyz="0 0 -0.33" rpy="0 0 0"/><geometry><box size="0.04 0.04 0.66"/></geometry></collision>
+    <inertial><origin xyz="0 0 -0.33" rpy="0 0 0"/><mass value="0.7"/><inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.001"/></inertial>
+  </link>
+
+  <joint name="top_to_leg1" type="fixed"><parent link="table_top"/><child link="table_leg_1"/><origin xyz="0.22 0.17 -0.01" rpy="0 0 0"/></joint>
+  <joint name="top_to_leg2" type="fixed"><parent link="table_top"/><child link="table_leg_2"/><origin xyz="0.22 -0.17 -0.01" rpy="0 0 0"/></joint>
+  <joint name="top_to_leg3" type="fixed"><parent link="table_top"/><child link="table_leg_3"/><origin xyz="-0.22 0.17 -0.01" rpy="0 0 0"/></joint>
+  <joint name="top_to_leg4" type="fixed"><parent link="table_top"/><child link="table_leg_4"/><origin xyz="-0.22 -0.17 -0.01" rpy="0 0 0"/></joint>
+
+  <link name="coke_bottle">
+    <visual>
+      <origin xyz="0 0 0.12" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.032" length="0.24"/></geometry>
+      <material name="bottle_clear"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.18" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.010" length="0.035"/></geometry>
+      <material name="bottle_cap"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.12" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.032" length="0.24"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.12" rpy="0 0 0"/>
+      <mass value="0.33"/>
+      <inertia ixx="0.00042" ixy="0" ixz="0" iyy="0.00042" iyz="0" izz="0.00017"/>
+    </inertial>
+  </link>
+
+  <joint name="top_to_bottle" type="fixed">
+    <parent link="table_top"/>
+    <child link="coke_bottle"/>
+    <origin xyz="0 0 0.02" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="table_top">
+    <material>Gazebo/Wood</material>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+  </gazebo>
+  <gazebo reference="table_leg_1"><material>Gazebo/Grey</material></gazebo>
+  <gazebo reference="table_leg_2"><material>Gazebo/Grey</material></gazebo>
+  <gazebo reference="table_leg_3"><material>Gazebo/Grey</material></gazebo>
+  <gazebo reference="table_leg_4"><material>Gazebo/Grey</material></gazebo>
+  <gazebo reference="coke_bottle">
+    <material>Gazebo/Green</material>
+    <mu1>0.7</mu1>
+    <mu2>0.7</mu2>
+  </gazebo>
+  <gazebo>
+    <static>true</static>
+  </gazebo>
+</robot>
