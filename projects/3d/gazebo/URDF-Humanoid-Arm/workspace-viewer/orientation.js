@@ -266,7 +266,15 @@ export function solvePose(model, target, seed = {}, options = {}) {
   return result();
 }
 
+export function coverageCategory(fraction) {
+  const f = finite(fraction) ? clamp(fraction, 0, 1) : 0;
+  if (f > 0.66) return 'green';
+  if (f >= 0.33) return 'yellow';
+  return 'red';
+}
+
 export function coverageColor(fraction) {
+
   const f = finite(fraction) ? clamp(fraction,0,1) : 0;
   const red = [0.95,0.16,0.2], yellow = [1,0.75,0.15], green = [0.16,0.85,0.45];
   const a = f<=0.5 ? red : yellow, b = f<=0.5 ? yellow : green;

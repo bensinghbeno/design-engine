@@ -33,6 +33,13 @@
         <p class="hint">At selected reachable points, try the same root-frame orientations—including tool roll—using multi-start inverse kinematics. Orientation is the tip link's frame, translated by your offset.</p>
         <label for="colour-mode">Workspace colours</label>
         <select id="colour-mode"><option value="height">Height · position workspace</option><option value="coverage">Orientation coverage · tested spots</option></select>
+        <label for="coverage-filter">Filter spots by orientation reach</label>
+        <select id="coverage-filter">
+          <option value="all">All tested spots (green, yellow, red)</option>
+          <option value="green">Green only (high dexterity &gt; 66%)</option>
+          <option value="yellow">Yellow only (moderate dexterity 33%–66%)</option>
+          <option value="red">Red only (limited dexterity &lt; 33%)</option>
+        </select>
         <label for="probe-count">Reachable positions to test</label>
         <select id="probe-count"><option value="20">20 · quick check</option><option value="80" selected>80 · balanced</option><option value="200">200 · detailed</option></select>
         <label for="orientation-count">Orientations per position</label>

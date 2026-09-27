@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {parseRobot, forward, chain, suggestedTip, configurationSampler, tipPosition} from './kinematics.js';
 import {examples} from './examples.js';
-import {coverageColor, DEFAULT_IK_OPTIONS} from './orientation.js';
+import {coverageColor, coverageCategory, DEFAULT_IK_OPTIONS} from './orientation.js';
 
 const $ = id => document.getElementById(id);
 const status = text => { $('status').textContent = text; };
@@ -253,10 +253,39 @@ function coverageOptions() {
   if (!Number.isFinite(angleDegrees) || angleDegrees<1 || angleDegrees>30) throw Error('Orientation tolerance must be 1–30°.');
   return {...DEFAULT_IK_OPTIONS,positionTolerance:positionMM/1000,orientationTolerance:angleDegrees*Math.PI/180};
 }
+function applyCoverageFilter() {
+  if (!coverageCloud) return;
+  const filter = $('coverage-filter')?.value || 'all';
+  const geometry = coverageCloud.geometry;
+  const positions = geometry.attributes.position;
+  const colors = geometry.attributes.color;
+  let visibleCount = 0;
+  for (let i = 0; i < coverageRecords.length; i++) {
+    const r = coverageRecords[i];
+    const cat = coverageCategory(r.fraction);
+    if (filter === 'all' || filter === cat) {
+      r._visibleIndex = visibleCount;
+      positions.setXYZ(visibleCount, ...r.position);
+      colors.setXYZ(visibleCount, ...coverageColor(r.fraction));
+      visibleCount++;
+    } else {
+      r._visibleIndex = -1;
+    }
+  }
+  positions.needsUpdate = true;
+  colors.needsUpdate = true;
+  geometry.setDrawRange(0, visibleCount);
+  geometry.computeBoundingSphere();
+}
+
 function updateCoverageSummary() {
   if (!coverageRecords.length) return;
   const values = coverageRecords.map(r=>r.fraction), mean = values.reduce((s,v)=>s+v,0)/values.length;
-  $('coverage-summary').textContent = `${coverageComplete ? 'Complete' : 'Partial'} · ${coverageRecords.length}/${coverageTotal} positions tested · `
+  const filter = $('coverage-filter')?.value || 'all';
+  const counts = {green: 0, yellow: 0, red: 0};
+  for (const r of coverageRecords) counts[coverageCategory(r.fraction)]++;
+  const filterText = filter === 'all' ? '' : ` [showing ${filter}: ${counts[filter]}/${coverageRecords.length}]`;
+  $('coverage-summary').textContent = `${coverageComplete ? 'Complete' : 'Partial'} · ${coverageRecords.length}/${coverageTotal} positions tested${filterText} · `
     + `mean orientations found ${(100*mean).toFixed(1)}% · range ${(100*Math.min(...values)).toFixed(0)}–${(100*Math.max(...values)).toFixed(0)}% · `
     + `${coverageRecords[0].tested} orientations/point · ${(coverageSettings.positionTolerance*1000).toFixed(1)} mm / ${(coverageSettings.orientationTolerance*180/Math.PI).toFixed(1)}° tolerances. No solution found ≠ impossible.`;
   $('coverage-summary').hidden = $('colour-mode').value !== 'coverage';
@@ -304,18 +333,16 @@ function analyzeOrientations() {
     if (data.type === 'error') { fail(data.message); return; }
     coverageTotal = data.total;
     if (data.type === 'probe') {
-      const r = data.result, index = coverageRecords.length;
+      const r = data.result;
       coverageRecords.push(r);
-      geometry.attributes.position.setXYZ(index,...r.position);
-      geometry.attributes.color.setXYZ(index,...coverageColor(r.fraction));
-      geometry.attributes.position.needsUpdate = true; geometry.attributes.color.needsUpdate = true;
-      geometry.setDrawRange(0,coverageRecords.length); geometry.computeBoundingSphere();
+      applyCoverageFilter();
       $('export-coverage').disabled = false;
       updateCoverageSummary();
     }
     if (data.type === 'done') {
       coverageComplete = true; worker.terminate(); orientationWorker = null;
       $('analyze').disabled = false; $('cancel-analysis').disabled = true;
+      applyCoverageFilter();
       $('orientation-progress').textContent = `Orientation analysis complete · ${coverageRecords.length} tested spots. Click a coloured spot for details.`;
       updateCoverageSummary();
     } else {
@@ -336,10 +363,13 @@ renderer.domElement.addEventListener('pointerup',event=> {
   const rect = renderer.domElement.getBoundingClientRect();
   probeRay.params.Points.threshold = camera.position.distanceTo(controls.target)*.008;
   probeRay.setFromCamera(new THREE.Vector2((event.clientX-rect.left)/rect.width*2-1,1-(event.clientY-rect.top)/rect.height*2),camera);
-  const hits = probeRay.intersectObject(coverageCloud).filter(hit=>hit.index<coverageRecords.length);
+  const maxIndex = coverageCloud.geometry.drawRange.count;
+  const hits = probeRay.intersectObject(coverageCloud).filter(hit=>hit.index<maxIndex);
   hits.sort((a,b)=>a.distanceToRay-b.distanceToRay);
   if (!hits.length) return;
-  const r = coverageRecords[hits[0].index];
+  const hitVisibleIndex = hits[0].index;
+  const r = coverageRecords.find(rec => rec._visibleIndex === hitVisibleIndex) || coverageRecords[hitVisibleIndex];
+  if (!r) return;
   $('probe-detail').hidden = false;
   $('probe-detail').textContent = `Point (${r.position.map(v=>v.toFixed(3)).join(', ')}) m · ${r.solved}/${r.tested} orientations found (${(100*r.fraction).toFixed(1)}%). `
     + 'Position known reachable; missing orientations are unconfirmed, not proven impossible.';
@@ -364,6 +394,7 @@ $('generate').onclick = guard(generate);
 $('analyze').onclick = guard(analyzeOrientations);
 $('cancel-analysis').onclick = cancelAnalysis;
 $('colour-mode').onchange = setColourMode;
+$('coverage-filter').onchange = () => { applyCoverageFilter(); updateCoverageSummary(); };
 for (const id of ['probe-count','orientation-count','position-tolerance','angle-tolerance']) {
   $(id).onchange = () => clearCoverage(workspaceSnapshot ? 'Analysis settings changed. Run orientation analysis again.' : 'Generate a workspace first.');
 }

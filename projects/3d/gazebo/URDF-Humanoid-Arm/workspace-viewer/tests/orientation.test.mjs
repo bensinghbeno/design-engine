@@ -9,7 +9,7 @@ import {
   parseRobot, forward, chain, tipPosition, sampler, configurationSampler,
 } from '../kinematics.js';
 import {
-  forwardPose, solvePose, orientationTargets, coverageColor, DEFAULT_IK_OPTIONS,
+  forwardPose, solvePose, orientationTargets, coverageColor, coverageCategory, DEFAULT_IK_OPTIONS,
 } from '../orientation.js';
 import {analyzeProbe, selectProbes} from '../orientation-analysis.js';
 
@@ -362,6 +362,20 @@ test('coverageColor has finite red/yellow/green endpoints and handles clamping',
   assert.deepEqual(coverageColor(-1), coverageColor(0));
   assert.deepEqual(coverageColor(2), coverageColor(1));
   for (const invalid of [NaN, Infinity, -Infinity]) assert.deepEqual(coverageColor(invalid), coverageColor(0));
+});
+
+test('coverageCategory partitions fractions into red, yellow, and green', () => {
+  assert.equal(coverageCategory(0), 'red');
+  assert.equal(coverageCategory(0.2), 'red');
+  assert.equal(coverageCategory(0.329), 'red');
+  assert.equal(coverageCategory(0.33), 'yellow');
+  assert.equal(coverageCategory(0.5), 'yellow');
+  assert.equal(coverageCategory(0.66), 'yellow');
+  assert.equal(coverageCategory(0.67), 'green');
+  assert.equal(coverageCategory(1.0), 'green');
+  assert.equal(coverageCategory(-0.5), 'red');
+  assert.equal(coverageCategory(1.5), 'green');
+  assert.equal(coverageCategory(NaN), 'red');
 });
 
 test('current five-joint rig: known sample baseline succeeds but 24-target orientation coverage stays low (benchmark)', t => {
