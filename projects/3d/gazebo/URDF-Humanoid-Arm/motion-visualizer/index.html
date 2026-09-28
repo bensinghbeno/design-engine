@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Motion Lab · Gripper replay</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">{"imports":{"three":"/vendor/three.module.js","three/addons/controls/OrbitControls.js":"/vendor/OrbitControls.js"}}</script>
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="brand-mark">M</span><div>MOTION LAB<small>SENSOR LOGGER REPLAY</small></div></div>
+    <span class="badge">LOCAL · ACCELEROMETER ESTIMATE</span>
+  </header>
+  <main>
+    <aside>
+      <section>
+        <div class="eyebrow">01 / RECORDING</div>
+        <h1>Follow the motion.</h1>
+        <p>Replay phone acceleration as an estimated gripper path in three-dimensional space.</p>
+        <button id="load-default" class="primary">Load Accelerometer.csv</button>
+        <label class="file-button">Open another Sensor Logger CSV<input id="upload" type="file" accept=".csv,text/csv"></label>
+        <div id="filename" class="filename">No recording loaded</div>
+      </section>
+      <section>
+        <div class="eyebrow">02 / REPLAY</div>
+        <div class="transport">
+          <button id="play" disabled>Play</button>
+          <button id="restart" disabled>Restart</button>
+        </div>
+        <label for="speed">Playback speed</label>
+        <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+        <label class="check"><input id="show-path" type="checkbox" checked> Show complete estimated path</label>
+      </section>
+      <section>
+        <div class="eyebrow">03 / POSITION</div>
+        <div class="coordinates"><div><span>FORWARD · X</span><strong id="position-x">—</strong></div><div><span>LEFT · Y</span><strong id="position-y">—</strong></div><div><span>UP · Z</span><strong id="position-z">—</strong></div></div>
+        <div class="time"><span id="elapsed">0.00 s</span><span id="duration">—</span></div>
+        <div class="progress"><span id="progress"></span></div>
+      </section>
+      <section>
+        <div class="eyebrow">04 / RECORDING SUMMARY</div>
+        <dl><div><dt>Samples</dt><dd id="samples">—</dd></div><div><dt>Duration</dt><dd id="summary-duration">—</dd></div><div><dt>Estimated travel</dt><dd id="travel">—</dd></div><div><dt>Startup bias X/Y/Z</dt><dd id="bias">—</dd></div></dl>
+      </section>
+      <p class="caution"><strong>Estimate, not measured position.</strong> Double-integrating acceleration accumulates drift. Use ARCore visual-inertial pose tracking for accurate gripper control.</p>
+    </aside>
+    <article>
+      <div class="toolbar"><span>GRIPPER ONLY</span><button id="fit">Fit path</button></div>
+      <div id="viewport"><div class="legend"><span class="x">X</span> forward · <span class="y">Y</span> left · <span class="z">Z</span> up &nbsp; Drag to orbit · scroll to zoom</div></div>
+      <div id="status" role="status" aria-live="polite">Loading recording…</div>
+    </article>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
