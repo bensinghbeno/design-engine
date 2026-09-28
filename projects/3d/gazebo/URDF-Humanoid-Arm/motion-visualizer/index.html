@@ -14,21 +14,22 @@
 </head>
 <body>
   <header>
-    <div class="brand"><span class="brand-mark">M</span><div>MOTION LAB<small>SENSOR LOGGER REPLAY</small></div></div>
-    <span class="badge">LOCAL · ACCELEROMETER ESTIMATE</span>
+    <div class="brand"><span class="brand-mark">M</span><div>MOTION LAB<small>PHONE MOTION → GRIPPER</small></div></div>
+    <span class="badge">LOCAL · ARCORE OR ACCELEROMETER</span>
   </header>
   <main>
     <aside>
       <section>
         <div class="eyebrow">01 / SOURCE</div>
         <h1>Follow the motion.</h1>
-        <p>Replay a recording or stream the phone's acceleration live as an estimated gripper path.</p>
+        <p>Replay a recording, or stream the phone live. ARCore gives measured position; the accelerometer only estimates it.</p>
         <div class="transport" role="group" aria-label="Motion source">
           <button id="mode-csv" class="mode active" aria-pressed="true">From CSV</button>
           <button id="mode-live" class="mode" aria-pressed="false">Server IP/port</button>
         </div>
         <div id="csv-panel">
           <button id="load-default" class="primary">Load Accelerometer.csv</button>
+          <button id="load-live" class="quiet-button">Load last live session</button>
           <label class="file-button">Open another Sensor Logger CSV<input id="upload" type="file" accept=".csv,text/csv"></label>
           <div id="filename" class="filename">No recording loaded</div>
         </div>
@@ -59,9 +60,9 @@
       </section>
       <section>
         <div class="eyebrow">04 / RECORDING SUMMARY</div>
-        <dl><div><dt>Samples</dt><dd id="samples">—</dd></div><div><dt>Duration</dt><dd id="summary-duration">—</dd></div><div><dt>Estimated travel</dt><dd id="travel">—</dd></div><div><dt>Startup bias X/Y/Z</dt><dd id="bias">—</dd></div></dl>
+        <dl><div><dt>Samples</dt><dd id="samples">—</dd></div><div><dt>Duration</dt><dd id="summary-duration">—</dd></div><div><dt id="travel-label">Estimated travel</dt><dd id="travel">—</dd></div><div><dt id="bias-label">Startup bias X/Y/Z</dt><dd id="bias">—</dd></div></dl>
       </section>
-      <p class="caution"><strong>Estimate, not measured position.</strong> Double-integrating acceleration accumulates drift. Use ARCore visual-inertial pose tracking for accurate gripper control.</p>
+      <p class="caution"><strong>ARCore is measured; the accelerometer is not.</strong> Accelerometer mode doubles small sensor errors into metres of drift during long moves, even with orientation levelling. Prefer ARCore for anything that needs real distances.</p>
     </aside>
     <article>
       <div class="toolbar"><span>GRIPPER ONLY</span><button id="fit">Fit path</button></div>

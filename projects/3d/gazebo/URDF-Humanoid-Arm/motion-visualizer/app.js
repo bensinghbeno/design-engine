@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {createLiveEstimator, estimateTrajectory, parseSensorCsv} from './motion.js';
+import {createLiveEstimator, createPoseTracker, estimateTrajectory, parseSensorCsv} from './motion.js';
 
 const $ = id => document.getElementById(id);
 const scene = new THREE.Scene();
@@ -40,7 +40,8 @@ let route = null, trail = null;
 let recording = null, mode = 'csv';
 const replay = {playing: false, elapsed: 0, startedAt: 0, frame: 0};
 const LIVE_POINTS = 1500;
-const live = {socket: null, estimator: createLiveEstimator(), phone: null, phones: 0, last: null, start: null,
+const live = {socket: null, estimator: createLiveEstimator(), tracker: createPoseTracker(), xr: false, enabled: false,
+  phone: null, phones: 0, last: null, start: null,
   points: new Float32Array(LIVE_POINTS * 3), length: 0, latest: null, elapsed: 0, samples: 0, rateStart: 0, rateCount: 0};
 const liveGeometry = new THREE.BufferGeometry();
 liveGeometry.setAttribute('position', new THREE.BufferAttribute(live.points, 3));
@@ -108,19 +109,27 @@ renderer.setAnimationLoop(animate);
 
 function liveState(text) { $('live-state').textContent = text; }
 function resetLive() {
-  live.estimator.reset(); live.last = null; live.start = null; live.length = 0; live.latest = [0, 0, 0]; live.elapsed = 0;
+  live.estimator.reset(); live.tracker.reset();
+  live.last = null; live.start = null; live.length = 0; live.latest = [0, 0, 0]; live.elapsed = 0;
   liveGeometry.setDrawRange(0, 0);
 }
-function onSample({phone, t, a}) {
+function onSample({phone, t, a, p, q, xr, on}) {
   const seconds = t / 1000;
   // A different phone or a restarted page resets its clock, so start a fresh estimate.
   if (phone !== live.phone || (live.last !== null && seconds <= live.last)) { resetLive(); live.phone = phone; }
   live.last = seconds;
   if (live.start === null) live.start = seconds;
-  const point = live.estimator.update(seconds, a);
+  live.xr = Boolean(xr);
+  if (on !== undefined && on !== live.enabled) setClutch(on);
+  const point = xr ? live.tracker.update(p, q) : live.estimator.update(seconds, a, q);
   if (live.length === LIVE_POINTS) { live.points.copyWithin(0, 3); live.length--; }
   live.points.set(point, live.length * 3); live.length++;
   live.latest = point; live.elapsed = seconds - live.start; live.samples++; live.rateCount++;
+}
+function setClutch(enabled) {
+  live.enabled = enabled;
+  if (enabled) { live.estimator.resume(); live.tracker.resume(); }
+  else { live.estimator.hold(); live.tracker.hold(); }
 }
 function updateLive(now) {
   if (mode !== 'live' || !live.latest) return;
@@ -129,10 +138,17 @@ function updateLive(now) {
   if (now - live.rateStart >= 1000) {
     $('live-rate').textContent = live.rateCount ? `${Math.round(live.rateCount * 1000 / (now - live.rateStart))} Hz` : '—';
     $('samples').textContent = live.samples.toLocaleString();
-    $('bias').textContent = live.estimator.bias?.map(value => value.toFixed(3)).join(' / ') ?? 'calibrating…';
+    $('bias').textContent = live.xr ? 'ARCore · measured'
+      : live.estimator.bias?.map(value => value.toFixed(3)).join(' / ') ?? 'calibrating…';
+    $('travel').textContent = live.xr ? 'ARCore (WebXR)'
+      : live.estimator.worldFrame ? 'Accelerometer · levelled' : 'Accelerometer · phone frame';
     live.rateStart = now; live.rateCount = 0;
   }
-  if (live.socket && live.phones && live.samples) liveState(live.estimator.calibrating ? 'Calibrating · keep phone still' : 'Streaming');
+  if (!live.socket || !live.phones || !live.samples) return;
+  if (!live.enabled) return liveState('Connected · holding (phone ENABLE is off)');
+  if (live.xr) return liveState('Streaming · ARCore');
+  liveState(live.estimator.calibrating ? 'Calibrating · keep phone still'
+    : live.estimator.still ? 'Streaming · holding' : 'Streaming · moving');
 }
 function showSession(session) {
   live.phones = session.phones;
@@ -154,7 +170,10 @@ function connect() {
   socket.onmessage = event => {
     const message = JSON.parse(event.data);
     if (message.type === 'sample') onSample(message);
+    else if (message.type === 'clutch') setClutch(message.enabled);
     else if (message.type === 'session') showSession(message);
+    else if (message.type === 'saved') $('status').textContent = `Saved sensors/${message.file} · ${message.samples.toLocaleString()} samples, ${message.seconds.toFixed(1)} s · replay it: From CSV → Load last live session.`;
+    else if (message.type === 'save-error') $('status').textContent = `Could not save live session: ${message.message}`;
   };
   socket.onclose = () => { if (live.socket === socket) { live.socket = null; $('connect').textContent = 'Connect'; liveState('Disconnected · check the server address'); } };
 }
@@ -171,21 +190,40 @@ function setMode(next) {
   $('travel').textContent = csv && recording ? `${recording.pathLength.toFixed(3)} m` : '—';
   if (csv) {
     disconnect();
+    $('travel-label').textContent = 'Estimated travel'; $('bias-label').textContent = 'Startup bias X/Y/Z';
     if (recording) { restart(false); $('duration').textContent = `${recording.time.at(-1).toFixed(2)} s`; $('summary-duration').textContent = `${recording.time.at(-1).toFixed(2)} s`; $('samples').textContent = recording.time.length.toLocaleString(); $('bias').textContent = recording.bias.map(value => value.toFixed(3)).join(' / '); }
     $('status').textContent = 'Recording mode · press Play to replay the estimated path.';
   } else {
+    $('travel-label').textContent = 'Tracking'; $('bias-label').textContent = 'Sensor offset X/Y/Z';
     replay.playing = false; $('play').textContent = 'Play';
-    resetLive(); live.samples = 0; setPosition(live.latest, 0);
+    resetLive(); live.samples = 0; live.enabled = false; setPosition(live.latest, 0);
     $('duration').textContent = 'LIVE'; $('summary-duration').textContent = 'LIVE'; $('samples').textContent = '0'; $('bias').textContent = '—';
-    $('status').textContent = 'Live mode · estimated position holds when the phone stops, then slowly relaxes to the origin.';
+    $('status').textContent = 'Live mode · tap ENABLE on the phone to move the gripper; tap again to hold it in place.';
     if (!live.socket) guard(connect);
     fit();
   }
 }
 
+function replayPoses(poses, quaternions, enabled) {
+  const tracker = createPoseTracker();
+  let held = true;
+  const position = poses.map((pose, index) => {
+    const on = enabled ? enabled[index] : true;
+    if (on !== held) { held = on; on ? tracker.resume() : tracker.hold(); }
+    return pose && on ? tracker.update(pose, quaternions?.[index]) : tracker.position;
+  });
+  const pathLength = position.slice(1).reduce((total, point, index) => total
+    + Math.hypot(...point.map((value, axis) => value - position[index][axis])), 0);
+  return {position, bias: [0, 0, 0], pathLength};
+}
+
 async function loadCsv(text, name) {
-  const {time, acceleration} = parseSensorCsv(text);
-  const estimate = estimateTrajectory(time, acceleration);
+  const parsed = parseSensorCsv(text);
+  const {time, acceleration} = parsed;
+  // ARCore sessions carry measured poses, so replay those instead of integrating acceleration.
+  const estimate = parsed.position
+    ? replayPoses(parsed.position, parsed.quaternion, parsed.enabled)
+    : estimateTrajectory(time, acceleration);
   recording = {time, ...estimate}; replay.playing = false;
   disposeLine(route); disposeLine(trail);
   route = lineFor(recording.position, 0x557086, 0.45); trail = lineFor(recording.position, 0x55f0bc, 1);
@@ -198,15 +236,17 @@ async function loadCsv(text, name) {
   $('play').disabled = false; $('restart').disabled = false;
   restart(false); fit(); $('status').textContent = 'Recording ready · press Play to replay the estimated path.';
 }
-async function loadDefault() {
-  $('status').textContent = 'Loading sensors/Accelerometer.csv…';
-  const response = await fetch('/api/motion');
+async function loadServerCsv(url, name) {
+  $('status').textContent = `Loading ${name}…`;
+  const response = await fetch(url);
   if (!response.ok) throw Error(await response.text());
-  await loadCsv(await response.text(), 'sensors/Accelerometer.csv');
+  await loadCsv(await response.text(), name);
 }
+const loadDefault = () => loadServerCsv('/api/motion', 'sensors/Accelerometer.csv');
 async function guard(action) { try { await action(); } catch (error) { $('status').textContent = error.message; console.error(error); } }
 
 $('load-default').onclick = () => guard(loadDefault);
+$('load-live').onclick = () => guard(() => loadServerCsv('/api/live-latest', 'sensors/live-latest.csv'));
 $('upload').onchange = () => guard(async () => { const file = $('upload').files[0]; if (!file) return; if (file.size > 10e6) throw Error('CSV exceeds 10 MB.'); await loadCsv(await file.text(), file.name); });
 $('play').onclick = togglePlay;
 $('restart').onclick = () => restart(false);

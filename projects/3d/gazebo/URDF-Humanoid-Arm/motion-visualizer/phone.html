@@ -6,25 +6,44 @@
   <title>Motion Lab · Phone sensor</title>
   <style>
     :root{color-scheme:dark;font:16px/1.5 "Trebuchet MS",sans-serif;color:#dce7ed;background:#091019}
-    body{margin:0;padding:24px;display:grid;gap:18px;max-width:520px;margin-inline:auto}
-    h1{margin:0;font-size:24px}.eyebrow{color:#55f0bc;font-size:11px;letter-spacing:2px;font-weight:800}
-    button{font:inherit;font-weight:800;padding:18px;border-radius:10px;border:0;background:#55f0bc;color:#06251b}
-    button.stop{background:#ff685f;color:#2a0806}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid div{background:#0e1823;border:1px solid #213446;border-radius:8px;padding:10px}
-    .grid span{display:block;font-size:11px;letter-spacing:1px;color:#8fa4b4}.grid strong{font-size:20px;font-variant-numeric:tabular-nums}
-    .x{color:#ff4d4d}.y{color:#4dff6a}.z{color:#5c8cff}#status{color:#8fa4b4}
+    body{margin:0;padding:20px;display:grid;gap:14px;max-width:520px;margin-inline:auto}
+    body.xr{background:transparent}
+    body.xr .hide-in-ar{display:none}
+    h1{margin:0;font-size:23px}.eyebrow{color:#55f0bc;font-size:11px;letter-spacing:2px;font-weight:800}
+    button,select{font:inherit;font-weight:800;padding:14px;border-radius:10px;border:1px solid #213446;background:#172737;color:#dce7ed;width:100%}
+    #toggle{background:#55f0bc;color:#06251b;border:0}
+    #toggle.stop{background:#ff685f;color:#2a0806}
+    #enable{font-size:22px;padding:30px 14px;background:#233448;border:2px solid #34506b}
+    #enable.on{background:#55f0bc;color:#06251b;border-color:#55f0bc}
+    #enable:disabled{opacity:.4}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .grid div{background:#0e1823;border:1px solid #213446;border-radius:8px;padding:8px}
+    .grid span{display:block;font-size:10px;letter-spacing:1px;color:#8fa4b4}
+    .grid strong{font-size:18px;font-variant-numeric:tabular-nums}
+    .x{color:#ff4d4d}.y{color:#4dff6a}.z{color:#5c8cff}
+    #status{color:#8fa4b4;margin:0;font-size:14px;background:#0e1823cc;border-radius:8px;padding:8px}
+    label{display:block;font-size:12px;color:#8fa4b4;margin-bottom:4px}
   </style>
 </head>
 <body>
-  <div><div class="eyebrow">MOTION LAB · PHONE CLIENT</div><h1>Stream acceleration</h1></div>
-  <p id="status">Tap Start and keep the phone still for the first half second.</p>
-  <button id="toggle">Start streaming</button>
+  <div class="hide-in-ar"><div class="eyebrow">MOTION LAB · PHONE CLIENT</div><h1>Stream motion</h1></div>
+  <p id="status">Choose a tracking mode, then tap Connect.</p>
+  <div class="hide-in-ar">
+    <label for="mode">Tracking mode</label>
+    <select id="mode">
+      <option value="auto" selected>Auto · ARCore if available</option>
+      <option value="xr">ARCore (WebXR) · measured position</option>
+      <option value="accel">Accelerometer · estimated position</option>
+    </select>
+  </div>
+  <button id="toggle">Connect</button>
+  <button id="enable" disabled>ENABLE</button>
   <div class="grid">
-    <div><span>SOURCE</span><strong id="source">—</strong></div>
+    <div><span>MODE</span><strong id="source">—</strong></div>
     <div><span>RATE</span><strong id="rate">—</strong></div>
-    <div><span class="x">X · SCREEN RIGHT</span><strong id="x">—</strong></div>
+    <div><span class="x">X · RIGHT</span><strong id="x">—</strong></div>
     <div><span class="y">Y · PHONE TOP</span><strong id="y">—</strong></div>
-    <div><span class="z">Z · OUT OF SCREEN</span><strong id="z">—</strong></div>
+    <div><span class="z">Z · UP</span><strong id="z">—</strong></div>
     <div><span>SENT</span><strong id="sent">0</strong></div>
   </div>
   <script src="phone.js"></script>
