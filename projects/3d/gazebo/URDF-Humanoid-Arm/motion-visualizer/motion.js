@@ -49,3 +49,42 @@ export function estimateTrajectory(time, acceleration, calibrationSeconds = 0.5)
     + Math.hypot(...point.map((value, axis) => value - position[index][axis])), 0);
   return {position, bias, pathLength};
 }
+
+// Live streams have no end point for drift correction: velocity resets when the phone is still, and position slowly relaxes.
+export function createLiveEstimator({calibrationSeconds = 0.5, velocityDecay = 3, positionDecay = 10, maxGap = 0.25,
+  stillAcceleration = 0.15, stillSeconds = 0.15} = {}) {
+  let start, last, bias, sum, count, lastAcceleration, velocity, position, stillFor;
+  const reset = () => {
+    start = null; last = null; bias = null; sum = [0, 0, 0]; count = 0; stillFor = 0;
+    lastAcceleration = [0, 0, 0]; velocity = [0, 0, 0]; position = [0, 0, 0];
+  };
+  reset();
+  return {
+    reset,
+    get calibrating() { return bias === null; },
+    get bias() { return bias; },
+    update(t, acceleration) {
+      if (start === null) start = t;
+      if (!bias) {
+        for (let axis = 0; axis < 3; axis++) sum[axis] += acceleration[axis];
+        count++; last = t;
+        if (t - start >= calibrationSeconds && count >= 3) bias = sum.map(value => value / count);
+        return position.slice();
+      }
+      const corrected = acceleration.map((value, axis) => value - bias[axis]);
+      const dt = t - last; last = t;
+      if (dt > 0 && dt <= maxGap) {
+        const keepVelocity = Math.exp(-dt / velocityDecay), keepPosition = Math.exp(-dt / positionDecay);
+        for (let axis = 0; axis < 3; axis++) {
+          const nextVelocity = (velocity[axis] + 0.5 * (lastAcceleration[axis] + corrected[axis]) * dt) * keepVelocity;
+          position[axis] = (position[axis] + 0.5 * (velocity[axis] + nextVelocity) * dt) * keepPosition;
+          velocity[axis] = nextVelocity;
+        }
+        stillFor = Math.hypot(...corrected) < stillAcceleration ? stillFor + dt : 0;
+        if (stillFor >= stillSeconds) velocity = [0, 0, 0];
+      }
+      lastAcceleration = corrected;
+      return position.slice();
+    },
+  };
+}

@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Motion Lab · Gripper replay</title>
   <link rel="stylesheet" href="style.css">
-  <style>.legend .x{color:#ff0000}.legend .y{color:#00ff00}.legend .z{color:#0000ff}</style>
+  <style>.legend .x{color:#ff0000}.legend .y{color:#00ff00}.legend .z{color:#0000ff}
+    [hidden]{display:none!important}.mode.active{background:var(--accent);border-color:var(--accent);color:#06251b}
+    .server-row{display:flex;gap:8px}.server-row input{flex:1;min-width:0;font:inherit;color:inherit;background:#172737;border:1px solid var(--edge);border-radius:7px;padding:9px}
+    .phone-link{font-size:11px;color:var(--accent);overflow-wrap:anywhere;user-select:all;background:#172737;border:1px solid var(--edge);border-radius:7px;padding:8px}
+    .quiet-button{width:100%;margin-top:12px;font-size:12px}</style>
   <script type="importmap">{"imports":{"three":"/vendor/three.module.js","three/addons/controls/OrbitControls.js":"/vendor/OrbitControls.js"}}</script>
 </head>
 <body>
@@ -16,14 +20,28 @@
   <main>
     <aside>
       <section>
-        <div class="eyebrow">01 / RECORDING</div>
+        <div class="eyebrow">01 / SOURCE</div>
         <h1>Follow the motion.</h1>
-        <p>Replay phone acceleration as an estimated gripper path in three-dimensional space.</p>
-        <button id="load-default" class="primary">Load Accelerometer.csv</button>
-        <label class="file-button">Open another Sensor Logger CSV<input id="upload" type="file" accept=".csv,text/csv"></label>
-        <div id="filename" class="filename">No recording loaded</div>
+        <p>Replay a recording or stream the phone's acceleration live as an estimated gripper path.</p>
+        <div class="transport" role="group" aria-label="Motion source">
+          <button id="mode-csv" class="mode active" aria-pressed="true">From CSV</button>
+          <button id="mode-live" class="mode" aria-pressed="false">Server IP/port</button>
+        </div>
+        <div id="csv-panel">
+          <button id="load-default" class="primary">Load Accelerometer.csv</button>
+          <label class="file-button">Open another Sensor Logger CSV<input id="upload" type="file" accept=".csv,text/csv"></label>
+          <div id="filename" class="filename">No recording loaded</div>
+        </div>
+        <div id="live-panel" hidden>
+          <label for="server">Motion server (IP:port)</label>
+          <div class="server-row"><input id="server" type="text" spellcheck="false" autocomplete="off"><button id="connect">Connect</button></div>
+          <label>Phone link · open in Chrome on the Pixel (same Wi-Fi), accept the certificate warning, tap Start</label>
+          <div id="phone-link" class="phone-link">Connect to show the link</div>
+          <dl><div><dt>Server</dt><dd id="live-state">Disconnected</dd></div><div><dt>Phones</dt><dd id="live-phones">—</dd></div><div><dt>Sample rate</dt><dd id="live-rate">—</dd></div></dl>
+          <button id="zero" class="quiet-button">Zero &amp; recalibrate (hold phone still)</button>
+        </div>
       </section>
-      <section>
+      <section id="replay-panel">
         <div class="eyebrow">02 / REPLAY</div>
         <div class="transport">
           <button id="play" disabled>Play</button>

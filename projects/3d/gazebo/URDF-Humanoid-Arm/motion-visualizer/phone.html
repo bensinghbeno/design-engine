@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Motion Lab · Phone sensor</title>
+  <style>
+    :root{color-scheme:dark;font:16px/1.5 "Trebuchet MS",sans-serif;color:#dce7ed;background:#091019}
+    body{margin:0;padding:24px;display:grid;gap:18px;max-width:520px;margin-inline:auto}
+    h1{margin:0;font-size:24px}.eyebrow{color:#55f0bc;font-size:11px;letter-spacing:2px;font-weight:800}
+    button{font:inherit;font-weight:800;padding:18px;border-radius:10px;border:0;background:#55f0bc;color:#06251b}
+    button.stop{background:#ff685f;color:#2a0806}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid div{background:#0e1823;border:1px solid #213446;border-radius:8px;padding:10px}
+    .grid span{display:block;font-size:11px;letter-spacing:1px;color:#8fa4b4}.grid strong{font-size:20px;font-variant-numeric:tabular-nums}
+    .x{color:#ff4d4d}.y{color:#4dff6a}.z{color:#5c8cff}#status{color:#8fa4b4}
+  </style>
+</head>
+<body>
+  <div><div class="eyebrow">MOTION LAB · PHONE CLIENT</div><h1>Stream acceleration</h1></div>
+  <p id="status">Tap Start and keep the phone still for the first half second.</p>
+  <button id="toggle">Start streaming</button>
+  <div class="grid">
+    <div><span>SOURCE</span><strong id="source">—</strong></div>
+    <div><span>RATE</span><strong id="rate">—</strong></div>
+    <div><span class="x">X · SCREEN RIGHT</span><strong id="x">—</strong></div>
+    <div><span class="y">Y · PHONE TOP</span><strong id="y">—</strong></div>
+    <div><span class="z">Z · OUT OF SCREEN</span><strong id="z">—</strong></div>
+    <div><span>SENT</span><strong id="sent">0</strong></div>
+  </div>
+  <script src="phone.js"></script>
+</body>
+</html>

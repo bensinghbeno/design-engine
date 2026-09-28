@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {estimateTrajectory, parseSensorCsv} from './motion.js';
+import {createLiveEstimator, estimateTrajectory, parseSensorCsv} from './motion.js';
 
 const $ = id => document.getElementById(id);
 const scene = new THREE.Scene();
@@ -37,8 +37,16 @@ for (const side of [-1, 1]) {
 gripper.rotation.z = Math.PI / 2;
 scene.add(gripper);
 let route = null, trail = null;
-let recording = null;
+let recording = null, mode = 'csv';
 const replay = {playing: false, elapsed: 0, startedAt: 0, frame: 0};
+const LIVE_POINTS = 1500;
+const live = {socket: null, estimator: createLiveEstimator(), phone: null, phones: 0, last: null, start: null,
+  points: new Float32Array(LIVE_POINTS * 3), length: 0, latest: null, elapsed: 0, samples: 0, rateStart: 0, rateCount: 0};
+const liveGeometry = new THREE.BufferGeometry();
+liveGeometry.setAttribute('position', new THREE.BufferAttribute(live.points, 3));
+liveGeometry.setDrawRange(0, 0);
+const liveTrail = new THREE.Line(liveGeometry, new THREE.LineBasicMaterial({color: 0x55f0bc}));
+liveTrail.frustumCulled = false; liveTrail.visible = false; scene.add(liveTrail);
 
 const observer = new ResizeObserver(() => {
   const {width, height} = $('viewport').getBoundingClientRect();
@@ -56,11 +64,15 @@ function setPosition(point, elapsed) {
     $(id).textContent = `${point['xyz'.indexOf(axis)].toFixed(3)} m`;
   }
   $('elapsed').textContent = `${elapsed.toFixed(2)} s`;
-  $('progress').style.width = `${100 * elapsed / recording.time.at(-1)}%`;
+  $('progress').style.width = mode === 'csv' && recording ? `${100 * elapsed / recording.time.at(-1)}%` : '0';
 }
 function fit() {
-  if (!recording) return;
-  const bounds = new THREE.Box3().setFromPoints(recording.position.map(point => new THREE.Vector3(...point)));
+  const points = mode === 'live'
+    ? [new THREE.Vector3(-0.15, -0.15, -0.15), new THREE.Vector3(0.15, 0.15, 0.15),
+      ...Array.from({length: live.length}, (_, index) => new THREE.Vector3().fromArray(live.points, index * 3))]
+    : recording?.position.map(point => new THREE.Vector3(...point));
+  if (!points) return;
+  const bounds = new THREE.Box3().setFromPoints(points);
   bounds.expandByObject(gripper);
   const center = bounds.getCenter(new THREE.Vector3()), radius = Math.max(0.18, bounds.getSize(new THREE.Vector3()).length() / 2);
   controls.target.copy(center);
@@ -91,8 +103,85 @@ function updateReplay(now) {
   const point = recording.position[replay.frame].map((value, axis) => THREE.MathUtils.lerp(value, recording.position[next][axis], mix));
   setPosition(point, replay.elapsed); trail.geometry.setDrawRange(0, next + 1);
 }
-function animate(now) { updateReplay(now); controls.update(); renderer.render(scene, camera); }
+function animate(now) { updateReplay(now); updateLive(now); controls.update(); renderer.render(scene, camera); }
 renderer.setAnimationLoop(animate);
+
+function liveState(text) { $('live-state').textContent = text; }
+function resetLive() {
+  live.estimator.reset(); live.last = null; live.start = null; live.length = 0; live.latest = [0, 0, 0]; live.elapsed = 0;
+  liveGeometry.setDrawRange(0, 0);
+}
+function onSample({phone, t, a}) {
+  const seconds = t / 1000;
+  // A different phone or a restarted page resets its clock, so start a fresh estimate.
+  if (phone !== live.phone || (live.last !== null && seconds <= live.last)) { resetLive(); live.phone = phone; }
+  live.last = seconds;
+  if (live.start === null) live.start = seconds;
+  const point = live.estimator.update(seconds, a);
+  if (live.length === LIVE_POINTS) { live.points.copyWithin(0, 3); live.length--; }
+  live.points.set(point, live.length * 3); live.length++;
+  live.latest = point; live.elapsed = seconds - live.start; live.samples++; live.rateCount++;
+}
+function updateLive(now) {
+  if (mode !== 'live' || !live.latest) return;
+  setPosition(live.latest, live.elapsed);
+  liveGeometry.attributes.position.needsUpdate = true; liveGeometry.setDrawRange(0, live.length);
+  if (now - live.rateStart >= 1000) {
+    $('live-rate').textContent = live.rateCount ? `${Math.round(live.rateCount * 1000 / (now - live.rateStart))} Hz` : '—';
+    $('samples').textContent = live.samples.toLocaleString();
+    $('bias').textContent = live.estimator.bias?.map(value => value.toFixed(3)).join(' / ') ?? 'calibrating…';
+    live.rateStart = now; live.rateCount = 0;
+  }
+  if (live.socket && live.phones && live.samples) liveState(live.estimator.calibrating ? 'Calibrating · keep phone still' : 'Streaming');
+}
+function showSession(session) {
+  live.phones = session.phones;
+  $('phone-link').textContent = session.error ? `Phone stream unavailable: ${session.error}` : session.phoneUrl;
+  $('live-phones').textContent = String(session.phones);
+  if (!session.phones) liveState('Connected · waiting for phone');
+}
+function disconnect() {
+  const socket = live.socket; live.socket = null;
+  socket?.close();
+  $('connect').textContent = 'Connect'; liveState('Disconnected');
+}
+function connect() {
+  if (live.socket) return disconnect();
+  const address = $('server').value.trim();
+  if (!/^([\w.-]+|\[[0-9a-f:]+\]):\d{1,5}$/i.test(address)) throw Error('Enter the server as IP:port, for example 127.0.0.1:8766.');
+  const socket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${address}/ws`);
+  live.socket = socket; $('connect').textContent = 'Disconnect'; liveState('Connecting…');
+  socket.onmessage = event => {
+    const message = JSON.parse(event.data);
+    if (message.type === 'sample') onSample(message);
+    else if (message.type === 'session') showSession(message);
+  };
+  socket.onclose = () => { if (live.socket === socket) { live.socket = null; $('connect').textContent = 'Connect'; liveState('Disconnected · check the server address'); } };
+}
+function setMode(next) {
+  mode = next;
+  for (const [id, value] of [['mode-csv', 'csv'], ['mode-live', 'live']]) {
+    $(id).classList.toggle('active', next === value); $(id).setAttribute('aria-pressed', String(next === value));
+  }
+  const csv = next === 'csv';
+  $('csv-panel').hidden = !csv; $('live-panel').hidden = csv; $('replay-panel').hidden = !csv;
+  if (route) route.visible = csv && $('show-path').checked;
+  if (trail) trail.visible = csv;
+  liveTrail.visible = !csv;
+  $('travel').textContent = csv && recording ? `${recording.pathLength.toFixed(3)} m` : '—';
+  if (csv) {
+    disconnect();
+    if (recording) { restart(false); $('duration').textContent = `${recording.time.at(-1).toFixed(2)} s`; $('summary-duration').textContent = `${recording.time.at(-1).toFixed(2)} s`; $('samples').textContent = recording.time.length.toLocaleString(); $('bias').textContent = recording.bias.map(value => value.toFixed(3)).join(' / '); }
+    $('status').textContent = 'Recording mode · press Play to replay the estimated path.';
+  } else {
+    replay.playing = false; $('play').textContent = 'Play';
+    resetLive(); live.samples = 0; setPosition(live.latest, 0);
+    $('duration').textContent = 'LIVE'; $('summary-duration').textContent = 'LIVE'; $('samples').textContent = '0'; $('bias').textContent = '—';
+    $('status').textContent = 'Live mode · estimated position holds when the phone stops, then slowly relaxes to the origin.';
+    if (!live.socket) guard(connect);
+    fit();
+  }
+}
 
 async function loadCsv(text, name) {
   const {time, acceleration} = parseSensorCsv(text);
@@ -122,6 +211,12 @@ $('upload').onchange = () => guard(async () => { const file = $('upload').files[
 $('play').onclick = togglePlay;
 $('restart').onclick = () => restart(false);
 $('fit').onclick = fit;
+$('mode-csv').onclick = () => setMode('csv');
+$('mode-live').onclick = () => setMode('live');
+$('connect').onclick = () => guard(connect);
+$('server').value = location.host;
+$('server').onkeydown = event => { if (event.key === 'Enter' && !live.socket) guard(connect); };
+$('zero').onclick = () => { resetLive(); fit(); };
 $('show-path').onchange = () => { if (route) route.visible = $('show-path').checked; };
 $('speed').onchange = () => { if (replay.playing) replay.startedAt = performance.now() - replay.elapsed * 1000 / Number($('speed').value); };
 await guard(loadDefault);
