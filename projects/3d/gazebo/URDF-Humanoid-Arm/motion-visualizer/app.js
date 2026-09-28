@@ -17,7 +17,12 @@ controls.enableDamping = true; controls.target.set(0, 0, 0.1);
 scene.add(new THREE.HemisphereLight(0xddeeff, 0x18202b, 2.5));
 const keyLight = new THREE.DirectionalLight(0xffffff, 4); keyLight.position.set(2, -3, 5); scene.add(keyLight);
 const grid = new THREE.GridHelper(4, 40, 0x355069, 0x1a2b3a); grid.rotation.x = Math.PI / 2; scene.add(grid);
-scene.add(new THREE.AxesHelper(0.18));
+const axisLength = 0.22;
+scene.add(
+  new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), axisLength, 0xff0000, 0.045, 0.022),
+  new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(), axisLength, 0x00ff00, 0.045, 0.022),
+  new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(), axisLength, 0x0000ff, 0.045, 0.022),
+);
 
 const gripper = new THREE.Group();
 const metal = new THREE.MeshStandardMaterial({color: 0x5ad6b0, roughness: 0.35, metalness: 0.5});
@@ -29,6 +34,7 @@ for (const side of [-1, 1]) {
   const tip = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.032, 0.04), grip);
   tip.position.set(0.091, side * 0.044, 0); gripper.add(tip);
 }
+gripper.rotation.z = Math.PI / 2;
 scene.add(gripper);
 let route = null, trail = null;
 let recording = null;
