@@ -6,9 +6,22 @@ let samples = 0, rateSamples = 0, rateStart = 0;
 const clean = values => values?.map(value => Number.isFinite(value) ? value : null) ?? [null, null, null];
 const text = values => values?.map(value => value === null ? '—' : value.toFixed(2)).join(' / ') ?? '—';
 
+function orientationQuaternion(alpha, beta, gamma) {
+  if (![alpha, beta, gamma].every(Number.isFinite)) return null;
+  const a = alpha * Math.PI / 360, b = beta * Math.PI / 360, g = -gamma * Math.PI / 360;
+  const c1 = Math.cos(b), c2 = Math.cos(a), c3 = Math.cos(g);
+  const s1 = Math.sin(b), s2 = Math.sin(a), s3 = Math.sin(g);
+  return [
+    s1 * c2 * c3 + c1 * s2 * s3,
+    c1 * s2 * c3 - s1 * c2 * s3,
+    c1 * c2 * s3 - s1 * s2 * c3,
+    c1 * c2 * c3 + s1 * s2 * s3,
+  ];
+}
+
 function sendSample(time) {
   const orientation = latestOrientation || [null, null, null];
-  const quaternion = absoluteQuaternion || [null, null, null, null];
+  const quaternion = absoluteQuaternion || orientationQuaternion(...orientation) || [null, null, null, null];
   const packet = {
     t: time,
     acceleration: clean(latestMotion?.acceleration),
