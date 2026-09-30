@@ -70,7 +70,6 @@ const server = http.createServer(async (request, response) => {
   if (!localHost(request.headers.host)) return send(403, 'text/plain', 'Local access only');
   const route = new URL(request.url, `http://127.0.0.1:${port}`).pathname.slice(1) || 'index.html';
   try {
-    if (route === 'api/motion') return send(200, 'text/csv', await readFile(path.join(sensorsDir, 'Accelerometer.csv')));
     if (route === 'api/live-latest') {
       try { return send(200, 'text/csv', await readFile(path.join(sensorsDir, 'live-latest.csv'))); }
       catch { return send(404, 'text/plain', 'No live session saved yet. Stream from the phone, then tap Stop streaming.'); }

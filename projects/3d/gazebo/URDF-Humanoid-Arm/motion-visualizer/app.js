@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {createLiveEstimator, createPoseTracker, estimateTrajectory, parseSensorCsv} from './motion.js';
+import {createOrientationTracker, parseSensorCsv} from './motion.js';
 
 const $ = id => document.getElementById(id);
 const scene = new THREE.Scene();
@@ -35,47 +35,34 @@ for (const side of [-1, 1]) {
   tip.position.set(0.091, side * 0.044, 0); gripper.add(tip);
 }
 gripper.rotation.z = Math.PI / 2;
+const neutralGripperRotation = gripper.quaternion.clone();
 scene.add(gripper);
-let route = null, trail = null;
 let recording = null, mode = 'csv';
 const replay = {playing: false, elapsed: 0, startedAt: 0, frame: 0};
-const LIVE_POINTS = 1500;
-const live = {socket: null, estimator: createLiveEstimator(), tracker: createPoseTracker(), xr: false, enabled: false,
-  phone: null, phones: 0, last: null, start: null,
-  points: new Float32Array(LIVE_POINTS * 3), length: 0, latest: null, elapsed: 0, samples: 0, rateStart: 0, rateCount: 0};
-const liveGeometry = new THREE.BufferGeometry();
-liveGeometry.setAttribute('position', new THREE.BufferAttribute(live.points, 3));
-liveGeometry.setDrawRange(0, 0);
-const liveTrail = new THREE.Line(liveGeometry, new THREE.LineBasicMaterial({color: 0x55f0bc}));
-liveTrail.frustumCulled = false; liveTrail.visible = false; scene.add(liveTrail);
+const live = {socket: null, tracker: createOrientationTracker(), enabled: false,
+  phone: null, phones: 0, last: null, start: null, latest: [0, 0, 0, 1], elapsed: 0, samples: 0, rateStart: 0, rateCount: 0};
 
 const observer = new ResizeObserver(() => {
   const {width, height} = $('viewport').getBoundingClientRect();
   renderer.setSize(width, height); camera.aspect = width / height; camera.updateProjectionMatrix();
 }); observer.observe($('viewport'));
 
-function lineFor(positions, color, opacity) {
-  const geometry = new THREE.BufferGeometry().setFromPoints(positions.map(point => new THREE.Vector3(...point)));
-  return new THREE.Line(geometry, new THREE.LineBasicMaterial({color, transparent: opacity < 1, opacity}));
-}
-function disposeLine(line) { if (!line) return; line.geometry.dispose(); line.material.dispose(); line.removeFromParent(); }
-function setPosition(point, elapsed) {
-  gripper.position.fromArray(point);
-  for (const [axis, id] of [['x', 'position-x'], ['y', 'position-y'], ['z', 'position-z']]) {
-    $(id).textContent = `${point['xyz'.indexOf(axis)].toFixed(3)} m`;
+function setRotation(quaternion, elapsed) {
+  gripper.position.set(0, 0, 0);
+  const relative = new THREE.Quaternion(...quaternion).normalize();
+  gripper.quaternion.copy(relative).multiply(neutralGripperRotation);
+  const angles = new THREE.Euler().setFromQuaternion(relative, 'YXZ');
+  for (const [axis, id] of [['x', 'rotation-x'], ['y', 'rotation-y'], ['z', 'rotation-z']]) {
+    $(id).textContent = `${THREE.MathUtils.radToDeg(angles[axis]).toFixed(1)}°`;
   }
   $('elapsed').textContent = `${elapsed.toFixed(2)} s`;
-  $('progress').style.width = mode === 'csv' && recording ? `${100 * elapsed / recording.time.at(-1)}%` : '0';
+  $('progress').style.width = mode === 'csv' && recording?.time.at(-1) ? `${100 * elapsed / recording.time.at(-1)}%` : '0';
 }
 function fit() {
-  const points = mode === 'live'
-    ? [new THREE.Vector3(-0.15, -0.15, -0.15), new THREE.Vector3(0.15, 0.15, 0.15),
-      ...Array.from({length: live.length}, (_, index) => new THREE.Vector3().fromArray(live.points, index * 3))]
-    : recording?.position.map(point => new THREE.Vector3(...point));
-  if (!points) return;
-  const bounds = new THREE.Box3().setFromPoints(points);
-  bounds.expandByObject(gripper);
-  const center = bounds.getCenter(new THREE.Vector3()), radius = Math.max(0.18, bounds.getSize(new THREE.Vector3()).length() / 2);
+  scene.updateMatrixWorld(true);
+  const bounds = new THREE.Box3().setFromObject(gripper);
+  const radius = Math.max(0.18, bounds.getSize(new THREE.Vector3()).length() / 2);
+  const center = new THREE.Vector3();
   controls.target.copy(center);
   camera.position.copy(center).add(new THREE.Vector3(1.3, 1.5, 0.9).normalize().multiplyScalar(radius * 3.2));
   camera.near = Math.max(0.0001, radius / 100); camera.far = Math.max(20, radius * 30); camera.updateProjectionMatrix(); controls.update();
@@ -83,7 +70,7 @@ function fit() {
 function restart(keepPlaying = false) {
   if (!recording) return;
   replay.elapsed = 0; replay.frame = 0; replay.startedAt = performance.now();
-  setPosition(recording.position[0], 0); trail.geometry.setDrawRange(0, 1);
+  setRotation(recording.rotation[0], 0);
   replay.playing = keepPlaying; $('play').textContent = keepPlaying ? 'Pause' : 'Play';
 }
 function togglePlay() {
@@ -101,57 +88,52 @@ function updateReplay(now) {
   const next = Math.min(replay.frame + 1, recording.time.length - 1);
   const span = recording.time[next] - recording.time[replay.frame];
   const mix = span ? (replay.elapsed - recording.time[replay.frame]) / span : 0;
-  const point = recording.position[replay.frame].map((value, axis) => THREE.MathUtils.lerp(value, recording.position[next][axis], mix));
-  setPosition(point, replay.elapsed); trail.geometry.setDrawRange(0, next + 1);
+  const quaternion = new THREE.Quaternion(...recording.rotation[replay.frame])
+    .slerp(new THREE.Quaternion(...recording.rotation[next]), mix);
+  setRotation(quaternion.toArray(), replay.elapsed);
 }
 function animate(now) { updateReplay(now); updateLive(now); controls.update(); renderer.render(scene, camera); }
 renderer.setAnimationLoop(animate);
 
 function liveState(text) { $('live-state').textContent = text; }
 function resetLive() {
-  live.estimator.reset(); live.tracker.reset();
-  live.last = null; live.start = null; live.length = 0; live.latest = [0, 0, 0]; live.elapsed = 0;
-  liveGeometry.setDrawRange(0, 0);
+  live.tracker.reset();
+  live.last = null; live.start = null; live.latest = [0, 0, 0, 1]; live.elapsed = 0;
 }
-function onSample({phone, t, a, p, q, xr, on}) {
+function onSample({phone, t, q, on}) {
   const seconds = t / 1000;
-  // A different phone or a restarted page resets its clock, so start a fresh estimate.
-  if (phone !== live.phone || (live.last !== null && seconds <= live.last)) { resetLive(); live.phone = phone; }
+  if (phone !== live.phone || (live.last !== null && seconds <= live.last)) {
+    live.last = null; live.start = null; live.phone = phone;
+    if (live.enabled) live.tracker.resume(); else live.tracker.hold();
+  }
   live.last = seconds;
   if (live.start === null) live.start = seconds;
-  live.xr = Boolean(xr);
-  if (on !== undefined && on !== live.enabled) setClutch(on);
-  const point = xr ? live.tracker.update(p, q) : live.estimator.update(seconds, a, q);
-  if (live.length === LIVE_POINTS) { live.points.copyWithin(0, 3); live.length--; }
-  live.points.set(point, live.length * 3); live.length++;
-  live.latest = point; live.elapsed = seconds - live.start; live.samples++; live.rateCount++;
+  const enabled = on === true;
+  if (enabled !== live.enabled) setClutch(enabled);
+  if (enabled) live.latest = live.tracker.update(q);
+  live.elapsed = seconds - live.start; live.samples++; live.rateCount++;
 }
 function setClutch(enabled) {
   live.enabled = enabled;
-  if (enabled) { live.estimator.resume(); live.tracker.resume(); }
-  else { live.estimator.hold(); live.tracker.hold(); }
+  if (enabled) live.tracker.resume();
+  else live.tracker.hold();
 }
 function updateLive(now) {
   if (mode !== 'live' || !live.latest) return;
-  setPosition(live.latest, live.elapsed);
-  liveGeometry.attributes.position.needsUpdate = true; liveGeometry.setDrawRange(0, live.length);
+  setRotation(live.latest, live.elapsed);
   if (now - live.rateStart >= 1000) {
     $('live-rate').textContent = live.rateCount ? `${Math.round(live.rateCount * 1000 / (now - live.rateStart))} Hz` : '—';
     $('samples').textContent = live.samples.toLocaleString();
-    $('bias').textContent = live.xr ? 'ARCore · measured'
-      : live.estimator.bias?.map(value => value.toFixed(3)).join(' / ') ?? 'calibrating…';
-    $('travel').textContent = live.xr ? 'ARCore (WebXR)'
-      : live.estimator.worldFrame ? 'Accelerometer · levelled' : 'Accelerometer · phone frame';
+    $('travel').textContent = 'Orientation sensor';
     live.rateStart = now; live.rateCount = 0;
   }
   if (!live.socket || !live.phones || !live.samples) return;
   if (!live.enabled) return liveState('Connected · holding (phone ENABLE is off)');
-  if (live.xr) return liveState('Streaming · ARCore');
-  liveState(live.estimator.calibrating ? 'Calibrating · keep phone still'
-    : live.estimator.still ? 'Streaming · holding' : 'Streaming · moving');
+  liveState('Streaming · rotation only');
 }
 function showSession(session) {
   live.phones = session.phones;
+  if (!live.phones) setClutch(false);
   $('phone-link').textContent = session.error ? `Phone stream unavailable: ${session.error}` : session.phoneUrl;
   $('live-phones').textContent = String(session.phones);
   if (!session.phones) liveState('Connected · waiting for phone');
@@ -184,57 +166,41 @@ function setMode(next) {
   }
   const csv = next === 'csv';
   $('csv-panel').hidden = !csv; $('live-panel').hidden = csv; $('replay-panel').hidden = !csv;
-  if (route) route.visible = csv && $('show-path').checked;
-  if (trail) trail.visible = csv;
-  liveTrail.visible = !csv;
-  $('travel').textContent = csv && recording ? `${recording.pathLength.toFixed(3)} m` : '—';
+  $('travel').textContent = csv ? 'Orientation recording' : 'Orientation sensor';
   if (csv) {
     disconnect();
-    $('travel-label').textContent = 'Estimated travel'; $('bias-label').textContent = 'Startup bias X/Y/Z';
-    if (recording) { restart(false); $('duration').textContent = `${recording.time.at(-1).toFixed(2)} s`; $('summary-duration').textContent = `${recording.time.at(-1).toFixed(2)} s`; $('samples').textContent = recording.time.length.toLocaleString(); $('bias').textContent = recording.bias.map(value => value.toFixed(3)).join(' / '); }
-    $('status').textContent = 'Recording mode · press Play to replay the estimated path.';
+    if (recording) { restart(false); $('duration').textContent = `${recording.time.at(-1).toFixed(2)} s`; $('summary-duration').textContent = `${recording.time.at(-1).toFixed(2)} s`; $('samples').textContent = recording.time.length.toLocaleString(); }
+    $('status').textContent = 'Recording mode · press Play to replay gripper rotation.';
   } else {
-    $('travel-label').textContent = 'Tracking'; $('bias-label').textContent = 'Sensor offset X/Y/Z';
     replay.playing = false; $('play').textContent = 'Play';
-    resetLive(); live.samples = 0; live.enabled = false; setPosition(live.latest, 0);
-    $('duration').textContent = 'LIVE'; $('summary-duration').textContent = 'LIVE'; $('samples').textContent = '0'; $('bias').textContent = '—';
-    $('status').textContent = 'Live mode · tap ENABLE on the phone to move the gripper; tap again to hold it in place.';
+    resetLive(); live.samples = 0; live.enabled = false; setRotation(live.latest, 0);
+    $('duration').textContent = 'LIVE'; $('summary-duration').textContent = 'LIVE'; $('samples').textContent = '0';
+    $('status').textContent = 'Live mode · hold ENABLE on the phone and rotate it; release to freeze.';
     if (!live.socket) guard(connect);
     fit();
   }
 }
 
-function replayPoses(poses, quaternions, enabled) {
-  const tracker = createPoseTracker();
-  let held = true;
-  const position = poses.map((pose, index) => {
+function replayOrientations(quaternions, enabled) {
+  const tracker = createOrientationTracker();
+  let active = false;
+  return quaternions.map((quaternion, index) => {
     const on = enabled ? enabled[index] : true;
-    if (on !== held) { held = on; on ? tracker.resume() : tracker.hold(); }
-    return pose && on ? tracker.update(pose, quaternions?.[index]) : tracker.position;
+    if (on !== active) { active = on; active ? tracker.resume() : tracker.hold(); }
+    return quaternion && active ? tracker.update(quaternion) : tracker.quaternion;
   });
-  const pathLength = position.slice(1).reduce((total, point, index) => total
-    + Math.hypot(...point.map((value, axis) => value - position[index][axis])), 0);
-  return {position, bias: [0, 0, 0], pathLength};
 }
 
 async function loadCsv(text, name) {
   const parsed = parseSensorCsv(text);
-  const {time, acceleration} = parsed;
-  // ARCore sessions carry measured poses, so replay those instead of integrating acceleration.
-  const estimate = parsed.position
-    ? replayPoses(parsed.position, parsed.quaternion, parsed.enabled)
-    : estimateTrajectory(time, acceleration);
-  recording = {time, ...estimate}; replay.playing = false;
-  disposeLine(route); disposeLine(trail);
-  route = lineFor(recording.position, 0x557086, 0.45); trail = lineFor(recording.position, 0x55f0bc, 1);
-  trail.geometry.setDrawRange(0, 1); scene.add(route, trail);
-  route.visible = $('show-path').checked;
-  $('filename').textContent = name; $('samples').textContent = time.length.toLocaleString();
-  $('duration').textContent = `${time.at(-1).toFixed(2)} s`; $('summary-duration').textContent = `${time.at(-1).toFixed(2)} s`;
-  $('travel').textContent = `${recording.pathLength.toFixed(3)} m`;
-  $('bias').textContent = recording.bias.map(value => value.toFixed(3)).join(' / ');
+  if (!parsed.quaternion) throw Error('This viewer now replays orientation-only CSVs with qx, qy, qz and qw columns.');
+  recording = {time: parsed.time, rotation: replayOrientations(parsed.quaternion, parsed.enabled)};
+  replay.playing = false;
+  $('filename').textContent = name; $('samples').textContent = recording.time.length.toLocaleString();
+  $('duration').textContent = `${recording.time.at(-1).toFixed(2)} s`; $('summary-duration').textContent = `${recording.time.at(-1).toFixed(2)} s`;
+  $('travel').textContent = 'Orientation recording';
   $('play').disabled = false; $('restart').disabled = false;
-  restart(false); fit(); $('status').textContent = 'Recording ready · press Play to replay the estimated path.';
+  restart(false); fit(); $('status').textContent = 'Orientation recording ready · press Play to replay rotation.';
 }
 async function loadServerCsv(url, name) {
   $('status').textContent = `Loading ${name}…`;
@@ -242,10 +208,8 @@ async function loadServerCsv(url, name) {
   if (!response.ok) throw Error(await response.text());
   await loadCsv(await response.text(), name);
 }
-const loadDefault = () => loadServerCsv('/api/motion', 'sensors/Accelerometer.csv');
 async function guard(action) { try { await action(); } catch (error) { $('status').textContent = error.message; console.error(error); } }
 
-$('load-default').onclick = () => guard(loadDefault);
 $('load-live').onclick = () => guard(() => loadServerCsv('/api/live-latest', 'sensors/live-latest.csv'));
 $('upload').onchange = () => guard(async () => { const file = $('upload').files[0]; if (!file) return; if (file.size > 10e6) throw Error('CSV exceeds 10 MB.'); await loadCsv(await file.text(), file.name); });
 $('play').onclick = togglePlay;
@@ -256,7 +220,5 @@ $('mode-live').onclick = () => setMode('live');
 $('connect').onclick = () => guard(connect);
 $('server').value = location.host;
 $('server').onkeydown = event => { if (event.key === 'Enter' && !live.socket) guard(connect); };
-$('zero').onclick = () => { resetLive(); fit(); };
-$('show-path').onchange = () => { if (route) route.visible = $('show-path').checked; };
+$('zero').onclick = () => { resetLive(); live.latest = [0, 0, 0, 1]; setRotation(live.latest, live.elapsed); };
 $('speed').onchange = () => { if (replay.playing) replay.startedAt = performance.now() - replay.elapsed * 1000 / Number($('speed').value); };
-await guard(loadDefault);

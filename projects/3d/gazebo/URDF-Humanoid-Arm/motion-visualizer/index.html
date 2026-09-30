@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Motion Lab · Gripper replay</title>
+  <title>Motion Lab · Orientation control</title>
   <link rel="stylesheet" href="style.css">
   <style>.legend .x{color:#ff0000}.legend .y{color:#00ff00}.legend .z{color:#0000ff}
     [hidden]{display:none!important}.mode.active{background:var(--accent);border-color:var(--accent);color:#06251b}
@@ -14,32 +14,31 @@
 </head>
 <body>
   <header>
-    <div class="brand"><span class="brand-mark">M</span><div>MOTION LAB<small>PHONE MOTION → GRIPPER</small></div></div>
-    <span class="badge">LOCAL · ARCORE OR ACCELEROMETER</span>
+    <div class="brand"><span class="brand-mark">M</span><div>MOTION LAB<small>PHONE ORIENTATION → GRIPPER</small></div></div>
+    <span class="badge">LOCAL · ROTATION ONLY</span>
   </header>
   <main>
     <aside>
       <section>
         <div class="eyebrow">01 / SOURCE</div>
         <h1>Follow the motion.</h1>
-        <p>Replay a recording, or stream the phone live. ARCore gives measured position; the accelerometer only estimates it.</p>
+        <p>Stream phone orientation and rotate the gripper in place. Translation is disabled.</p>
         <div class="transport" role="group" aria-label="Motion source">
           <button id="mode-csv" class="mode active" aria-pressed="true">From CSV</button>
           <button id="mode-live" class="mode" aria-pressed="false">Server IP/port</button>
         </div>
         <div id="csv-panel">
-          <button id="load-default" class="primary">Load Accelerometer.csv</button>
           <button id="load-live" class="quiet-button">Load last live session</button>
-          <label class="file-button">Open another Sensor Logger CSV<input id="upload" type="file" accept=".csv,text/csv"></label>
+          <label class="file-button">Open orientation CSV<input id="upload" type="file" accept=".csv,text/csv"></label>
           <div id="filename" class="filename">No recording loaded</div>
         </div>
         <div id="live-panel" hidden>
           <label for="server">Motion server (IP:port)</label>
           <div class="server-row"><input id="server" type="text" spellcheck="false" autocomplete="off"><button id="connect">Connect</button></div>
-          <label>Phone link · open in Chrome on the Pixel (same Wi-Fi), accept the certificate warning, tap Start</label>
+          <label>Phone link · open in Chrome on the Pixel (same Wi-Fi), accept the certificate warning, then Connect</label>
           <div id="phone-link" class="phone-link">Connect to show the link</div>
           <dl><div><dt>Server</dt><dd id="live-state">Disconnected</dd></div><div><dt>Phones</dt><dd id="live-phones">—</dd></div><div><dt>Sample rate</dt><dd id="live-rate">—</dd></div></dl>
-          <button id="zero" class="quiet-button">Zero &amp; recalibrate (hold phone still)</button>
+          <button id="zero" class="quiet-button">Reset gripper rotation</button>
         </div>
       </section>
       <section id="replay-panel">
@@ -50,24 +49,23 @@
         </div>
         <label for="speed">Playback speed</label>
         <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
-        <label class="check"><input id="show-path" type="checkbox" checked> Show complete estimated path</label>
       </section>
       <section>
-        <div class="eyebrow">03 / POSITION</div>
-        <div class="coordinates"><div><span>SCREEN RIGHT · +X</span><strong id="position-x">—</strong></div><div><span>PHONE TOP · +Y</span><strong id="position-y">—</strong></div><div><span>SCREEN NORMAL · +Z</span><strong id="position-z">—</strong></div></div>
+        <div class="eyebrow">03 / ROTATION</div>
+        <div class="coordinates"><div><span>ROTATION X</span><strong id="rotation-x">0.0°</strong></div><div><span>ROTATION Y</span><strong id="rotation-y">0.0°</strong></div><div><span>ROTATION Z</span><strong id="rotation-z">0.0°</strong></div></div>
         <div class="time"><span id="elapsed">0.00 s</span><span id="duration">—</span></div>
         <div class="progress"><span id="progress"></span></div>
       </section>
       <section>
         <div class="eyebrow">04 / RECORDING SUMMARY</div>
-        <dl><div><dt>Samples</dt><dd id="samples">—</dd></div><div><dt>Duration</dt><dd id="summary-duration">—</dd></div><div><dt id="travel-label">Estimated travel</dt><dd id="travel">—</dd></div><div><dt id="bias-label">Startup bias X/Y/Z</dt><dd id="bias">—</dd></div></dl>
+        <dl><div><dt>Samples</dt><dd id="samples">—</dd></div><div><dt>Duration</dt><dd id="summary-duration">—</dd></div><div><dt>Input</dt><dd id="travel">Orientation</dd></div></dl>
       </section>
-      <p class="caution"><strong>ARCore is measured; the accelerometer is not.</strong> Accelerometer mode doubles small sensor errors into metres of drift during long moves, even with orientation levelling. Prefer ARCore for anything that needs real distances.</p>
+      <p class="caution"><strong>Rotation only.</strong> The phone's acceleration and position are ignored. The gripper stays fixed in place and mirrors orientation while ENABLE is held.</p>
     </aside>
     <article>
       <div class="toolbar"><span>GRIPPER ONLY</span><button id="fit">Fit path</button></div>
-      <div id="viewport"><div class="legend"><span class="x">+X</span> screen right · <span class="y">+Y</span> phone top · <span class="z">+Z</span> out of screen &nbsp; Drag to orbit · scroll to zoom</div></div>
-      <div id="status" role="status" aria-live="polite">Loading recording…</div>
+      <div id="viewport"><div class="legend"><span class="x">X</span> rotation · <span class="y">Y</span> rotation · <span class="z">Z</span> rotation &nbsp; Drag to orbit · scroll to zoom</div></div>
+      <div id="status" role="status" aria-live="polite">Connect the phone or open an orientation CSV.</div>
     </article>
   </main>
   <script type="module" src="app.js"></script>

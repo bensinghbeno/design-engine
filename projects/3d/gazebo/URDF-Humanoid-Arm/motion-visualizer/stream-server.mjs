@@ -17,28 +17,18 @@ function validToken(candidate) {
   return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
 
-const triple = value => Array.isArray(value) && value.length === 3 && value.every(Number.isFinite);
-
 function validSample(sample) {
-  if (!sample || !Number.isFinite(sample.t)) return false;
-  if (!triple(sample.a ?? sample.p)) return false;
-  if (sample.q !== undefined && !(Array.isArray(sample.q) && sample.q.length === 4 && sample.q.every(Number.isFinite))) return false;
-  return true;
+  return sample && Number.isFinite(sample.t) && Array.isArray(sample.q) && sample.q.length === 4
+    && sample.q.every(Number.isFinite) && typeof sample.on === 'boolean';
 }
 
-// Sensor Logger's columns plus optional orientation/pose, so saved sessions load through the CSV path.
 async function saveSession(phone, samples) {
   const start = samples[0].t;
-  const hasQuaternion = samples.some(sample => sample.q);
-  const hasPose = samples.some(sample => sample.p);
-  const header = ['time', 'seconds_elapsed', 'z', 'y', 'x',
-    ...(hasQuaternion ? ['qx', 'qy', 'qz', 'qw'] : []), ...(hasPose ? ['px', 'py', 'pz'] : []), 'enabled'];
-  const rows = samples.map(({t, a = [0, 0, 0], p, q, on, received}) => [
-    BigInt(received) * 1000000n, (t - start) / 1000, a[2], a[1], a[0],
-    ...(hasQuaternion ? (q ?? ['', '', '', '']) : []), ...(hasPose ? (p ?? ['', '', '']) : []),
-    on === false ? 0 : 1,
+  const header = 'time,seconds_elapsed,qx,qy,qz,qw,enabled';
+  const rows = samples.map(({t, q, on, received}) => [
+    BigInt(received) * 1000000n, (t - start) / 1000, ...q, on ? 1 : 0,
   ].join(','));
-  const csv = `${header.join(',')}\n${rows.join('\n')}\n`;
+  const csv = `${header}\n${rows.join('\n')}\n`;
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace('T', '-').slice(0, 15);
   const file = `live-${stamp}-${phone}.csv`;
   await mkdir(sensorsDir, {recursive: true});
@@ -88,10 +78,10 @@ server.on('upgrade', (request, socket) => {
       return parentPort.postMessage({type: 'clutch', phone, enabled: message.enabled});
     }
     if (!validSample(message)) return;
-    const {t, a, p, q, xr, on = true} = message;
-    parentPort.postMessage({type: 'sample', phone, t, a, p, q, xr, on});
+    const {t, q, on} = message;
+    parentPort.postMessage({type: 'sample', phone, t, q, on});
     if (recorded.length < MAX_RECORDED && (!recorded.length || t > recorded.at(-1).t)) {
-      recorded.push({t, a, p, q, on, received: Date.now()});
+      recorded.push({t, q, on, received: Date.now()});
     }
   });
   peer.on('close', async () => {

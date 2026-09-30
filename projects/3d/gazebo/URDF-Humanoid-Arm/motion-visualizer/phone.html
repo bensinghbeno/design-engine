@@ -7,13 +7,11 @@
   <style>
     :root{color-scheme:dark;font:16px/1.5 "Trebuchet MS",sans-serif;color:#dce7ed;background:#091019}
     body{margin:0;padding:20px;display:grid;gap:14px;max-width:520px;margin-inline:auto}
-    body.xr{background:transparent}
-    body.xr .hide-in-ar{display:none}
     h1{margin:0;font-size:23px}.eyebrow{color:#55f0bc;font-size:11px;letter-spacing:2px;font-weight:800}
     button,select{font:inherit;font-weight:800;padding:14px;border-radius:10px;border:1px solid #213446;background:#172737;color:#dce7ed;width:100%}
     #toggle{background:#55f0bc;color:#06251b;border:0}
     #toggle.stop{background:#ff685f;color:#2a0806}
-    #enable{font-size:22px;padding:30px 14px;background:#233448;border:2px solid #34506b}
+    #enable{font-size:22px;padding:30px 14px;background:#233448;border:2px solid #34506b;touch-action:none;user-select:none}
     #enable.on{background:#55f0bc;color:#06251b;border-color:#55f0bc}
     #enable:disabled{opacity:.4}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -26,24 +24,16 @@
   </style>
 </head>
 <body>
-  <div class="hide-in-ar"><div class="eyebrow">MOTION LAB · PHONE CLIENT</div><h1>Stream motion</h1></div>
-  <p id="status">Choose a tracking mode, then tap Connect.</p>
-  <div class="hide-in-ar">
-    <label for="mode">Tracking mode</label>
-    <select id="mode">
-      <option value="auto" selected>Auto · ARCore if available</option>
-      <option value="xr">ARCore (WebXR) · measured position</option>
-      <option value="accel">Accelerometer · estimated position</option>
-    </select>
-  </div>
+  <div><div class="eyebrow">MOTION LAB · ORIENTATION CLIENT</div><h1>Mirror phone rotation</h1></div>
+  <p id="status">Tap Connect to start the orientation sensor.</p>
   <button id="toggle">Connect</button>
-  <button id="enable" disabled>ENABLE</button>
+  <button id="enable" disabled>PRESS &amp; HOLD TO ENABLE</button>
   <div class="grid">
-    <div><span>MODE</span><strong id="source">—</strong></div>
+    <div><span>SENSOR</span><strong id="source">—</strong></div>
     <div><span>RATE</span><strong id="rate">—</strong></div>
-    <div><span class="x">X · RIGHT</span><strong id="x">—</strong></div>
-    <div><span class="y">Y · PHONE TOP</span><strong id="y">—</strong></div>
-    <div><span class="z">Z · UP</span><strong id="z">—</strong></div>
+    <div><span class="x">ROLL · X</span><strong id="x">—</strong></div>
+    <div><span class="y">PITCH · Y</span><strong id="y">—</strong></div>
+    <div><span class="z">YAW · Z</span><strong id="z">—</strong></div>
     <div><span>SENT</span><strong id="sent">0</strong></div>
   </div>
   <script src="phone.js"></script>

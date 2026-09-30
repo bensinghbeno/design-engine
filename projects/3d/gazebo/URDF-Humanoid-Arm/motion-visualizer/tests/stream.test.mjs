@@ -46,16 +46,21 @@ test('stream worker relays valid phone samples and rejects bad tokens', async ()
     assert.equal(await openRaw(port, '/ws?token=wrong', origin), 403);
     assert.equal(await openRaw(port, `/ws?token=${token}`, 'https://evil.example'), 403);
     const socket = await openRaw(port, `/ws?token=${token}`, origin);
-    socket.write(clientFrame(JSON.stringify({t: 12.5, a: [0.1, 0.2, 0.3]})));
-    socket.write(clientFrame(JSON.stringify({t: 13, a: [0.1, 'bad', 0.3]})));
-    socket.write(clientFrame(JSON.stringify({t: 14, a: [1, 2, 3]})));
-    socket.write(clientFrame(JSON.stringify({t: 13.5, a: [9, 9, 9]})));
+    socket.write(clientFrame(JSON.stringify({t: 12.5, q: [0, 0, 0, 1], on: true})));
+    socket.write(clientFrame(JSON.stringify({t: 13, q: [0, 0, 0], on: true})));
+    socket.write(clientFrame(JSON.stringify({t: 14, q: [0, 0, 0.1, 0.995], on: true})));
+    socket.write(clientFrame(JSON.stringify({t: 13.5, q: [0, 0, 0.2, 0.98], on: true})));
+    socket.write(clientFrame(JSON.stringify({t: 14.5, a: [1, 2, 3], on: true})));
     socket.write(clientFrame(JSON.stringify({enabled: false})));
-    socket.write(clientFrame(JSON.stringify({t: 1012.5, a: [4, 5, 6], on: false})));
+    socket.write(clientFrame(JSON.stringify({t: 1012.5, q: [0, 0, 0, 1], on: false})));
     await new Promise(resolve => setTimeout(resolve, 200));
     const samples = messages.filter(message => message.type === 'sample');
-    assert.deepEqual(samples.map(({t, a}) => ({t, a})), [{t: 12.5, a: [0.1, 0.2, 0.3]}, {t: 14, a: [1, 2, 3]},
-      {t: 13.5, a: [9, 9, 9]}, {t: 1012.5, a: [4, 5, 6]}]);
+    assert.deepEqual(samples.map(({t, q, on}) => ({t, q, on})), [
+      {t: 12.5, q: [0, 0, 0, 1], on: true},
+      {t: 14, q: [0, 0, 0.1, 0.995], on: true},
+      {t: 13.5, q: [0, 0, 0.2, 0.98], on: true},
+      {t: 1012.5, q: [0, 0, 0, 1], on: false},
+    ]);
     assert.ok(messages.some(message => message.type === 'clutch' && message.enabled === false));
     assert.ok(messages.some(message => message.type === 'phone' && message.connected));
     socket.destroy();
@@ -66,8 +71,9 @@ test('stream worker relays valid phone samples and rejects bad tokens', async ()
     assert.equal(csv, readFileSync(path.join(sensorsDir, saved.file), 'utf8'));
     const parsed = parseSensorCsv(csv);
     assert.deepEqual(parsed.time, [0, 0.0015, 1]);
-    assert.deepEqual(parsed.acceleration, [[0.1, 0.2, 0.3], [1, 2, 3], [4, 5, 6]]);
+    assert.deepEqual(parsed.quaternion, [[0, 0, 0, 1], [0, 0, 0.1, 0.995], [0, 0, 0, 1]]);
     assert.deepEqual(parsed.enabled, [true, true, false]);
+    assert.equal('acceleration' in parsed, false);
   } finally {
     await worker.terminate();
     rmSync(certDir, {recursive: true, force: true});
