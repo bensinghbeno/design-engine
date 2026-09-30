@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Field Notes · Sensor console</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="mark">F</span><div>FIELD NOTES<small>LIVE SENSOR CONSOLE · 05</small></div></div>
+    <div class="live-state"><i id="live-dot"></i><span id="status">Waiting for a phone</span></div>
+  </header>
+  <main>
+    <aside>
+      <section>
+        <div class="eyebrow">PHONE CLIENT</div>
+        <h1>Connect a device</h1>
+        <p>Open this link in Chrome on the phone, on the same Wi-Fi. Accept the certificate warning before starting the sensor stream.</p>
+        <div class="phone-link" id="phone-link">Starting server…</div>
+        <div class="actions"><button id="copy-link" title="Copy phone link">Copy link</button><button id="recenter">Reset position</button></div>
+      </section>
+      <section>
+        <div class="eyebrow">STREAM</div>
+        <dl>
+          <div><dt>Phone connections</dt><dd id="phone-count">0</dd></div>
+          <div><dt>Incoming rate</dt><dd id="sample-rate">—</dd></div>
+          <div><dt>Last packet</dt><dd id="packet-age">—</dd></div>
+          <div><dt>Samples received</dt><dd id="sample-count">0</dd></div>
+        </dl>
+      </section>
+      <p class="note"><strong>Position is an estimate.</strong> It integrates linear acceleration twice, so small offsets accumulate into large drift. Orientation and raw sensor readings are direct measurements; integrated position is not.</p>
+    </aside>
+    <section class="dashboard" aria-label="Live sensor values">
+      <div class="section-heading"><div><div class="eyebrow">LIVE TELEMETRY</div><h2>Sensor values</h2></div><span id="sample-time">No samples yet</span></div>
+      <div id="charts" class="charts"></div>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
