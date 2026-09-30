@@ -27,40 +27,17 @@ export function parseSensorCsv(text) {
   return parsed;
 }
 
-function normalizedQuaternion(quaternion) {
-  const length = Math.hypot(...quaternion);
-  if (!Number.isFinite(length) || length < 1e-9) throw Error('Orientation quaternion must have a nonzero length.');
-  return quaternion.map(value => value / length);
-}
-
-function multiplyQuaternions(a, b) {
-  const [ax, ay, az, aw] = a, [bx, by, bz, bw] = b;
-  return [
-    aw * bx + ax * bw + ay * bz - az * by,
-    aw * by - ax * bz + ay * bw + az * bx,
-    aw * bz + ax * by - ay * bx + az * bw,
-    aw * bw - ax * bx - ay * by - az * bz,
-  ];
-}
-
-export function relativeQuaternion(reference, current) {
-  const [x, y, z, w] = normalizedQuaternion(reference);
-  return normalizedQuaternion(multiplyQuaternions(normalizedQuaternion(current), [-x, -y, -z, w]));
-}
-
 export function createOrientationTracker() {
-  let reference = null, base = [0, 0, 0, 1], held = [0, 0, 0, 1], paused = false;
+  let held = [0, 0, 0, 1], paused = false;
   return {
-    reset() { reference = null; base = [0, 0, 0, 1]; held = [0, 0, 0, 1]; paused = false; },
-    hold() { paused = true; reference = null; base = held.slice(); },
-    resume() { paused = false; reference = null; base = held.slice(); },
+    reset() { held = [0, 0, 0, 1]; paused = false; },
+    hold() { paused = true; },
+    resume() { paused = false; },
     get paused() { return paused; },
     get quaternion() { return held.slice(); },
     update(quaternion) {
       if (paused) return held.slice();
-      const current = normalizedQuaternion(quaternion);
-      if (!reference) { reference = current; base = held.slice(); return held.slice(); }
-      held = normalizedQuaternion(multiplyQuaternions(relativeQuaternion(reference, current), base));
+      held = quaternion.slice();
       return held.slice();
     },
   };

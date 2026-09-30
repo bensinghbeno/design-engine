@@ -34,10 +34,9 @@ for (const side of [-1, 1]) {
   const tip = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.032, 0.04), grip);
   tip.position.set(0.091, side * 0.044, 0); gripper.add(tip);
 }
-gripper.rotation.z = Math.PI / 2;
-const neutralGripperRotation = gripper.quaternion.clone();
 scene.add(gripper);
 let recording = null, mode = 'csv';
+let swapXY = true, invertY = true;
 const replay = {playing: false, elapsed: 0, startedAt: 0, frame: 0};
 const live = {socket: null, tracker: createOrientationTracker(), enabled: false,
   phone: null, phones: 0, last: null, start: null, latest: [0, 0, 0, 1], elapsed: 0, samples: 0, rateStart: 0, rateCount: 0};
@@ -49,9 +48,12 @@ const observer = new ResizeObserver(() => {
 
 function setRotation(quaternion, elapsed) {
   gripper.position.set(0, 0, 0);
-  const relative = new THREE.Quaternion(...quaternion).normalize();
-  gripper.quaternion.copy(relative).multiply(neutralGripperRotation);
-  const angles = new THREE.Euler().setFromQuaternion(relative, 'YXZ');
+  const orientation = new THREE.Quaternion(...quaternion);
+  const angles = new THREE.Euler().setFromQuaternion(orientation, 'YXZ');
+  if (swapXY) [angles.x, angles.y] = [angles.y, angles.x];
+  if (invertY) angles.y = -angles.y;
+  const displayedOrientation = new THREE.Quaternion().setFromEuler(angles);
+  gripper.quaternion.copy(displayedOrientation);
   for (const [axis, id] of [['x', 'rotation-x'], ['y', 'rotation-y'], ['z', 'rotation-z']]) {
     $(id).textContent = `${THREE.MathUtils.radToDeg(angles[axis]).toFixed(1)}°`;
   }
@@ -85,12 +87,7 @@ function updateReplay(now) {
   const duration = recording.time.at(-1);
   if (replay.elapsed >= duration) { replay.elapsed = duration; replay.playing = false; $('play').textContent = 'Replay'; }
   while (replay.frame + 1 < recording.time.length && recording.time[replay.frame + 1] <= replay.elapsed) replay.frame++;
-  const next = Math.min(replay.frame + 1, recording.time.length - 1);
-  const span = recording.time[next] - recording.time[replay.frame];
-  const mix = span ? (replay.elapsed - recording.time[replay.frame]) / span : 0;
-  const quaternion = new THREE.Quaternion(...recording.rotation[replay.frame])
-    .slerp(new THREE.Quaternion(...recording.rotation[next]), mix);
-  setRotation(quaternion.toArray(), replay.elapsed);
+  setRotation(recording.rotation[replay.frame], replay.elapsed);
 }
 function animate(now) { updateReplay(now); updateLive(now); controls.update(); renderer.render(scene, camera); }
 renderer.setAnimationLoop(animate);
@@ -218,7 +215,22 @@ $('fit').onclick = fit;
 $('mode-csv').onclick = () => setMode('csv');
 $('mode-live').onclick = () => setMode('live');
 $('connect').onclick = () => guard(connect);
+$('swap-xy').onclick = () => {
+  swapXY = !swapXY;
+  $('swap-xy').setAttribute('aria-pressed', String(swapXY));
+  $('swap-xy').textContent = `Swap X/Y: ${swapXY ? 'On' : 'Off'}`;
+  if (mode === 'live') setRotation(live.latest, live.elapsed);
+  else if (recording) setRotation(recording.rotation[replay.frame], replay.elapsed);
+};
+$('invert-y').onclick = () => {
+  invertY = !invertY;
+  $('invert-y').setAttribute('aria-pressed', String(invertY));
+  $('invert-y').textContent = `Invert Y: ${invertY ? 'On' : 'Off'}`;
+  if (mode === 'live') setRotation(live.latest, live.elapsed);
+  else if (recording) setRotation(recording.rotation[replay.frame], replay.elapsed);
+};
 $('server').value = location.host;
 $('server').onkeydown = event => { if (event.key === 'Enter' && !live.socket) guard(connect); };
 $('zero').onclick = () => { resetLive(); live.latest = [0, 0, 0, 1]; setRotation(live.latest, live.elapsed); };
 $('speed').onchange = () => { if (replay.playing) replay.startedAt = performance.now() - replay.elapsed * 1000 / Number($('speed').value); };
+setRotation(live.latest, 0);

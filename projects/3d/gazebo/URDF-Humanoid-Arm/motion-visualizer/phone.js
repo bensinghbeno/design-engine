@@ -34,20 +34,6 @@ function emitOrientation(t, quaternion) {
   publish({t, q: quaternion}, quaternionAngles(quaternion));
 }
 
-function deviceOrientationQuaternion(event) {
-  if (![event.alpha, event.beta, event.gamma].every(Number.isFinite)) return null;
-  const alpha = event.alpha * Math.PI / 360, beta = event.beta * Math.PI / 360, gamma = event.gamma * Math.PI / 360;
-  const c1 = Math.cos(beta), c2 = Math.cos(alpha), c3 = Math.cos(-gamma);
-  const s1 = Math.sin(beta), s2 = Math.sin(alpha), s3 = Math.sin(-gamma);
-  const quaternion = [
-    s1 * c2 * c3 + c1 * s2 * s3,
-    c1 * s2 * c3 - s1 * c2 * s3,
-    c1 * c2 * s3 - s1 * s2 * c3,
-    c1 * c2 * c3 + s1 * s2 * s3,
-  ];
-  return quaternion;
-}
-
 async function startOrientation() {
   for (const Sensor of [window.AbsoluteOrientationSensor, window.RelativeOrientationSensor]) {
     if (!Sensor) continue;
@@ -68,25 +54,7 @@ async function startOrientation() {
     }
     sensor.stop();
   }
-
-  return new Promise((resolve, reject) => {
-    let started = false;
-    const timer = setTimeout(() => {
-      if (started) return;
-      removeEventListener('deviceorientation', handler);
-      reject(Error('This browser did not provide an orientation sensor.'));
-    }, 3000);
-    const handler = event => {
-      const quaternion = deviceOrientationQuaternion(event);
-      if (!quaternion) return;
-      emitOrientation(event.timeStamp, quaternion);
-      if (!started) {
-        started = true; clearTimeout(timer); $('source').textContent = 'Device orientation';
-        resolve(() => removeEventListener('deviceorientation', handler));
-      }
-    };
-    addEventListener('deviceorientation', handler);
-  });
+  throw Error('This browser did not provide a native orientation quaternion sensor.');
 }
 
 function setEnabled(next) {
