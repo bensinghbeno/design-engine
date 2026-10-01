@@ -23,7 +23,7 @@ try {
   const yBounds = (await page.locator('#by').textContent()).split(' → ').map(Number);
   assert.ok(yBounds[1]-yBounds[0]>.90, 'Pitch plus roll must aim the arm in space');
   const rigXml = await page.locator('#xml').inputValue();
-  for (const name of ['pitch_actuator','roll_actuator','yaw_actuator','elbow_actuator',
+  for (const name of ['pitch_actuator','roll_actuator','elbow_actuator',
     'wrist_roll_actuator','gripper_left_joint','gripper_right_joint']) {
     assert.ok(rigXml.includes(`name="${name}"`), `${name} must be loaded`);
   }

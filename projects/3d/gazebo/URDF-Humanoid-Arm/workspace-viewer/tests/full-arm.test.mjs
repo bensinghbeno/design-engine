@@ -22,14 +22,13 @@ const xml = expand();
 const robot = parse(xml);
 const stages = [
   ['shoulder_joint', 'pitch_actuator', 'shoulder_pitch_shaft', 'roll_actuator', [0,1,0], 'Gazebo/Purple', [.60,.16,.82,1]],
-  ['shoulder_roll_joint', 'roll_actuator', 'shoulder_roll_shaft', 'yaw_actuator', [1,0,0], 'Gazebo/Green', [.18,.80,.28,1]],
-  ['shoulder_yaw_joint', 'yaw_actuator', 'shoulder_yaw_link', 'upper_arm', [0,0,1], 'Gazebo/Turquoise', [.02,.72,.85,1]],
-  ['elbow_joint', 'elbow_actuator', 'elbow_shaft', 'forearm', [0,1,0], 'Gazebo/Orange', [1,.38,.08,1]],
+  ['shoulder_roll_joint', 'roll_actuator', 'shoulder_roll_shaft', 'upper_arm', [1,0,0], 'Gazebo/Green', [.18,.80,.28,1]],
+  ['elbow_joint', 'elbow_actuator', 'elbow_shaft', 'forearm', [0,0,1], 'Gazebo/Orange', [1,.38,.08,1]],
   ['wrist_roll_joint', 'wrist_roll_actuator', 'wrist_roll_shaft', 'gripper_base', [1,0,0], 'Gazebo/Blue', [.12,.32,.90,1]],
 ].map(([joint, housing, shaft, receiver, axis, colour, rgba]) => ({joint, housing, shaft, receiver, axis, colour, rgba}));
 const armJoints = stages.map(s => s.joint);
 const fingerJoints = ['gripper_left_joint', 'gripper_right_joint'];
-const pose = Object.fromEntries(armJoints.map((name, i) => [name, [.43,-.57,.71,-.83,.39][i]]));
+const pose = Object.fromEntries(armJoints.map((name, i) => [name, [.43,-.57,.71,-.83][i]]));
 const scaleArgs = ['stem_height:=3', 'stem_width:=0.2', 'stem_depth:=0.2',
   'crossbar_length:=2', 'crossbar_thickness:=0.16', 'crossbar_depth:=0.16',
   'upper_arm_width:=0.14', 'upper_arm_depth:=0.14',
@@ -81,7 +80,7 @@ function boxPenetration(rig, frames, name, ends) {
   return Math.max(0, hi-lo) * delta.length();
 }
 
-test('full arm: exactly five continuous Y X Z Y X joints lead to the tool, plus two independent sliders', () => {
+test('full arm: exactly four continuous Y X Z X joints lead to the tool, plus two independent sliders', () => {
   const movable = [...robot.joints.values()].filter(j => j.type !== 'fixed');
   assert.deepEqual(movable.map(j => j.name).sort(), [...armJoints,...fingerJoints].sort());
   assert.deepEqual(chain(robot, 'gripper_tool').filter(j => j.type !== 'fixed').map(j => j.name), armJoints);
@@ -118,7 +117,7 @@ test('full arm: exactly five continuous Y X Z Y X joints lead to the tool, plus 
   assert.equal(mounting.child,'gripper_base');
 });
 
-test('full arm: each of five actuators is one correctly coloured cube and each output is gold', () => {
+test('full arm: each of four actuators is one correctly coloured cube and each output is gold', () => {
   assert.deepEqual([...robot.links.keys()].filter(name => name.endsWith('_actuator')).sort(), stages.map(s => s.housing).sort());
   for (const {name,rig,size} of variants) for (const stage of stages) {
     const visuals = rig.links.get(stage.housing).visuals;
@@ -155,7 +154,15 @@ for (const stage of stages) test(`full arm geometry: ${stage.shaft} is centered 
     const size = rig.links.get(stage.housing).visuals[0].size[0];
     near(face.distanceTo(housingCenter), size/2, `${label} exits face center`);
     near(boxPenetration(rig, frames, stage.housing, ends), size/5, `${label} stator insertion`);
-    assert.ok(boxPenetration(rig, frames, stage.receiver, ends) > size/10, `${label} must penetrate receiving solid`);
+    if (stage.receiver === 'upper_arm') {
+      const mount = rig.joints.get('roll_output_to_upper_arm');
+      matrixNear(frames.get('upper_arm'), frames.get('shoulder_roll_shaft').clone().multiply(mount.origin), `${label} direct mount`);
+      const armFrame = frames.get('upper_arm').clone().invert();
+      for (const end of ends) {
+        near(end.clone().applyMatrix4(armFrame).z, -rig.links.get('upper_arm').visuals[0].size[0]/2,
+          `${label} roll shaft centerline is half the arm depth below its top`);
+      }
+    } else assert.ok(boxPenetration(rig, frames, stage.receiver, ends) > size/10, `${label} must penetrate receiving solid`);
     if (stage.receiver.endsWith('_actuator')) {
       const receivingCenter = point(frames, stage.receiver);
       near(receivingCenter.clone().sub(ends[0]).cross(direction).length(), 0, `${label} receiver centerline`);
@@ -184,7 +191,7 @@ test('full arm: neutral forearm extends along local +X, with coaxial wrist roll 
     vectorNear(wristInForearm, [visual.size[0]+size/2,0,0], `${name} wrist touches distal forearm`);
     const moved = forward(rig, {elbow_joint: Math.PI/2});
     const bentDirection = point(moved, 'forearm', [visual.size[0],0,0]).sub(point(moved, 'forearm'));
-    vectorNear(bentDirection, [0,0,-visual.size[0]], `${name} positive elbow bends +X toward -Z`);
+    vectorNear(bentDirection, [0,visual.size[0],0], `${name} positive elbow yaw turns +X toward +Y`);
   }
 });
 
@@ -330,8 +337,8 @@ test('full arm reach: shoulder plus elbow has local positional rank three, not m
   // Test a central-difference positional Jacobian with two shoulder columns
   // and the elbow column. Wrist angles stay fixed throughout differentiation.
   const candidates = [pose,
-    Object.fromEntries(armJoints.map((name, i) => [name, [-.8,.4,-.6,1.1,-.3][i]])),
-    Object.fromEntries(armJoints.map((name, i) => [name, [.9,.7,.3,-1.2,.6][i]]))];
+    Object.fromEntries(armJoints.map((name, i) => [name, [-.8,.4,1.1,-.3][i]])),
+    Object.fromEntries(armJoints.map((name, i) => [name, [.9,.7,-1.2,.6][i]]))];
   const names = ['shoulder_joint','shoulder_roll_joint','elbow_joint'];
   function derivatives(rig, q, h) {
     return names.map(name => tool(rig, {...q, [name]: q[name]+h})
@@ -353,17 +360,25 @@ test('full arm reach: shoulder plus elbow has local positional rank three, not m
   }
 });
 
-test('full arm reach: elbow bending changes shoulder-to-tool distance with every shoulder/wrist angle held fixed', () => {
+test('full arm reach: elbow yaw sweeps the tool around its local Z axis', () => {
   for (const {name,rig} of variants) {
-    const shoulder = rig.joints.get('shoulder_joint');
     const frames = forward(rig, pose);
-    const pivot = new Vector3().applyMatrix4(frames.get(shoulder.parent).clone().multiply(shoulder.origin));
-    const radii = [-Math.PI/2,-.7,0,.7,Math.PI/2].map(elbow => tool(rig, {...pose, elbow_joint: elbow}).distanceTo(pivot));
-    assert.ok(Math.max(...radii)-Math.min(...radii) > .15, `${name} bending must change reach, got ${radii}`);
+    const elbow = rig.joints.get('elbow_joint');
+    const jointFrame = frames.get(elbow.parent).clone().multiply(elbow.origin);
+    const pivot = new Vector3().applyMatrix4(jointFrame);
+    const axis = elbow.axis.clone().transformDirection(jointFrame);
+    const radialDistance = angle => {
+      const offset = tool(rig, {...pose, elbow_joint: angle}).sub(pivot);
+      return offset.addScaledVector(axis, -offset.dot(axis)).length();
+    };
+    const radii = [-Math.PI/2,-.7,0,.7,Math.PI/2].map(radialDistance);
+    assert.ok(Math.max(...radii)-Math.min(...radii) < 1e-8, `${name} yaw preserves distance to its axis, got ${radii}`);
+    assert.ok(tool(rig, {...pose, elbow_joint: Math.PI/2}).distanceTo(tool(rig, {...pose, elbow_joint: 0})) > .01,
+      `${name} elbow yaw must sweep the tool`);
   }
 });
 
-test('full arm Gazebo: SDF retains all five arm joints, both independent finger joints, and each part colour', t => {
+test('full arm Gazebo: SDF retains all four arm joints, both independent finger joints, and each part colour', t => {
   if (!existsSync('/usr/bin/gz')) return t.skip('Gazebo Classic is not installed');
   const directory = mkdtempSync(path.join(tmpdir(), 'full-arm-test-'));
   try {
@@ -374,7 +389,7 @@ test('full arm Gazebo: SDF retains all five arm joints, both independent finger 
     assert.equal(doc.documentElement.nodeName, 'sdf');
     const joints = elements(doc, 'joint');
     assert.deepEqual(joints.filter(j => j.getAttribute('type') !== 'fixed').map(j => j.getAttribute('name')).sort(), [...armJoints,...fingerJoints].sort(),
-      'fixed-joint lumping must not discard any of the seven movable joints');
+      'fixed-joint lumping must not discard any of the six movable joints');
     for (const name of [...armJoints,...fingerJoints]) {
       const matches = joints.filter(j => j.getAttribute('name') === name);
       assert.equal(matches.length, 1, `${name} survives exactly once`);

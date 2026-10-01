@@ -378,7 +378,7 @@ test('coverageCategory partitions fractions into red, yellow, and green', () => 
   assert.equal(coverageCategory(NaN), 'red');
 });
 
-test('current five-joint rig: known sample baseline succeeds but 24-target orientation coverage stays low (benchmark)', t => {
+test('current four-joint rig: known sample baseline succeeds but 24-target orientation coverage stays low (benchmark)', t => {
   // Expand the actual current rig rather than duplicating its geometry here.
   // Match the existing rig tests' ROS environment; no server or browser needed.
   const file = fileURLToPath(new URL('../../urdf/rig.urdf.xacro', import.meta.url));
@@ -390,7 +390,7 @@ test('current five-joint rig: known sample baseline succeeds but 24-target orien
   const robot = parse(xml), tip = 'gripper_tool', offset = [0, 0, 0];
   const states = statesFor(robot), model = modelFor(robot, tip, offset, states);
   assert.deepEqual(model.joints.filter(j => j.type !== 'fixed').map(j => j.name), [
-    'shoulder_joint', 'shoulder_roll_joint', 'shoulder_yaw_joint', 'elbow_joint', 'wrist_roll_joint',
+    'shoulder_joint', 'shoulder_roll_joint', 'elbow_joint', 'wrist_roll_joint',
   ]);
   const q = configurationSampler(robot, tip, states, 80)(0);
   const known = threePose(robot, tip, offset, q);

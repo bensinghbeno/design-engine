@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <!--
   G1-style shoulder order: crossbar -> pitch (local Y) -> roll (local X)
-  -> yaw (local Z) -> upper arm -> elbow (Y) -> forearm -> wrist roll (X)
+  -> upper arm -> elbow yaw (local Z) -> forearm -> wrist roll (X)
   -> parallel gripper, attached directly to wrist roll.
-  Five passive continuous arm joints, plus two prismatic fingers commanded
+  Four passive continuous arm joints, plus two prismatic fingers commanded
   symmetrically as one aperture by the GUI. No physical coupling/controller.
-  Wrist pitch/yaw are omitted. This keeps the G1 shoulder/elbow order,
+  Wrist pitch and shoulder yaw are omitted. This keeps the G1 shoulder/elbow order,
   NOT the G1's exact dimensions, tilted
   joint frames, travel limits, motor specifications or internal construction.
 
@@ -23,21 +23,18 @@
     pitch_actuator - purple cube bolted to the crossbar end face.
     shoulder_pitch_shaft - gold local-Y output through the green roll cube.
     roll_actuator - green cube carried by pitch, outboard of the crossbar.
-    shoulder_roll_shaft - gold local-X output through the cyan yaw cube.
-    yaw_actuator - cyan cube carried by roll, forward at the same height.
-    shoulder_yaw_link - gold local-Z output down into the upper arm.
-    upper_arm - hangs below yaw, with its centreline on the yaw axis.
+    shoulder_roll_shaft - gold local-X output directly connected to the arm.
+    upper_arm - fixed directly to the roll shaft and hanging from its axis.
 
   Each output carries everything downstream, but not its own housing.
-  Yaw twists the upper arm without moving its centreline tip; pitch and roll
-  aim the arm. Yaw is no longer fixed vertical after pitch or roll moves.
+  Pitch and roll aim the arm. There is no yaw joint; the roll shaft connects
+  directly to the upper arm.
   Housings are cubes 20 percent larger than the largest stem/bar section.
-  The roll output exits the green face centre and enters the cyan face
-  centre. These are simplified solid housings, not machined bores, bearings
-  or gearbox internals. The perpendicular shaft axes now intersect;
-  actual internal couplings remain to be designed. Shafts
-  intentionally enter housings. Full-turn clearance and cable routing are
-  not designed.
+  The pitch output exits the purple housing and drives the green roll
+  housing. The roll shaft enters the upper arm half its depth below the top.
+  These are simplified solid housings, not machined bores or bearings.
+  Shafts intentionally enter housings. Full-turn clearance and cable routing
+  are not designed.
 
   At zero angles the upper arm hangs down and the forearm points forward
   along local +X, as in the G1 reference's forearm convention. Wrist roll
@@ -122,16 +119,12 @@
   <xacro:property name="transfer_shaft_length" value="${shaft_insert+shaft_gap+actuator_size+shaft_cap}"/>
   <xacro:property name="transfer_shaft_center" value="${transfer_shaft_length/2.0-shaft_insert}"/>
   <xacro:property name="next_housing_offset" value="${shaft_gap+actuator_size/2.0}"/>
-  <xacro:property name="arm_insert" value="${min(ual/4.0, actuator_size/3.0)}"/>
-  <xacro:property name="yaw_shaft_length" value="${shaft_insert+shaft_gap+arm_insert}"/>
-  <xacro:property name="yaw_shaft_center" value="${yaw_shaft_length/2.0-shaft_insert}"/>
-
     <!-- Forearm length follows the stem; all motor cubes retain the same size.
       Finger stroke is fixed at 40 mm per side (80 mm total aperture). -->
     <xacro:property name="fal" value="${sh/5.0}"/>
     <xacro:property name="faw" value="${uaw*0.85}"/>
     <xacro:property name="fah" value="${uad*0.85}"/>
-    <xacro:property name="elbow_shaft_length" value="${shaft_insert+shaft_gap+faw+shaft_cap}"/>
+    <xacro:property name="elbow_shaft_length" value="${shaft_insert+shaft_gap+fah+shaft_cap}"/>
     <xacro:property name="elbow_shaft_center" value="${elbow_shaft_length/2.0-shaft_insert}"/>
     <xacro:property name="gripper_x" value="${actuator_size/2.0}"/>
     <xacro:property name="finger_width" value="${actuator_size/10.0}"/>
@@ -164,9 +157,6 @@
     <color rgba="0.72 0.45 0.20 1.0"/>
   </material>
 
-  <material name="actuator_cyan">
-    <color rgba="0.02 0.72 0.85 1"/>
-  </material>
   <material name="actuator_purple">
     <color rgba="0.60 0.16 0.82 1"/>
   </material>
@@ -317,13 +307,7 @@
   <xacro:actuator_cube name="roll_actuator" colour="actuator_green" gazebo_colour="Gazebo/Green"/>
   <xacro:output_shaft name="shoulder_roll_shaft" length="${transfer_shaft_length}"
                       xyz="${transfer_shaft_center} 0 0" rpy="0 ${pi/2.0} 0"/>
-  <xacro:actuator_cube name="yaw_actuator" colour="actuator_cyan" gazebo_colour="Gazebo/Turquoise"/>
-  <xacro:output_shaft name="shoulder_yaw_link" length="${yaw_shaft_length}"
-                      xyz="0 0 ${-yaw_shaft_center}" rpy="0 0 0"/>
-
-  <!-- upper arm.
-       Fixed to yaw output, separated from its housing by exposed shaft.
-       Frame at its top centre, preserving the original box dimensions. -->
+  <!-- Upper arm frame sits at the roll-shaft axis; its body hangs downward. -->
   <link name="upper_arm">
     <visual>
       <origin xyz="0 0 ${-ual/2}" rpy="0 0 0"/>
@@ -350,10 +334,10 @@
     </inertial>
   </link>
 
-  <!-- Elbow output passes across Y through the proximal forearm. -->
+  <!-- Elbow output runs along the upper arm and through the forearm thickness. -->
   <xacro:actuator_cube name="elbow_actuator" colour="actuator_orange" gazebo_colour="Gazebo/Orange"/>
   <xacro:output_shaft name="elbow_shaft" length="${elbow_shaft_length}"
-                      xyz="0 ${side*elbow_shaft_center} 0" rpy="${pi/2.0} 0 0"/>
+                      xyz="0 0 ${-elbow_shaft_center}" rpy="0 0 0"/>
   <xacro:solid_box name="forearm" x="${fal}" y="${faw}" z="${fah}"
                    xyz="${fal/2.0} 0 0" density="${rho}" colour="copper" gazebo_colour="Gazebo/Orange"/>
   <xacro:actuator_cube name="wrist_roll_actuator" colour="actuator_blue" gazebo_colour="Gazebo/Blue"/>
@@ -417,26 +401,11 @@
     <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
   </joint>
 
-  <!-- The roll shaft passes through the centre of the cyan yaw cube. -->
-  <joint name="roll_output_to_yaw_actuator" type="fixed">
+  <!-- Attach the upper arm directly on the roll-shaft axis. -->
+  <joint name="roll_output_to_upper_arm" type="fixed">
     <parent link="shoulder_roll_shaft"/>
-    <child link="yaw_actuator"/>
-    <origin xyz="${next_housing_offset} 0 0" rpy="0 0 0"/>
-  </joint>
-
-  <!-- Yaw is THIRD: twist about the hanging arm's own centreline. -->
-  <joint name="shoulder_yaw_joint" type="continuous">
-    <parent link="yaw_actuator"/>
-    <child link="shoulder_yaw_link"/>
-    <origin xyz="0 0 ${-actuator_size/2.0}" rpy="0 0 0"/>
-    <axis xyz="0 0 1"/>
-    <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
-  </joint>
-
-  <joint name="yaw_output_to_upper_arm" type="fixed">
-    <parent link="shoulder_yaw_link"/>
     <child link="upper_arm"/>
-    <origin xyz="0 0 ${-shaft_gap}" rpy="0 0 0"/>
+    <origin xyz="${next_housing_offset} 0 ${uad/2.0}" rpy="0 0 0"/>
   </joint>
 
   <joint name="upper_arm_to_elbow_actuator" type="fixed">
@@ -445,12 +414,12 @@
   </joint>
   <joint name="elbow_joint" type="continuous">
     <parent link="elbow_actuator"/><child link="elbow_shaft"/>
-    <origin xyz="0 ${side*actuator_size/2.0} 0"/><axis xyz="0 1 0"/>
+    <origin xyz="0 0 ${-actuator_size/2.0}"/><axis xyz="0 0 1"/>
     <dynamics damping="${shoulder_damping}" friction="${shoulder_friction}"/>
   </joint>
   <joint name="elbow_output_to_forearm" type="fixed">
     <parent link="elbow_shaft"/><child link="forearm"/>
-    <origin xyz="${-fah/2.0} ${side*(shaft_gap+faw/2.0)} 0"/>
+    <origin xyz="${-fah/2.0} 0 ${-(shaft_gap+fah/2.0)}"/>
   </joint>
   <joint name="forearm_to_wrist_roll" type="fixed">
     <parent link="forearm"/><child link="wrist_roll_actuator"/>
