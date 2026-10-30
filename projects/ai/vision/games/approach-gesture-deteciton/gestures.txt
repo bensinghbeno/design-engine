@@ -1,0 +1,9 @@
+Left Hand Up
+Right Hand Up
+Turn Left
+Turn Right
+Turn Back
+Left Leg Up
+Right Leg Up
+Both Hands Up
+Bend Down
