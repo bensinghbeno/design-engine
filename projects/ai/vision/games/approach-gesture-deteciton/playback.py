@@ -61,9 +61,10 @@ class SeekSlider(QSlider):
 
 
 class PlaybackWindow(QWidget):
-    def __init__(self, fps, frame_count, seeking=True):
+    def __init__(self, fps, frame_count, seeking=True, live=False):
         super().__init__()
         self.source_fps = fps
+        self.live = live
         self.playback_fps = fps
         self.frame_count = max(1, frame_count)
         self.current_frame = 0
@@ -76,6 +77,10 @@ class PlaybackWindow(QWidget):
         self.setWindowTitle("Gesture detection")
         self.resize(1100, 750)
         layout = QVBoxLayout(self)
+        self.script_status = QLabel()
+        self.script_status.setWordWrap(True)
+        self.script_status.hide()
+        layout.addWidget(self.script_status)
         self.image = QLabel()
         self.image.setMinimumSize(320, 180)
         self.image.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -85,6 +90,7 @@ class PlaybackWindow(QWidget):
         self.timeline = SeekSlider(Qt.Orientation.Horizontal)
         self.timeline.setRange(0, self.frame_count - 1)
         self.timeline.setEnabled(seeking)
+        self.timeline.setVisible(not live)
         self.timeline.sliderReleased.connect(lambda: self.request_seek(self.timeline.value()))
         self.timeline.valueChanged.connect(self.timeline_changed)
         layout.addWidget(self.timeline)
@@ -94,6 +100,7 @@ class PlaybackWindow(QWidget):
         self.previous.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaSeekBackward))
         self.previous.setToolTip("Seek backward three seconds")
         self.previous.setEnabled(seeking)
+        self.previous.setVisible(not live)
         self.previous.clicked.connect(lambda: self.request_seek(self.current_frame - round(3 * fps)))
         controls.addWidget(self.previous)
         self.play = QPushButton()
@@ -103,6 +110,7 @@ class PlaybackWindow(QWidget):
         self.following.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaSeekForward))
         self.following.setToolTip("Seek forward three seconds")
         self.following.setEnabled(seeking)
+        self.following.setVisible(not live)
         self.following.clicked.connect(lambda: self.request_seek(self.current_frame + round(3 * fps)))
         controls.addWidget(self.following)
         controls.addSpacing(12)
@@ -193,7 +201,7 @@ class PlaybackWindow(QWidget):
             self.timeline.blockSignals(True)
             self.timeline.setValue(frame_index)
             self.timeline.blockSignals(False)
-        self.clock.setText(f"{frame_index / self.source_fps:.1f} / {self.frame_count / self.source_fps:.1f} s")
+        self.clock.setText("Live" if self.live else f"{frame_index / self.source_fps:.1f} / {self.frame_count / self.source_fps:.1f} s")
         QApplication.instance().processEvents()
 
     def update_image(self):
@@ -218,12 +226,12 @@ class PlaybackWindow(QWidget):
             super().keyPressEvent(event)
 
 
-def create_player(fps, frame_count, seeking=True):
+def create_player(fps, frame_count, seeking=True, live=False):
     for key in ("QT_QPA_PLATFORM_PLUGIN_PATH", "QT_QPA_FONTDIR"):
         if "cv2" in os.environ.get(key, ""):
             os.environ.pop(key)
     app = QApplication.instance() or QApplication([])
-    player = PlaybackWindow(fps, frame_count, seeking)
+    player = PlaybackWindow(fps, frame_count, seeking, live)
     player.app = app
     player.show()
     return player

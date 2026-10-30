@@ -4,3 +4,4 @@ __pycache__/
 output/
 *_gestures.mp4
 *_gestures.csv
+last_run.log

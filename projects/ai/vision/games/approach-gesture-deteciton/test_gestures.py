@@ -28,6 +28,32 @@ class GestureTests(unittest.TestCase):
         points[15][1] = 260
         self.assertEqual(classify_pose(points)[0], {"Left Leg Up"})
 
+    def test_stand_normal(self):
+        from gesture_script import ScriptRunner, required_visible
+        points = self.pose()
+        for index, position in {0: (100, 60), 1: (92, 50), 2: (108, 50),
+                                5: (70, 100), 6: (130, 100), 7: (70, 155), 8: (130, 155),
+                                9: (70, 210), 10: (130, 210), 13: (85, 270), 14: (115, 270),
+                                15: (90, 350), 16: (110, 350)}.items():
+            points[index][:2] = position
+        self.assertEqual(classify_pose(points)[0], {"Stand Normal"})
+        runner = ScriptRunner([], speaker=lambda text: None)
+        runner.expected = "Stand Normal"
+        runner.phase = "Respond"
+        self.assertIn("Matched", runner.assess(1, classify_pose(points)[0], points, .5)[0])
+        self.assertEqual(runner.feedback_pending, ["success"])
+        for index, position in ((9, (70, 50)), (7, (30, 155)), (13, (125, 230)),
+                                (15, (20, 350)), (0, (145, 60)), (5, (70, 150))):
+            altered = [point[:] for point in points]
+            altered[index][:2] = position
+            with self.subTest(index=index):
+                self.assertNotIn("Stand Normal", classify_pose(altered)[0])
+        for index in (0, 7, 9, 13, 15):
+            hidden = [point[:] for point in points]
+            hidden[index][2] = 0
+            self.assertNotIn("Stand Normal", classify_pose(hidden)[0])
+            self.assertFalse(required_visible("Stand Normal", hidden, .5))
+
     def test_missing_torso(self):
         points = self.pose()
         points[5][2] = 0
@@ -46,6 +72,112 @@ class GestureTests(unittest.TestCase):
 
     def test_polygon(self):
         self.assertEqual(parse_roi("0,0;100,0;100,100"), [(0, 0), (100, 0), (100, 100)])
+
+
+class RecordingTests(unittest.TestCase):
+    def test_live_recording_timestamps(self):
+        import tempfile
+        from pathlib import Path
+        import av
+        import numpy as np
+        from live_capture import LiveVideoWriter
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "session.mp4"
+            writer = LiveVideoWriter(path, 320, 240, 30)
+            try:
+                for timestamp in (10.0, 10.1, 10.5):
+                    writer.write(np.zeros((240, 320, 3), dtype=np.uint8), timestamp)
+            finally:
+                writer.release()
+            with av.open(str(path)) as container:
+                times = [float(frame.pts * frame.time_base) for frame in container.decode(video=0)]
+            self.assertEqual(len(times), 3)
+            self.assertAlmostEqual(times[0], 0, places=2)
+            self.assertAlmostEqual(times[-1], .5, places=2)
+
+
+class RunLogTests(unittest.TestCase):
+    def test_traceback_and_overwrite(self):
+        import tempfile
+        from pathlib import Path
+        from run_log import run_logged
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "run.log"
+
+            def failure():
+                print("Before failure")
+                raise RuntimeError("Intentional test failure")
+
+            self.assertEqual(run_logged(failure, path), 1)
+            content = path.read_text()
+            self.assertIn("Before failure", content)
+            self.assertIn("Traceback", content)
+            self.assertIn("Intentional test failure", content)
+            self.assertEqual(run_logged(lambda: print("Fresh run"), path), 0)
+            self.assertIn("Fresh run", path.read_text())
+            self.assertNotIn("Intentional test failure", path.read_text())
+
+
+class SpeechTests(unittest.TestCase):
+    def test_feedback_once_per_outcome(self):
+        from gesture_script import ScriptRunner
+        runner = ScriptRunner([], speaker=lambda text: None)
+        runner.expected = "Left Hand Up"
+        runner.phase = "Respond"
+        points = [[0, 0, 1] for _ in range(17)]
+        for _ in range(10):
+            runner.assess(1, {"Right Hand Up"}, points, .5)
+        for _ in range(10):
+            runner.assess(1, {"Left Hand Up"}, points, .5)
+        self.assertEqual(runner.feedback_pending, ["wrong", "success"])
+        played = []
+        runner.play_feedback = played.append
+        runner.drain_feedback()
+        self.assertEqual(played, ["wrong", "success"])
+        self.assertEqual(runner.feedback_pending, [])
+
+    def test_feedback_deadline_and_unknown(self):
+        from gesture_script import ScriptRunner, parse_script
+        for visible, expected in ((True, ["wrong"]), (False, [])):
+            runner = ScriptRunner(parse_script("Left Hand Up\n[delay 3 sec]"), speaker=lambda text: None)
+            played = []
+            runner.play_feedback = played.append
+
+            def wait(seconds):
+                if seconds == 3:
+                    runner.assess(1, set(), [[0, 0, int(visible)] for _ in range(17)], .5)
+                runner.drain_feedback()
+
+            runner.wait = wait
+            runner.thread.start()
+            runner.thread.join(timeout=2)
+            self.assertFalse(runner.thread.is_alive())
+            self.assertIsNone(runner.error)
+            self.assertEqual(played, expected)
+
+    def test_wrong_tone_precedes_warning(self):
+        from gesture_script import ScriptRunner
+        events = []
+        runner = ScriptRunner([], speaker=lambda text: events.append(text))
+        runner.run_audio_command = lambda command: events.append("tone")
+        runner.play_feedback("wrong")
+        self.assertEqual(events, ["tone", "Wrong gesture detected"])
+
+    def test_only_plain_text_reaches_speaker(self):
+        from gesture_script import ScriptRunner, parse_script
+        spoken = []
+        runner = ScriptRunner(parse_script("Hello [delay 0 sec]\nLeft Hand Up\n[visual cue]\nThanks"), speaker=spoken.append)
+        runner.thread.start()
+        runner.thread.join(timeout=2)
+        self.assertFalse(runner.thread.is_alive())
+        self.assertIsNone(runner.error)
+        self.assertEqual(spoken, ["Hello", "Left Hand Up", "Thanks"])
+
+    def test_invalid_brackets_rejected(self):
+        from gesture_script import parse_script
+        for text in ("Hello [oops", "Hello [nested [cue]]", "[delay invalid sec]"):
+            with self.assertRaises(ValueError):
+                parse_script(text)
 
 
 class PlaybackTests(unittest.TestCase):

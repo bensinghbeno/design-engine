@@ -43,6 +43,31 @@ def classify_pose(points, confidence=0.5):
             orientation = "Screen Right"
         else:
             orientation = "Front"
+    if not labels and orientation == "Front" and visible(0, 1, 2, *range(5, 17)):
+        shoulder_width = abs(points[5][0] - points[6][0])
+
+        def downward(start, end, minimum, slope):
+            vertical = points[end][1] - points[start][1]
+            return vertical >= torso * minimum and abs(points[end][0] - points[start][0]) <= vertical * slope
+
+        facing = (shoulder_width >= torso * 0.35
+                  and abs(points[1][0] - points[2][0]) >= torso * 0.08
+                  and points[0][1] < shoulder[1] - torso * 0.1)
+        upright = lean <= 15 and abs(points[5][1] - points[6][1]) <= torso * 0.15
+        arms_down = all(
+            downward(joint, elbow, 0.15, 0.4) and downward(elbow, wrist, 0.15, 0.4)
+            and abs(points[wrist][0] - points[joint][0]) <= torso * 0.2
+            and points[wrist][1] >= hip[1] - torso * 0.2
+            for joint, elbow, wrist in ((5, 7, 9), (6, 8, 10))
+        )
+        legs_straight = all(
+            downward(joint, knee, 0.25, 0.3) and downward(knee, ankle, 0.25, 0.3)
+            for joint, knee, ankle in ((11, 13, 15), (12, 14, 16))
+        )
+        feet_close = (abs(points[15][0] - points[16][0]) <= shoulder_width * 1.1
+                      and abs(points[15][1] - points[16][1]) <= torso * 0.15)
+        if facing and upright and arms_down and legs_straight and feet_close:
+            labels.add("Stand Normal")
     return labels, orientation
 
 
@@ -92,7 +117,12 @@ def parse_roi(value):
 
 def build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("video", type=Path, help="Input MP4 or other OpenCV-readable video")
+    parser.add_argument("video", type=Path, nargs="?", help="Input MP4 or other OpenCV-readable video")
+    parser.add_argument("--ssh-camera", metavar="USER@HOST", help="Receive a remote USB webcam over SSH")
+    parser.add_argument("--camera-device", default="/dev/video2")
+    parser.add_argument("--camera-width", type=int, default=1280)
+    parser.add_argument("--camera-height", type=int, default=720)
+    parser.add_argument("--camera-fps", type=int, default=30)
     parser.add_argument("--output", type=Path, help="Optionally save MP4 and CSV; default is display only")
     parser.add_argument("--model", default="yolo26s-pose.pt")
     parser.add_argument("--device", default="auto", help="auto, cpu, or CUDA index such as 0")
@@ -103,6 +133,10 @@ def build_parser():
     parser.add_argument("--release", type=float, default=0.15, help="Tolerance for brief missing observations")
     parser.add_argument("--roi", type=parse_roi, help="Near-vehicle ground polygon in source-image pixels")
     parser.add_argument("--skeleton", action="store_true")
+    parser.add_argument("--script", type=Path, default=Path(__file__).with_name("gestures.txt"), help="Spoken gesture script")
+    parser.add_argument("--no-script", action="store_true", help="Disable speech and expected-gesture checking")
+    parser.add_argument("--tts", choices=("neural", "system"), default="neural", help="Neural TTS uses an online service; system is offline")
+    parser.add_argument("--voice", default="en-US-AriaNeural", help="Neural TTS voice, e.g. en-US-GuyNeural")
     parser.add_argument("--show", action="store_true", help="Display preview; press q to stop")
     parser.add_argument("--experimental-turns", action="store_true", help="Enable approximate front-to-side turn events")
     parser.add_argument("--max-frames", type=int, default=0, help="Stop after this many frames; 0 processes all")
@@ -112,18 +146,23 @@ def build_parser():
 def main():
     parser = build_parser()
     args = parser.parse_args()
-    if not args.video.is_file():
+    live = args.ssh_camera is not None
+    if live == (args.video is not None):
+        parser.error("Provide either a video file or --ssh-camera USER@HOST")
+    if min(args.camera_width, args.camera_height, args.camera_fps) <= 0:
+        parser.error("Camera dimensions and FPS must be positive")
+    if not live and not args.video.is_file():
         parser.error(f"Video does not exist: {args.video}")
     if args.hold <= 0 or args.release < 0 or args.imgsz <= 0 or args.max_frames < 0:
         parser.error("hold/imgsz must be positive; release/max-frames must be nonnegative")
     if not all(0 < threshold <= 1 for threshold in (args.confidence, args.keypoint_confidence)):
         parser.error("Confidence thresholds must be in (0, 1]")
     output = args.output
-    show = args.show or output is None
+    show = live or args.show or output is None
     if output is not None and output.suffix.lower() != ".mp4":
         parser.error("Output must have an .mp4 extension")
     csv_path = output.with_suffix(".csv") if output is not None else None
-    if output is not None and args.video.resolve() in (output.resolve(), csv_path.resolve()):
+    if output is not None and not live and args.video.resolve() in (output.resolve(), csv_path.resolve()):
         parser.error("Output must not overwrite the input")
     if output is not None and (output.exists() or csv_path.exists()):
         parser.error("Output MP4 or CSV already exists; choose a different --output")
@@ -141,11 +180,18 @@ def main():
     model = YOLO(args.model)
     if model.task != "pose":
         parser.error("Choose a YOLO pose model")
-    capture = cv2.VideoCapture(str(args.video))
+    if live:
+        from live_capture import SSHCamera
+        capture = SSHCamera(args.ssh_camera, args.camera_device, args.camera_width, args.camera_height, args.camera_fps)
+    else:
+        capture = cv2.VideoCapture(str(args.video))
     writer = None
     player = None
+    script = None
     frame_index = 0
     processed_frames = 0
+    capture_generation = 0
+    last_live_timestamp = None
     try:
         if not capture.isOpened():
             raise RuntimeError(f"Cannot decode {args.video}")
@@ -156,12 +202,24 @@ def main():
         height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
         if output is not None:
             output.parent.mkdir(parents=True, exist_ok=True)
-            writer = cv2.VideoWriter(str(output), cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
-            if not writer.isOpened():
-                raise RuntimeError("Could not open MP4 encoder")
+            if live:
+                from live_capture import LiveVideoWriter
+                writer = LiveVideoWriter(output, width, height, round(fps))
+            else:
+                writer = cv2.VideoWriter(str(output), cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
+                if not writer.isOpened():
+                    raise RuntimeError("Could not open MP4 encoder")
         if show:
             from playback import create_player
-            player = create_player(fps, int(capture.get(cv2.CAP_PROP_FRAME_COUNT)), seeking=output is None)
+            player = create_player(fps, int(capture.get(cv2.CAP_PROP_FRAME_COUNT)),
+                                   seeking=not live and output is None and args.no_script, live=live)
+        if not args.no_script:
+            from gesture_script import ScriptRunner, parse_script
+            if not show:
+                raise ValueError("Spoken scripts require display playback; add --show or use --no-script")
+            script = ScriptRunner(parse_script(args.script.read_text()), paused=lambda: player.paused,
+                                  tts=args.tts, voice=args.voice)
+            player.timeline.setToolTip("Seeking is disabled during a spoken script; use --no-script for free playback")
         polygon = np.array(args.roi, dtype=np.int32) if args.roi else None
         states = {}
         seen = {}
@@ -185,13 +243,32 @@ def main():
                             tracker.reset()
                 success, frame = capture.read()
                 if not success:
+                    if live:
+                        if capture.error:
+                            raise RuntimeError(capture.error)
+                        player.clock.setText(capture.status)
+                        continue
                     if player is not None and output is None and processed_frames > 0:
                         player.paused = True
                         player.ended = True
                         player.update_play_button()
                         continue
                     break
-                timestamp = frame_index / fps
+                timestamp = capture.timestamp if live else frame_index / fps
+                if live:
+                    if capture.generation != capture_generation or (last_live_timestamp is not None and timestamp - last_live_timestamp > 1):
+                        states.clear()
+                        seen.clear()
+                        for tracker in getattr(model.predictor, "trackers", []):
+                            tracker.reset()
+                        if script is not None:
+                            with script.lock:
+                                script.observations.clear()
+                                script.results.clear()
+                    capture_generation = capture.generation
+                    last_live_timestamp = timestamp
+                if script is not None and script.thread.ident is None:
+                    script.thread.start()
                 result = model.track(frame, persist=True, tracker="bytetrack.yaml", device=device,
                                      imgsz=args.imgsz, conf=args.confidence, verbose=False)[0]
                 canvas = result.plot(boxes=False, labels=False, conf=False) if args.skeleton else frame.copy()
@@ -223,6 +300,13 @@ def main():
                         if polygon is not None:
                             text += f" | Near vehicle: {near}"
                         color = (0, 180, 255) if active else (80, 210, 80)
+                        if script is not None and track_id is not None:
+                            assessment, mismatch = script.assess(track_id, active, points, args.keypoint_confidence)
+                            if assessment:
+                                label = assessment
+                                text = f"ID {track_id} | {assessment}"
+                            if mismatch:
+                                color = (0, 0, 255)
                         cv2.rectangle(canvas, (left, top), (right, bottom), color, 2)
                         scale = min(0.6, max(0.2, (width - 10) / max(1, cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 1, 1)[0][0])))
                         text_width, text_height = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scale, 1)[0]
@@ -237,9 +321,17 @@ def main():
                         del seen[track_id]
                         states.pop(track_id, None)
                 if writer is not None:
-                    writer.write(canvas)
+                    if live:
+                        writer.write(canvas, timestamp)
+                    else:
+                        writer.write(canvas)
                 if player is not None:
+                    if script is not None:
+                        player.script_status.setText(script.status())
+                        player.script_status.show()
                     player.display(canvas, frame_index)
+                    if live:
+                        player.clock.setText(f"Live | {timestamp:.1f} s")
                 frame_index += 1
                 processed_frames += 1
                 if frame_index % 100 == 0:
@@ -247,6 +339,8 @@ def main():
         if processed_frames == 0:
             raise RuntimeError("No video frames decoded")
     finally:
+        if script is not None:
+            script.close()
         capture.release()
         if writer is not None:
             writer.release()
@@ -259,4 +353,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    from run_log import run_logged
+    raise SystemExit(run_logged(main))

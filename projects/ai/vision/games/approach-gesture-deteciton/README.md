@@ -4,6 +4,16 @@ Local YOLO26-Pose inference with ByteTrack IDs, rule-based gestures, and MP4/CSV
 
 ## Run
 
+Record an annotated live-camera session while displaying it and running spoken prompts:
+
+```bash
+.venv/bin/python detect_gestures.py --ssh-camera ben@10.0.0.226 --camera-device /dev/video2 --device 0 --skeleton --script gestures.txt --output "output/session-$(date +%Y%m%d-%H%M%S).mp4"
+```
+
+Live recordings preserve receive-time spacing between processed frames, including pauses/gaps, instead of speeding up dropped frames. The MP4 contains the annotated video image (boxes, labels and optional skeleton), not window controls or the prompt-status widget. It has no audio. A matching CSV records detections. Close the window or press q/Escape to finalize the MP4; force-killing the process may leave it incomplete. Existing files are not overwritten.
+
+Each command-line invocation overwrites `last_run.log` beside the script. It mirrors Python console output and records the command, timestamps, exit status, Python tracebacks, speech prompts/results, and remote camera errors/reconnections. It is flushed during the run and ignored by Git. Native-library output written directly to OS file descriptors and hard process crashes are not captured by this Python logger. The log may contain script text and hostnames; review it before sharing. Only the latest run is kept, so inspect it before rerunning.
+
 ```bash
 .venv/bin/python detect_gestures.py vehicle-recording-approach.mp4 --skeleton --device 0
 .venv/bin/python detect_gestures.py /path/to/video.mp4 --output output/annotated.mp4
@@ -25,6 +35,27 @@ Options:
 - `--experimental-turns`: approximate front-to-side body turns using face position relative to shoulders. These are not reliable head/body rotation measurements.
 
 ## Scope and Limitations
+
+## Spoken Prompts
+
+Gesture feedback plays on the speech worker without blocking video inference. A match produces a rising success tone. A detected wrong gesture or missed response deadline produces a falling warning tone followed by "Wrong gesture detected" in the selected voice. Each outcome is played at most once per prompt across all tracked people, so repeated frames cannot spam audio. Correcting a wrong gesture can still produce the success tone. Unknown/occluded poses remain silent. Feedback and narration are serialized; feedback can delay the next prompt. Both TTS backends require ffplay for tones.
+
+The player reads gestures.txt on a background thread by default. Neural speech uses `edge-tts` with Microsoft's online speech service and the `en-US-AriaNeural` voice. Only spoken text is sent, not video. Internet access is required for uncached prompts. Audio is cached under `~/.cache/gesture-detection/speech` and played locally with `ffplay` (required; installed on this machine).
+
+```bash
+.venv/bin/python detect_gestures.py vehicle-recording-approach.mp4 --skeleton --voice en-US-AriaNeural
+.venv/bin/python detect_gestures.py vehicle-recording-approach.mp4 --skeleton --voice en-US-GuyNeural
+```
+
+Use `--tts system` for the older offline Speech Dispatcher voice, or `--no-script` to disable narration and restore free seeking. There is no silent fallback to the system voice if neural synthesis fails; errors appear in the player. A first-time synthesis request may delay a prompt while video continues playing.
+
+Everything inside square brackets is excluded from speech. `[delay 3 sec]` waits three seconds; other bracketed cues appear as visual captions, not arbitrary animated effects. Exact supported gesture names set the expected action. A wrong detected gesture produces a red box; a visible person who misses the following delay deadline gets a red Not performed result for one second. Hidden required joints produce Cannot verify. Results are per tracking ID, and a successful gesture is remembered for its response window.
+
+Delays use wall-clock playback time and freeze while paused; a sentence already playing may finish. Seeking is disabled during scripted tests. Prerecorded video must already align with prompt timing; speech cannot change what the recorded person does. Turn prompts are not supported for compliance checking. Use --no-script for headless export, or --show for a spoken test.
+
+## Detection Limits
+
+`Stand Normal` is also supported: face visible and approximately front-facing, torso upright, both arms hanging nearly vertically with wrists near/below the hips, straight upright legs, and feet no wider than approximately shoulder width. Face, arm, hip, knee and ankle joints must meet the confidence threshold. It uses the same hold duration and spoken-test feedback as other gestures. This is a 2D geometric approximation, not proof of body orientation; validate thresholds for your camera angle. Cropped feet or hidden joints cannot verify this pose.
 
 The six static labels from gestures.txt are implemented: Left Hand Up, Right Hand Up, Both Hands Up, Left Leg Up, Right Leg Up, Bend Down. Left/right refers to anatomical side, as estimated by the pose model. Rules use wrists, shoulders, hips, knees, and ankles, not finger gestures. The list is a specification, not text prompts or a trained classifier; adding a line does not create a new detector.
 
