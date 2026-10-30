@@ -4,7 +4,7 @@ import math
 import os
 import time
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QEvent, Qt
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import (
     QApplication, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSlider,
@@ -122,6 +122,18 @@ class PlaybackWindow(QWidget):
         if not seeking:
             self.timeline.setToolTip("Seeking is disabled while saving output")
         self.update_play_button()
+        for widget in [self, *self.findChildren(QWidget)]:
+            widget.installEventFilter(self)
+
+    def eventFilter(self, watched, event):
+        if (event.type() == QEvent.Type.KeyPress
+                and event.modifiers() == Qt.KeyboardModifier.NoModifier
+                and not isinstance(watched, QLineEdit)):
+            if event.key() in (Qt.Key.Key_Left, Qt.Key.Key_Right):
+                button = self.previous if event.key() == Qt.Key.Key_Left else self.following
+                button.click()
+                return True
+        return super().eventFilter(watched, event)
 
     def update_play_button(self):
         icon = QStyle.StandardPixmap.SP_MediaPlay if self.paused else QStyle.StandardPixmap.SP_MediaPause

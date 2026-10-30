@@ -75,6 +75,24 @@ class PlaybackTests(unittest.TestCase):
         self.assertFalse(slider.isSliderDown())
         player.pending_seek = None
 
+    def test_arrow_seeking(self):
+        from PySide6.QtCore import Qt
+        from PySide6.QtTest import QTest
+
+        player = self.player
+        player.current_frame = 150
+        for widget in (player, player.timeline, player.play):
+            QTest.keyClick(widget, Qt.Key.Key_Left)
+            self.assertEqual(player.pending_seek, 60)
+            QTest.keyClick(widget, Qt.Key.Key_Right)
+            self.assertEqual(player.pending_seek, 240)
+        player.pending_seek = None
+        player.fps_field.setText("30")
+        player.fps_field.setCursorPosition(2)
+        QTest.keyClick(player.fps_field, Qt.Key.Key_Left)
+        self.assertEqual(player.fps_field.cursorPosition(), 1)
+        self.assertIsNone(player.pending_seek)
+
     def test_controls(self):
         player = self.player
         player.play.click()
