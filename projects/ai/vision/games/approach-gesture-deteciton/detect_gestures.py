@@ -143,7 +143,9 @@ def main():
         parser.error("Choose a YOLO pose model")
     capture = cv2.VideoCapture(str(args.video))
     writer = None
+    player = None
     frame_index = 0
+    processed_frames = 0
     try:
         if not capture.isOpened():
             raise RuntimeError(f"Cannot decode {args.video}")
@@ -158,8 +160,8 @@ def main():
             if not writer.isOpened():
                 raise RuntimeError("Could not open MP4 encoder")
         if show:
-            cv2.namedWindow("Gesture detection", cv2.WINDOW_NORMAL)
-            cv2.resizeWindow("Gesture detection", min(width, 1280), min(height, 720))
+            from playback import create_player
+            player = create_player(fps, int(capture.get(cv2.CAP_PROP_FRAME_COUNT)), seeking=output is None)
         polygon = np.array(args.roi, dtype=np.int32) if args.roi else None
         states = {}
         seen = {}
@@ -167,9 +169,27 @@ def main():
             log = csv.writer(csv_file) if csv_file is not None else None
             if log is not None:
                 log.writerow(["frame", "seconds", "track_id", "gestures", "orientation_hint", "near_vehicle", "x1", "y1", "x2", "y2"])
-            while not args.max_frames or frame_index < args.max_frames:
+            while not args.max_frames or processed_frames < args.max_frames:
+                if player is not None:
+                    action = player.next_action()
+                    if action is None:
+                        break
+                    if action >= 0:
+                        if not capture.set(cv2.CAP_PROP_POS_FRAMES, action):
+                            player.error.setText("Video seek failed")
+                            continue
+                        frame_index = int(capture.get(cv2.CAP_PROP_POS_FRAMES))
+                        states.clear()
+                        seen.clear()
+                        for tracker in getattr(model.predictor, "trackers", []):
+                            tracker.reset()
                 success, frame = capture.read()
                 if not success:
+                    if player is not None and output is None and processed_frames > 0:
+                        player.paused = True
+                        player.ended = True
+                        player.update_play_button()
+                        continue
                     break
                 timestamp = frame_index / fps
                 result = model.track(frame, persist=True, tracker="bytetrack.yaml", device=device,
@@ -218,26 +238,24 @@ def main():
                         states.pop(track_id, None)
                 if writer is not None:
                     writer.write(canvas)
+                if player is not None:
+                    player.display(canvas, frame_index)
                 frame_index += 1
+                processed_frames += 1
                 if frame_index % 100 == 0:
                     print(f"Processed {frame_index} frames ({frame_index / fps:.1f}s of video)", flush=True)
-                if show:
-                    cv2.imshow("Gesture detection", canvas)
-                    key = cv2.waitKey(1) & 0xFF
-                    if key in (ord("q"), 27) or cv2.getWindowProperty("Gesture detection", cv2.WND_PROP_VISIBLE) < 1:
-                        break
-        if frame_index == 0:
+        if processed_frames == 0:
             raise RuntimeError("No video frames decoded")
     finally:
         capture.release()
         if writer is not None:
             writer.release()
-        if show:
-            cv2.destroyAllWindows()
+        if player is not None:
+            player.close()
     if output is not None:
         print(f"Saved {frame_index} frames: {output}\nLabels: {csv_path}\nOutput video has no audio.")
     else:
-        print(f"Displayed {frame_index} frames. No output files saved.")
+        print(f"Displayed {processed_frames} frames. No output files saved.")
 
 
 if __name__ == "__main__":

@@ -11,6 +11,8 @@ Local YOLO26-Pose inference with ByteTrack IDs, rule-based gestures, and MP4/CSV
 
 By default, the annotated video appears in a resizable display window and no MP4 or CSV is saved. Press q or Escape, or close the window, to stop. Use --output to explicitly save an MP4 and matching CSV; add --show to display while saving. Existing outputs are never overwritten. CSV rows contain frame number, video time, tracking ID, gesture labels, an approximate orientation hint, ROI membership, and box coordinates. Multiple compatible gestures can appear together. The output MP4 has no audio. Timing assumes a constant-frame-rate input.
 
+The player has a play/pause button, FPS textbox with Apply (or Enter), three-second backward/forward buttons, and a seek bar with elapsed/total seconds. Space toggles playback when the video window has focus outside the textbox. FPS is a target presentation rate (0 < FPS <= 240), limited by inference speed; it does not change source timestamps or saved video FPS. Seeking preserves pause state and resets tracking and gesture history. At the end, seek backward or press Play to restart. Seeking is disabled while saving output to preserve sequential export. Playback has no audio.
+
 Options:
 
 - `--show`: also display when saving with --output; display is already the default without --output.

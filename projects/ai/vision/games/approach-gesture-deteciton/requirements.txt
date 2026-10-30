@@ -3,3 +3,6 @@ torch==2.5.1+cu121
 torchvision==0.20.1+cu121
 ultralytics==8.4.194
 lap>=0.5.12,<0.6
+PySide6==6.4.3
+numpy==1.26.4
+opencv-python==4.11.0.86

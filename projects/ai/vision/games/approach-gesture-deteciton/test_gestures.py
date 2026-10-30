@@ -48,5 +48,62 @@ class GestureTests(unittest.TestCase):
         self.assertEqual(parse_roi("0,0;100,0;100,100"), [(0, 0), (100, 0), (100, 100)])
 
 
+class PlaybackTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        from playback import create_player
+        cls.player = create_player(30, 301)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.player.close()
+
+    def test_click_and_drag_seek(self):
+        from PySide6.QtCore import QPoint, Qt
+        from PySide6.QtTest import QTest
+
+        player = self.player
+        player.app.processEvents()
+        slider = player.timeline
+        for fraction, expected in ((0.75, 225), (0.25, 75), (0, 0), (1, 300)):
+            position = QPoint(round((slider.width() - 1) * fraction), slider.height() // 2)
+            QTest.mouseClick(slider, Qt.MouseButton.LeftButton, pos=position)
+            self.assertLessEqual(abs(player.pending_seek - expected), 3)
+        QTest.mousePress(slider, Qt.MouseButton.LeftButton, pos=QPoint(10, slider.height() // 2))
+        QTest.mouseRelease(slider, Qt.MouseButton.LeftButton, pos=QPoint(slider.width() // 2, slider.height() // 2))
+        self.assertLessEqual(abs(player.pending_seek - 150), 2)
+        self.assertFalse(slider.isSliderDown())
+        player.pending_seek = None
+
+    def test_controls(self):
+        player = self.player
+        player.play.click()
+        self.assertTrue(player.paused)
+        player.fps_field.setText("12")
+        player.apply.click()
+        self.assertEqual(player.playback_fps, 12)
+        for value in ("nan", "0", "-1", "abc", "241"):
+            player.fps_field.setText(value)
+            player.apply.click()
+            self.assertEqual(player.playback_fps, 12)
+            self.assertTrue(player.error.text())
+        player.current_frame = 150
+        player.previous.click()
+        self.assertEqual(player.next_action(), 60)
+        player.following.click()
+        self.assertEqual(player.next_action(), 240)
+        player.timeline.setValue(299)
+        self.assertEqual(player.next_action(), 299)
+        self.assertTrue(player.paused)
+        player.request_seek(-90)
+        self.assertEqual(player.next_action(), 0)
+        player.request_seek(999)
+        self.assertEqual(player.next_action(), 300)
+        player.ended = True
+        player.play.click()
+        self.assertFalse(player.paused)
+        self.assertEqual(player.next_action(), 0)
+
+
 if __name__ == "__main__":
     unittest.main()
