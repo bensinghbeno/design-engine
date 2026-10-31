@@ -17,6 +17,18 @@ class SessionAudio:
         self.started = None
         self.events = []
         self.journal = Path(video).with_suffix(".audio.json") if video is not None else None
+        self.gameplay_start = None
+        self.session_path = Path(video).with_suffix(".session.json") if video is not None else None
+
+    def mark_gameplay_start(self, timestamp):
+        if self.started is None or self.gameplay_start is not None:
+            return
+        offset = max(0, timestamp - self.started)
+        if self.session_path is not None:
+            temporary = self.session_path.with_suffix(".json.tmp")
+            temporary.write_text(json.dumps({"version": 1, "gameplay_start_seconds": offset}), encoding="utf-8")
+            temporary.replace(self.session_path)
+        self.gameplay_start = offset
 
     def record(self, command, started, ended):
         if self.started is not None:

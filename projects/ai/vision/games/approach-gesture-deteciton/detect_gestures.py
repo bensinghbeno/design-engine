@@ -129,6 +129,7 @@ def build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, help="Load command-line settings from a JSON file")
     parser.add_argument("--no-intro", action="store_true", help="Skip the startup intro video")
+    parser.add_argument("--start-seconds", type=float, default=None, help="Override the session gameplay marker; use 0 to replay from the beginning")
     parser.add_argument("video", type=Path, nargs="?", help="Input MP4 or other OpenCV-readable video")
     parser.add_argument("--ssh-camera", metavar="USER@HOST", help="Receive a remote USB webcam over SSH")
     parser.add_argument("--camera-device", default="/dev/video2")
@@ -145,7 +146,7 @@ def build_parser():
     parser.add_argument("--release", type=float, default=0.15, help="Tolerance for brief missing observations")
     parser.add_argument("--roi", type=parse_roi, help="Near-vehicle ground polygon in source-image pixels")
     parser.add_argument("--skeleton", action="store_true")
-    parser.add_argument("--script", type=Path, default=Path(__file__).with_name("gestures.txt"), help="Spoken gesture script")
+    parser.add_argument("--script", type=Path, default=Path(__file__).with_name("script.txt"), help="Spoken gesture script")
     parser.add_argument("--no-script", action="store_true", help="Disable speech and expected-gesture checking")
     parser.add_argument("--tts", choices=("gtts", "neural", "system"), default="gtts", help="gTTS (default) and neural use online services; system is offline")
     parser.add_argument("--voice", default="en-US-AriaNeural", help="Neural TTS voice, e.g. en-US-GuyNeural")
@@ -211,12 +212,48 @@ def play_intro(player):
     player.show_failures(None, {}, intro_clip=intro)
 
 
+def video_start_seconds(video, override=None):
+    import json
+    marker = video.with_suffix(".session.json")
+    if override is not None:
+        start = override
+    elif marker.is_file():
+        metadata = json.loads(marker.read_text(encoding="utf-8"))
+        start = metadata["gameplay_start_seconds"]
+    else:
+        start = 0
+    if isinstance(start, bool) or not isinstance(start, (int, float)) or not math.isfinite(start) or start < 0:
+        raise ValueError("Video start time must be finite and nonnegative")
+    return start
+
+
+def gameplay_cues(cues):
+    from gesture_script import GESTURES
+    for index, cue in enumerate(cues):
+        if cue.kind == "speech" and cue.value in GESTURES:
+            if index > 0 and cues[index - 1].kind == "read" and str(cues[index - 1].value).strip().casefold() == "machee says":
+                index -= 1
+            return cues[index:]
+    return cues
+
+
+def load_script(path, no_intro=False):
+    from gesture_script import parse_script
+    cues = parse_script(path.read_text(encoding="utf-8"))
+    if no_intro:
+        cues = [cue for cue in cues if not (cue.kind == "load" and cue.value in ("Intro Image", "Intro Video"))]
+    return cues
+
+
 def main():
     parser = build_parser()
     args = parse_arguments(parser)
     live = args.ssh_camera is not None
     if live == (args.video is not None):
         parser.error("Provide either a video file or --ssh-camera USER@HOST")
+    if live and args.start_seconds is not None:
+        parser.error("start-seconds is only supported for video input")
+    start_seconds = 0 if live else video_start_seconds(args.video, args.start_seconds)
     if min(args.camera_width, args.camera_height, args.camera_fps) <= 0:
         parser.error("Camera dimensions and FPS must be positive")
     if not live and not args.video.is_file():
@@ -260,7 +297,7 @@ def main():
     script = None
     audio_recorder = None
     audio_merged = False
-    timed_recording = live or (output is not None and not args.no_script)
+    timed_recording = live or (output is not None and (show or not args.no_script))
     frame_index = 0
     processed_frames = 0
     capture_generation = 0
@@ -273,6 +310,12 @@ def main():
             raise RuntimeError("Video FPS is invalid; transcode to a constant-frame-rate MP4 first")
         width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        if start_seconds:
+            if not capture.set(cv2.CAP_PROP_POS_MSEC, start_seconds * 1000):
+                raise RuntimeError("Could not seek to the gameplay start time")
+            frame_index = int(capture.get(cv2.CAP_PROP_POS_FRAMES))
+            if frame_index >= capture.get(cv2.CAP_PROP_FRAME_COUNT):
+                raise ValueError("Gameplay start time is beyond the end of the video")
         if output is not None:
             output.parent.mkdir(parents=True, exist_ok=True)
             if timed_recording:
@@ -285,20 +328,23 @@ def main():
         cues = None
         if not args.no_script:
             from gesture_script import ScriptRunner, parse_script
-            cues = parse_script(args.script.read_text())
+            cues = load_script(args.script, no_intro=args.no_intro)
+            if start_seconds:
+                cues = gameplay_cues(cues)
         if show:
             from playback import create_player
             player = create_player(fps, int(capture.get(cv2.CAP_PROP_FRAME_COUNT)),
                                    seeking=not live and output is None and args.no_script, live=live)
-            if not args.no_intro and not any(cue.kind == "load" and cue.value == "Intro Video" for cue in (cues or [])):
+            if output is not None:
+                from session_audio import SessionAudio
+                audio_recorder = SessionAudio(output)
+                player.start_recording(writer, audio_recorder, width, height, fps)
+            if not args.no_intro and not start_seconds and not any(cue.kind == "load" and cue.value == "Intro Video" for cue in (cues or [])):
                 play_intro(player)
                 if player.closed:
                     return
         if not args.no_script:
             from gesture_script import ScriptRunner, parse_script
-            if output is not None:
-                from session_audio import SessionAudio
-                audio_recorder = SessionAudio(output)
             if not show:
                 raise ValueError("Spoken scripts require display playback; add --show or use --no-script")
             script = ScriptRunner(cues, paused=lambda: player.paused,
@@ -313,9 +359,16 @@ def main():
                 log.writerow(["frame", "seconds", "track_id", "gestures", "orientation_hint", "near_vehicle", "x1", "y1", "x2", "y2"])
             while not args.max_frames or processed_frames < args.max_frames:
                 if player is not None:
-                    if script is not None and script.take_video_request() is not None:
+                    presentation = script.take_video_request() if script is not None else None
+                    if presentation is not None:
                         try:
-                            play_intro(player)
+                            if presentation == "show scores":
+                                player.show_scores(script.scores())
+                            elif presentation == "play congrats":
+                                player.show_scores(script.scores())
+                                player.show_failures(None, {}, congrats=True)
+                            else:
+                                play_intro(player)
                         finally:
                             if player.closed:
                                 script.stop_event.set()
@@ -351,6 +404,9 @@ def main():
                         player.update_play_button()
                         continue
                     break
+                if not live and start_seconds and capture.get(cv2.CAP_PROP_POS_MSEC) < start_seconds * 1000:
+                    frame_index += 1
+                    continue
                 timestamp = capture.timestamp if live else frame_index / fps
                 recording_timestamp = capture.started + timestamp if live else time.monotonic()
                 if audio_recorder is not None and audio_recorder.started is None:
@@ -421,16 +477,18 @@ def main():
                     if timestamp - seen[track_id] > 2:
                         del seen[track_id]
                         states.pop(track_id, None)
-                if writer is not None:
+                if writer is not None and player is None:
                     if timed_recording:
                         writer.write(canvas, recording_timestamp)
                     else:
                         writer.write(canvas)
                 if player is not None:
                     if script is not None:
-                        player.script_status.setText(script.status())
+                        player.script_status.setText("Scores" if player.score_entries is not None else script.status())
                         player.set_gesture(script.gesture_image())
                         player.script_status.show()
+                    from gesture_script import GESTURES
+                    player.gameplay_visible = script is None or script.gesture_image() in GESTURES
                     player.display(canvas, frame_index)
                     if live:
                         player.clock.setText(f"Live | {timestamp:.1f} s")
@@ -444,19 +502,24 @@ def main():
         if script is not None:
             script.close()
         capture.release()
+        if player is not None:
+            player.stop_recording()
         if writer is not None:
             writer.release()
         if player is not None:
             player.close()
-        if audio_recorder is not None and writer is not None and processed_frames:
+        if audio_recorder is not None and writer is not None and player.recording_frames:
             try:
-                if script.thread.is_alive():
+                if script is not None and script.thread.is_alive():
                     raise RuntimeError("Speech worker did not stop; cannot finalize audio safely")
                 audio_merged = audio_recorder.merge(output)
             except Exception:
                 logging.getLogger("gesture_detection").exception("Audio merge failed; original silent recording preserved")
+    if player is not None and player.recording_error is not None:
+        raise RuntimeError(f"Session recording failed: {player.recording_error}")
     if output is not None:
-        print(f"Saved {frame_index} frames: {output}\nLabels: {csv_path}\nAudio: {'speech and feedback included' if audio_merged else 'none'}.")
+        saved_frames = player.recording_frames if player is not None else frame_index
+        print(f"Saved {saved_frames} frames: {output}\nLabels: {csv_path}\nAudio: {'application audio included' if audio_merged else 'none'}.")
     else:
         print(f"Displayed {processed_frames} frames. No output files saved.")
 

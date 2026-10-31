@@ -7,7 +7,7 @@ import random
 import subprocess
 from pathlib import Path
 
-from PySide6.QtCore import QEvent, Qt
+from PySide6.QtCore import QEvent, Qt, QTimer
 from PySide6.QtGui import QImage, QPixmap, QPainter, QColor
 from PySide6.QtWidgets import (
     QApplication, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSlider,
@@ -78,8 +78,17 @@ class PlaybackWindow(QWidget):
         self.pixmap = None
         self.gesture_pixmap = None
         self.intro_image = None
+        self.score_entries = None
+        self.score_cache = None
         self.current_gesture = None
         self.deadline = 0.0
+        self.session_writer = None
+        self.session_audio = None
+        self.recording_error = None
+        self.recording_frames = 0
+        self.gameplay_visible = False
+        self.recording_timer = QTimer(self)
+        self.recording_timer.timeout.connect(self.record_presentation)
         self.setWindowTitle("Gesture detection")
         self.resize(1100, 750)
         layout = QVBoxLayout(self)
@@ -195,6 +204,8 @@ class PlaybackWindow(QWidget):
         app = QApplication.instance()
         while not self.closed:
             app.processEvents()
+            if self.recording_error is not None:
+                raise RuntimeError(f"Session recording failed: {self.recording_error}")
             if self.pending_seek is not None:
                 target = self.pending_seek
                 self.pending_seek = None
@@ -205,6 +216,44 @@ class PlaybackWindow(QWidget):
             from PySide6.QtCore import QThread
             QThread.msleep(5)
         return None
+
+    def start_recording(self, writer, audio, width, height, fps):
+        self.session_writer = writer
+        self.session_audio = audio
+        self.recording_size = (width, height)
+        self.record_presentation()
+        self.recording_timer.start(max(1, round(1000 / fps)))
+
+    def record_presentation(self):
+        if self.session_writer is None or self.closed or self.recording_error is not None:
+            return
+        try:
+            import cv2
+            import numpy as np
+            timestamp = time.monotonic()
+            image = self.grab().toImage().convertToFormat(QImage.Format.Format_RGB888)
+            pixels = np.frombuffer(image.bits(), dtype=np.uint8).reshape(image.height(), image.bytesPerLine())
+            rgb = pixels[:, :image.width() * 3].reshape(image.height(), image.width(), 3)
+            width, height = self.recording_size
+            scale = min(width / image.width(), height / image.height())
+            resized = cv2.resize(rgb, (max(1, round(image.width() * scale)), max(1, round(image.height() * scale))))
+            canvas = np.zeros((height, width, 3), dtype=np.uint8)
+            top, left = (height - resized.shape[0]) // 2, (width - resized.shape[1]) // 2
+            canvas[top:top + resized.shape[0], left:left + resized.shape[1]] = resized
+            if self.session_audio.started is None:
+                self.session_audio.started = timestamp
+            self.session_writer.write(cv2.cvtColor(canvas, cv2.COLOR_RGB2BGR), timestamp)
+            if self.gameplay_visible and self.intro_image is None:
+                self.session_audio.mark_gameplay_start(timestamp)
+            self.recording_frames += 1
+        except Exception as error:
+            self.recording_error = error
+            self.recording_timer.stop()
+
+    def stop_recording(self):
+        self.recording_timer.stop()
+        self.record_presentation()
+        self.session_writer = None
 
     def display(self, frame, frame_index):
         height, width = frame.shape[:2]
@@ -225,6 +274,8 @@ class PlaybackWindow(QWidget):
                 self.gesture_image.size(), Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation))
         source = self.intro_image if self.intro_image is not None else self.pixmap
+        if self.score_entries is not None:
+            source = self.render_scores()
         if source is not None:
             self.image.setPixmap(source.scaled(self.image.size(), Qt.AspectRatioMode.KeepAspectRatio,
                                                    Qt.TransformationMode.SmoothTransformation))
@@ -252,12 +303,77 @@ class PlaybackWindow(QWidget):
         painter.end()
         return grid
 
-    def show_failures(self, expected, failed, intro_clip=None):
+    def show_scores(self, entries):
+        self.set_gesture(None)
+        self.score_entries = entries
+        self.score_cache = None
+        self.script_status.setText("Scores")
+        self.script_status.show()
+        self.update_image()
+        QApplication.instance().processEvents()
+
+    def render_scores(self):
+        width, height = self.image.width(), self.image.height()
+        if self.score_cache is not None and self.score_cache.size() == self.image.size():
+            return self.score_cache
+        canvas = QPixmap(width, height)
+        canvas.fill(QColor("#ffffff"))
+        painter = QPainter(canvas)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        medals = [("Gold", "#d5a710"), ("Silver", "#99a3a5"), ("Bronze", "#b57439")]
+        if any(entry["medal"] == "Unscored" for entry in self.score_entries):
+            medals.append(("Unscored", "#677575"))
+        band_height = height // len(medals)
+        label_width = min(145, width // 4)
+        for band, (medal, color) in enumerate(medals):
+            top = band * band_height
+            painter.setPen(QColor("#bac7c7"))
+            painter.setBrush(QColor("#ffffff"))
+            painter.drawRoundedRect(6, top + 6, width - 12, band_height - 12, 8, 8)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(QColor(color))
+            painter.drawEllipse(18, top + 22, 18, 18)
+            painter.setPen(QColor("#263238"))
+            font = painter.font()
+            font.setPixelSize(16)
+            font.setBold(True)
+            painter.setFont(font)
+            painter.drawText(44, top + 37, medal)
+            entries = [entry for entry in self.score_entries if entry["medal"] == medal]
+            if not entries:
+                continue
+            available = max(1, width - label_width - 18)
+            columns = max(1, min(len(entries), available // 110))
+            rows = math.ceil(len(entries) / columns)
+            cell_width, cell_height = available // columns, (band_height - 20) // rows
+            for index, entry in enumerate(entries):
+                left = label_width + (index % columns) * cell_width
+                cell_top = top + 10 + (index // columns) * cell_height
+                photo = entry["photo"]
+                if photo is not None:
+                    photo_height, photo_width = photo.shape[:2]
+                    image = QImage(photo.data, photo_width, photo_height, photo.strides[0], QImage.Format.Format_BGR888).copy()
+                    tile = QPixmap.fromImage(image).scaled(max(1, cell_width - 12), max(1, cell_height - 36),
+                                                          Qt.AspectRatioMode.KeepAspectRatio,
+                                                          Qt.TransformationMode.SmoothTransformation)
+                    painter.drawPixmap(left + (cell_width - tile.width()) // 2, cell_top, tile)
+                font.setBold(False)
+                font.setPixelSize(max(8, min(12, cell_height // 5)))
+                painter.setFont(font)
+                percent = "Unscored" if entry["percentage"] is None else f"{entry['percentage']:.0f}%"
+                painter.drawText(left + 4, cell_top + cell_height - 19, f"ID {entry['track_id']}  {percent}")
+                painter.drawText(left + 4, cell_top + cell_height - 5, f"{entry['correct']}/{entry['total']}")
+        painter.end()
+        self.score_cache = canvas
+        return canvas
+
+    def show_failures(self, expected, failed, intro_clip=None, congrats=False):
         import av
         from PySide6.QtCore import QThread
-        clips = [intro_clip] if intro_clip is not None else sorted((Path(__file__).parent / "bad").glob("*.mp4"))
+        folder = "congrats" if congrats else "bad"
+        clips = [intro_clip] if intro_clip is not None else sorted((Path(__file__).parent / folder).glob("*.mp4"))
         if not clips:
-            self.error.setText("No failure videos found in bad/*.mp4")
+            self.error.setText(f"No videos found in {folder}/*.mp4")
             return
         clip = random.choice(clips)
         previous_pixmap = self.pixmap
@@ -277,19 +393,20 @@ class PlaybackWindow(QWidget):
                 self.script_status.hide()
                 self.gesture_image.hide()
             else:
-                self.script_status.setText(f"Gesture review: {expected}")
+                self.script_status.setText("Scores" if congrats else f"Gesture review: {expected}")
                 self.gesture_image.show()
             self.image_layout.activate()
-            if intro_clip is None:
+            if intro_clip is None and not congrats:
                 self.pixmap = self.failure_grid(failed)
             with av.open(str(clip)) as video:
                 frames = video.decode(video=0)
                 first = next(frames)
                 origin = float(first.time or 0)
                 duration = float(video.duration / av.time_base) if video.duration else 0
-                audio = subprocess.Popen(["ffplay", "-nodisp", "-vn", "-autoexit", "-loglevel", "error", str(clip)],
-                                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                audio_command = ["ffplay", "-nodisp", "-vn", "-autoexit", "-loglevel", "error", str(clip)]
                 started = time.monotonic()
+                audio = subprocess.Popen(audio_command,
+                                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
                 def present(decoded):
                     target = float(decoded.time or 0) - origin
@@ -320,6 +437,7 @@ class PlaybackWindow(QWidget):
             self.error.setText(f"Failure video: {error}")
         finally:
             if audio is not None:
+                ended = time.monotonic()
                 if audio.poll() is None:
                     audio.terminate()
                 try:
@@ -327,6 +445,8 @@ class PlaybackWindow(QWidget):
                 except subprocess.TimeoutExpired:
                     audio.kill()
                     audio.wait()
+                if self.session_audio is not None:
+                    self.session_audio.record(audio_command, started, ended)
             if intro_clip is None:
                 self.pixmap = previous_pixmap
             self.current_gesture = ""
@@ -342,6 +462,9 @@ class PlaybackWindow(QWidget):
         if gesture == self.current_gesture:
             return
         self.current_gesture = gesture
+        if gesture is not None:
+            self.score_entries = None
+            self.score_cache = None
         self.intro_image = None
         self.gesture_pixmap = None
         self.gesture_image.clear()
@@ -367,6 +490,7 @@ class PlaybackWindow(QWidget):
         self.update_image()
 
     def closeEvent(self, event):
+        self.stop_recording()
         self.closed = True
         super().closeEvent(event)
 

@@ -1,5 +1,5 @@
-[Load:Intro Video]
 [Load:Intro Image][Read:Hello welcome to Machee Says Game!!]
+[Load:Intro Video]
 [delay 5 sec]
 [Read: Machee Says] Left Hand Up
 [delay 3 sec]
@@ -21,3 +21,4 @@ Right Hand Up
 [delay 3 sec]
 
 Okay, Thanks for your test !!
+[Show Scores] [Play Congrats]

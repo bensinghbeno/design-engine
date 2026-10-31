@@ -1,8 +1,8 @@
 {
-  "intro": "yes",
+  "intro": "no",
   "ssh-camera": "ben@10.0.0.226",
   "camera-device": "/dev/video2",
   "device": "0",
-  "script": "gestures.txt",
+  "script": "script.txt",
   "output": "output/session-{timestamp}.mp4"
 }

@@ -34,7 +34,9 @@ def parse_script(text):
         if token.startswith("["):
             directive = token[1:-1].strip()
             delay = re.fullmatch(r"delay\s+(\d+(?:\.\d+)?)\s*(?:sec|seconds?|s)", directive, re.IGNORECASE)
-            if delay:
+            if directive.casefold() in ("show scores", "play congrats"):
+                cues.append(Cue("presentation", directive.casefold()))
+            elif delay:
                 cues.append(Cue("delay", float(delay.group(1))))
             elif directive.lower().startswith("delay"):
                 raise ValueError(f"Invalid delay: [{directive}]")
@@ -81,6 +83,9 @@ class ScriptRunner:
         self.previous_pose = "Stand Normal"
         self.hold_previous = False
         self.pose_changes = set()
+        self.participants = {}
+        self.round_mistakes = set()
+        self.round_scored = False
         self.paused = paused
         self.speaker = speaker or self.speak
         self.tts = tts
@@ -233,6 +238,8 @@ class ScriptRunner:
                                         self.expected = self.previous_pose
                                 self.authorized = False
                         self.pose_changes.clear()
+                        self.round_mistakes.clear()
+                        self.round_scored = False
                         self.reference_gesture = self.expected
                         if cue.kind == "read":
                             for following in self.cues[cue_index + 1:]:
@@ -283,6 +290,15 @@ class ScriptRunner:
                         with self.lock:
                             self.loaded_image = str(cue.value)
                             self.reference_gesture = self.loaded_image
+                elif cue.kind == "presentation":
+                    with self.lock:
+                        self.phase = "Scores" if cue.value == "show scores" else "Congratulations"
+                        self.reference_gesture = None
+                        self.video_done.clear()
+                        self.video_request = str(cue.value)
+                    while not self.video_done.wait(.05):
+                        if self.stop_event.is_set():
+                            return
                 elif cue.kind == "visual":
                     with self.lock:
                         self.caption = str(cue.value)
@@ -298,6 +314,7 @@ class ScriptRunner:
                                 for track_id, (matched, visible) in self.observations.items()
                             }
                             logging.getLogger("gesture_detection").info("Gesture results: expected=%s tracks=%s", self.expected, self.results)
+                            self.score_round()
                             if "Not performed" in self.results.values():
                                 self.queue_feedback("wrong")
                             if self.hold_previous and "Matched" in self.results.values():
@@ -329,6 +346,135 @@ class ScriptRunner:
                 self.error = str(error)
                 self.phase = "Speech error"
 
+    def score_round(self):
+        if self.round_scored:
+            return
+        for track_id, result in self.results.items():
+            participant = self.participants.setdefault(track_id, {"correct": 0, "total": 0, "photo": None})
+            if result == "Cannot verify":
+                continue
+            participant["total"] += 1
+            if result == "Matched" and track_id not in self.round_mistakes and track_id not in self.pose_changes:
+                participant["correct"] += 1
+        self.round_scored = True
+
+    def scores(self):
+        with self.lock:
+            rows = []
+            for track_id, participant in self.participants.items():
+                total = participant["total"]
+                percentage = 100 * participant["correct"] / total if total else None
+                medal = ("Unscored" if percentage is None else "Gold" if percentage >= 90
+                         else "Silver" if percentage >= 50 else "Bronze")
+                rows.append(dict(participant, track_id=track_id, percentage=percentage, medal=medal))
+            ranked = sorted(rows, key=lambda row: (-(row["percentage"] if row["percentage"] is not None else -1), row["track_id"]))
+            unique = []
+            for row in ranked:
+                if not any(self.similar_participant_photos(row["photo"], kept["photo"])
+                           or self.partial_image_match(row["photo"], kept["photo"]) for kept in unique):
+                    unique.append(row)
+            return unique
+
+    @staticmethod
+    def partial_image_match(first, second):
+        if first is None or second is None or not first.size or not second.size:
+            return False
+        ratios = [photo.shape[1] / photo.shape[0] for photo in (first, second)]
+        if min(ratios) / max(ratios) < .75:
+            return False
+        import cv2
+        import numpy as np
+        images = [cv2.resize(photo, (96, 288)) for photo in (first, second)]
+        for image in images:
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            counts = cv2.calcHist([gray], [0], None, [64], [0, 256]).ravel()
+            probabilities = counts[counts > 0] / gray.size
+            if -np.sum(probabilities * np.log2(probabilities)) < 4:
+                return False
+        for source, target in (images, images[::-1]):
+            for top in (0, 48, 96):
+                patch = source[top:top + 144, 12:84]
+                if cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY).std() < 12:
+                    continue
+                for scale in (.6, .8, 1, 1.2):
+                    template = cv2.resize(patch, None, fx=scale, fy=scale)
+                    response = cv2.matchTemplate(target, template, cv2.TM_CCOEFF_NORMED)
+                    _, similarity, _, location = cv2.minMaxLoc(response)
+                    if similarity < .65:
+                        continue
+                    left, upper = location
+                    height, width = template.shape[:2]
+                    matched = target[upper:upper + height, left:left + width]
+                    template_lab = cv2.cvtColor(template, cv2.COLOR_BGR2LAB).astype(np.float32)
+                    matched_lab = cv2.cvtColor(matched, cv2.COLOR_BGR2LAB).astype(np.float32)
+                    agreement = np.mean(np.max(np.abs(template_lab - matched_lab), axis=2) <= 30)
+                    if agreement > .5:
+                        return True
+        return False
+
+    @staticmethod
+    def similar_participant_photos(first, second):
+        if first is None or second is None or not first.size or not second.size:
+            return False
+        import cv2
+        import numpy as np
+
+        def clothing_histograms(photo):
+            height, width = photo.shape[:2]
+            if height < 20 or width < 10:
+                return None
+            histograms = []
+            for top, bottom in ((.22, .52), (.55, .90)):
+                region = photo[int(height * top):int(height * bottom), int(width * .2):int(width * .8)]
+                hsv = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)
+                if np.mean(hsv[:, :, 1] >= 60) < .35:
+                    return None
+                histogram = cv2.calcHist([hsv], [0, 1], None, [18, 8], [0, 180, 0, 256])
+                histograms.append(cv2.normalize(histogram, histogram, 1, 0, cv2.NORM_L1))
+            return histograms
+
+        first_clothes, second_clothes = clothing_histograms(first), clothing_histograms(second)
+        if first_clothes is not None and second_clothes is not None:
+            if all(cv2.compareHist(first_hist, second_hist, cv2.HISTCMP_BHATTACHARYYA) <= .35
+                   for first_hist, second_hist in zip(first_clothes, second_clothes)):
+                return True
+
+        def appearance(photo):
+            height, width = photo.shape[:2]
+            center = photo[height // 10:height - height // 10, width // 10:width - width // 10]
+            resized = cv2.resize(center, (48, 96), interpolation=cv2.INTER_AREA)
+            lab = cv2.cvtColor(resized, cv2.COLOR_BGR2LAB).astype(np.float32)
+            return cv2.GaussianBlur(lab, (5, 5), 0)
+
+        first_lab, second_lab = appearance(first), appearance(second)
+        if np.mean(np.abs(first_lab[:, :, 1:] - second_lab[:, :, 1:])) > 8:
+            return False
+        first_light, second_light = first_lab[:, :, 0], second_lab[:, :, 0]
+        if min(first_light.std(), second_light.std()) < 3:
+            return bool(np.mean(np.abs(first_lab - second_lab)) < 2)
+        first_light = first_light - first_light.mean()
+        second_light = second_light - second_light.mean()
+        correlation = cv2.matchTemplate(first_light, second_light, cv2.TM_CCOEFF_NORMED)[0, 0]
+        if correlation >= .65 and ScriptRunner.majority_pixel_agreement(first_lab, second_lab) > .5:
+            return True
+        return bool(correlation >= .90 and np.mean(np.abs(first_light - second_light)) <= 12)
+
+    @staticmethod
+    def majority_pixel_agreement(first, second):
+        import numpy as np
+        height, width = first.shape[:2]
+        best = 0.0
+        for vertical in range(-8, 9, 2):
+            for horizontal in range(-4, 5, 2):
+                first_region = first[max(0, vertical):min(height, height + vertical),
+                                     max(0, horizontal):min(width, width + horizontal)]
+                second_region = second[max(0, -vertical):min(height, height - vertical),
+                                       max(0, -horizontal):min(width, width - horizontal)]
+                difference = np.abs(first_region.astype(np.float32) - second_region.astype(np.float32))
+                agreement = np.count_nonzero(np.max(difference, axis=2) <= 30) / (height * width)
+                best = max(best, agreement)
+        return best
+
     def reassociate_track(self, track_id, box, timestamp):
         if track_id not in self.track_boxes:
             candidates = []
@@ -357,6 +503,16 @@ class ScriptRunner:
                 if previous_id in self.pose_changes:
                     self.pose_changes.remove(previous_id)
                     self.pose_changes.add(track_id)
+                if previous_id in self.round_mistakes:
+                    self.round_mistakes.remove(previous_id)
+                    self.round_mistakes.add(track_id)
+                if previous_id in self.participants:
+                    previous = self.participants.pop(previous_id)
+                    current = self.participants.setdefault(track_id, {"correct": 0, "total": 0, "photo": None})
+                    current["correct"] += previous["correct"]
+                    current["total"] += previous["total"]
+                    if current["photo"] is None:
+                        current["photo"] = previous["photo"]
                 del self.track_boxes[previous_id]
                 logging.getLogger("gesture_detection").info("Script track reassociation: %s -> %s", previous_id, track_id)
         self.track_boxes[track_id] = (tuple(box), timestamp)
@@ -374,6 +530,13 @@ class ScriptRunner:
                 status = self.results.get(track_id, "Cannot verify")
                 return f"{status} | Expected: {expected}", status == "Not performed"
             visible = required_visible(expected, points, threshold)
+            participant = self.participants.setdefault(track_id, {"correct": 0, "total": 0, "photo": None})
+            if participant["photo"] is None and frame is not None and box is not None:
+                height, width = frame.shape[:2]
+                left, top, right, bottom = map(int, box)
+                photo = frame[max(0, top):min(height, bottom), max(0, left):min(width, right)]
+                if photo.size:
+                    participant["photo"] = photo.copy()
             matched, observed = self.observations.get(track_id, (False, False))
             matched = matched or expected in labels
             if self.hold_previous:
@@ -383,6 +546,8 @@ class ScriptRunner:
                     self.pose_changes.add(track_id)
                 matched = matched and track_id not in self.pose_changes
             self.observations[track_id] = (matched, observed or visible)
+            if visible and labels and not matched:
+                self.round_mistakes.add(track_id)
             if (frame is not None and box is not None and visible and not matched
                     and (not self.hold_previous or track_id not in self.person_frames)):
                 height, width = frame.shape[:2]

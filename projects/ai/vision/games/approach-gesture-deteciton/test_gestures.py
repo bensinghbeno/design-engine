@@ -4,6 +4,55 @@ from detect_gestures import GestureState, classify_pose, parse_roi
 
 
 class ConfigTests(unittest.TestCase):
+    def test_intro_no_skips_both_script_loads_only(self):
+        import tempfile
+        from pathlib import Path
+        from detect_gestures import load_script
+        from gesture_script import parse_script
+        text = ('[Load:Intro Image][Read:Welcome][Load:Intro Video][delay 5 sec]'
+                '[Read:Machee Says] Left Hand Up\n[delay 3 sec][Show Scores][Play Congrats]')
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'script.txt'
+            path.write_text(text, encoding='utf-8')
+            for settings, extra, skip in (({'intro': 'no'}, [], True),
+                                           ({'intro': 'yes'}, [], False),
+                                           ({'intro': 'yes'}, ['--no-intro'], True)):
+                args = self.parse_config(settings, extra)
+                with self.subTest(settings=settings, extra=extra):
+                    cues = load_script(path, no_intro=args.no_intro)
+                    expected = [cue for cue in parse_script(text) if not (skip and cue.kind == 'load')]
+                    self.assertEqual(cues, expected)
+
+    def test_session_start_marker_and_script_trimming(self):
+        import tempfile
+        import json
+        from pathlib import Path
+        from session_audio import SessionAudio
+        from detect_gestures import video_start_seconds, gameplay_cues
+        from gesture_script import parse_script
+        with tempfile.TemporaryDirectory() as directory:
+            video = Path(directory) / 'session.mp4'
+            self.assertEqual(video_start_seconds(video), 0)
+            audio = SessionAudio(video)
+            audio.mark_gameplay_start(99)
+            self.assertFalse(video.with_suffix('.session.json').exists())
+            audio.started = 100
+            audio.mark_gameplay_start(125)
+            audio.mark_gameplay_start(140)
+            self.assertEqual(video_start_seconds(video), 25)
+            self.assertEqual(video_start_seconds(video, 0), 0)
+            for invalid in (-1, float('nan'), float('inf'), True, '25'):
+                video.with_suffix('.session.json').write_text(json.dumps({'gameplay_start_seconds': invalid}))
+                with self.assertRaises(ValueError):
+                    video_start_seconds(video)
+        cues = parse_script('[Load:Intro Video][Load:Intro Image][Read:Welcome][delay 5 sec]'
+                            '[Read:Machee Says] Left Hand Up\n[delay 3 sec][Show Scores][Play Congrats]')
+        trimmed = gameplay_cues(cues)
+        self.assertEqual(trimmed[0].value, 'Machee Says')
+        self.assertEqual(trimmed[1].value, 'Left Hand Up')
+        self.assertEqual(trimmed[-1].value, 'play congrats')
+        self.assertFalse(any(cue.kind == 'load' for cue in trimmed))
+
     def parse_config(self, settings, extra=()):
         import json
         import tempfile
@@ -236,6 +285,111 @@ class RunLogTests(unittest.TestCase):
 
 
 class SpeechTests(unittest.TestCase):
+    def test_partial_image_match_keeps_higher_score(self):
+        import cv2
+        import numpy as np
+        from gesture_script import ScriptRunner
+        generator = np.random.default_rng(23)
+        first = generator.integers(0, 256, (288, 96, 3), dtype=np.uint8)
+        partial = generator.integers(0, 256, first.shape, dtype=np.uint8)
+        template = cv2.resize(first[:144, 12:84], None, fx=.6, fy=.6)
+        height, width = template.shape[:2]
+        partial[19:19 + height, 6:6 + width] = template
+        different = generator.integers(0, 256, first.shape, dtype=np.uint8)
+        different[:, :, 0] //= 4
+        self.assertTrue(ScriptRunner.partial_image_match(first, partial))
+        self.assertTrue(ScriptRunner.partial_image_match(partial, first))
+        self.assertFalse(ScriptRunner.partial_image_match(first, different))
+        self.assertFalse(ScriptRunner.partial_image_match(first, None))
+        runner = ScriptRunner([], speaker=lambda text: None)
+        for track_id, correct, photo in ((5, 0, partial), (4, 6, first), (3, 3, different)):
+            runner.participants[track_id] = {"correct": correct, "total": 10, "photo": photo}
+        self.assertEqual([row["track_id"] for row in runner.scores()], [4, 3])
+
+    def test_majority_pixels_with_partial_occlusion(self):
+        import numpy as np
+        from gesture_script import ScriptRunner
+        generator = np.random.default_rng(42)
+        first = generator.integers(0, 256, (96, 48, 3), dtype=np.uint8)
+        second = first.copy()
+        second[:35] = 0
+        self.assertGreater(ScriptRunner.majority_pixel_agreement(first, second), .5)
+        second[:70] = 0
+        self.assertLess(ScriptRunner.majority_pixel_agreement(first, second), .5)
+        shifted = np.zeros_like(first)
+        shifted[4:, 2:] = first[:-4, :-2]
+        self.assertGreater(ScriptRunner.majority_pixel_agreement(first, shifted), .85)
+
+    def test_clothing_match_survives_arm_pose_change(self):
+        import numpy as np
+        from gesture_script import ScriptRunner
+        first = np.full((180, 90, 3), 180, dtype=np.uint8)
+        first[35:96, 18:72] = (35, 185, 210)
+        first[98:165, 18:72] = (70, 155, 40)
+        changed_pose = first.copy()
+        changed_pose[:100, :18] = (50, 95, 150)
+        changed_pose[35:90, 38:48] = (50, 95, 150)
+        different_trousers = changed_pose.copy()
+        different_trousers[98:165, 18:72] = (190, 50, 40)
+        runner = ScriptRunner([], speaker=lambda text: None)
+        for track_id, correct, photo in ((1, 2, changed_pose), (2, 9, first), (3, 3, different_trousers)):
+            runner.participants[track_id] = {"correct": correct, "total": 10, "photo": photo}
+        self.assertEqual([row["track_id"] for row in runner.scores()], [2, 3])
+
+    def test_duplicate_photos_keep_highest_score_only(self):
+        import cv2
+        import numpy as np
+        from gesture_script import ScriptRunner
+        photo = np.full((180, 90, 3), 45, dtype=np.uint8)
+        photo[15:55, 25:65] = (90, 140, 180)
+        photo[55:125, 15:75] = (130, 60, 30)
+        photo[125:170, 20:40] = (25, 25, 25)
+        similar = cv2.resize(cv2.convertScaleAbs(photo, alpha=1, beta=9), (120, 240))
+        distinct = photo.copy()
+        distinct[55:125, 15:75] = (35, 120, 70)
+        different_pattern = photo[::-1].copy()
+        runner = ScriptRunner([], speaker=lambda text: None)
+        for track_id, correct, image in ((1, 5, photo), (2, 9, similar), (3, 2, photo.copy()),
+                                         (4, 7, distinct), (5, 9, similar.copy()),
+                                         (6, 6, different_pattern), (7, 0, None), (8, 0, None)):
+            runner.participants[track_id] = {"correct": correct, "total": 10, "photo": image}
+        self.assertEqual([row["track_id"] for row in runner.scores()], [2, 4, 6, 7, 8])
+        self.assertEqual(len(runner.participants), 8)
+        self.assertEqual(runner.participants[2]["correct"], 9)
+
+    def test_score_bands_and_verifiable_rounds(self):
+        from gesture_script import ScriptRunner
+        runner = ScriptRunner([], speaker=lambda text: None)
+        for track_id, correct, total in ((1, 90, 100), (2, 89, 100), (3, 50, 100),
+                                         (4, 49, 100), (5, 0, 100), (6, 0, 0), (7, 100, 100)):
+            runner.participants[track_id] = {"correct": correct, "total": total, "photo": None}
+        self.assertEqual({row["track_id"]: row["medal"] for row in runner.scores()},
+                         {1: "Gold", 2: "Silver", 3: "Silver", 4: "Bronze", 5: "Bronze", 6: "Unscored", 7: "Gold"})
+        runner.results = {1: "Matched", 2: "Matched", 3: "Not performed", 6: "Cannot verify"}
+        runner.round_mistakes.add(2)
+        runner.score_round()
+        runner.score_round()
+        self.assertEqual(runner.participants[1]["correct"], 91)
+        self.assertEqual(runner.participants[2]["correct"], 89)
+        self.assertEqual(runner.participants[2]["total"], 101)
+        self.assertEqual(runner.participants[3]["total"], 101)
+        self.assertEqual(runner.participants[6]["total"], 0)
+
+    def test_score_and_congratulations_directives_are_not_spoken(self):
+        from gesture_script import ScriptRunner, parse_script
+        spoken, requests = [], []
+        runner = ScriptRunner(parse_script("[Show Scores] [Play Congrats]"), speaker=spoken.append)
+
+        def complete(timeout):
+            requests.append(runner.take_video_request())
+            return True
+
+        runner.video_done.wait = complete
+        runner.run()
+        self.assertIsNone(runner.error)
+        self.assertEqual(spoken, [])
+        self.assertEqual(requests, ["show scores", "play congrats"])
+
     def test_scripted_intro_waits_before_welcome(self):
         import threading
         from gesture_script import ScriptRunner, parse_script
@@ -600,6 +754,66 @@ class SpeechTests(unittest.TestCase):
 
 
 class PlaybackTests(unittest.TestCase):
+    def test_scores_persist_during_congratulations(self):
+        from unittest.mock import patch, MagicMock
+        from types import SimpleNamespace
+        from pathlib import Path
+        import numpy as np
+        from playback import create_player
+        player = create_player(30, 100, live=True)
+        entries = [{"track_id": 1, "correct": 9, "total": 10, "percentage": 90,
+                    "medal": "Gold", "photo": np.full((100, 60, 3), 180, dtype=np.uint8)}]
+        decoded = SimpleNamespace(time=0, to_ndarray=lambda **kwargs: np.zeros((60, 80, 3), dtype=np.uint8))
+        video = MagicMock()
+        video.__enter__.return_value = video
+        video.decode.return_value = iter([decoded])
+        video.duration = 0
+        player.session_audio = MagicMock()
+        try:
+            player.show_scores(entries)
+            with patch("playback.Path.glob", return_value=iter([Path("congrats/test.mp4")])), \
+                    patch("av.open", return_value=video), patch("playback.subprocess.Popen"):
+                player.show_failures(None, {}, congrats=True)
+            player.display(np.zeros((60, 80, 3), dtype=np.uint8), 0)
+            self.assertEqual(player.score_entries, entries)
+            self.assertFalse(player.render_scores().isNull())
+            self.assertEqual(player.error.text(), "")
+            self.assertEqual(player.session_audio.record.call_args.args[0][-1], "congrats/test.mp4")
+        finally:
+            player.close()
+
+    def test_presentation_recording_runs_without_camera_updates(self):
+        from unittest.mock import MagicMock
+        from PySide6.QtTest import QTest
+        from playback import create_player
+        player = create_player(30, 100, live=True)
+        writer, audio = MagicMock(), MagicMock()
+        audio.started = None
+        try:
+            player.set_gesture("Intro Image")
+            player.start_recording(writer, audio, 640, 360, 30)
+            QTest.qWait(100)
+            audio.mark_gameplay_start.assert_not_called()
+            player.gameplay_visible = True
+            player.record_presentation()
+            audio.mark_gameplay_start.assert_not_called()
+            player.set_gesture("Left Hand Up")
+            player.record_presentation()
+            audio.mark_gameplay_start.assert_called_once_with(writer.write.call_args.args[1])
+            player.stop_recording()
+            self.assertIsNone(player.recording_error)
+            self.assertGreaterEqual(writer.write.call_count, 2)
+            frames = writer.write.call_args_list
+            self.assertEqual(frames[-1].args[0].shape, (360, 640, 3))
+            self.assertGreater(frames[-1].args[0].max(), 100)
+            self.assertEqual(audio.started, frames[0].args[1])
+            self.assertGreater(frames[-1].args[1], frames[0].args[1])
+            count = writer.write.call_count
+            QTest.qWait(50)
+            self.assertEqual(writer.write.call_count, count)
+        finally:
+            player.close()
+
     def test_intro_image_persists_over_camera_frames(self):
         import numpy as np
         from playback import create_player
@@ -625,6 +839,7 @@ class PlaybackTests(unittest.TestCase):
         from playback import create_player
         player = create_player(30, 100)
         player.set_gesture("Left Hand Up")
+        player.session_audio = MagicMock()
         decoded = SimpleNamespace(time=0, to_ndarray=lambda **kwargs: np.zeros((60, 100, 3), dtype=np.uint8)[:, :80])
         video = MagicMock()
         video.__enter__.return_value = video
@@ -641,6 +856,8 @@ class PlaybackTests(unittest.TestCase):
             self.assertEqual(player.current_gesture, "Left Hand Up")
             self.assertTrue(player.play.isEnabled())
             self.assertIn("-vn", audio.call_args.args[0])
+            player.session_audio.record.assert_called_once()
+            self.assertEqual(player.session_audio.record.call_args.args[0], audio.call_args.args[0])
             process.terminate.assert_called_once()
         finally:
             player.close()
