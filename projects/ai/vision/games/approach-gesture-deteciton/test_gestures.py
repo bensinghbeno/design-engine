@@ -3,6 +3,49 @@ import unittest
 from detect_gestures import GestureState, classify_pose, parse_roi
 
 
+class ConfigTests(unittest.TestCase):
+    def parse_config(self, settings, extra=()):
+        import json
+        import tempfile
+        from pathlib import Path
+        from detect_gestures import build_parser, parse_arguments
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "config.json"
+            path.write_text(json.dumps(settings))
+            return parse_arguments(build_parser(), ["--config", str(path), *extra])
+
+    def test_config_types_and_cli_overrides(self):
+        from pathlib import Path
+        args = self.parse_config({
+            "video": "input.mp4", "camera-width": 640, "confidence": .6,
+            "roi": "0,0;10,0;10,10", "skeleton": True, "no_intro": True,
+            "show": False, "tts": "gtts", "device": "0",
+            "output": "output/session-{timestamp}.mp4",
+        }, ["--device", "cpu", "--camera-width", "1280", "--show", "replacement.mp4"])
+        self.assertEqual(args.video, Path("replacement.mp4"))
+        self.assertEqual(args.camera_width, 1280)
+        self.assertEqual(args.device, "cpu")
+        self.assertEqual(args.confidence, .6)
+        self.assertEqual(args.roi, [(0, 0), (10, 0), (10, 10)])
+        self.assertTrue(args.skeleton and args.no_intro and args.show)
+        self.assertRegex(str(args.output), r"^output/session-\d{8}-\d{6}\.mp4$")
+        self.assertEqual(self.parse_config({"video": "input.mp4"}).video, Path("input.mp4"))
+
+    def test_invalid_config_rejected(self):
+        self.assertFalse(self.parse_config({"intro": "yes"}).no_intro)
+        self.assertTrue(self.parse_config({"intro": "no"}).no_intro)
+        self.assertTrue(self.parse_config({"intro": "yes"}, ["--no-intro"]).no_intro)
+        import contextlib
+        import io
+        for settings in ([], {"intro": True}, {"intro": "maybe"}, {"intro": "yes", "no-intro": True},
+                 {"unknown": 1}, {"show": "false"}, {"camera-fps": "bad"},
+                         {"tts": "invalid"}, {"roi": "bad"}, {"device": None},
+                         {"no-intro": True, "no_intro": False}, {"config": "nested.json"}):
+            with self.subTest(settings=settings), contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit):
+                    self.parse_config(settings)
+
+
 class GestureTests(unittest.TestCase):
     def pose(self):
         points = [[100.0, 100.0, 1.0] for _ in range(17)]
@@ -59,6 +102,12 @@ class GestureTests(unittest.TestCase):
                                 15: (90, 350), 16: (110, 350)}.items():
             points[index][:2] = position
         self.assertEqual(classify_pose(points)[0], {"Stand Normal"})
+        for displacement, accepted in ((24, True), (-24, True), (36, False), (-36, False)):
+            relaxed = [point[:] for point in points]
+            relaxed[8][0] += displacement / 2
+            relaxed[10][0] += displacement
+            with self.subTest(wrist_displacement=displacement):
+                self.assertEqual("Stand Normal" in classify_pose(relaxed)[0], accepted)
         runner = ScriptRunner([], speaker=lambda text: None)
         runner.expected = "Stand Normal"
         runner.phase = "Respond"
@@ -187,6 +236,52 @@ class RunLogTests(unittest.TestCase):
 
 
 class SpeechTests(unittest.TestCase):
+    def test_machee_says_hold_previous_pose(self):
+        from gesture_script import ScriptRunner, parse_script
+        import numpy as np
+        for change in (False, True):
+            with self.subTest(change=change):
+                runner = ScriptRunner(parse_script(
+                    "[Read: Machee Says] Right Leg Up\n[delay 3 sec]\nStand Normal\n[delay 3 sec]"),
+                    speaker=lambda text: None)
+                runner.play_feedback = lambda outcome: None
+                points = [[0, 0, 1] for _ in range(17)]
+                frame = np.full((20, 20, 3), 100, dtype=np.uint8)
+
+                def wait(seconds):
+                    if runner.phase != "Respond":
+                        return
+                    runner.assess(1, {"Right Leg Up"}, points, .5,
+                                  box=(0, 0, 20, 20), timestamp=1, frame=frame)
+                    if runner.hold_previous:
+                        self.assertEqual(runner.expected, "Right Leg Up")
+                        self.assertEqual(runner.gesture_image(), "Right Leg Up")
+                        self.assertEqual(runner.feedback_pending, [])
+                        if change:
+                            runner.assess(1, {"Stand Normal"}, points, .5,
+                                          box=(0, 0, 20, 20), timestamp=1.2, frame=frame)
+                            runner.assess(2, {"Right Leg Up"}, points, .5,
+                                          box=(0, 0, 20, 20), timestamp=1.5, frame=frame * 0)
+
+                runner.wait = wait
+                runner.run()
+                self.assertIsNone(runner.error)
+                self.assertEqual(runner.results, {2: "Not performed"} if change else {1: "Matched"})
+                if change:
+                    self.assertTrue((runner.person_frames[2] == 100).all())
+
+    def test_machee_says_only_authorizes_next_command(self):
+        from gesture_script import ScriptRunner, parse_script
+        observed = []
+        runner = ScriptRunner(parse_script(
+            "[Read: Machee Says] Left Hand Up\n[delay 3 sec]\n"
+            "[Read: Perform Action] Right Hand Up\n[delay 3 sec]\n"
+            "[Read: Machee Says] Stand Normal\n[delay 3 sec]"), speaker=lambda text: None)
+        runner.wait = lambda seconds: observed.append((runner.expected, runner.hold_previous)) if runner.phase == "Respond" else None
+        runner.run()
+        self.assertIsNone(runner.error)
+        self.assertEqual(observed, [("Left Hand Up", False), ("Left Hand Up", True), ("Stand Normal", False)])
+
     def test_failure_review_crops_and_blocks_next_prompt(self):
         import threading
         import time
@@ -459,28 +554,39 @@ class PlaybackTests(unittest.TestCase):
             player.close()
 
     def test_intro_playback_command(self):
-        from unittest.mock import patch
+        from unittest.mock import patch, MagicMock
         from detect_gestures import play_intro
+        player = MagicMock()
         with patch("detect_gestures.Path.is_file", return_value=True), \
-                patch("detect_gestures.shutil.which", return_value="ffplay"), \
-                patch("detect_gestures.subprocess.run") as run:
-            play_intro()
-            command = run.call_args.args[0]
-            self.assertEqual(command[0], "ffplay")
-            self.assertIn("-autoexit", command)
-            self.assertIn("-fs", command)
-            self.assertNotIn("-an", command)
-            self.assertTrue(command[-1].endswith("/intro/1.mp4"))
-            self.assertTrue(run.call_args.kwargs["check"])
+                patch("detect_gestures.shutil.which", return_value="ffplay"):
+            play_intro(player)
+            self.assertEqual(player.show_failures.call_args.args, (None, {}))
+            self.assertTrue(str(player.show_failures.call_args.kwargs["intro_clip"]).endswith("/intro/1.mp4"))
 
-    def test_intro_runs_before_camera_startup(self):
-        from unittest.mock import patch
-        from detect_gestures import main
-        with patch("sys.argv", ["detect_gestures.py", "--ssh-camera", "user@host"]), \
-                patch("detect_gestures.play_intro", side_effect=RuntimeError("intro reached")) as intro:
-            with self.assertRaisesRegex(RuntimeError, "intro reached"):
-                main()
-            intro.assert_called_once_with()
+    def test_intro_retains_fullscreen_image_until_camera_frame(self):
+        from unittest.mock import patch, MagicMock
+        from types import SimpleNamespace
+        from pathlib import Path
+        import numpy as np
+        from playback import create_player
+        player = create_player(30, 100, live=True)
+        decoded = SimpleNamespace(time=0, to_ndarray=lambda **kwargs: np.full((60, 80, 3), 123, dtype=np.uint8))
+        video = MagicMock()
+        video.__enter__.return_value = video
+        video.decode.return_value = iter([decoded])
+        video.duration = 0
+        try:
+            with patch("av.open", return_value=video), patch("playback.subprocess.Popen"):
+                player.show_failures(None, {}, intro_clip=Path("intro/1.mp4"))
+            self.assertTrue(player.isFullScreen())
+            self.assertFalse(player.pixmap.isNull())
+            self.assertEqual(player.pixmap.toImage().pixelColor(0, 0).red(), 123)
+            self.assertTrue(player.gesture_image.isHidden())
+            player.display(np.zeros((60, 80, 3), dtype=np.uint8), 0)
+            self.assertTrue(player.isFullScreen())
+            self.assertEqual(player.pixmap.toImage().pixelColor(0, 0).red(), 0)
+        finally:
+            player.close()
 
     def test_gesture_reference_images_and_split(self):
         from playback import create_player

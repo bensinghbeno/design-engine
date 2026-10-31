@@ -70,6 +70,11 @@ def required_visible(expected, points, threshold):
 class ScriptRunner:
     def __init__(self, cues, paused=lambda: False, speaker=None, tts="gtts", voice="en-US-AriaNeural", audio_recorder=None, failure_screen=False):
         self.cues = cues
+        self.machee_says = any(cue.kind == "read" and str(cue.value).strip().casefold() == "machee says" for cue in cues)
+        self.authorized = False
+        self.previous_pose = "Stand Normal"
+        self.hold_previous = False
+        self.pose_changes = set()
         self.paused = paused
         self.speaker = speaker or self.speak
         self.tts = tts
@@ -205,6 +210,19 @@ class ScriptRunner:
                     logging.getLogger("gesture_detection").info("Speaking prompt: %s", cue.value)
                     with self.lock:
                         self.expected = cue.value if cue.kind == "speech" and cue.value in GESTURES else None
+                        self.hold_previous = False
+                        if self.machee_says:
+                            if cue.kind == "read":
+                                self.authorized = str(cue.value).strip().casefold() == "machee says"
+                            else:
+                                if self.expected:
+                                    self.hold_previous = not self.authorized
+                                    if self.authorized:
+                                        self.previous_pose = self.expected
+                                    else:
+                                        self.expected = self.previous_pose
+                                self.authorized = False
+                        self.pose_changes.clear()
                         self.reference_gesture = self.expected
                         if cue.kind == "read":
                             for following in self.cues[cue_index + 1:]:
@@ -237,6 +255,7 @@ class ScriptRunner:
                     with self.lock:
                         self.caption = str(cue.value)
                 else:
+                    self.authorized = False
                     logging.getLogger("gesture_detection").info("Response delay: %s seconds", cue.value)
                     self.wait(float(cue.value))
                     with self.lock:
@@ -249,6 +268,8 @@ class ScriptRunner:
                             logging.getLogger("gesture_detection").info("Gesture results: expected=%s tracks=%s", self.expected, self.results)
                             if "Not performed" in self.results.values():
                                 self.queue_feedback("wrong")
+                            if self.hold_previous and "Matched" in self.results.values():
+                                self.queue_feedback("success")
                     if self.expected:
                         self.wait(1.0)
                         self.drain_feedback()
@@ -297,6 +318,9 @@ class ScriptRunner:
                     self.results[track_id] = self.results.pop(previous_id)
                 if previous_id in self.person_frames:
                     self.person_frames[track_id] = self.person_frames.pop(previous_id)
+                if previous_id in self.pose_changes:
+                    self.pose_changes.remove(previous_id)
+                    self.pose_changes.add(track_id)
                 del self.track_boxes[previous_id]
                 logging.getLogger("gesture_detection").info("Script track reassociation: %s -> %s", previous_id, track_id)
         self.track_boxes[track_id] = (tuple(box), timestamp)
@@ -316,16 +340,28 @@ class ScriptRunner:
             visible = required_visible(expected, points, threshold)
             matched, observed = self.observations.get(track_id, (False, False))
             matched = matched or expected in labels
+            if self.hold_previous:
+                if visible and labels and labels != {expected}:
+                    if track_id not in self.pose_changes:
+                        self.person_frames.pop(track_id, None)
+                    self.pose_changes.add(track_id)
+                matched = matched and track_id not in self.pose_changes
             self.observations[track_id] = (matched, observed or visible)
-            if frame is not None and box is not None and visible and not matched:
+            if (frame is not None and box is not None and visible and not matched
+                    and (not self.hold_previous or track_id not in self.person_frames)):
                 height, width = frame.shape[:2]
                 left, top, right, bottom = map(int, box)
                 crop = frame[max(0, top):min(height, bottom), max(0, left):min(width, right)]
                 if crop.size:
                     self.person_frames[track_id] = crop.copy()
             if matched:
+                if self.hold_previous:
+                    return f"Holding: {expected}", False
                 self.queue_feedback("success")
                 return f"Matched: {expected}", False
+            if self.hold_previous and track_id in self.pose_changes:
+                self.queue_feedback("wrong")
+                return f"Pose changed | Keep: {expected}", True
             if not visible:
                 return f"Cannot verify | Expected: {expected}", False
             if labels:

@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import argparse
+import json
+import sys
+from datetime import datetime
 import csv
 import math
 import time
 import logging
 import shutil
-import subprocess
 from contextlib import nullcontext
 from pathlib import Path
 
@@ -64,7 +66,7 @@ def classify_pose(points, confidence=0.5):
         upright = lean <= 15 and abs(points[5][1] - points[6][1]) <= torso * 0.15
         arms_down = all(
             downward(joint, elbow, 0.15, 0.4) and downward(elbow, wrist, 0.15, 0.4)
-            and abs(points[wrist][0] - points[joint][0]) <= torso * 0.2
+            and abs(points[wrist][0] - points[joint][0]) <= torso * 0.3
             and points[wrist][1] >= hip[1] - torso * 0.2
             for joint, elbow, wrist in ((5, 7, 9), (6, 8, 10))
         )
@@ -125,6 +127,8 @@ def parse_roi(value):
 
 def build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", type=Path, help="Load command-line settings from a JSON file")
+    parser.add_argument("--no-intro", action="store_true", help="Skip the startup intro video")
     parser.add_argument("video", type=Path, nargs="?", help="Input MP4 or other OpenCV-readable video")
     parser.add_argument("--ssh-camera", metavar="USER@HOST", help="Receive a remote USB webcam over SSH")
     parser.add_argument("--camera-device", default="/dev/video2")
@@ -151,21 +155,65 @@ def build_parser():
     return parser
 
 
-def play_intro():
+def parse_arguments(parser, argv=None):
+    argv = sys.argv[1:] if argv is None else argv
+    bootstrap = argparse.ArgumentParser(add_help=False)
+    bootstrap.add_argument("--config", type=Path)
+    config_path = bootstrap.parse_known_args(argv)[0].config
+    if config_path is not None:
+        try:
+            settings = json.loads(config_path.read_text())
+        except (OSError, ValueError) as error:
+            parser.error(f"Cannot load config {config_path}: {error}")
+        if not isinstance(settings, dict):
+            parser.error("Config must be a JSON object")
+        actions = {action.dest: action for action in parser._actions if action.dest not in ("help", "config")}
+        tokens = []
+        seen = set()
+        for key, value in settings.items():
+            name = key.replace("-", "_")
+            if name == "intro":
+                if not isinstance(value, str) or value.lower() not in ("yes", "no"):
+                    parser.error('Config option intro must be "yes" or "no"')
+                name = "no_intro"
+                value = value.lower() == "no"
+            if name not in actions or name in seen:
+                parser.error(f"Unknown or duplicate config option: {key}")
+            seen.add(name)
+            action = actions[name]
+            if isinstance(action, argparse._StoreTrueAction):
+                if not isinstance(value, bool):
+                    parser.error(f"Config option {key} must be true or false")
+                if value:
+                    tokens.append(action.option_strings[0])
+            else:
+                if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+                    parser.error(f"Config option {key} must be a string or number")
+                if action.option_strings:
+                    tokens.append(f"{action.option_strings[0]}={value}")
+                else:
+                    tokens.append(str(value))
+        configured = parser.parse_args(tokens)
+        parser.set_defaults(**vars(configured))
+    args = parser.parse_args(argv)
+    if args.output is not None:
+        args.output = Path(str(args.output).replace("{timestamp}", datetime.now().strftime("%Y%m%d-%H%M%S")))
+    return args
+
+
+def play_intro(player):
     intro = Path(__file__).parent / "intro" / "1.mp4"
     if not intro.is_file():
         raise RuntimeError(f"Intro video not found: {intro}; use --no-intro to skip")
     if shutil.which("ffplay") is None:
         raise RuntimeError("Intro playback requires ffplay; use --no-intro to skip")
     logging.getLogger("gesture_detection").info("Playing intro: %s", intro)
-    subprocess.run(["ffplay", "-autoexit", "-fs", "-loglevel", "error",
-                    "-window_title", "Machee Says", str(intro)], check=True)
+    player.show_failures(None, {}, intro_clip=intro)
 
 
 def main():
     parser = build_parser()
-    parser.add_argument("--no-intro", action="store_true", help="Skip the startup intro video")
-    args = parser.parse_args()
+    args = parse_arguments(parser)
     live = args.ssh_camera is not None
     if live == (args.video is not None):
         parser.error("Provide either a video file or --ssh-camera USER@HOST")
@@ -188,9 +236,6 @@ def main():
         parser.error("Output must not overwrite the input")
     if output is not None and (output.exists() or csv_path.exists()):
         parser.error("Output MP4 or CSV already exists; choose a different --output")
-
-    if show and not args.no_intro:
-        play_intro()
 
     import cv2
     import numpy as np
@@ -241,6 +286,10 @@ def main():
             from playback import create_player
             player = create_player(fps, int(capture.get(cv2.CAP_PROP_FRAME_COUNT)),
                                    seeking=not live and output is None and args.no_script, live=live)
+            if not args.no_intro:
+                play_intro(player)
+                if player.closed:
+                    return
         if not args.no_script:
             from gesture_script import ScriptRunner, parse_script
             if output is not None:

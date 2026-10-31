@@ -250,10 +250,10 @@ class PlaybackWindow(QWidget):
         painter.end()
         return grid
 
-    def show_failures(self, expected, failed):
+    def show_failures(self, expected, failed, intro_clip=None):
         import av
         from PySide6.QtCore import QThread
-        clips = sorted((Path(__file__).parent / "bad").glob("*.mp4"))
+        clips = [intro_clip] if intro_clip is not None else sorted((Path(__file__).parent / "bad").glob("*.mp4"))
         if not clips:
             self.error.setText("No failure videos found in bad/*.mp4")
             return
@@ -263,13 +263,22 @@ class PlaybackWindow(QWidget):
         audio = None
         controls = (self.play, self.previous, self.following, self.timeline, self.apply, self.fps_field)
         enabled = [control.isEnabled() for control in controls]
+        visibility = [control.isVisible() for control in controls]
+        status_visible = self.script_status.isVisible()
         try:
             for control in controls:
                 control.setEnabled(False)
-            self.script_status.setText(f"Not performed: {expected}")
-            self.gesture_image.show()
+                if intro_clip is not None:
+                    control.hide()
+            if intro_clip is not None:
+                self.script_status.hide()
+                self.gesture_image.hide()
+            else:
+                self.script_status.setText(f"Not performed: {expected}")
+                self.gesture_image.show()
             self.image_layout.activate()
-            self.pixmap = self.failure_grid(failed)
+            if intro_clip is None:
+                self.pixmap = self.failure_grid(failed)
             with av.open(str(clip)) as video:
                 frames = video.decode(video=0)
                 first = next(frames)
@@ -289,7 +298,10 @@ class PlaybackWindow(QWidget):
                     rgb = decoded.to_ndarray(format="rgb24").copy()
                     height, width = rgb.shape[:2]
                     image = QImage(rgb.data, width, height, rgb.strides[0], QImage.Format.Format_RGB888).copy()
-                    self.gesture_pixmap = QPixmap.fromImage(image)
+                    if intro_clip is not None:
+                        self.pixmap = QPixmap.fromImage(image)
+                    else:
+                        self.gesture_pixmap = QPixmap.fromImage(image)
                     self.update_image()
                     QApplication.instance().processEvents()
 
@@ -312,11 +324,14 @@ class PlaybackWindow(QWidget):
                 except subprocess.TimeoutExpired:
                     audio.kill()
                     audio.wait()
-            self.pixmap = previous_pixmap
+            if intro_clip is None:
+                self.pixmap = previous_pixmap
             self.current_gesture = ""
             self.set_gesture(previous_gesture)
-            for control, was_enabled in zip(controls, enabled):
+            for control, was_enabled, was_visible in zip(controls, enabled, visibility):
                 control.setEnabled(was_enabled)
+                control.setVisible(was_visible)
+            self.script_status.setVisible(status_visible)
             self.deadline = 0.0
             self.update_image()
 
@@ -360,5 +375,5 @@ def create_player(fps, frame_count, seeking=True, live=False):
     app = QApplication.instance() or QApplication([])
     player = PlaybackWindow(fps, frame_count, seeking, live)
     player.app = app
-    player.show()
+    player.showFullScreen()
     return player

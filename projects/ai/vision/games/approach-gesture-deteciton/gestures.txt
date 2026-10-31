@@ -6,17 +6,17 @@ Hello welcome to Machee Says Game!!
 [delay 3 sec]
 Right Hand Up
 [delay 3 sec]
-Stand Normal
+[Read: Machee Says] Stand Normal
 [delay 3 sec]
-Left Leg Up
+[Read: Machee Says] Left Leg Up
 [delay 3 sec]
-Stand Normal
+[Read: Machee Says] Stand Normal
 [delay 3 sec]
-Right Leg Up
+[Read: Machee Says] Right Leg Up
 [delay 3 sec]
-Stand Normal
+[Read: Machee Says]Stand Normal
 [delay 3 sec]
-Bend Down
+[Read: Machee Says] Bend Down
 [delay 3 sec]
 
 Okay, Thanks for your test !!
