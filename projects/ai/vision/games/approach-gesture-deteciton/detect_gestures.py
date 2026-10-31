@@ -5,6 +5,8 @@ from __future__ import annotations
 import argparse
 import csv
 import math
+import time
+import logging
 from contextlib import nullcontext
 from pathlib import Path
 
@@ -28,10 +30,14 @@ def classify_pose(points, confidence=0.5):
     labels.update(["Both Hands Up"] if len(raised) == 2 else raised)
     for side, knee, ankle, other_ankle in (("Left", 13, 15, 16), ("Right", 14, 16, 15)):
         if visible(knee, ankle, other_ankle):
-            if points[ankle][1] < points[other_ankle][1] - torso * 0.35 and points[knee][1] < hip[1] + torso * 0.45:
+            if points[ankle][1] < points[other_ankle][1] - torso * 0.28 and points[knee][1] < hip[1] + torso * 0.8:
                 labels.add(f"{side} Leg Up")
     lean = math.degrees(math.atan2(abs(shoulder[0] - hip[0]), hip[1] - shoulder[1]))
-    if lean > 50:
+    shoulder_span = math.dist(points[5][:2], points[6][:2])
+    forward_bend = (visible(13, 14) and shoulder_span > 5
+                    and torso < shoulder_span * 0.65
+                    and min(points[13][1], points[14][1]) > hip[1] + shoulder_span * 0.6)
+    if lean > 50 or forward_bend:
         labels.add("Bend Down")
     orientation = "Unknown"
     if visible(0, 1, 2):
@@ -158,6 +164,8 @@ def main():
     if not all(0 < threshold <= 1 for threshold in (args.confidence, args.keypoint_confidence)):
         parser.error("Confidence thresholds must be in (0, 1]")
     output = args.output
+    if output is not None and not args.no_script and args.tts == "system":
+        parser.error("Recording spoken audio requires --tts neural (default); system speech cannot be captured")
     show = live or args.show or output is None
     if output is not None and output.suffix.lower() != ".mp4":
         parser.error("Output must have an .mp4 extension")
@@ -188,6 +196,9 @@ def main():
     writer = None
     player = None
     script = None
+    audio_recorder = None
+    audio_merged = False
+    timed_recording = live or (output is not None and not args.no_script)
     frame_index = 0
     processed_frames = 0
     capture_generation = 0
@@ -202,7 +213,7 @@ def main():
         height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
         if output is not None:
             output.parent.mkdir(parents=True, exist_ok=True)
-            if live:
+            if timed_recording:
                 from live_capture import LiveVideoWriter
                 writer = LiveVideoWriter(output, width, height, round(fps))
             else:
@@ -215,10 +226,13 @@ def main():
                                    seeking=not live and output is None and args.no_script, live=live)
         if not args.no_script:
             from gesture_script import ScriptRunner, parse_script
+            if output is not None:
+                from session_audio import SessionAudio
+                audio_recorder = SessionAudio(output)
             if not show:
                 raise ValueError("Spoken scripts require display playback; add --show or use --no-script")
             script = ScriptRunner(parse_script(args.script.read_text()), paused=lambda: player.paused,
-                                  tts=args.tts, voice=args.voice)
+                                  tts=args.tts, voice=args.voice, audio_recorder=audio_recorder)
             player.timeline.setToolTip("Seeking is disabled during a spoken script; use --no-script for free playback")
         polygon = np.array(args.roi, dtype=np.int32) if args.roi else None
         states = {}
@@ -255,6 +269,9 @@ def main():
                         continue
                     break
                 timestamp = capture.timestamp if live else frame_index / fps
+                recording_timestamp = capture.started + timestamp if live else time.monotonic()
+                if audio_recorder is not None and audio_recorder.started is None:
+                    audio_recorder.started = recording_timestamp
                 if live:
                     if capture.generation != capture_generation or (last_live_timestamp is not None and timestamp - last_live_timestamp > 1):
                         states.clear()
@@ -301,7 +318,8 @@ def main():
                             text += f" | Near vehicle: {near}"
                         color = (0, 180, 255) if active else (80, 210, 80)
                         if script is not None and track_id is not None:
-                            assessment, mismatch = script.assess(track_id, active, points, args.keypoint_confidence)
+                            assessment, mismatch = script.assess(track_id, active, points, args.keypoint_confidence,
+                                                                 box=box, timestamp=timestamp)
                             if assessment:
                                 label = assessment
                                 text = f"ID {track_id} | {assessment}"
@@ -321,8 +339,8 @@ def main():
                         del seen[track_id]
                         states.pop(track_id, None)
                 if writer is not None:
-                    if live:
-                        writer.write(canvas, timestamp)
+                    if timed_recording:
+                        writer.write(canvas, recording_timestamp)
                     else:
                         writer.write(canvas)
                 if player is not None:
@@ -346,8 +364,15 @@ def main():
             writer.release()
         if player is not None:
             player.close()
+        if audio_recorder is not None and writer is not None and processed_frames:
+            try:
+                if script.thread.is_alive():
+                    raise RuntimeError("Speech worker did not stop; cannot finalize audio safely")
+                audio_merged = audio_recorder.merge(output)
+            except Exception:
+                logging.getLogger("gesture_detection").exception("Audio merge failed; original silent recording preserved")
     if output is not None:
-        print(f"Saved {frame_index} frames: {output}\nLabels: {csv_path}\nOutput video has no audio.")
+        print(f"Saved {frame_index} frames: {output}\nLabels: {csv_path}\nAudio: {'speech and feedback included' if audio_merged else 'none'}.")
     else:
         print(f"Displayed {processed_frames} frames. No output files saved.")
 

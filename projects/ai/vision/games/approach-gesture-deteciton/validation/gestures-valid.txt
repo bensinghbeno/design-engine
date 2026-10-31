@@ -1,0 +1,13 @@
+Hello this is Vehicle Suspicious Gesture Detection Script!!
+[delay 10 sec]
+Left Hand Up
+[delay 3 sec]
+Stand Normal
+[delay 3 sec]
+Right Hand Up
+[delay 3 sec]
+Stand Normal
+[delay 3 sec]
+Left Leg Up
+[delay 3 sec]
+Okay, Thanks for your test !!

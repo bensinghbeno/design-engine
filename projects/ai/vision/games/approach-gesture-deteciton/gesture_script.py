@@ -38,6 +38,11 @@ def parse_script(text):
                 cues.append(Cue("delay", float(delay.group(1))))
             elif directive.lower().startswith("delay"):
                 raise ValueError(f"Invalid delay: [{directive}]")
+            elif directive.lower().startswith("read:"):
+                readout = directive.split(":", 1)[1].strip()
+                if not readout:
+                    raise ValueError("Read directive requires text")
+                cues.append(Cue("read", readout))
             else:
                 cues.append(Cue("visual", directive))
         else:
@@ -63,12 +68,13 @@ def required_visible(expected, points, threshold):
 
 
 class ScriptRunner:
-    def __init__(self, cues, paused=lambda: False, speaker=None, tts="neural", voice="en-US-AriaNeural"):
+    def __init__(self, cues, paused=lambda: False, speaker=None, tts="neural", voice="en-US-AriaNeural", audio_recorder=None):
         self.cues = cues
         self.paused = paused
         self.speaker = speaker or self.speak
         self.tts = tts
         self.voice = voice
+        self.audio_recorder = audio_recorder
         executable = "ffplay" if tts == "neural" else "spd-say"
         if speaker is None and shutil.which(executable) is None:
             raise RuntimeError(f"Speech requires {executable}, or use --no-script")
@@ -79,6 +85,7 @@ class ScriptRunner:
         self.phase = "Starting"
         self.caption = ""
         self.observations = {}
+        self.track_boxes = {}
         self.results = {}
         self.error = None
         self.process = None
@@ -145,12 +152,16 @@ class ScriptRunner:
                         process.kill()
                     if not self.stop_event.is_set():
                         raise RuntimeError("Speech service timed out")
+                    if self.audio_recorder is not None and command[0] == "ffplay":
+                        self.audio_recorder.record(command, started, time.monotonic())
                     return
             if process.returncode:
                 errors.seek(0)
                 detail = errors.read().decode(errors="replace").strip()
                 raise RuntimeError(detail[-1000:] or "Speech service failed")
             self.process = None
+            if self.audio_recorder is not None and command[0] == "ffplay":
+                self.audio_recorder.record(command, started, time.monotonic())
 
     def wait(self, seconds):
         remaining = seconds
@@ -173,17 +184,27 @@ class ScriptRunner:
                     pass
                 if self.stop_event.is_set():
                     return
-                if cue.kind == "speech":
+                if cue.kind in ("speech", "read"):
                     logging.getLogger("gesture_detection").info("Speaking prompt: %s", cue.value)
                     with self.lock:
-                        self.expected = cue.value if cue.value in GESTURES else None
+                        self.expected = cue.value if cue.kind == "speech" and cue.value in GESTURES else None
                         self.phase = "Speaking"
                         self.caption = str(cue.value)
                         self.observations.clear()
+                        self.track_boxes.clear()
                         self.results.clear()
                         self.feedback_pending.clear()
                         self.feedback_sent.clear()
                     self.speaker(str(cue.value))
+                    if self.stop_event.is_set():
+                        return
+                    if self.expected:
+                        with self.lock:
+                            self.phase = "Get ready"
+                        logging.getLogger("gesture_detection").info("Gesture grace period: 1 second")
+                        self.wait(1.0)
+                        if self.stop_event.is_set():
+                            return
                     with self.lock:
                         self.phase = "Respond"
                 elif cue.kind == "visual":
@@ -213,13 +234,40 @@ class ScriptRunner:
                 self.error = str(error)
                 self.phase = "Speech error"
 
-    def assess(self, track_id, labels, points, threshold):
+    def reassociate_track(self, track_id, box, timestamp):
+        if track_id not in self.track_boxes:
+            candidates = []
+            left, top, right, bottom = box
+            area = max(0, right - left) * max(0, bottom - top)
+            for previous_id, (previous_box, last_seen) in self.track_boxes.items():
+                if not .15 < timestamp - last_seen <= 2.0:
+                    continue
+                old_left, old_top, old_right, old_bottom = previous_box
+                overlap = (max(0, min(right, old_right) - max(left, old_left))
+                           * max(0, min(bottom, old_bottom) - max(top, old_top)))
+                old_area = max(0, old_right - old_left) * max(0, old_bottom - old_top)
+                union = area + old_area - overlap
+                if union > 0 and overlap / union >= .7:
+                    candidates.append(previous_id)
+            if len(candidates) == 1:
+                previous_id = candidates[0]
+                if previous_id in self.observations:
+                    self.observations[track_id] = self.observations.pop(previous_id)
+                if previous_id in self.results:
+                    self.results[track_id] = self.results.pop(previous_id)
+                del self.track_boxes[previous_id]
+                logging.getLogger("gesture_detection").info("Script track reassociation: %s -> %s", previous_id, track_id)
+        self.track_boxes[track_id] = (tuple(box), timestamp)
+
+    def assess(self, track_id, labels, points, threshold, box=None, timestamp=None):
         with self.lock:
             expected = self.expected
             if not expected or self.phase not in ("Respond", "Result"):
                 return "", False
             if expected not in SUPPORTED:
                 return f"Cannot verify: {expected} unsupported", False
+            if box is not None and timestamp is not None:
+                self.reassociate_track(track_id, box, timestamp)
             if self.phase == "Result":
                 status = self.results.get(track_id, "Cannot verify")
                 return f"{status} | Expected: {expected}", status == "Not performed"

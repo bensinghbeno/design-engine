@@ -2,7 +2,15 @@
 
 Local YOLO26-Pose inference with ByteTrack IDs, rule-based gestures, and MP4/CSV output.
 
+## Recording Regression
+
+`validation/session-20261030-194436.mp4` is the reference copied from the session used to diagnose missed Left Leg Up and Bend Down gestures. Run `.venv/bin/python -m unittest -v test_validation.py` to rerun YOLO26s-Pose on it. Local model weights are required; CUDA is used when available, otherwise CPU. This test does not open the remote camera, speak, or overwrite the last-run log.
+
+The test uses actual decoded video timestamps: Left Leg Up at 41.0-43.9 seconds, Bend Down at 80.0-82.6 seconds, and standing negative controls at 39.0-40.7 and 78.0-79.4 seconds. It samples approximately every 0.3 seconds and checks temporal confirmation. The recording contains burned-in annotations, so this is a regression reference, not an independent accuracy benchmark. The existing older video and gestures-valid.txt are preserved; this test does not claim to score the whole gesture script.
+
 ## Run
+
+Audio finalization temporarily ignores Ctrl+C; wait for `Audio merge completed`. Each recorded session now saves a matching `.audio.json` playback timeline as clips finish. If merging fails, retry with `.venv/bin/python session_audio.py output/session-NAME.mp4`. Keep the speech cache and timeline for this recovery. Older recordings without a timeline cannot be recovered exactly by this command. Force-killing the program can still prevent finalization.
 
 Record an annotated live-camera session while displaying it and running spoken prompts:
 
@@ -10,7 +18,9 @@ Record an annotated live-camera session while displaying it and running spoken p
 .venv/bin/python detect_gestures.py --ssh-camera ben@10.0.0.226 --camera-device /dev/video2 --device 0 --skeleton --script gestures.txt --output "output/session-$(date +%Y%m%d-%H%M%S).mp4"
 ```
 
-Live recordings preserve receive-time spacing between processed frames, including pauses/gaps, instead of speeding up dropped frames. The MP4 contains the annotated video image (boxes, labels and optional skeleton), not window controls or the prompt-status widget. It has no audio. A matching CSV records detections. Close the window or press q/Escape to finalize the MP4; force-killing the process may leave it incomplete. Existing files are not overwritten.
+Live recordings preserve receive-time spacing between processed frames, including pauses/gaps, instead of speeding up dropped frames. The MP4 contains the annotated video image (boxes, labels and optional skeleton), not window controls or the prompt-status widget. Neural speech and feedback tones are merged as AAC audio when recording ends. A matching CSV records detections. Close the window, press q/Escape, or press Ctrl+C once and wait for finalization; force-killing the process may leave it incomplete. Existing files are not overwritten.
+
+Audio recording uses the exact speech clips and generated tones, aligned to audio-player launch timestamps. Device playback latency may cause a small synchronization offset. Microphone, source-video audio, and other system sounds are not captured. Scripted file recordings also use real playback timing to keep narration aligned. FFmpeg is required; --tts system is not supported with scripted recording. With --no-script or no played audio, recordings remain silent. On merge failure, the original silent video is preserved and the error is logged.
 
 Each command-line invocation overwrites `last_run.log` beside the script. It mirrors Python console output and records the command, timestamps, exit status, Python tracebacks, speech prompts/results, and remote camera errors/reconnections. It is flushed during the run and ignored by Git. Native-library output written directly to OS file descriptors and hard process crashes are not captured by this Python logger. The log may contain script text and hostnames; review it before sharing. Only the latest run is kept, so inspect it before rerunning.
 
@@ -19,9 +29,9 @@ Each command-line invocation overwrites `last_run.log` beside the script. It mir
 .venv/bin/python detect_gestures.py /path/to/video.mp4 --output output/annotated.mp4
 ```
 
-By default, the annotated video appears in a resizable display window and no MP4 or CSV is saved. Press q or Escape, or close the window, to stop. Use --output to explicitly save an MP4 and matching CSV; add --show to display while saving. Existing outputs are never overwritten. CSV rows contain frame number, video time, tracking ID, gesture labels, an approximate orientation hint, ROI membership, and box coordinates. Multiple compatible gestures can appear together. The output MP4 has no audio. Timing assumes a constant-frame-rate input.
+By default, the annotated video appears in a resizable display window and no MP4 or CSV is saved. Press q or Escape, or close the window, to stop. Use --output to explicitly save an MP4 and matching CSV; add --show to display while saving a file. Existing outputs are never overwritten. CSV rows contain frame number, video time, tracking ID, gesture labels, an approximate orientation hint, ROI membership, and box coordinates. Multiple compatible gestures can appear together. Source-video timing assumes a constant-frame-rate input.
 
-The player has a play/pause button, FPS textbox with Apply (or Enter), three-second backward/forward buttons, and a seek bar with elapsed/total seconds. Space toggles playback when the video window has focus outside the textbox. FPS is a target presentation rate (0 < FPS <= 240), limited by inference speed; it does not change source timestamps or saved video FPS. Seeking preserves pause state and resets tracking and gesture history. At the end, seek backward or press Play to restart. Seeking is disabled while saving output to preserve sequential export. Playback has no audio.
+The file player has a play/pause button, FPS textbox with Apply (or Enter), three-second backward/forward buttons, and a seek bar with elapsed/total seconds. Space toggles playback when the video window has focus outside the textbox. FPS is a target presentation rate (0 < FPS <= 240), limited by inference speed; it does not change source timestamps. Seeking preserves pause state and resets tracking and gesture history. At the end, seek backward or press Play to restart. Seeking is disabled while saving output to preserve sequential export. Source-video audio is not played.
 
 Options:
 
@@ -49,7 +59,7 @@ The player reads gestures.txt on a background thread by default. Neural speech u
 
 Use `--tts system` for the older offline Speech Dispatcher voice, or `--no-script` to disable narration and restore free seeking. There is no silent fallback to the system voice if neural synthesis fails; errors appear in the player. A first-time synthesis request may delay a prompt while video continues playing.
 
-Everything inside square brackets is excluded from speech. `[delay 3 sec]` waits three seconds; other bracketed cues appear as visual captions, not arbitrary animated effects. Exact supported gesture names set the expected action. A wrong detected gesture produces a red box; a visible person who misses the following delay deadline gets a red Not performed result for one second. Hidden required joints produce Cannot verify. Results are per tracking ID, and a successful gesture is remembered for its response window.
+`[Read: Perform Action]` speaks "Perform Action" without setting a validation target. `[Read: Perform Action] Left Hand Up` speaks the readout, then the gesture name, then waits a one-second grace period before evaluating Left Hand Up. `[delay 3 sec]` provides the following three-second response window. Other bracketed cues remain display-only visual captions. Exact supported gesture names outside brackets set the expected action. A wrong detected gesture produces a red box; a visible person who misses the following delay deadline gets a red Not performed result for one second. Hidden required joints produce Cannot verify. Results are per tracking ID, and a successful gesture is remembered for its response window.
 
 Delays use wall-clock playback time and freeze while paused; a sentence already playing may finish. Seeking is disabled during scripted tests. Prerecorded video must already align with prompt timing; speech cannot change what the recorded person does. Turn prompts are not supported for compliance checking. Use --no-script for headless export, or --show for a spoken test.
 

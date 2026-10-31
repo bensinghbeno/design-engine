@@ -28,6 +28,28 @@ class GestureTests(unittest.TestCase):
         points[15][1] = 260
         self.assertEqual(classify_pose(points)[0], {"Left Leg Up"})
 
+    def test_foot_lift_without_high_knee(self):
+        points = self.pose()
+        points[13][1] = 265
+        points[15][1] = 315
+        self.assertIn("Left Leg Up", classify_pose(points)[0])
+        points[15][1] = 340
+        self.assertNotIn("Left Leg Up", classify_pose(points)[0])
+        points[15][1] = 315
+        points[15][2] = 0
+        self.assertNotIn("Left Leg Up", classify_pose(points)[0])
+
+    def test_forward_bend_without_sideways_lean(self):
+        points = self.pose()
+        points[5][:2] = (70, 170)
+        points[6][:2] = (130, 170)
+        self.assertIn("Bend Down", classify_pose(points)[0])
+        points[13][2] = 0
+        self.assertNotIn("Bend Down", classify_pose(points)[0])
+        points[13][2] = 1
+        points[13][1] = points[14][1] = 210
+        self.assertNotIn("Bend Down", classify_pose(points)[0])
+
     def test_stand_normal(self):
         from gesture_script import ScriptRunner, required_visible
         points = self.pose()
@@ -75,6 +97,52 @@ class GestureTests(unittest.TestCase):
 
 
 class RecordingTests(unittest.TestCase):
+    def test_audio_journal_and_interrupt_protection(self):
+        import json
+        import os
+        import signal
+        import tempfile
+        from pathlib import Path
+        from session_audio import SessionAudio
+        with tempfile.TemporaryDirectory() as directory:
+            audio = SessionAudio(Path(directory) / "session.mp4")
+            audio.started = 10
+            audio.record(["ffplay", "clip.mp3"], 11, 12)
+            self.assertEqual(json.loads(audio.journal.read_text())[0][:2], [1, 1])
+            previous = signal.getsignal(signal.SIGINT)
+
+            def merge(video):
+                os.kill(os.getpid(), signal.SIGINT)
+                return True
+
+            audio._merge = merge
+            self.assertTrue(audio.merge("unused.mp4"))
+            self.assertEqual(signal.getsignal(signal.SIGINT), previous)
+
+    def test_audio_timeline_mux(self):
+        import tempfile
+        from pathlib import Path
+        import av
+        import numpy as np
+        from live_capture import LiveVideoWriter
+        from session_audio import SessionAudio
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "session.mp4"
+            writer = LiveVideoWriter(path, 320, 240, 10)
+            for index in range(20):
+                writer.write(np.zeros((240, 320, 3), dtype=np.uint8), index / 10)
+            writer.release()
+            audio = SessionAudio()
+            audio.started = 100
+            audio.record(["ffplay", "-f", "lavfi", "sine=frequency=880:duration=0.3"], 100.5, 100.8)
+            self.assertTrue(audio.merge(path))
+            with av.open(str(path)) as container:
+                self.assertEqual(len(container.streams.video), 1)
+                self.assertEqual(container.streams.audio[0].codec_context.name, "aac")
+                samples = np.concatenate([frame.to_ndarray().ravel() for frame in container.decode(audio=0)])
+                self.assertLess(float(np.max(np.abs(samples[:8000]))), .001)
+                self.assertGreater(float(np.max(np.abs(samples))), .01)
+
     def test_live_recording_timestamps(self):
         import tempfile
         from pathlib import Path
@@ -119,6 +187,106 @@ class RunLogTests(unittest.TestCase):
 
 
 class SpeechTests(unittest.TestCase):
+    def test_readout_then_gesture_grace_and_validation(self):
+        from gesture_script import ScriptRunner, parse_script
+        events = []
+        runner = ScriptRunner(parse_script("[Read: Perform Action] Left Hand Up\n[delay 3 sec]"),
+                              speaker=lambda text: events.append(("spoken", text)))
+        runner.play_feedback = lambda outcome: events.append(("feedback", outcome))
+
+        def wait(seconds):
+            events.append((runner.phase, seconds))
+            if runner.phase == "Respond":
+                runner.assess(1, {"Left Hand Up"}, [[0, 0, 1] for _ in range(17)], .5)
+            runner.drain_feedback()
+
+        runner.wait = wait
+        runner.run()
+        self.assertIsNone(runner.error)
+        self.assertEqual(events, [("spoken", "Perform Action"), ("spoken", "Left Hand Up"),
+                                  ("Get ready", 1.0), ("Respond", 3.0),
+                                  ("feedback", "success"), ("Result", 1.0)])
+        self.assertEqual(runner.results, {1: "Matched"})
+
+    def test_readout_is_not_a_validation_target(self):
+        from gesture_script import ScriptRunner, parse_script
+        spoken = []
+        runner = ScriptRunner(parse_script("[read: Left Hand Up]"), speaker=spoken.append)
+        runner.run()
+        self.assertIsNone(runner.error)
+        self.assertEqual(spoken, ["Left Hand Up"])
+        self.assertIsNone(runner.expected)
+        with self.assertRaises(ValueError):
+            parse_script("[Read: ]")
+
+    def test_recorded_bend_track_change_preserves_success(self):
+        from gesture_script import ScriptRunner, parse_script
+        runner = ScriptRunner(parse_script("Bend Down\n[delay 3 sec]"), speaker=lambda text: None)
+        points = [[0, 0, 1] for _ in range(17)]
+        played = []
+        runner.play_feedback = played.append
+
+        def wait(seconds):
+            if runner.phase == "Respond":
+                runner.assess(1, {"Bend Down"}, points, .5,
+                              box=(604, 302, 698, 463), timestamp=83.419)
+                status, mismatch = runner.assess(17, set(), points, .5,
+                                                box=(605, 303, 695, 463), timestamp=84.782)
+                self.assertEqual(status, "Matched: Bend Down")
+                self.assertFalse(mismatch)
+            runner.drain_feedback()
+
+        runner.wait = wait
+        runner.run()
+        self.assertIsNone(runner.error)
+        self.assertEqual(runner.results, {17: "Matched"})
+        self.assertEqual(played, ["success"])
+
+    def test_track_reassociation_does_not_merge_unrelated_people(self):
+        from gesture_script import ScriptRunner
+        points = [[0, 0, 1] for _ in range(17)]
+        for box, timestamp, ambiguous in (
+            ((800, 302, 894, 463), 84.782, False),
+            ((604, 302, 698, 463), 86.0, False),
+            ((604, 302, 698, 463), 83.419, False),
+            ((604, 302, 698, 463), 84.782, True),
+        ):
+            with self.subTest(box=box, timestamp=timestamp, ambiguous=ambiguous):
+                runner = ScriptRunner([], speaker=lambda text: None)
+                runner.expected = "Bend Down"
+                runner.phase = "Respond"
+                runner.assess(1, {"Bend Down"}, points, .5,
+                              box=(604, 302, 698, 463), timestamp=83.419)
+                if ambiguous:
+                    runner.assess(2, set(), points, .5,
+                                  box=(604, 302, 698, 463), timestamp=83.419)
+                runner.assess(17, set(), points, .5, box=box, timestamp=timestamp)
+                self.assertEqual(runner.observations[17], (False, True))
+                self.assertEqual(runner.observations[1], (True, True))
+
+    def test_grace_period_ignores_poses_before_response(self):
+        from gesture_script import ScriptRunner, parse_script
+        runner = ScriptRunner(parse_script("Hello\nLeft Hand Up\n[delay 3 sec]"), speaker=lambda text: None)
+        waits = []
+        points = [[0, 0, 1] for _ in range(17)]
+        runner.play_feedback = lambda outcome: None
+
+        def wait(seconds):
+            waits.append((runner.phase, seconds))
+            if runner.phase == "Get ready":
+                for label in ("Stand Normal", "Left Hand Up"):
+                    self.assertEqual(runner.assess(1, {label}, points, .5), ("", False))
+                self.assertEqual(runner.observations, {})
+                self.assertEqual(runner.feedback_pending, [])
+            elif runner.phase == "Respond":
+                runner.assess(1, {"Left Hand Up"}, points, .5)
+
+        runner.wait = wait
+        runner.run()
+        self.assertIsNone(runner.error)
+        self.assertEqual(waits, [("Get ready", 1.0), ("Respond", 3.0), ("Result", 1.0)])
+        self.assertEqual(runner.results, {1: "Matched"})
+
     def test_feedback_once_per_outcome(self):
         from gesture_script import ScriptRunner
         runner = ScriptRunner([], speaker=lambda text: None)
