@@ -236,6 +236,81 @@ class RunLogTests(unittest.TestCase):
 
 
 class SpeechTests(unittest.TestCase):
+    def test_scripted_intro_waits_before_welcome(self):
+        import threading
+        from gesture_script import ScriptRunner, parse_script
+        spoken = []
+        waiting = threading.Event()
+        runner = ScriptRunner(parse_script(
+            "[Load:Intro Video]\n[Load:Intro Image][Read:Welcome]\n[delay 5 sec]"),
+            speaker=lambda text: None)
+        runner.speaker = lambda text: spoken.append((text, runner.gesture_image()))
+        runner.wait = lambda seconds: None
+        original_wait = runner.video_done.wait
+
+        def wait_for_video(timeout):
+            waiting.set()
+            return original_wait(timeout)
+
+        runner.video_done.wait = wait_for_video
+        runner.thread.start()
+        try:
+            self.assertTrue(waiting.wait(2))
+            self.assertEqual(spoken, [])
+            self.assertEqual(runner.take_video_request(), "Intro Video")
+            self.assertIsNone(runner.take_video_request())
+            runner.video_done.set()
+            runner.thread.join(timeout=2)
+            self.assertFalse(runner.thread.is_alive())
+            self.assertIsNone(runner.error)
+            self.assertEqual(spoken, [("Welcome", "Intro Image")])
+        finally:
+            runner.close()
+
+    def test_load_intro_image_with_readout(self):
+        from gesture_script import ScriptRunner, parse_script
+        observed = []
+        runner = ScriptRunner(parse_script(
+            "[Load:Intro Image][Read:Welcome]\n[delay 5 sec]\n[Read: Machee Says] Left Hand Up"),
+            speaker=lambda text: None)
+        runner.speaker = lambda text: observed.append((text, runner.gesture_image()))
+        runner.wait = lambda seconds: observed.append((seconds, runner.gesture_image()))
+        runner.run()
+        self.assertIsNone(runner.error)
+        self.assertEqual(observed, [("Welcome", "Intro Image"), (5.0, "Intro Image"),
+                                    ("Machee Says", "Left Hand Up"), ("Left Hand Up", "Left Hand Up"),
+                                    (1.0, "Left Hand Up")])
+        with self.assertRaises(ValueError):
+            parse_script("[Load:Unknown]")
+
+    def test_corrected_mistake_still_shows_failure_review(self):
+        import numpy as np
+        from gesture_script import ScriptRunner, parse_script
+        runner = ScriptRunner(parse_script("Right Leg Up\n[delay 3 sec]"),
+                              speaker=lambda text: None, failure_screen=True)
+        runner.play_feedback = lambda outcome: None
+        runner.failure_done.wait = lambda timeout: True
+        points = [[0, 0, 1] for _ in range(17)]
+        frame = np.full((20, 20, 3), 123, dtype=np.uint8)
+
+        def wait(seconds):
+            if runner.phase == "Respond":
+                runner.assess(1, {"Right Leg Up"}, points, .5,
+                              box=(50, 0, 70, 20), timestamp=1, frame=frame)
+                runner.assess(2, {"Stand Normal"}, points, .5,
+                              box=(0, 0, 20, 20), timestamp=1, frame=frame)
+                runner.assess(3, {"Right Leg Up"}, points, .5,
+                              box=(0, 0, 20, 20), timestamp=1.5, frame=frame * 0)
+
+        runner.wait = wait
+        runner.run()
+        self.assertIsNone(runner.error)
+        self.assertEqual(runner.results, {1: "Matched", 3: "Matched"})
+        expected, failed = runner.take_failure_request()
+        self.assertEqual(expected, "Right Leg Up")
+        self.assertEqual(set(failed), {3})
+        self.assertTrue((failed[3] == 123).all())
+
     def test_machee_says_hold_previous_pose(self):
         from gesture_script import ScriptRunner, parse_script
         import numpy as np
@@ -525,6 +600,23 @@ class SpeechTests(unittest.TestCase):
 
 
 class PlaybackTests(unittest.TestCase):
+    def test_intro_image_persists_over_camera_frames(self):
+        import numpy as np
+        from playback import create_player
+        player = create_player(30, 100, live=True)
+        try:
+            player.set_gesture("Intro Image")
+            player.display(np.zeros((60, 80, 3), dtype=np.uint8), 0)
+            self.assertIsNotNone(player.intro_image)
+            self.assertFalse(player.intro_image.isNull())
+            self.assertTrue(player.gesture_image.isHidden())
+            self.assertGreater(player.image.pixmap().width(), 0)
+            player.set_gesture("Left Hand Up")
+            self.assertIsNone(player.intro_image)
+            self.assertFalse(player.gesture_image.isHidden())
+        finally:
+            player.close()
+
     def test_failure_clip_completion_restores_player(self):
         from pathlib import Path
         from types import SimpleNamespace

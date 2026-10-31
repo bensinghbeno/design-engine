@@ -38,6 +38,12 @@ def parse_script(text):
                 cues.append(Cue("delay", float(delay.group(1))))
             elif directive.lower().startswith("delay"):
                 raise ValueError(f"Invalid delay: [{directive}]")
+            elif directive.lower().startswith("load:"):
+                image = directive.split(":", 1)[1].strip()
+                media = {"intro image": "Intro Image", "intro video": "Intro Video"}
+                if image.casefold() not in media:
+                    raise ValueError(f"Unknown media: {image}")
+                cues.append(Cue("load", media[image.casefold()]))
             elif directive.lower().startswith("read:"):
                 readout = directive.split(":", 1)[1].strip()
                 if not readout:
@@ -88,13 +94,17 @@ class ScriptRunner:
         self.thread = threading.Thread(target=self.run, name="gesture-speech", daemon=True)
         self.expected = None
         self.reference_gesture = None
+        self.loaded_image = None
         self.phase = "Starting"
         self.caption = ""
         self.observations = {}
         self.track_boxes = {}
         self.person_frames = {}
+        self.mistake_frames = {}
         self.failure_screen = failure_screen
         self.failure_request = None
+        self.video_request = None
+        self.video_done = threading.Event()
         self.failure_done = threading.Event()
         self.results = {}
         self.error = None
@@ -231,11 +241,18 @@ class ScriptRunner:
                                 if following.kind == "speech" and following.value in SUPPORTED:
                                     self.reference_gesture = following.value
                                 break
+                        if self.reference_gesture is not None:
+                            self.loaded_image = None
+                        elif cue.kind == "read":
+                            self.reference_gesture = self.loaded_image
+                        else:
+                            self.loaded_image = None
                         self.phase = "Speaking"
                         self.caption = str(cue.value)
                         self.observations.clear()
                         self.track_boxes.clear()
                         self.person_frames.clear()
+                        self.mistake_frames.clear()
                         self.results.clear()
                         self.feedback_pending.clear()
                         self.feedback_sent.clear()
@@ -251,6 +268,21 @@ class ScriptRunner:
                             return
                     with self.lock:
                         self.phase = "Respond"
+                elif cue.kind == "load":
+                    if cue.value == "Intro Video":
+                        with self.lock:
+                            self.phase = "Intro video"
+                            self.loaded_image = None
+                            self.reference_gesture = None
+                            self.video_done.clear()
+                            self.video_request = str(cue.value)
+                        while not self.video_done.wait(.05):
+                            if self.stop_event.is_set():
+                                return
+                    else:
+                        with self.lock:
+                            self.loaded_image = str(cue.value)
+                            self.reference_gesture = self.loaded_image
                 elif cue.kind == "visual":
                     with self.lock:
                         self.caption = str(cue.value)
@@ -278,7 +310,9 @@ class ScriptRunner:
                                 failed = {track_id: self.person_frames[track_id]
                                           for track_id, result in self.results.items()
                                           if result == "Not performed" and track_id in self.person_frames}
+                                failed.update(self.mistake_frames)
                                 if failed:
+                                    logging.getLogger("gesture_detection").info("Failure review: expected=%s tracks=%s", self.expected, sorted(failed))
                                     self.phase = "Failure review"
                                     self.failure_done.clear()
                                     self.failure_request = (self.expected, failed)
@@ -318,6 +352,8 @@ class ScriptRunner:
                     self.results[track_id] = self.results.pop(previous_id)
                 if previous_id in self.person_frames:
                     self.person_frames[track_id] = self.person_frames.pop(previous_id)
+                if previous_id in self.mistake_frames:
+                    self.mistake_frames[track_id] = self.mistake_frames.pop(previous_id)
                 if previous_id in self.pose_changes:
                     self.pose_changes.remove(previous_id)
                     self.pose_changes.add(track_id)
@@ -354,6 +390,8 @@ class ScriptRunner:
                 crop = frame[max(0, top):min(height, bottom), max(0, left):min(width, right)]
                 if crop.size:
                     self.person_frames[track_id] = crop.copy()
+                    if labels and track_id not in self.mistake_frames:
+                        self.mistake_frames[track_id] = crop.copy()
             if matched:
                 if self.hold_previous:
                     return f"Holding: {expected}", False
@@ -368,6 +406,12 @@ class ScriptRunner:
                 self.queue_feedback("wrong")
                 return f"Wrong gesture: {', '.join(sorted(labels))} | Expected: {expected}", True
             return f"Waiting for: {expected}", False
+
+    def take_video_request(self):
+        with self.lock:
+            request = self.video_request
+            self.video_request = None
+            return request
 
     def take_failure_request(self):
         with self.lock:

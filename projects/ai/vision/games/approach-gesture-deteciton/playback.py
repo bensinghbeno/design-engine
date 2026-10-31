@@ -77,6 +77,7 @@ class PlaybackWindow(QWidget):
         self.ended = False
         self.pixmap = None
         self.gesture_pixmap = None
+        self.intro_image = None
         self.current_gesture = None
         self.deadline = 0.0
         self.setWindowTitle("Gesture detection")
@@ -223,8 +224,9 @@ class PlaybackWindow(QWidget):
             self.gesture_image.setPixmap(self.gesture_pixmap.scaled(
                 self.gesture_image.size(), Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation))
-        if self.pixmap is not None:
-            self.image.setPixmap(self.pixmap.scaled(self.image.size(), Qt.AspectRatioMode.KeepAspectRatio,
+        source = self.intro_image if self.intro_image is not None else self.pixmap
+        if source is not None:
+            self.image.setPixmap(source.scaled(self.image.size(), Qt.AspectRatioMode.KeepAspectRatio,
                                                    Qt.TransformationMode.SmoothTransformation))
 
     def failure_grid(self, failed):
@@ -271,10 +273,11 @@ class PlaybackWindow(QWidget):
                 if intro_clip is not None:
                     control.hide()
             if intro_clip is not None:
+                self.intro_image = None
                 self.script_status.hide()
                 self.gesture_image.hide()
             else:
-                self.script_status.setText(f"Not performed: {expected}")
+                self.script_status.setText(f"Gesture review: {expected}")
                 self.gesture_image.show()
             self.image_layout.activate()
             if intro_clip is None:
@@ -339,8 +342,16 @@ class PlaybackWindow(QWidget):
         if gesture == self.current_gesture:
             return
         self.current_gesture = gesture
+        self.intro_image = None
         self.gesture_pixmap = None
         self.gesture_image.clear()
+        if gesture == "Intro Image":
+            path = Path(__file__).parent / "intro" / "intro-image.jpeg"
+            pixmap = QPixmap(str(path))
+            if pixmap.isNull():
+                self.error.setText(f"Cannot load intro image: {path}")
+            else:
+                self.intro_image = pixmap
         if gesture in {"Left Hand Up", "Right Hand Up", "Both Hands Up", "Left Leg Up",
                        "Right Leg Up", "Stand Normal", "Bend Down"}:
             path = Path(__file__).parent / "gesture-images" / (gesture.lower().replace(" ", "-") + ".png")

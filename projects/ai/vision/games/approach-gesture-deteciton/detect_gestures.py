@@ -282,11 +282,15 @@ def main():
                 writer = cv2.VideoWriter(str(output), cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
                 if not writer.isOpened():
                     raise RuntimeError("Could not open MP4 encoder")
+        cues = None
+        if not args.no_script:
+            from gesture_script import ScriptRunner, parse_script
+            cues = parse_script(args.script.read_text())
         if show:
             from playback import create_player
             player = create_player(fps, int(capture.get(cv2.CAP_PROP_FRAME_COUNT)),
                                    seeking=not live and output is None and args.no_script, live=live)
-            if not args.no_intro:
+            if not args.no_intro and not any(cue.kind == "load" and cue.value == "Intro Video" for cue in (cues or [])):
                 play_intro(player)
                 if player.closed:
                     return
@@ -297,7 +301,7 @@ def main():
                 audio_recorder = SessionAudio(output)
             if not show:
                 raise ValueError("Spoken scripts require display playback; add --show or use --no-script")
-            script = ScriptRunner(parse_script(args.script.read_text()), paused=lambda: player.paused,
+            script = ScriptRunner(cues, paused=lambda: player.paused,
                                   tts=args.tts, voice=args.voice, audio_recorder=audio_recorder, failure_screen=True)
             player.timeline.setToolTip("Seeking is disabled during a spoken script; use --no-script for free playback")
         polygon = np.array(args.roi, dtype=np.int32) if args.roi else None
@@ -309,6 +313,13 @@ def main():
                 log.writerow(["frame", "seconds", "track_id", "gestures", "orientation_hint", "near_vehicle", "x1", "y1", "x2", "y2"])
             while not args.max_frames or processed_frames < args.max_frames:
                 if player is not None:
+                    if script is not None and script.take_video_request() is not None:
+                        try:
+                            play_intro(player)
+                        finally:
+                            if player.closed:
+                                script.stop_event.set()
+                            script.video_done.set()
                     failure = script.take_failure_request() if script is not None else None
                     if failure is not None:
                         try:
