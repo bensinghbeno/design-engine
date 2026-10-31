@@ -303,7 +303,7 @@ class PlaybackWindow(QWidget):
         painter.end()
         return grid
 
-    def show_scores(self, entries):
+    def show_scores(self, entries, save_path=None):
         self.set_gesture(None)
         self.score_entries = entries
         self.score_cache = None
@@ -311,6 +311,14 @@ class PlaybackWindow(QWidget):
         self.script_status.show()
         self.update_image()
         QApplication.instance().processEvents()
+
+        if save_path is not None:
+            save_path = Path(save_path)
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+            temporary = save_path.with_suffix(".tmp.png")
+            if not self.render_scores().save(str(temporary), "PNG"):
+                raise OSError(f"Could not save scores image: {save_path}")
+            temporary.replace(save_path)
 
     def render_scores(self):
         width, height = self.image.width(), self.image.height()

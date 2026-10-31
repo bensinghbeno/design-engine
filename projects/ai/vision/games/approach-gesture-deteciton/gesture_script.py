@@ -398,9 +398,38 @@ class ScriptRunner:
             unique = []
             for row in ranked:
                 if not any(self.similar_participant_photos(row["photo"], kept["photo"])
-                           or self.partial_image_match(row["photo"], kept["photo"]) for kept in unique):
+                           or self.partial_image_match(row["photo"], kept["photo"])
+                           or self.color_pattern_match(row["photo"], kept["photo"]) for kept in unique):
                     unique.append(row)
             return unique
+
+    @staticmethod
+    def color_pattern_match(first, second):
+        if first is None or second is None or not first.size or not second.size:
+            return False
+        import cv2
+        import numpy as np
+        patterns = []
+        for photo in (first, second):
+            hsv = cv2.cvtColor(photo, cv2.COLOR_BGR2HSV)
+            mask = cv2.inRange(hsv, (0, 60, 40), (179, 255, 255))
+            if np.mean(mask > 0) < .25:
+                return False
+            histogram = cv2.calcHist([hsv], [0, 1], mask, [18, 8], [0, 180, 0, 256])
+            histogram = cv2.normalize(histogram, histogram, 1, 0, cv2.NORM_L1)
+            centers = {}
+            for hue in np.flatnonzero(histogram.sum(axis=1) >= .1):
+                vertical, _ = np.nonzero((mask > 0) & (hsv[:, :, 0] // 10 == hue))
+                centers[int(hue)] = float(vertical.mean() / photo.shape[0])
+            patterns.append((histogram, centers))
+        first_histogram, first_centers = patterns[0]
+        second_histogram, second_centers = patterns[1]
+        if cv2.compareHist(first_histogram, second_histogram, cv2.HISTCMP_BHATTACHARYYA) > .25:
+            return False
+        shared = sorted(first_centers.keys() & second_centers.keys())
+        if len(shared) < 2 or shared[-1] - shared[0] < 2:
+            return False
+        return all(abs(first_centers[hue] - second_centers[hue]) <= .25 for hue in shared)
 
     @staticmethod
     def partial_image_match(first, second):

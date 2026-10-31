@@ -248,14 +248,16 @@ def load_script(path, no_intro=False):
 def main():
     parser = build_parser()
     args = parse_arguments(parser)
-    live = args.ssh_camera is not None
-    if live == (args.video is not None):
-        parser.error("Provide either a video file or --ssh-camera USER@HOST")
+    live = args.video is None
+    if args.ssh_camera is not None and args.video is not None:
+        parser.error("Provide either a video file or --ssh-camera USER@HOST, not both")
     if live and args.start_seconds is not None:
         parser.error("start-seconds is only supported for video input")
     start_seconds = 0 if live else video_start_seconds(args.video, args.start_seconds)
     if min(args.camera_width, args.camera_height, args.camera_fps) <= 0:
         parser.error("Camera dimensions and FPS must be positive")
+    if live and args.ssh_camera is None and not Path(args.camera_device).exists():
+        parser.error(f"Local camera does not exist: {args.camera_device}; connect the webcam or update camera-device")
     if not live and not args.video.is_file():
         parser.error(f"Video does not exist: {args.video}")
     if args.hold <= 0 or args.release < 0 or args.imgsz <= 0 or args.max_frames < 0:
@@ -263,6 +265,8 @@ def main():
     if not all(0 < threshold <= 1 for threshold in (args.confidence, args.keypoint_confidence)):
         parser.error("Confidence thresholds must be in (0, 1]")
     output = args.output
+    scores_path = (output.with_suffix(".scores.png") if output is not None else
+                   Path("output") / f"session-{datetime.now():%Y%m%d-%H%M%S-%f}.scores.png")
     if output is not None and not args.no_script and args.tts == "system":
         parser.error("Recording spoken audio requires --tts gtts (default) or neural; system speech cannot be captured")
     show = live or args.show or output is None
@@ -288,8 +292,8 @@ def main():
     if model.task != "pose":
         parser.error("Choose a YOLO pose model")
     if live:
-        from live_capture import SSHCamera
-        capture = SSHCamera(args.ssh_camera, args.camera_device, args.camera_width, args.camera_height, args.camera_fps)
+        from live_capture import LiveCamera
+        capture = LiveCamera(args.ssh_camera, args.camera_device, args.camera_width, args.camera_height, args.camera_fps)
     else:
         capture = cv2.VideoCapture(str(args.video))
     writer = None
@@ -363,9 +367,9 @@ def main():
                     if presentation is not None:
                         try:
                             if presentation == "show scores":
-                                player.show_scores(script.scores())
+                                player.show_scores(script.scores(), save_path=scores_path)
                             elif presentation == "play congrats":
-                                player.show_scores(script.scores())
+                                player.show_scores(script.scores(), save_path=scores_path)
                                 player.show_failures(None, {}, congrats=True)
                             else:
                                 play_intro(player)

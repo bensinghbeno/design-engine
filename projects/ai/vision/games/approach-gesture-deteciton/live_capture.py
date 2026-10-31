@@ -1,4 +1,4 @@
-"""Latest-frame USB camera capture through an authenticated SSH pipe."""
+"""Latest-frame USB camera capture through local or SSH FFmpeg pipes."""
 
 import re
 import logging
@@ -44,7 +44,7 @@ class LiveVideoWriter:
 
 
 def camera_command(host, device, width, height, fps):
-    if not re.fullmatch(r"[A-Za-z0-9_.-]+@[A-Za-z0-9][A-Za-z0-9_.-]*", host):
+    if host is not None and not re.fullmatch(r"[A-Za-z0-9_.-]+@[A-Za-z0-9][A-Za-z0-9_.-]*", host):
         raise ValueError("SSH host must be user@hostname or user@IPv4-address")
     if not re.fullmatch(r"/dev/video\d+", device):
         raise ValueError("Camera device must be /dev/videoN")
@@ -52,12 +52,14 @@ def camera_command(host, device, width, height, fps):
               "-f", "v4l2", "-input_format", "mjpeg", "-framerate", str(fps),
               "-video_size", f"{width}x{height}", "-i", device,
               "-an", "-c:v", "copy", "-f", "image2pipe", "pipe:1"]
+    if host is None:
+        return remote
     return ["ssh", "-T", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10",
             "-o", "ServerAliveInterval=3", "-o", "ServerAliveCountMax=2",
             host, shlex.join(remote)]
 
 
-class SSHCamera:
+class LiveCamera:
     def __init__(self, host, device="/dev/video2", width=1280, height=720, fps=30):
         self.command = camera_command(host, device, width, height, fps)
         self.width, self.height, self.fps = width, height, fps
@@ -66,12 +68,12 @@ class SSHCamera:
         self.latest = None
         self.process = None
         self.error = None
-        self.status = "Connecting to remote webcam"
+        self.status = "Connecting to remote webcam" if host is not None else "Connecting to local webcam"
         self.started = time.monotonic()
         self.last_received = self.started
         self.timestamp = 0.0
         self.generation = 0
-        self.thread = threading.Thread(target=self.receive, name="ssh-camera", daemon=True)
+        self.thread = threading.Thread(target=self.receive, name="live-camera", daemon=True)
         self.thread.start()
 
     def receive(self):
@@ -80,7 +82,7 @@ class SSHCamera:
             for attempt in range(3):
                 if self.stop.is_set():
                     return
-                logging.getLogger("gesture_detection").info("SSH camera connection attempt %s/3", attempt + 1)
+                logging.getLogger("gesture_detection").info("Camera connection attempt %s/3", attempt + 1)
                 with tempfile.TemporaryFile() as errors:
                     try:
                         process = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=errors)
@@ -122,10 +124,10 @@ class SSHCamera:
                     errors.seek(0)
                     detail = errors.read().decode(errors="replace").strip()
                     if detail:
-                        logging.getLogger("gesture_detection").warning("Remote camera stderr: %s", detail)
+                        logging.getLogger("gesture_detection").warning("Camera stderr: %s", detail)
                 if self.stop.wait(1):
                     return
-            self.error = f"Remote camera disconnected after three attempts. {detail or self.status}"
+            self.error = f"Camera disconnected after three attempts. {detail or self.status}"
         except Exception as error:
             logging.getLogger("gesture_detection").exception("Camera worker failed")
             self.error = str(error)
@@ -155,3 +157,6 @@ class SSHCamera:
             if self.process is not None and self.process.poll() is None:
                 self.process.terminate()
         self.thread.join(timeout=5)
+
+
+SSHCamera = LiveCamera

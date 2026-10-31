@@ -60,6 +60,12 @@ Options:
 
 ## Spoken Prompts
 
+With no video input or `ssh-camera`, the app opens `camera-device` on the local PC (default `/dev/video2`). With `ssh-camera`, that same device path refers to the remote machine. Both camera modes use live latest-frame capture, recording, scoring and disabled seeking. Local capture requires FFmpeg, camera access permissions, and MJPEG support at the requested `camera-width`, `camera-height` and `camera-fps`. Check `ls /dev/video*` for available local devices; a missing local device is reported before model loading. Run `.venv/bin/python detect_gestures.py --config config.json` with the local camera config.
+
+A pose-tolerant color-pattern fallback also compares saturated, non-dark pixels across the full crop, excluding most gray background pixels. It requires sufficient colored area, at least two shared dominant hues, close hue/saturation distributions, and roughly consistent vertical color positions. This can match bent/upright views while keeping the higher score, but it is still image matching, not identity verification; similar outfits can be merged incorrectly.
+
+When `[Show Scores]` or `[Play Congrats]` displays the results, a separate score-only PNG is saved automatically. For `output/session-20261031-113702.mp4`, the image is `output/session-20261031-113702.scores.png`. Without `--output`, a timestamped `.scores.png` is saved in `output/`. Repeated score displays update the same session image; other sessions keep their own files. The PNG includes medal rows, participant photos, points and percentages, without the congratulations video or application controls. Sessions stopped before displaying scores do not produce a score image.
+
 Tamil gesture text is mapped to the existing images and validation rules without changing the spoken text:
 
 | Tamil script text | Gesture |

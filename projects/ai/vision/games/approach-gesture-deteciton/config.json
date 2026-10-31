@@ -1,8 +1,6 @@
 {
-  "intro": "no",
-  "ssh-camera": "ben@10.0.0.226",
-  "camera-device": "/dev/video2",
-  "device": "0",
+  "intro": "yes",
+  "camera-device": "/dev/video0",
   "script": "script.txt",
   "output": "output/session-{timestamp}.mp4"
 }

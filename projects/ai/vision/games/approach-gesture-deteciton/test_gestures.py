@@ -4,6 +4,38 @@ from detect_gestures import GestureState, classify_pose, parse_roi
 
 
 class ConfigTests(unittest.TestCase):
+    def test_local_camera_config_and_ssh_commands(self):
+        import shlex
+        from live_capture import camera_command, LiveCamera, SSHCamera
+        args = self.parse_config({'camera-device': '/dev/video2', 'camera-width': 640,
+                                  'camera-height': 480, 'camera-fps': 15})
+        self.assertIsNone(args.video)
+        self.assertIsNone(args.ssh_camera)
+        local = camera_command(args.ssh_camera, args.camera_device, args.camera_width,
+                               args.camera_height, args.camera_fps)
+        self.assertEqual(local[0], 'ffmpeg')
+        self.assertEqual(local[local.index('-i') + 1], '/dev/video2')
+        self.assertEqual(local[local.index('-video_size') + 1], '640x480')
+        self.assertEqual(local[local.index('-framerate') + 1], '15')
+        remote = camera_command('ben@10.0.0.226', '/dev/video2', 640, 480, 15)
+        self.assertEqual(remote[0], 'ssh')
+        self.assertEqual(shlex.split(remote[-1]), local)
+        self.assertIs(SSHCamera, LiveCamera)
+        with self.assertRaises(ValueError):
+            camera_command(None, '/not-a-camera', 640, 480, 15)
+
+    def test_missing_local_camera_fails_before_model_loading(self):
+        import contextlib
+        import io
+        from unittest.mock import patch
+        from detect_gestures import main
+        errors = io.StringIO()
+        with patch('sys.argv', ['detect_gestures.py', '--camera-device', '/dev/video999999']), \
+                contextlib.redirect_stderr(errors):
+            with self.assertRaises(SystemExit):
+                main()
+        self.assertIn('Local camera does not exist', errors.getvalue())
+
     def test_intro_no_skips_both_script_loads_only(self):
         import tempfile
         from pathlib import Path
@@ -285,6 +317,28 @@ class RunLogTests(unittest.TestCase):
 
 
 class SpeechTests(unittest.TestCase):
+    def test_color_pattern_handles_pose_shift(self):
+        import numpy as np
+        from gesture_script import ScriptRunner
+        upright = np.full((220, 100, 3), 180, dtype=np.uint8)
+        upright[20:90, 20:80] = (30, 190, 220)
+        upright[90:180, 20:80] = (45, 180, 35)
+        shifted = np.full_like(upright, 180)
+        shifted[40:110, 10:70] = (30, 190, 220)
+        shifted[110:200, 10:70] = (45, 180, 35)
+        different = shifted.copy()
+        different[110:200, 10:70] = (190, 50, 30)
+        self.assertTrue(ScriptRunner.color_pattern_match(upright, shifted))
+        self.assertFalse(ScriptRunner.color_pattern_match(upright, different))
+        self.assertFalse(ScriptRunner.color_pattern_match(upright, upright[::-1].copy()))
+        self.assertFalse(ScriptRunner.color_pattern_match(upright, None))
+        flat = np.full_like(upright, (30, 190, 220))
+        self.assertFalse(ScriptRunner.color_pattern_match(flat, flat))
+        runner = ScriptRunner([], speaker=lambda text: None)
+        for track_id, correct, photo in ((1, 10, shifted), (2, 6, upright), (3, 5, different)):
+            runner.participants[track_id] = {"correct": correct, "total": 10, "photo": photo}
+        self.assertEqual([row["track_id"] for row in runner.scores()], [1, 3])
+
     def test_tamil_gestures_keep_original_speech_and_game_rules(self):
         from gesture_script import ScriptRunner, parse_script, gesture_name, is_machee_says
         from detect_gestures import gameplay_cues
@@ -777,6 +831,31 @@ class SpeechTests(unittest.TestCase):
 
 
 class PlaybackTests(unittest.TestCase):
+    def test_scores_saved_separately_for_each_session(self):
+        import tempfile
+        from pathlib import Path
+        import numpy as np
+        from PySide6.QtGui import QImage
+        from playback import create_player
+        entries = [{"track_id": 4, "correct": 6, "total": 10, "percentage": 60,
+                    "medal": "Silver", "photo": np.full((100, 60, 3), 180, dtype=np.uint8)}]
+        player = create_player(30, 100, live=True)
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                first = Path(directory) / 'output' / 'session-1.scores.png'
+                second = first.with_name('session-2.scores.png')
+                player.show_scores(entries, save_path=first)
+                original = first.read_bytes()
+                player.show_scores([], save_path=second)
+                self.assertEqual(first.read_bytes(), original)
+                self.assertNotEqual(second.read_bytes(), original)
+                image = QImage(str(first))
+                self.assertFalse(image.isNull())
+                self.assertEqual(image.size(), player.image.size())
+                self.assertFalse(first.with_suffix('.tmp.png').exists())
+        finally:
+            player.close()
+
     def test_tamil_gestures_load_existing_images(self):
         from gesture_script import gesture_name
         from playback import create_player
