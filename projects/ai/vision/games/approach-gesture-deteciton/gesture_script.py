@@ -9,6 +9,7 @@ import sys
 import tempfile
 import threading
 import time
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -18,6 +19,31 @@ GESTURES = {
     "Right Leg Up", "Bend Down", "Turn Left", "Turn Right", "Turn Back", "Stand Normal",
 }
 SUPPORTED = GESTURES - {"Turn Left", "Turn Right", "Turn Back"}
+
+
+def normalize_prompt(text):
+    return unicodedata.normalize("NFC", " ".join(str(text).split())).casefold()
+
+
+GESTURE_NAMES = {normalize_prompt(name): name for name in GESTURES}
+GESTURE_NAMES.update({normalize_prompt(text): name for text, name in {
+    "இடது கையை உயர்த்தவும்": "Left Hand Up",
+    "வலது கையை உயர்த்தவும்": "Right Hand Up",
+    "இரு கைகளையும் உயர்த்தவும்": "Both Hands Up",
+    "இடது காலை மேலே தூக்கு": "Left Leg Up",
+    "வலது காலை மேலே தூக்கு": "Right Leg Up",
+    "சாதாரணமாக நில்": "Stand Normal",
+    "குனியுங்கள்": "Bend Down",
+}.items()})
+
+
+def gesture_name(text):
+    return GESTURE_NAMES.get(normalize_prompt(text))
+
+
+def is_machee_says(text):
+    return normalize_prompt(text) in {normalize_prompt(value) for value in
+                                      ("Machee Says", "மச்சி சொல்கிறார்", "மாச்சி சொல்கிறார்")}
 
 
 @dataclass(frozen=True)
@@ -78,7 +104,7 @@ def required_visible(expected, points, threshold):
 class ScriptRunner:
     def __init__(self, cues, paused=lambda: False, speaker=None, tts="gtts", voice="en-US-AriaNeural", audio_recorder=None, failure_screen=False):
         self.cues = cues
-        self.machee_says = any(cue.kind == "read" and str(cue.value).strip().casefold() == "machee says" for cue in cues)
+        self.machee_says = any(cue.kind == "read" and is_machee_says(cue.value) for cue in cues)
         self.authorized = False
         self.previous_pose = "Stand Normal"
         self.hold_previous = False
@@ -224,11 +250,11 @@ class ScriptRunner:
                 if cue.kind in ("speech", "read"):
                     logging.getLogger("gesture_detection").info("Speaking prompt: %s", cue.value)
                     with self.lock:
-                        self.expected = cue.value if cue.kind == "speech" and cue.value in GESTURES else None
+                        self.expected = gesture_name(cue.value) if cue.kind == "speech" else None
                         self.hold_previous = False
                         if self.machee_says:
                             if cue.kind == "read":
-                                self.authorized = str(cue.value).strip().casefold() == "machee says"
+                                self.authorized = is_machee_says(cue.value)
                             else:
                                 if self.expected:
                                     self.hold_previous = not self.authorized
@@ -245,8 +271,9 @@ class ScriptRunner:
                             for following in self.cues[cue_index + 1:]:
                                 if following.kind in ("read", "visual"):
                                     continue
-                                if following.kind == "speech" and following.value in SUPPORTED:
-                                    self.reference_gesture = following.value
+                                following_gesture = gesture_name(following.value)
+                                if following.kind == "speech" and following_gesture in SUPPORTED:
+                                    self.reference_gesture = following_gesture
                                 break
                         if self.reference_gesture is not None:
                             self.loaded_image = None

@@ -285,6 +285,29 @@ class RunLogTests(unittest.TestCase):
 
 
 class SpeechTests(unittest.TestCase):
+    def test_tamil_gestures_keep_original_speech_and_game_rules(self):
+        from gesture_script import ScriptRunner, parse_script, gesture_name, is_machee_says
+        from detect_gestures import gameplay_cues
+        import unicodedata
+        self.assertTrue(is_machee_says('மாச்சி சொல்கிறார்'))
+        self.assertEqual(gesture_name(unicodedata.normalize('NFD', 'இடது காலை மேலே தூக்கு')), 'Left Leg Up')
+        cues = gameplay_cues(parse_script('[Load:Intro Image][Read:Welcome][delay 5 sec]'
+                                         '[Read: மச்சி சொல்கிறார்] இடது கையை உயர்த்தவும்\n'
+                                         'வலது கையை உயர்த்தவும்\n'
+                                         '[Read: மச்சி சொல்கிறார்] சாதாரணமாக நில்'))
+        seen = []
+        runner = ScriptRunner(cues, speaker=lambda text: seen.append(
+            (text, runner.expected, runner.gesture_image(), runner.hold_previous)))
+        runner.wait = lambda seconds: None
+        runner.run()
+        self.assertIsNone(runner.error)
+        self.assertTrue(runner.machee_says)
+        self.assertEqual(seen[0][2], 'Left Hand Up')
+        self.assertEqual(seen[1], ('இடது கையை உயர்த்தவும்', 'Left Hand Up', 'Left Hand Up', False))
+        self.assertEqual(seen[2], ('வலது கையை உயர்த்தவும்', 'Left Hand Up', 'Left Hand Up', True))
+        self.assertEqual(seen[3][2], 'Stand Normal')
+        self.assertEqual(seen[4], ('சாதாரணமாக நில்', 'Stand Normal', 'Stand Normal', False))
+
     def test_partial_image_match_keeps_higher_score(self):
         import cv2
         import numpy as np
@@ -754,6 +777,24 @@ class SpeechTests(unittest.TestCase):
 
 
 class PlaybackTests(unittest.TestCase):
+    def test_tamil_gestures_load_existing_images(self):
+        from gesture_script import gesture_name
+        from playback import create_player
+        mappings = {'இடது கையை உயர்த்தவும்': 'Left Hand Up', 'வலது கையை உயர்த்தவும்': 'Right Hand Up',
+                    'இரு கைகளையும் உயர்த்தவும்': 'Both Hands Up', 'இடது காலை மேலே தூக்கு': 'Left Leg Up',
+                    'வலது காலை மேலே தூக்கு': 'Right Leg Up', 'சாதாரணமாக நில்': 'Stand Normal',
+                    'குனியுங்கள்': 'Bend Down'}
+        player = create_player(30, 100, live=True)
+        try:
+            for text, expected in mappings.items():
+                with self.subTest(text=text):
+                    self.assertEqual(gesture_name(text), expected)
+                    player.set_gesture(gesture_name(text))
+                    self.assertIsNotNone(player.gesture_pixmap)
+                    self.assertFalse(player.gesture_pixmap.isNull())
+        finally:
+            player.close()
+
     def test_scores_persist_during_congratulations(self):
         from unittest.mock import patch, MagicMock
         from types import SimpleNamespace

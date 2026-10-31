@@ -60,6 +60,20 @@ Options:
 
 ## Spoken Prompts
 
+Tamil gesture text is mapped to the existing images and validation rules without changing the spoken text:
+
+| Tamil script text | Gesture |
+| --- | --- |
+| இடது கையை உயர்த்தவும் | Left Hand Up |
+| வலது கையை உயர்த்தவும் | Right Hand Up |
+| இரு கைகளையும் உயர்த்தவும் | Both Hands Up |
+| இடது காலை மேலே தூக்கு | Left Leg Up |
+| வலது காலை மேலே தூக்கு | Right Leg Up |
+| சாதாரணமாக நில் | Stand Normal |
+| குனியுங்கள் | Bend Down |
+
+Both `[Read: மச்சி சொல்கிறார்]` and `[Read: மாச்சி சொல்கிறார்]` authorize the next gesture like `[Read: Machee Says]`. An unprefixed Tamil gesture retains the previous pose, following the same game rules. Tamil mappings also work for early image previews and replay-start trimming. Use `--tts neural --voice ta-IN-PallaviNeural` for Tamil speech; the default gTTS backend is still configured for English.
+
 Generic partial-image matching handles differently framed duplicate photos: it searches textured image windows at multiple scales in both directions, then requires template correlation of at least 0.65 and more than 50% matching pixels in the aligned window. Low-detail images and substantially different aspect ratios are excluded from this fallback. Higher-scoring entries take priority. This uses OpenCV image matching, not person identification or an Intel model; similar backgrounds or repeated patterns can still produce false matches.
 
 An additional pixel check accepts more than 50% matching pixels after center cropping, resizing to 48x96, smoothing, and limited alignment. A pixel matches within 30 levels per Lab channel; nonoverlapping pixels count as mismatches. Compatible overall color and body-pattern correlation are also required so shared backgrounds alone do not merge participants. The highest-scoring entry remains. Partial crops containing another participant can still fail this check.

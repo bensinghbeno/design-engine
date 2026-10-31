@@ -228,10 +228,10 @@ def video_start_seconds(video, override=None):
 
 
 def gameplay_cues(cues):
-    from gesture_script import GESTURES
+    from gesture_script import gesture_name, is_machee_says
     for index, cue in enumerate(cues):
-        if cue.kind == "speech" and cue.value in GESTURES:
-            if index > 0 and cues[index - 1].kind == "read" and str(cues[index - 1].value).strip().casefold() == "machee says":
+        if cue.kind == "speech" and gesture_name(cue.value) is not None:
+            if index > 0 and cues[index - 1].kind == "read" and is_machee_says(cues[index - 1].value):
                 index -= 1
             return cues[index:]
     return cues

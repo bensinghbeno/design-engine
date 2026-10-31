@@ -1,24 +1,24 @@
-[Load:Intro Image][Read:Hello welcome to Machee Says Game!!]
+[Load:Intro Image][Read:வணக்கம், மச்சி சொல்கிறார் Game-க்கு உங்களை வரவேற்கிறோம் ]
 [Load:Intro Video]
 [delay 5 sec]
-[Read: Machee Says] Left Hand Up
+[Read: மச்சி சொல்கிறார்] இடது கையை உயர்த்தவும்
 [delay 3 sec]
-[Read: Machee Says] Stand Normal
+[Read: மச்சி சொல்கிறார்] சாதாரணமாக நில்
 [delay 3 sec]
-Right Hand Up
+வலது கையை உயர்த்தவும்
 [delay 3 sec]
-[Read: Machee Says] Stand Normal
+[Read: மச்சி சொல்கிறார்] சாதாரணமாக நில்
 [delay 3 sec]
-[Read: Machee Says] Left Leg Up
+[Read: மச்சி சொல்கிறார்] இடது காலை மேலே தூக்கு
 [delay 3 sec]
-[Read: Machee Says] Stand Normal
+[Read: மச்சி சொல்கிறார்] சாதாரணமாக நில்
 [delay 3 sec]
-[Read: Machee Says] Right Leg Up
+[Read: மச்சி சொல்கிறார்] வலது காலை மேலே தூக்கு
 [delay 3 sec]
-[Read: Machee Says]Stand Normal
+[Read: மச்சி சொல்கிறார்]சாதாரணமாக நில்
 [delay 3 sec]
-[Read: Machee Says] Bend Down
+[Read: மச்சி சொல்கிறார்] குனியுங்கள்
 [delay 3 sec]
 
-Okay, Thanks for your test !!
+அருமை குழந்தைகளே, விளையாடியதற்கு நன்றி!
 [Show Scores] [Play Congrats]
