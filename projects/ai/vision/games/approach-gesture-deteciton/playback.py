@@ -3,10 +3,12 @@
 import math
 import os
 import time
+import random
+import subprocess
 from pathlib import Path
 
 from PySide6.QtCore import QEvent, Qt
-from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtGui import QImage, QPixmap, QPainter, QColor
 from PySide6.QtWidgets import (
     QApplication, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSlider,
     QStyle, QStyleOptionSlider, QVBoxLayout, QWidget,
@@ -224,6 +226,99 @@ class PlaybackWindow(QWidget):
         if self.pixmap is not None:
             self.image.setPixmap(self.pixmap.scaled(self.image.size(), Qt.AspectRatioMode.KeepAspectRatio,
                                                    Qt.TransformationMode.SmoothTransformation))
+
+    def failure_grid(self, failed):
+        width, height = self.image.width(), self.image.height()
+        grid = QPixmap(width, height)
+        grid.fill(QColor("#202020"))
+        painter = QPainter(grid)
+        columns = max(1, math.ceil(math.sqrt(len(failed) * width / max(1, height))))
+        columns = min(columns, len(failed))
+        rows = math.ceil(len(failed) / columns)
+        cell_width, cell_height = width // columns, height // rows
+        for index, (track_id, crop) in enumerate(sorted(failed.items())):
+            crop_height, crop_width = crop.shape[:2]
+            image = QImage(crop.data, crop_width, crop_height, crop.strides[0], QImage.Format.Format_BGR888).copy()
+            tile = QPixmap.fromImage(image).scaled(max(1, cell_width - 12), max(1, cell_height - 32),
+                                                   Qt.AspectRatioMode.KeepAspectRatio,
+                                                   Qt.TransformationMode.SmoothTransformation)
+            left = (index % columns) * cell_width
+            top = (index // columns) * cell_height
+            painter.drawPixmap(left + (cell_width - tile.width()) // 2, top + 24, tile)
+            painter.setPen(QColor("white"))
+            painter.drawText(left + 8, top + 18, f"ID {track_id}")
+        painter.end()
+        return grid
+
+    def show_failures(self, expected, failed):
+        import av
+        from PySide6.QtCore import QThread
+        clips = sorted((Path(__file__).parent / "bad").glob("*.mp4"))
+        if not clips:
+            self.error.setText("No failure videos found in bad/*.mp4")
+            return
+        clip = random.choice(clips)
+        previous_pixmap = self.pixmap
+        previous_gesture = self.current_gesture
+        audio = None
+        controls = (self.play, self.previous, self.following, self.timeline, self.apply, self.fps_field)
+        enabled = [control.isEnabled() for control in controls]
+        try:
+            for control in controls:
+                control.setEnabled(False)
+            self.script_status.setText(f"Not performed: {expected}")
+            self.gesture_image.show()
+            self.image_layout.activate()
+            self.pixmap = self.failure_grid(failed)
+            with av.open(str(clip)) as video:
+                frames = video.decode(video=0)
+                first = next(frames)
+                origin = float(first.time or 0)
+                duration = float(video.duration / av.time_base) if video.duration else 0
+                audio = subprocess.Popen(["ffplay", "-nodisp", "-vn", "-autoexit", "-loglevel", "error", str(clip)],
+                                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                started = time.monotonic()
+
+                def present(decoded):
+                    target = float(decoded.time or 0) - origin
+                    while not self.closed and time.monotonic() - started < target:
+                        QApplication.instance().processEvents()
+                        QThread.msleep(5)
+                    if self.closed:
+                        return
+                    rgb = decoded.to_ndarray(format="rgb24").copy()
+                    height, width = rgb.shape[:2]
+                    image = QImage(rgb.data, width, height, rgb.strides[0], QImage.Format.Format_RGB888).copy()
+                    self.gesture_pixmap = QPixmap.fromImage(image)
+                    self.update_image()
+                    QApplication.instance().processEvents()
+
+                present(first)
+                for decoded in frames:
+                    if self.closed:
+                        break
+                    present(decoded)
+                while not self.closed and time.monotonic() - started < duration:
+                    QApplication.instance().processEvents()
+                    QThread.msleep(5)
+        except Exception as error:
+            self.error.setText(f"Failure video: {error}")
+        finally:
+            if audio is not None:
+                if audio.poll() is None:
+                    audio.terminate()
+                try:
+                    audio.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    audio.kill()
+                    audio.wait()
+            self.pixmap = previous_pixmap
+            self.current_gesture = ""
+            self.set_gesture(previous_gesture)
+            for control, was_enabled in zip(controls, enabled):
+                control.setEnabled(was_enabled)
+            self.deadline = 0.0
+            self.update_image()
 
     def set_gesture(self, gesture):
         if gesture == self.current_gesture:

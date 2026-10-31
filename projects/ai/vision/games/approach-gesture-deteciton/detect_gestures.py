@@ -7,6 +7,8 @@ import csv
 import math
 import time
 import logging
+import shutil
+import subprocess
 from contextlib import nullcontext
 from pathlib import Path
 
@@ -149,8 +151,20 @@ def build_parser():
     return parser
 
 
+def play_intro():
+    intro = Path(__file__).parent / "intro" / "1.mp4"
+    if not intro.is_file():
+        raise RuntimeError(f"Intro video not found: {intro}; use --no-intro to skip")
+    if shutil.which("ffplay") is None:
+        raise RuntimeError("Intro playback requires ffplay; use --no-intro to skip")
+    logging.getLogger("gesture_detection").info("Playing intro: %s", intro)
+    subprocess.run(["ffplay", "-autoexit", "-fs", "-loglevel", "error",
+                    "-window_title", "Machee Says", str(intro)], check=True)
+
+
 def main():
     parser = build_parser()
+    parser.add_argument("--no-intro", action="store_true", help="Skip the startup intro video")
     args = parser.parse_args()
     live = args.ssh_camera is not None
     if live == (args.video is not None):
@@ -174,6 +188,9 @@ def main():
         parser.error("Output must not overwrite the input")
     if output is not None and (output.exists() or csv_path.exists()):
         parser.error("Output MP4 or CSV already exists; choose a different --output")
+
+    if show and not args.no_intro:
+        play_intro()
 
     import cv2
     import numpy as np
@@ -232,7 +249,7 @@ def main():
             if not show:
                 raise ValueError("Spoken scripts require display playback; add --show or use --no-script")
             script = ScriptRunner(parse_script(args.script.read_text()), paused=lambda: player.paused,
-                                  tts=args.tts, voice=args.voice, audio_recorder=audio_recorder)
+                                  tts=args.tts, voice=args.voice, audio_recorder=audio_recorder, failure_screen=True)
             player.timeline.setToolTip("Seeking is disabled during a spoken script; use --no-script for free playback")
         polygon = np.array(args.roi, dtype=np.int32) if args.roi else None
         states = {}
@@ -243,6 +260,12 @@ def main():
                 log.writerow(["frame", "seconds", "track_id", "gestures", "orientation_hint", "near_vehicle", "x1", "y1", "x2", "y2"])
             while not args.max_frames or processed_frames < args.max_frames:
                 if player is not None:
+                    failure = script.take_failure_request() if script is not None else None
+                    if failure is not None:
+                        try:
+                            player.show_failures(*failure)
+                        finally:
+                            script.failure_done.set()
                     action = player.next_action()
                     if action is None:
                         break
@@ -319,7 +342,7 @@ def main():
                         color = (0, 180, 255) if active else (80, 210, 80)
                         if script is not None and track_id is not None:
                             assessment, mismatch = script.assess(track_id, active, points, args.keypoint_confidence,
-                                                                 box=box, timestamp=timestamp)
+                                                                 box=box, timestamp=timestamp, frame=frame)
                             if assessment:
                                 label = assessment
                                 text = f"ID {track_id} | {assessment}"

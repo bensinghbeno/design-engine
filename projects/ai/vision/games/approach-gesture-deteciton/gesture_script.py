@@ -68,7 +68,7 @@ def required_visible(expected, points, threshold):
 
 
 class ScriptRunner:
-    def __init__(self, cues, paused=lambda: False, speaker=None, tts="gtts", voice="en-US-AriaNeural", audio_recorder=None):
+    def __init__(self, cues, paused=lambda: False, speaker=None, tts="gtts", voice="en-US-AriaNeural", audio_recorder=None, failure_screen=False):
         self.cues = cues
         self.paused = paused
         self.speaker = speaker or self.speak
@@ -87,6 +87,10 @@ class ScriptRunner:
         self.caption = ""
         self.observations = {}
         self.track_boxes = {}
+        self.person_frames = {}
+        self.failure_screen = failure_screen
+        self.failure_request = None
+        self.failure_done = threading.Event()
         self.results = {}
         self.error = None
         self.process = None
@@ -213,6 +217,7 @@ class ScriptRunner:
                         self.caption = str(cue.value)
                         self.observations.clear()
                         self.track_boxes.clear()
+                        self.person_frames.clear()
                         self.results.clear()
                         self.feedback_pending.clear()
                         self.feedback_sent.clear()
@@ -247,6 +252,19 @@ class ScriptRunner:
                     if self.expected:
                         self.wait(1.0)
                         self.drain_feedback()
+                        if self.failure_screen:
+                            with self.lock:
+                                failed = {track_id: self.person_frames[track_id]
+                                          for track_id, result in self.results.items()
+                                          if result == "Not performed" and track_id in self.person_frames}
+                                if failed:
+                                    self.phase = "Failure review"
+                                    self.failure_done.clear()
+                                    self.failure_request = (self.expected, failed)
+                            if failed:
+                                while not self.failure_done.wait(.05):
+                                    if self.stop_event.is_set():
+                                        return
             with self.lock:
                 self.phase = "Finished"
                 self.reference_gesture = None
@@ -277,11 +295,13 @@ class ScriptRunner:
                     self.observations[track_id] = self.observations.pop(previous_id)
                 if previous_id in self.results:
                     self.results[track_id] = self.results.pop(previous_id)
+                if previous_id in self.person_frames:
+                    self.person_frames[track_id] = self.person_frames.pop(previous_id)
                 del self.track_boxes[previous_id]
                 logging.getLogger("gesture_detection").info("Script track reassociation: %s -> %s", previous_id, track_id)
         self.track_boxes[track_id] = (tuple(box), timestamp)
 
-    def assess(self, track_id, labels, points, threshold, box=None, timestamp=None):
+    def assess(self, track_id, labels, points, threshold, box=None, timestamp=None, frame=None):
         with self.lock:
             expected = self.expected
             if not expected or self.phase not in ("Respond", "Result"):
@@ -297,6 +317,12 @@ class ScriptRunner:
             matched, observed = self.observations.get(track_id, (False, False))
             matched = matched or expected in labels
             self.observations[track_id] = (matched, observed or visible)
+            if frame is not None and box is not None and visible and not matched:
+                height, width = frame.shape[:2]
+                left, top, right, bottom = map(int, box)
+                crop = frame[max(0, top):min(height, bottom), max(0, left):min(width, right)]
+                if crop.size:
+                    self.person_frames[track_id] = crop.copy()
             if matched:
                 self.queue_feedback("success")
                 return f"Matched: {expected}", False
@@ -306,6 +332,12 @@ class ScriptRunner:
                 self.queue_feedback("wrong")
                 return f"Wrong gesture: {', '.join(sorted(labels))} | Expected: {expected}", True
             return f"Waiting for: {expected}", False
+
+    def take_failure_request(self):
+        with self.lock:
+            request = self.failure_request
+            self.failure_request = None
+            return request
 
     def gesture_image(self):
         with self.lock:

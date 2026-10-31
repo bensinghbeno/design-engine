@@ -10,6 +10,8 @@ The test uses actual decoded video timestamps: Left Leg Up at 41.0-43.9 seconds,
 
 ## Run
 
+Interactive launches first play `intro/1.mp4` fullscreen with audio through `ffplay`. After it ends, the camera/video session and scripted prompts start. Press Escape to skip the playing intro, or pass `--no-intro` to bypass it entirely. Headless exports do not play the intro. The intro is not included in the session recording.
+
 Audio finalization temporarily ignores Ctrl+C; wait for `Audio merge completed`. Each recorded session now saves a matching `.audio.json` playback timeline as clips finish. If merging fails, retry with `.venv/bin/python session_audio.py output/session-NAME.mp4`. Keep the speech cache and timeline for this recovery. Older recordings without a timeline cannot be recovered exactly by this command. Force-killing the program can still prevent finalization.
 
 Record an annotated live-camera session while displaying it and running spoken prompts:
@@ -47,6 +49,8 @@ Options:
 ## Scope and Limitations
 
 ## Spoken Prompts
+
+After a failed response window, the script waits while the display shows the latest visible crop of each failed participant in a labelled grid on the left (75%) and a randomly selected `bad/*.mp4` clip with audio on the right (25%). Matched and unverifiable participants are excluded. Normal playback resumes after the clip; closing the window stops the review. Review crops are held in memory, not saved as separate files. The failure grid and clip audio are display-only and are not included in the session recording. Missing or unreadable clips show an error and allow the script to continue.
 
 Gesture feedback plays on the speech worker without blocking video inference. A match produces a rising success tone. A detected wrong gesture or missed response deadline produces a falling warning tone followed by "Wrong gesture detected" in the selected voice. Each outcome is played at most once per prompt across all tracked people, so repeated frames cannot spam audio. Correcting a wrong gesture can still produce the success tone. Unknown/occluded poses remain silent. Feedback and narration are serialized; feedback can delay the next prompt. Both TTS backends require ffplay for tones.
 

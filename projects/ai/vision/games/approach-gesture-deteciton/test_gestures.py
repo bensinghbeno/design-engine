@@ -187,6 +187,48 @@ class RunLogTests(unittest.TestCase):
 
 
 class SpeechTests(unittest.TestCase):
+    def test_failure_review_crops_and_blocks_next_prompt(self):
+        import threading
+        import time
+        import numpy as np
+        from gesture_script import ScriptRunner, parse_script
+        spoken = []
+        runner = ScriptRunner(parse_script("Left Hand Up\n[delay 3 sec]\nThanks"),
+                              speaker=spoken.append, failure_screen=True)
+        frame = np.full((80, 100, 3), 123, dtype=np.uint8)
+        points = [[0, 0, 1] for _ in range(17)]
+        runner.play_feedback = lambda outcome: None
+
+        def wait(seconds):
+            if runner.phase == "Respond":
+                runner.assess(1, set(), points, .5, box=(0, 0, 40, 60), timestamp=1, frame=frame)
+                runner.assess(2, {"Left Hand Up"}, points, .5, box=(50, 0, 100, 60), timestamp=1, frame=frame)
+                runner.assess(3, set(), [[0, 0, 0] for _ in range(17)], .5,
+                              box=(0, 0, 20, 30), timestamp=1, frame=frame)
+                frame[:] = 0
+
+        runner.wait = wait
+        runner.thread.start()
+        try:
+            deadline = time.monotonic() + 2
+            request = None
+            while request is None and time.monotonic() < deadline:
+                request = runner.take_failure_request()
+                threading.Event().wait(.01)
+            self.assertIsNotNone(request)
+            expected, failed = request
+            self.assertEqual(expected, "Left Hand Up")
+            self.assertEqual(set(failed), {1})
+            self.assertEqual(failed[1].shape, (60, 40, 3))
+            self.assertTrue((failed[1] == 123).all())
+            self.assertEqual(spoken, ["Left Hand Up"])
+            runner.failure_done.set()
+            runner.thread.join(timeout=2)
+            self.assertFalse(runner.thread.is_alive())
+            self.assertEqual(spoken, ["Left Hand Up", "Thanks"])
+        finally:
+            runner.close()
+
     def test_reference_image_during_readout_and_response(self):
         from gesture_script import ScriptRunner, parse_script
         observed = []
@@ -388,6 +430,58 @@ class SpeechTests(unittest.TestCase):
 
 
 class PlaybackTests(unittest.TestCase):
+    def test_failure_clip_completion_restores_player(self):
+        from pathlib import Path
+        from types import SimpleNamespace
+        from unittest.mock import patch, MagicMock
+        import numpy as np
+        from playback import create_player
+        player = create_player(30, 100)
+        player.set_gesture("Left Hand Up")
+        decoded = SimpleNamespace(time=0, to_ndarray=lambda **kwargs: np.zeros((60, 100, 3), dtype=np.uint8)[:, :80])
+        video = MagicMock()
+        video.__enter__.return_value = video
+        video.decode.return_value = iter([decoded])
+        video.duration = 0
+        process = MagicMock()
+        process.poll.return_value = None
+        try:
+            with patch("playback.Path.glob", return_value=iter([Path("bad/example.mp4")])), \
+                    patch("av.open", return_value=video), \
+                    patch("playback.subprocess.Popen", return_value=process) as audio:
+                player.show_failures("Left Hand Up", {1: np.ones((80, 60, 3), dtype=np.uint8)})
+            self.assertEqual(player.error.text(), "")
+            self.assertEqual(player.current_gesture, "Left Hand Up")
+            self.assertTrue(player.play.isEnabled())
+            self.assertIn("-vn", audio.call_args.args[0])
+            process.terminate.assert_called_once()
+        finally:
+            player.close()
+
+    def test_intro_playback_command(self):
+        from unittest.mock import patch
+        from detect_gestures import play_intro
+        with patch("detect_gestures.Path.is_file", return_value=True), \
+                patch("detect_gestures.shutil.which", return_value="ffplay"), \
+                patch("detect_gestures.subprocess.run") as run:
+            play_intro()
+            command = run.call_args.args[0]
+            self.assertEqual(command[0], "ffplay")
+            self.assertIn("-autoexit", command)
+            self.assertIn("-fs", command)
+            self.assertNotIn("-an", command)
+            self.assertTrue(command[-1].endswith("/intro/1.mp4"))
+            self.assertTrue(run.call_args.kwargs["check"])
+
+    def test_intro_runs_before_camera_startup(self):
+        from unittest.mock import patch
+        from detect_gestures import main
+        with patch("sys.argv", ["detect_gestures.py", "--ssh-camera", "user@host"]), \
+                patch("detect_gestures.play_intro", side_effect=RuntimeError("intro reached")) as intro:
+            with self.assertRaisesRegex(RuntimeError, "intro reached"):
+                main()
+            intro.assert_called_once_with()
+
     def test_gesture_reference_images_and_split(self):
         from playback import create_player
         player = create_player(30, 100)
