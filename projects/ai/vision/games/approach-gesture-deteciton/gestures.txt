@@ -1,10 +1,10 @@
-Hello this is Vehicle Suspicious Gesture Detection Script!!
-[delay 10 sec]
-[Read: Perform Action] Left Hand Up
+Hello welcome to Machee Says Game!!
+[delay 5 sec]
+[Read: Machee Says] Left Hand Up
 [delay 3 sec]
-[Read: Perform Action] Stand Normal
+[Read: Machee Says] Stand Normal
 [delay 3 sec]
-[Read: Perform Action] Right Hand Up
+Right Hand Up
 [delay 3 sec]
 Stand Normal
 [delay 3 sec]

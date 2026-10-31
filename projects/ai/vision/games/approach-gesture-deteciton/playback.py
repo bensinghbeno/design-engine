@@ -3,6 +3,7 @@
 import math
 import os
 import time
+from pathlib import Path
 
 from PySide6.QtCore import QEvent, Qt
 from PySide6.QtGui import QImage, QPixmap
@@ -73,6 +74,8 @@ class PlaybackWindow(QWidget):
         self.closed = False
         self.ended = False
         self.pixmap = None
+        self.gesture_pixmap = None
+        self.current_gesture = None
         self.deadline = 0.0
         self.setWindowTitle("Gesture detection")
         self.resize(1100, 750)
@@ -86,7 +89,16 @@ class PlaybackWindow(QWidget):
         self.image.setAlignment(Qt.AlignmentFlag.AlignCenter)
         from PySide6.QtWidgets import QSizePolicy
         self.image.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
-        layout.addWidget(self.image, 1)
+        self.gesture_image = QLabel()
+        self.gesture_image.setMinimumSize(0, 0)
+        self.gesture_image.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.gesture_image.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
+        self.gesture_image.hide()
+        self.image_layout = QHBoxLayout()
+        self.image_layout.setSpacing(0)
+        self.image_layout.addWidget(self.image, 3)
+        self.image_layout.addWidget(self.gesture_image, 1)
+        layout.addLayout(self.image_layout, 1)
         self.timeline = SeekSlider(Qt.Orientation.Horizontal)
         self.timeline.setRange(0, self.frame_count - 1)
         self.timeline.setEnabled(seeking)
@@ -205,9 +217,29 @@ class PlaybackWindow(QWidget):
         QApplication.instance().processEvents()
 
     def update_image(self):
+        if self.gesture_pixmap is not None:
+            self.gesture_image.setPixmap(self.gesture_pixmap.scaled(
+                self.gesture_image.size(), Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation))
         if self.pixmap is not None:
             self.image.setPixmap(self.pixmap.scaled(self.image.size(), Qt.AspectRatioMode.KeepAspectRatio,
                                                    Qt.TransformationMode.SmoothTransformation))
+
+    def set_gesture(self, gesture):
+        if gesture == self.current_gesture:
+            return
+        self.current_gesture = gesture
+        self.gesture_pixmap = None
+        self.gesture_image.clear()
+        if gesture in {"Left Hand Up", "Right Hand Up", "Both Hands Up", "Left Leg Up",
+                       "Right Leg Up", "Stand Normal", "Bend Down"}:
+            path = Path(__file__).parent / "gesture-images" / (gesture.lower().replace(" ", "-") + ".png")
+            pixmap = QPixmap(str(path))
+            if not pixmap.isNull():
+                self.gesture_pixmap = pixmap
+        self.gesture_image.setVisible(self.gesture_pixmap is not None)
+        self.image_layout.activate()
+        self.update_image()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

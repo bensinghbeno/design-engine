@@ -68,20 +68,21 @@ def required_visible(expected, points, threshold):
 
 
 class ScriptRunner:
-    def __init__(self, cues, paused=lambda: False, speaker=None, tts="neural", voice="en-US-AriaNeural", audio_recorder=None):
+    def __init__(self, cues, paused=lambda: False, speaker=None, tts="gtts", voice="en-US-AriaNeural", audio_recorder=None):
         self.cues = cues
         self.paused = paused
         self.speaker = speaker or self.speak
         self.tts = tts
         self.voice = voice
         self.audio_recorder = audio_recorder
-        executable = "ffplay" if tts == "neural" else "spd-say"
+        executable = "spd-say" if tts == "system" else "ffplay"
         if speaker is None and shutil.which(executable) is None:
             raise RuntimeError(f"Speech requires {executable}, or use --no-script")
         self.lock = threading.Lock()
         self.stop_event = threading.Event()
         self.thread = threading.Thread(target=self.run, name="gesture-speech", daemon=True)
         self.expected = None
+        self.reference_gesture = None
         self.phase = "Starting"
         self.caption = ""
         self.observations = {}
@@ -116,24 +117,36 @@ class ScriptRunner:
             self.play_feedback(outcome)
 
     def speak(self, text):
+        text = text.strip()
+        if not text:
+            return
         if self.tts == "system":
             self.run_audio_command(["spd-say", "--wait", "--priority", "message", "--", text])
             return
         cache = Path.home() / ".cache" / "gesture-detection" / "speech"
         cache.mkdir(parents=True, exist_ok=True)
-        key = hashlib.sha256(f"{self.voice}\n{text}".encode()).hexdigest()
+        voice = "gtts:en:normal" if self.tts == "gtts" else self.voice
+        key = hashlib.sha256(f"{voice}\n{text}".encode()).hexdigest()
         audio = cache / f"{key}.mp3"
         if not audio.exists():
             with tempfile.TemporaryDirectory(dir=cache) as temporary:
                 destination = Path(temporary) / "speech.mp3"
-                self.run_audio_command([
-                    sys.executable, "-m", "edge_tts", "--voice", self.voice,
-                    "--text", text, "--write-media", str(destination),
-                ])
+                if self.tts == "gtts":
+                    self.run_audio_command([
+                        sys.executable, "-c",
+                        "import sys; from gtts import gTTS; "
+                        "gTTS(text=sys.argv[1], lang='en', slow=False, timeout=15).save(sys.argv[2])",
+                        text, str(destination),
+                    ])
+                else:
+                    self.run_audio_command([
+                        sys.executable, "-m", "edge_tts", "--voice", self.voice,
+                        "--text", text, "--write-media", str(destination),
+                    ])
                 if self.stop_event.is_set():
                     return
                 if not destination.exists() or destination.stat().st_size == 0:
-                    raise RuntimeError("Neural TTS returned no audio; check your internet connection")
+                    raise RuntimeError("TTS returned no audio; check your internet connection")
                 destination.replace(audio)
         if not self.stop_event.is_set():
             self.run_audio_command(["ffplay", "-nodisp", "-autoexit", "-loglevel", "error", str(audio)])
@@ -177,7 +190,7 @@ class ScriptRunner:
 
     def run(self):
         try:
-            for cue in self.cues:
+            for cue_index, cue in enumerate(self.cues):
                 if self.stop_event.is_set():
                     return
                 while self.paused() and not self.stop_event.wait(.05):
@@ -188,6 +201,14 @@ class ScriptRunner:
                     logging.getLogger("gesture_detection").info("Speaking prompt: %s", cue.value)
                     with self.lock:
                         self.expected = cue.value if cue.kind == "speech" and cue.value in GESTURES else None
+                        self.reference_gesture = self.expected
+                        if cue.kind == "read":
+                            for following in self.cues[cue_index + 1:]:
+                                if following.kind in ("read", "visual"):
+                                    continue
+                                if following.kind == "speech" and following.value in SUPPORTED:
+                                    self.reference_gesture = following.value
+                                break
                         self.phase = "Speaking"
                         self.caption = str(cue.value)
                         self.observations.clear()
@@ -228,6 +249,7 @@ class ScriptRunner:
                         self.drain_feedback()
             with self.lock:
                 self.phase = "Finished"
+                self.reference_gesture = None
         except Exception as error:
             logging.getLogger("gesture_detection").exception("Speech worker failed")
             with self.lock:
@@ -284,6 +306,10 @@ class ScriptRunner:
                 self.queue_feedback("wrong")
                 return f"Wrong gesture: {', '.join(sorted(labels))} | Expected: {expected}", True
             return f"Waiting for: {expected}", False
+
+    def gesture_image(self):
+        with self.lock:
+            return self.reference_gesture
 
     def status(self):
         with self.lock:

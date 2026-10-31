@@ -187,6 +187,45 @@ class RunLogTests(unittest.TestCase):
 
 
 class SpeechTests(unittest.TestCase):
+    def test_reference_image_during_readout_and_response(self):
+        from gesture_script import ScriptRunner, parse_script
+        observed = []
+        runner = ScriptRunner(parse_script("[Read: Machee Says] Left Hand Up\n[delay 3 sec]\nThanks"),
+                              speaker=lambda text: None)
+        runner.speaker = lambda text: observed.append((text, runner.gesture_image()))
+        runner.wait = lambda seconds: observed.append((runner.phase, runner.gesture_image()))
+        runner.run()
+        self.assertIsNone(runner.error)
+        self.assertEqual(observed, [("Machee Says", "Left Hand Up"), ("Left Hand Up", "Left Hand Up"),
+                                    ("Get ready", "Left Hand Up"), ("Respond", "Left Hand Up"),
+                                    ("Result", "Left Hand Up"), ("Thanks", None)])
+        self.assertIsNone(runner.gesture_image())
+
+    def test_gtts_caches_audio_and_uses_recordable_playback(self):
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        from gesture_script import ScriptRunner
+        commands = []
+        runner = ScriptRunner([], speaker=lambda text: None)
+
+        def audio_command(command):
+            commands.append(command)
+            if command[1] == "-c":
+                self.assertIn("from gtts import gTTS", command[2])
+                self.assertEqual(command[3], "Perform Action")
+                Path(command[-1]).write_bytes(b"test audio")
+
+        runner.run_audio_command = audio_command
+        with tempfile.TemporaryDirectory() as directory, patch("gesture_script.Path.home", return_value=Path(directory)):
+            runner.speak("  Perform Action  ")
+            runner.speak("Perform Action")
+            runner.speak("   ")
+            self.assertEqual(len(commands), 3)
+            self.assertEqual(commands[1][0], "ffplay")
+            self.assertEqual(commands[1], commands[2])
+            self.assertTrue(Path(commands[1][-1]).is_file())
+
     def test_readout_then_gesture_grace_and_validation(self):
         from gesture_script import ScriptRunner, parse_script
         events = []
@@ -349,6 +388,29 @@ class SpeechTests(unittest.TestCase):
 
 
 class PlaybackTests(unittest.TestCase):
+    def test_gesture_reference_images_and_split(self):
+        from playback import create_player
+        player = create_player(30, 100)
+        try:
+            for width, height in ((1100, 750), (640, 480)):
+                player.resize(width, height)
+                for gesture in ("Left Hand Up", "Right Hand Up", "Both Hands Up", "Left Leg Up",
+                                "Right Leg Up", "Stand Normal", "Bend Down"):
+                    player.set_gesture(gesture)
+                    player.app.processEvents()
+                    player.update_image()
+                    self.assertIsNotNone(player.gesture_pixmap, gesture)
+                    self.assertAlmostEqual(player.image.width() / player.gesture_image.width(), 3, delta=.03)
+                    rendered = player.gesture_image.pixmap()
+                    self.assertLessEqual(rendered.width(), player.gesture_image.width())
+                    self.assertLessEqual(rendered.height(), player.gesture_image.height())
+            for gesture in (None, "Unknown"):
+                player.set_gesture(gesture)
+                self.assertTrue(player.gesture_image.isHidden())
+                self.assertIsNone(player.gesture_pixmap)
+        finally:
+            player.close()
+
     @classmethod
     def setUpClass(cls):
         from playback import create_player

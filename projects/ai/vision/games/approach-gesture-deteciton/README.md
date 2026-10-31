@@ -50,7 +50,7 @@ Options:
 
 Gesture feedback plays on the speech worker without blocking video inference. A match produces a rising success tone. A detected wrong gesture or missed response deadline produces a falling warning tone followed by "Wrong gesture detected" in the selected voice. Each outcome is played at most once per prompt across all tracked people, so repeated frames cannot spam audio. Correcting a wrong gesture can still produce the success tone. Unknown/occluded poses remain silent. Feedback and narration are serialized; feedback can delay the next prompt. Both TTS backends require ffplay for tones.
 
-The player reads gestures.txt on a background thread by default. Neural speech uses `edge-tts` with Microsoft's online speech service and the `en-US-AriaNeural` voice. Only spoken text is sent, not video. Internet access is required for uncached prompts. Audio is cached under `~/.cache/gesture-detection/speech` and played locally with `ffplay` (required; installed on this machine).
+The player reads gestures.txt on a background thread by default. Speech defaults to `--tts gtts`, using Google's text-to-speech service with English and normal speed. Use `--tts neural` for the previous Microsoft `edge-tts` voice (`en-US-AriaNeural`); `--voice` applies only to that backend. Only spoken text is sent, not video. Internet access is required for uncached prompts. Audio is cached separately for each voice under `~/.cache/gesture-detection/speech` and played locally with `ffplay` (required; installed on this machine). Both online backends support session audio recording, feedback, and the one-second gesture grace period.
 
 ```bash
 .venv/bin/python detect_gestures.py vehicle-recording-approach.mp4 --skeleton --voice en-US-AriaNeural

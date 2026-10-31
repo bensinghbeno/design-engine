@@ -141,7 +141,7 @@ def build_parser():
     parser.add_argument("--skeleton", action="store_true")
     parser.add_argument("--script", type=Path, default=Path(__file__).with_name("gestures.txt"), help="Spoken gesture script")
     parser.add_argument("--no-script", action="store_true", help="Disable speech and expected-gesture checking")
-    parser.add_argument("--tts", choices=("neural", "system"), default="neural", help="Neural TTS uses an online service; system is offline")
+    parser.add_argument("--tts", choices=("gtts", "neural", "system"), default="gtts", help="gTTS (default) and neural use online services; system is offline")
     parser.add_argument("--voice", default="en-US-AriaNeural", help="Neural TTS voice, e.g. en-US-GuyNeural")
     parser.add_argument("--show", action="store_true", help="Display preview; press q to stop")
     parser.add_argument("--experimental-turns", action="store_true", help="Enable approximate front-to-side turn events")
@@ -165,7 +165,7 @@ def main():
         parser.error("Confidence thresholds must be in (0, 1]")
     output = args.output
     if output is not None and not args.no_script and args.tts == "system":
-        parser.error("Recording spoken audio requires --tts neural (default); system speech cannot be captured")
+        parser.error("Recording spoken audio requires --tts gtts (default) or neural; system speech cannot be captured")
     show = live or args.show or output is None
     if output is not None and output.suffix.lower() != ".mp4":
         parser.error("Output must have an .mp4 extension")
@@ -346,6 +346,7 @@ def main():
                 if player is not None:
                     if script is not None:
                         player.script_status.setText(script.status())
+                        player.set_gesture(script.gesture_image())
                         player.script_status.show()
                     player.display(canvas, frame_index)
                     if live:
