@@ -1,0 +1,2 @@
+[ -145052ms] [WARNING] Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently @ https://cdn-scripts.signifyd.com/o/lite.js?sessionId=69f34dad-cb06-4714-9890-8337e93f7dd8&ping=false&profile=true&pageURL=https%253A%252F%252Fmym.fans%252Fapp%252Fmessages%252F22befdb0-b470-4f46-96b4-0b140d815ba9:6
+[ -145002ms] [WARNING] No available adapters. @ about:srcdoc:0

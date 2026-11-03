@@ -1,0 +1,10 @@
+[-2718916ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://styx.mym.fans/v1/chats?status=all&limit=30:0
+[-2718911ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://styx.mym.fans/v1/chats/status_counts:0
+[-2718909ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://styx.mym.fans/v1/chats/22befdb0-b470-4f46-96b4-0b140d815ba9/messages?limit=20:0
+[  -88731ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://styx.mym.fans/v1/chats?status=all&limit=1:0
+[  -88729ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://styx.mym.fans/v1/chats/status_counts:0
+[  -88728ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://styx.mym.fans/v1/chats/22befdb0-b470-4f46-96b4-0b140d815ba9/messages?limit=20:0
+[  -88726ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://styx.mym.fans/v1/chats?status=all&limit=30:0
+[  -88725ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://styx.mym.fans/v1/chats/22befdb0-b470-4f46-96b4-0b140d815ba9/messages?limit=1:0
+[   11393ms] [WARNING] Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently @ https://cdn-scripts.signifyd.com/o/lite.js?sessionId=6ced2ca9-737a-4e9e-b776-86d27dbb00fa&ping=false&profile=true&pageURL=https%253A%252F%252Fmym.fans%252Fapp%252Fmessages%252F22befdb0-b470-4f46-96b4-0b140d815ba9:6
+[   11462ms] [WARNING] No available adapters. @ about:srcdoc:0

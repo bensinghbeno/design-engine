@@ -1,0 +1,49 @@
+title: AS5600 to Arduino Uno
+subtitle: Direct wiring - no external I2C level shifter
+warning: Direct Uno I2C is 5V. Use only with a breakout rated for 5V I2C.
+canvas:
+  width: 1600
+  height: 920
+components:
+  - id: uno
+    label: Arduino Uno
+    subtitle: I2C pins are free in the supplied sketch
+    x: 100
+    y: 285
+    width: 420
+    height: 430
+    fill: "#edf4ee"
+    accent: "#39785d"
+    pins:
+      3V3: {side: right, y: 150, label: "3.3V"}
+      GND: {side: right, y: 220, label: "GND"}
+      A4: {side: right, y: 290, label: "A4 / SDA"}
+      A5: {side: right, y: 360, label: "A5 / SCL"}
+  - id: sensor
+    label: AS5600 Breakout
+    subtitle: Confirm the board's supply and I2C ratings
+    x: 1080
+    y: 285
+    width: 420
+    height: 430
+    fill: "#edf2f8"
+    accent: "#3f759e"
+    pins:
+      VCC: {side: left, y: 150, label: "VCC"}
+      GND: {side: left, y: 220, label: "GND"}
+      SDA: {side: left, y: 290, label: "SDA"}
+      SCL: {side: left, y: 360, label: "SCL"}
+connections:
+  - {from: uno.3V3, to: sensor.VCC, kind: power}
+  - {from: uno.GND, to: sensor.GND, kind: ground}
+  - {from: uno.A4, to: sensor.SDA, kind: sda}
+  - {from: uno.A5, to: sensor.SCL, kind: scl}
+legend:
+  - {kind: power, label: 3.3V power, color: "#d28a25"}
+  - {kind: ground, label: Ground, color: "#46515b"}
+  - {kind: sda, label: SDA data, color: "#27845f"}
+  - {kind: scl, label: SCL clock, color: "#3479b5"}
+notes:
+  - A4 is SDA and A5 is SCL on the Uno R3. These pins do not conflict with D2, D3, D4, D6, or D7.
+  - Uno 3.3V -> breakout VCC; Uno GND -> breakout GND. Verify the breakout accepts 3.3V power.
+  - Direct SDA/SCL is safe only if the breakout explicitly supports 5V I2C or has onboard level shifting.

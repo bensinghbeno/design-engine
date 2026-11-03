@@ -150,6 +150,8 @@ def build_parser():
     parser.add_argument("--no-script", action="store_true", help="Disable speech and expected-gesture checking")
     parser.add_argument("--tts", choices=("gtts", "neural", "system"), default="gtts", help="gTTS (default) and neural use online services; system is offline")
     parser.add_argument("--voice", default="en-US-AriaNeural", help="Neural TTS voice, e.g. en-US-GuyNeural")
+    parser.add_argument("--wrong-detection", default="Wrong gesture detected", help="Spoken wrong-gesture feedback; empty disables the readout")
+    parser.add_argument("--correct-detection", "--correct-deetection", default="", help="Spoken correct-gesture feedback; empty keeps only the tone")
     parser.add_argument("--show", action="store_true", help="Display preview; press q to stop")
     parser.add_argument("--experimental-turns", action="store_true", help="Enable approximate front-to-side turn events")
     parser.add_argument("--max-frames", type=int, default=0, help="Stop after this many frames; 0 processes all")
@@ -173,6 +175,8 @@ def parse_arguments(parser, argv=None):
         seen = set()
         for key, value in settings.items():
             name = key.replace("-", "_")
+            if name == "correct_deetection":
+                name = "correct_detection"
             if name == "intro":
                 if not isinstance(value, str) or value.lower() not in ("yes", "no"):
                     parser.error('Config option intro must be "yes" or "no"')
@@ -337,8 +341,10 @@ def main():
                 cues = gameplay_cues(cues)
         if show:
             from playback import create_player
+            initial_gesture = "Intro Image" if cues and cues[0].kind == "load" and cues[0].value == "Intro Image" else None
             player = create_player(fps, int(capture.get(cv2.CAP_PROP_FRAME_COUNT)),
-                                   seeking=not live and output is None and args.no_script, live=live)
+                                   seeking=not live and output is None and args.no_script, live=live,
+                                   initial_gesture=initial_gesture)
             if output is not None:
                 from session_audio import SessionAudio
                 audio_recorder = SessionAudio(output)
@@ -352,7 +358,8 @@ def main():
             if not show:
                 raise ValueError("Spoken scripts require display playback; add --show or use --no-script")
             script = ScriptRunner(cues, paused=lambda: player.paused,
-                                  tts=args.tts, voice=args.voice, audio_recorder=audio_recorder, failure_screen=True)
+                                  tts=args.tts, voice=args.voice, audio_recorder=audio_recorder, failure_screen=True,
+                                  wrong_detection=args.wrong_detection, correct_detection=args.correct_detection)
             player.timeline.setToolTip("Seeking is disabled during a spoken script; use --no-script for free playback")
         polygon = np.array(args.roi, dtype=np.int32) if args.roi else None
         states = {}

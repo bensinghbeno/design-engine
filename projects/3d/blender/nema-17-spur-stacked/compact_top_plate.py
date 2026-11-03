@@ -329,5 +329,20 @@ def seven_mm_slab():
     print('BUILT seven mm slab and flange; bearing reference fused, guide deleted')
 
 
+def full_shaft_motor_pinion():
+    pinion = bpy.data.objects['Poles | motor pinion 20T D bore']
+    assert all(abs(value-1) < 1e-6 for value in pinion.scale)
+    assert abs(max(vertex.co.z for vertex in pinion.data.vertices)-14) < 1e-4
+    pinion.data = pinion.data.copy()
+    for vertex in pinion.data.vertices:
+        if abs(vertex.co.z-14) < 1e-4:
+            vertex.co.z = 24
+    pinion.data.update()
+    pinion['face_width_mm'] = 16
+    pinion['shaft_engagement'] = 'z8..24, reaches imported motor shaft tip; original D bore and lower round relief retained'
+    pinion['diameter_constraint'] = '20T module0.4 pair retained at fixed 8mm centers; larger pitch diameters require layout redesign'
+    bpy.context.view_layer.update()
+
+
 if __name__ == '__main__':
     build()

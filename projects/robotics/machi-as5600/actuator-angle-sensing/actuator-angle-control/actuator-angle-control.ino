@@ -170,11 +170,29 @@ void moveTowardTarget(float currentAngle, unsigned long nowMicros) {
 }
 
 bool runButtonControl(unsigned long nowMicros) {
-  if (digitalRead(BUTTON_PIN_RUN) != LOW) {
+  const bool runPressed = digitalRead(BUTTON_PIN_RUN) == LOW;
+  static bool runWasPressed = false;
+  static int lastDirection = -1;
+
+  if (!runPressed) {
+    runWasPressed = false;
+    lastDirection = -1;
     if (!targetActive && !holdEnabled) {
       digitalWrite(ENABLE_PIN, LOW);
     }
     return false;
+  }
+
+  if (!runWasPressed) {
+    runWasPressed = true;
+    Serial.println("RUN button pressed");
+  }
+
+  const int direction = digitalRead(BUTTON_PIN_DIRECTION) == HIGH ? DIR_CW : DIR_ACW;
+  if (direction != lastDirection) {
+    lastDirection = direction;
+    Serial.print("Direction: ");
+    Serial.println(direction == DIR_CW ? "CW" : "ACW");
   }
 
   if (targetActive) {
@@ -183,7 +201,6 @@ bool runButtonControl(unsigned long nowMicros) {
   }
 
   digitalWrite(ENABLE_PIN, HIGH);
-  const int direction = digitalRead(BUTTON_PIN_DIRECTION) == HIGH ? DIR_CW : DIR_ACW;
   digitalWrite(DIR_PIN, direction);
 
   if (nowMicros - lastStepTime >= BUTTON_STEP_INTERVAL_US) {

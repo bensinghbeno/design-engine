@@ -4,6 +4,16 @@ from detect_gestures import GestureState, classify_pose, parse_roi
 
 
 class ConfigTests(unittest.TestCase):
+    def test_feedback_config_alias_and_cli_override(self):
+        args = self.parse_config({'wrong-detection': 'தவறான சைகை கண்டறியப்பட்டது',
+                                  'correct-deetection': 'ஆஹா, அருமை!'})
+        self.assertEqual(args.wrong_detection, 'தவறான சைகை கண்டறியப்பட்டது')
+        self.assertEqual(args.correct_detection, 'ஆஹா, அருமை!')
+        args = self.parse_config({'correct-deetection': 'Old'}, ['--correct-detection', 'New'])
+        self.assertEqual(args.correct_detection, 'New')
+        args = self.parse_config({'correct-detection': '', 'wrong-detection': ''})
+        self.assertEqual((args.correct_detection, args.wrong_detection), ('', ''))
+
     def test_local_camera_config_and_ssh_commands(self):
         import shlex
         from live_capture import camera_command, LiveCamera, SSHCamera
@@ -317,6 +327,48 @@ class RunLogTests(unittest.TestCase):
 
 
 class SpeechTests(unittest.TestCase):
+    def test_feedback_random_choice_each_time(self):
+        from unittest.mock import patch, call
+        from gesture_script import ScriptRunner
+        spoken = []
+        runner = ScriptRunner([], speaker=spoken.append, correct_detection=' ஆஹா, , அருமை! ,',
+                              wrong_detection=' தவறு, பிழை ')
+        runner.run_audio_command = lambda command: None
+        with patch('gesture_script.random.choice', side_effect=['ஆஹா', 'அருமை!', 'பிழை']) as choose:
+            runner.play_feedback('success')
+            runner.play_feedback('success')
+            runner.play_feedback('wrong')
+            self.assertEqual(choose.call_args_list, [call(['ஆஹா', 'அருமை!']),
+                                                     call(['ஆஹா', 'அருமை!']), call(['தவறு', 'பிழை'])])
+        self.assertEqual(spoken, ['ஆஹா', 'அருமை!', 'பிழை'])
+        runner.correct_detection = ' , , '
+        with patch('gesture_script.random.choice') as choose:
+            runner.play_feedback('success')
+            runner.stop_event.set()
+            runner.play_feedback('wrong')
+            choose.assert_not_called()
+
+    def test_configured_feedback_readouts_and_defaults(self):
+        from gesture_script import ScriptRunner
+        spoken, tones = [], []
+        runner = ScriptRunner([], speaker=spoken.append, correct_detection='ஆஹா அருமை!',
+                              wrong_detection='தவறான சைகை கண்டறியப்பட்டது')
+        runner.run_audio_command = tones.append
+        for outcome in ('success', 'success', 'wrong', 'wrong'):
+            runner.queue_feedback(outcome)
+        runner.drain_feedback()
+        self.assertEqual(spoken, ['ஆஹா அருமை!', 'தவறான சைகை கண்டறியப்பட்டது'])
+        self.assertEqual(len(tones), 2)
+        runner.stop_event.set()
+        runner.play_feedback('wrong')
+        self.assertEqual(len(spoken), 2)
+        default_spoken = []
+        default = ScriptRunner([], speaker=default_spoken.append)
+        default.run_audio_command = lambda command: None
+        default.play_feedback('success')
+        default.play_feedback('wrong')
+        self.assertEqual(default_spoken, ['Wrong gesture detected'])
+
     def test_color_pattern_handles_pose_shift(self):
         import numpy as np
         from gesture_script import ScriptRunner
@@ -831,6 +883,30 @@ class SpeechTests(unittest.TestCase):
 
 
 class PlaybackTests(unittest.TestCase):
+    def test_intro_image_loaded_before_window_is_shown(self):
+        from unittest.mock import patch, MagicMock
+        from playback import PlaybackWindow, create_player
+        original = PlaybackWindow.showFullScreen
+        loaded = []
+
+        def show(window):
+            loaded.append(window.intro_image is not None and not window.intro_image.isNull())
+            original(window)
+
+        with patch.object(PlaybackWindow, 'showFullScreen', show):
+            player = create_player(30, 0, live=True, initial_gesture='Intro Image')
+        try:
+            self.assertEqual(loaded, [True])
+            self.assertIsNone(player.pixmap)
+            writer, audio = MagicMock(), MagicMock()
+            audio.started = None
+            player.start_recording(writer, audio, 640, 360, 30)
+            self.assertIsNone(player.recording_error)
+            self.assertGreater(writer.write.call_args.args[0].max(), 100)
+            player.stop_recording()
+        finally:
+            player.close()
+
     def test_scores_saved_separately_for_each_session(self):
         import tempfile
         from pathlib import Path

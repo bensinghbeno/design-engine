@@ -511,12 +511,14 @@ class PlaybackWindow(QWidget):
             super().keyPressEvent(event)
 
 
-def create_player(fps, frame_count, seeking=True, live=False):
+def create_player(fps, frame_count, seeking=True, live=False, initial_gesture=None):
     for key in ("QT_QPA_PLATFORM_PLUGIN_PATH", "QT_QPA_FONTDIR"):
         if "cv2" in os.environ.get(key, ""):
             os.environ.pop(key)
     app = QApplication.instance() or QApplication([])
     player = PlaybackWindow(fps, frame_count, seeking, live)
     player.app = app
+    if initial_gesture is not None:
+        player.set_gesture(initial_gesture)
     player.showFullScreen()
     return player

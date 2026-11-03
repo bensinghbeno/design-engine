@@ -60,6 +60,12 @@ Options:
 
 ## Spoken Prompts
 
+Feedback settings accept comma-separated alternatives. Each feedback readout randomly chooses one trimmed, non-empty entry from the relevant setting. Repeats are possible, and repeated entries increase that phrase's chance of selection. Every comma is a separator: `ஆஹா, அருமை!` means two choices; use `ஆஹா அருமை!` to keep it as one phrase. Existing once-per-outcome-per-prompt feedback limits still apply.
+
+Set `wrong-detection` and `correct-detection` in the JSON config to customize the readout after each feedback tone. The spelling `correct-deetection` is also accepted as an alias. Both use the selected TTS voice and are included in recorded speech. Defaults remain "Wrong gesture detected" for wrong feedback and no spoken correct feedback; an empty string disables that readout but keeps the tone. Feedback remains limited to once per outcome per prompt across participants, rather than once per video frame. Use the Tamil neural voice for Tamil messages.
+
+If the first enabled script cue is `[Load:Intro Image]`, its image is preloaded before the fullscreen window appears, including while the camera is still connecting. It is also present in the first recorded application frame. Disabling intros or trimming the opening cues for replay prevents this preload.
+
 With no video input or `ssh-camera`, the app opens `camera-device` on the local PC (default `/dev/video2`). With `ssh-camera`, that same device path refers to the remote machine. Both camera modes use live latest-frame capture, recording, scoring and disabled seeking. Local capture requires FFmpeg, camera access permissions, and MJPEG support at the requested `camera-width`, `camera-height` and `camera-fps`. Check `ls /dev/video*` for available local devices; a missing local device is reported before model loading. Run `.venv/bin/python detect_gestures.py --config config.json` with the local camera config.
 
 A pose-tolerant color-pattern fallback also compares saturated, non-dark pixels across the full crop, excluding most gray background pixels. It requires sufficient colored area, at least two shared dominant hues, close hue/saturation distributions, and roughly consistent vertical color positions. This can match bent/upright views while keeping the higher score, but it is still image matching, not identity verification; similar outfits can be merged incorrectly.

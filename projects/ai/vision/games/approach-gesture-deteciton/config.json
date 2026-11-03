@@ -2,5 +2,7 @@
   "intro": "yes",
   "camera-device": "/dev/video0",
   "script": "script.txt",
-  "output": "output/session-{timestamp}.mp4"
+  "output": "output/session-{timestamp}.mp4",
+  "wrong-detection": "தவறான சைகை கண்டறியப்பட்டது, தவறு,சாரி அல்லா,பிழை,அய்யோ",
+  "correct-deetection": "ஆஹா, அருமை!,செம்ம,சூப்பர்,அய்யோ, அருமை!,சிறப்பு"
 }

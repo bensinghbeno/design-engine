@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-label="Arduino Uno to DM542 Driver">
+<defs><marker id="connection-arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#25313b" /></marker></defs>
+<rect x="0" y="0" width="1400" height="900" fill="#fbfaf7" />
+<text x="100" y="80" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="38" font-weight="bold">Arduino Uno to DM542 Driver</text>
+<text x="102" y="120" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">Step/Dir/Enable + 5 V logic + common ground</text>
+<rect x="100" y="165" width="1200" height="60" rx="8" ry="8" fill="#fff0ec" stroke="#d98573" stroke-width="2" />
+<text x="122" y="196" fill="#8e342b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="16" font-weight="bold">DM542 motor supply is typically 20–50 V DC. Keep motor power separate from Arduino 5 V logic.</text>
+<rect x="100" y="140" width="420" height="440" rx="12" ry="12" fill="#edf4ee" stroke="#c4ccd0" stroke-width="2" />
+<rect x="100" y="140" width="420" height="82" rx="12" ry="12" fill="#39785d" />
+<rect x="100" y="188" width="420" height="34" fill="#39785d" />
+<text x="122" y="184" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">Arduino Uno</text>
+<text x="123" y="213" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">I/O pins for stepper control</text>
+<rect x="100" y="600" width="420" height="560" rx="12" ry="12" fill="#f4eced" stroke="#c4ccd0" stroke-width="2" />
+<rect x="100" y="600" width="420" height="82" rx="12" ry="12" fill="#8e342b" />
+<rect x="100" y="648" width="420" height="34" fill="#8e342b" />
+<text x="122" y="644" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">DM542 Stepper Driver</text>
+<text x="123" y="673" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">Step/Dir/Enable + motor phases</text>
+<polyline points="520,220 520.0,220 520.0,680 520,680" fill="none" stroke="#d28a25" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
+<polyline points="520,300 310.0,300 310.0,760 100,760" fill="none" stroke="#46515b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
+<polyline points="520,400 520.0,400 520.0,860 520,860" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
+<polyline points="520,480 520.0,480 520.0,940 520,940" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
+<polyline points="520,560 520.0,560 520.0,1020 520,1020" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
+<circle cx="520" cy="220" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="502" y="225" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">5V</text>
+<circle cx="520" cy="300" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="502" y="305" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">GND</text>
+<circle cx="520" cy="400" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="502" y="405" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">D2 / DIR</text>
+<circle cx="520" cy="480" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="502" y="485" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">D3 / STEP / PUL</text>
+<circle cx="520" cy="560" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="502" y="565" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">D4 / ENABLE / EN</text>
+<circle cx="520" cy="680" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="502" y="685" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">+5V logic</text>
+<circle cx="100" cy="760" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="118" y="765" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">GND</text>
+<circle cx="520" cy="860" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="502" y="865" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">DIR+ / DIR</text>
+<circle cx="520" cy="940" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="502" y="945" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">PUL+ / STEP</text>
+<circle cx="520" cy="1020" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="502" y="1025" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">ENA+ / EN</text>
+<line x1="100" y1="780" x2="138" y2="780" stroke="#d28a25" stroke-width="5" stroke-linecap="round" />
+<text x="150" y="774" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">5 V logic power</text>
+<line x1="347.5" y1="780" x2="385.5" y2="780" stroke="#46515b" stroke-width="5" stroke-linecap="round" />
+<text x="397.5" y="774" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">Ground</text>
+<line x1="518.5" y1="780" x2="556.5" y2="780" stroke="#8e342b" stroke-width="5" stroke-linecap="round" />
+<text x="568.5" y="774" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">Stepper control</text>
+<text x="100" y="830" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">DM542 motor power supply (20–50 V DC) connects to driver power terminals — not shown.</text>
+<text x="100" y="858" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">A4 is SDA and A5 is SCL on the Uno R3 (I2C to AS5600) — not shown here.</text>
+</svg>

@@ -1,0 +1,3 @@
+[   61171ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://styx.mym.fans/v1/chats?status=all&limit=30:0
+[   61176ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://styx.mym.fans/v1/chats/status_counts:0
+[   61178ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://styx.mym.fans/v1/chats/22befdb0-b470-4f46-96b4-0b140d815ba9/messages?limit=20:0

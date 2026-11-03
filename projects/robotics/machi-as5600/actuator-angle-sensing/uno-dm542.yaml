@@ -1,0 +1,50 @@
+title: Arduino Uno to DM542 Driver
+subtitle: Step/Dir/Enable + 5 V logic + common ground
+warning: DM542 motor supply is typically 20–50 V DC. Keep motor power separate from Arduino 5 V logic.
+canvas:
+  width: 1400
+  height: 900
+components:
+  - id: uno
+    label: Arduino Uno
+    subtitle: I/O pins for stepper control
+    x: 100
+    y: 140
+    width: 420
+    height: 440
+    fill: "#edf4ee"
+    accent: "#39785d"
+    pins:
+      5V: {side: right, y: 80, label: "5V"}
+      GND: {side: right, y: 160, label: "GND"}
+      D2: {side: right, y: 260, label: "D2 / DIR"}
+      D3: {side: right, y: 340, label: "D3 / STEP / PUL"}
+      D4: {side: right, y: 420, label: "D4 / ENABLE / EN"}
+  - id: dm542
+    label: DM542 Stepper Driver
+    subtitle: Step/Dir/Enable + motor phases
+    x: 100
+    y: 600
+    width: 420
+    height: 560
+    fill: "#f4eced"
+    accent: "#8e342b"
+    pins:
+      +5V: {side: right, y: 80, label: "+5V logic"}
+      GND: {side: left, y: 160, label: "GND"}
+      DIR+: {side: right, y: 260, label: "DIR+ / DIR"}
+      PUL+: {side: right, y: 340, label: "PUL+ / STEP"}
+      ENA+: {side: right, y: 420, label: "ENA+ / EN"}
+connections:
+  - {from: uno.5V, to: dm542.+5V, kind: power}
+  - {from: uno.GND, to: dm542.GND, kind: ground}
+  - {from: uno.D2, to: dm542.DIR+, kind: step}
+  - {from: uno.D3, to: dm542.PUL+, kind: step}
+  - {from: uno.D4, to: dm542.ENA+, kind: step}
+legend:
+  - {kind: power, label: 5 V logic power, color: "#d28a25"}
+  - {kind: ground, label: Ground, color: "#46515b"}
+  - {kind: step, label: Stepper control, color: "#8e342b"}
+notes:
+  - DM542 motor power supply (20–50 V DC) connects to driver power terminals — not shown.
+  - A4 is SDA and A5 is SCL on the Uno R3 (I2C to AS5600) — not shown here.

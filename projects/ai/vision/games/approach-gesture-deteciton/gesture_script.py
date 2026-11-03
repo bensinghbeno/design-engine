@@ -1,6 +1,7 @@
 """Parse spoken prompts and run their response windows off the UI thread."""
 
 import re
+import random
 import logging
 import hashlib
 import shutil
@@ -102,7 +103,8 @@ def required_visible(expected, points, threshold):
 
 
 class ScriptRunner:
-    def __init__(self, cues, paused=lambda: False, speaker=None, tts="gtts", voice="en-US-AriaNeural", audio_recorder=None, failure_screen=False):
+    def __init__(self, cues, paused=lambda: False, speaker=None, tts="gtts", voice="en-US-AriaNeural", audio_recorder=None, failure_screen=False,
+                 wrong_detection="Wrong gesture detected", correct_detection=""):
         self.cues = cues
         self.machee_says = any(cue.kind == "read" and is_machee_says(cue.value) for cue in cues)
         self.authorized = False
@@ -116,6 +118,8 @@ class ScriptRunner:
         self.speaker = speaker or self.speak
         self.tts = tts
         self.voice = voice
+        self.wrong_detection = wrong_detection.strip()
+        self.correct_detection = correct_detection.strip()
         self.audio_recorder = audio_recorder
         executable = "spd-say" if tts == "system" else "ffplay"
         if speaker is None and shutil.which(executable) is None:
@@ -155,8 +159,10 @@ class ScriptRunner:
                 f"sine=frequency={frequencies[1]}:duration=0.22[second];"
                 "[first][second]concat=n=2:v=0:a=1,volume=0.5")
         self.run_audio_command(["ffplay", "-nodisp", "-autoexit", "-loglevel", "error", "-f", "lavfi", tone])
-        if outcome == "wrong" and not self.stop_event.is_set():
-            self.speaker("Wrong gesture detected")
+        message = self.correct_detection if outcome == "success" else self.wrong_detection
+        choices = [phrase.strip() for phrase in message.split(",") if phrase.strip()]
+        if choices and not self.stop_event.is_set():
+            self.speaker(random.choice(choices))
 
     def drain_feedback(self):
         while not self.stop_event.is_set() and not self.paused():
