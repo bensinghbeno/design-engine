@@ -1,5 +1,5 @@
 --extra-index-url https://download.pytorch.org/whl/cu121
-torch==2.5.1+cu121
+torch==2.13.0
 torchvision==0.20.1+cu121
 ultralytics==8.4.194
 lap>=0.5.12,<0.6
