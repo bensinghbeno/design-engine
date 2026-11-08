@@ -99,7 +99,7 @@ def draw_connections(dwg, data, anchors):
         start = anchors[connection["from"]]
         end = anchors[connection["to"]]
         mid_x = (start[0] + end[0]) / 2
-        route = [start, (mid_x, start[1]), (mid_x, end[1]), end]
+        route = [start, *connection.get("via", [(mid_x, start[1]), (mid_x, end[1])]), end]
         dwg.append(polyline(
             route,
             fill="none",
@@ -107,8 +107,11 @@ def draw_connections(dwg, data, anchors):
             stroke_width=4,
             stroke_linejoin="round",
             stroke_linecap="round",
-            marker_end="url(#connection-arrow)",
+            marker_end="url(#connection-arrow)" if data.get("arrows", True) else "none",
         ))
+    for junction in data.get("junctions", []):
+        dwg.append(circle(junction["x"], junction["y"], 6,
+                          fill=colors[junction["kind"]]))
 def draw_pins(dwg, components):
     for component in components:
         x = component["x"]
@@ -127,9 +130,8 @@ def draw_pins(dwg, components):
                             text_anchor=text_anchor, dominant_baseline="middle"))
 
 
-def draw_legend(dwg, legend):
+def draw_legend(dwg, legend, y=770):
     x = 100
-    y = 770
     for item in legend:
         dwg.append(line(x, y + 10, x + 38, y + 10, stroke=item["color"], stroke_width=5, stroke_linecap="round"))
         dwg.append(text(x + 50, y + 4, item["label"], fill=INK,
@@ -177,9 +179,9 @@ def render(source, destination):
         draw_component(dwg, component, anchors)
     draw_connections(dwg, data, anchors)
     draw_pins(dwg, data["components"])
-    draw_legend(dwg, data["legend"])
+    draw_legend(dwg, data["legend"], data.get("legend_y", 770))
 
-    note_y = 830
+    note_y = data.get("notes_y", 830)
     for note in data["notes"]:
         dwg.append(text(100, note_y, note, fill=MUTED, font_family=FONT_FAMILY, font_size=14))
         note_y += 28

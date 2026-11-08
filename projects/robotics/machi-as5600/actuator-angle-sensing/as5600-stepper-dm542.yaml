@@ -1,127 +1,158 @@
-title: AS5600 + Stepper with DM542 Driver
-subtitle: Arduino Uno · AS5600 encoder · DM542 driver · NEMA stepper · button jog
-warning: DM542 motor supply is typically 20–50 V DC. Keep motor power separate from Arduino 5 V logic.
-canvas:
-  width: 1600
-  height: 1300
+title: Actuator Angle Control - Complete Wiring
+subtitle: Arduino Uno R3 | AS5600 I2C feedback | DM542 common-anode control | two jog buttons
+warning: Power OFF before wiring. Motor DC supply must NEVER connect to Uno 5V. Verify driver voltage limits and ENA polarity.
+canvas: {width: 2100, height: 1530}
+arrows: false
+legend_y: 1200
+notes_y: 1260
 components:
-  - id: uno
-    label: Arduino Uno
-    subtitle: I2C + stepper control pins
-    x: 100
-    y: 100
-    width: 420
-    height: 440
-    fill: "#edf4ee"
-    accent: "#39785d"
-    pins:
-      3V3: {side: right, y: 50, label: "3.3V"}
-      GND: {side: right, y: 110, label: "GND"}
-      A4: {side: right, y: 170, label: "A4 / SDA"}
-      A5: {side: right, y: 230, label: "A5 / SCL"}
-      D2: {side: right, y: 290, label: "D2 / DIR"}
-      D3: {side: right, y: 350, label: "D3 / STEP"}
-      D4: {side: right, y: 410, label: "D4 / ENABLE"}
-      D6: {side: left, y: 50, label: "D6 / RUN BTN"}
-      D7: {side: left, y: 110, label: "D7 / DIR BTN"}
   - id: as5600
     label: AS5600 Breakout
-    subtitle: Magnetic rotary encoder (I2C 0x36)
-    x: 1080
-    y: 100
-    width: 420
-    height: 420
+    subtitle: 5V-compatible module | address 0x36
+    x: 100
+    y: 280
+    width: 340
+    height: 300
     fill: "#edf2f8"
     accent: "#3f759e"
     pins:
-      VCC: {side: left, y: 50, label: "VCC"}
-      GND: {side: left, y: 130, label: "GND"}
-      SDA: {side: left, y: 210, label: "SDA"}
-      SCL: {side: left, y: 290, label: "SCL"}
+      VCC: {side: right, y: 120, label: "VCC / 5V"}
+      GND: {side: right, y: 160, label: "GND"}
+      SDA: {side: right, y: 200, label: "SDA"}
+      SCL: {side: right, y: 240, label: "SCL"}
+  - id: uno
+    label: Arduino Uno R3
+    subtitle: "USB power + Serial Monitor: 115200 baud"
+    x: 650
+    y: 280
+    width: 380
+    height: 850
+    fill: "#edf4ee"
+    accent: "#39785d"
+    pins:
+      5V_SENSOR: {side: left, y: 120, label: "5V"}
+      GND_SENSOR: {side: left, y: 160, label: "GND"}
+      A4: {side: left, y: 200, label: "A4 / SDA"}
+      A5: {side: left, y: 240, label: "A5 / SCL"}
+      5V_DRIVER: {side: right, y: 120, label: "5V"}
+      D3: {side: right, y: 300, label: "D3 / STEP"}
+      D2: {side: right, y: 360, label: "D2 / DIR"}
+      D4: {side: right, y: 420, label: "D4 / ENABLE"}
+      D6: {side: left, y: 490, label: "D6 / RUN"}
+      GND_RUN: {side: left, y: 530, label: "GND"}
+      D7: {side: left, y: 730, label: "D7 / DIRECTION"}
+      GND_DIR: {side: left, y: 770, label: "GND"}
   - id: btn_run
-    label: RUN Button
-    subtitle: Momentary to GND
-    x: 550
-    y: 100
-    width: 120
-    height: 60
-    fill: "#fff0ec"
-    accent: "#d28a25"
-    pins:
-      IN: {side: right, y: 30, label: "to D6"}
-      GND: {side: right, y: 60, label: "to GND"}
-  - id: btn_dir
-    label: DIR Button
-    subtitle: Momentary to GND
-    x: 550
-    y: 180
-    width: 120
-    height: 60
-    fill: "#fff0ec"
-    accent: "#d28a25"
-    pins:
-      IN: {side: right, y: 30, label: "to D7"}
-      GND: {side: right, y: 60, label: "to GND"}
-  - id: dm542
-    label: DM542 Stepper Driver
-    subtitle: Step/Dir/Enable + motor phases
+    label: RUN Button (NO)
+    subtitle: Hold to jog | release to stop jogging
     x: 100
-    y: 600
-    width: 420
-    height: 560
+    y: 650
+    width: 340
+    height: 200
+    fill: "#fff0ec"
+    accent: "#9b5729"
+    pins:
+      IN: {side: right, y: 120, label: "Contact 1"}
+      GND: {side: right, y: 160, label: "Contact 2"}
+  - id: btn_dir
+    label: DIRECTION Button (NO)
+    subtitle: "Released: CW | held: ACW (code labels)"
+    x: 100
+    y: 890
+    width: 340
+    height: 200
+    fill: "#fff0ec"
+    accent: "#9b5729"
+    pins:
+      IN: {side: right, y: 120, label: "Contact 1"}
+      GND: {side: right, y: 160, label: "Contact 2"}
+  - id: dm542
+    label: DM542 Driver
+    subtitle: Common anode | 5V signal inputs
+    x: 1240
+    y: 280
+    width: 340
+    height: 850
     fill: "#f4eced"
     accent: "#8e342b"
     pins:
-      PUL+: {side: right, y: 60, label: "PUL+ / STEP"}
-      DIR+: {side: right, y: 160, label: "DIR+ / DIR"}
-      ENA+: {side: right, y: 260, label: "ENA+ / EN"}
-      +5V: {side: right, y: 360, label: "+5V logic"}
-      A+: {side: right, y: 460, label: "Motor A+"}
-      B+: {side: right, y: 540, label: "Motor B+"}
-      PUL-: {side: left, y: 60, label: "PUL- / GND"}
-      DIR-: {side: left, y: 160, label: "DIR- / GND"}
-      ENA-: {side: left, y: 260, label: "ENA- / GND"}
-      GND: {side: left, y: 360, label: "GND"}
-      A-: {side: left, y: 460, label: "Motor A-"}
-      B-: {side: left, y: 540, label: "Motor B-"}
+      PUL+: {side: left, y: 120, label: "PUL+"}
+      DIR+: {side: left, y: 170, label: "DIR+"}
+      ENA+: {side: left, y: 220, label: "ENA+"}
+      PUL-: {side: left, y: 300, label: "PUL-"}
+      DIR-: {side: left, y: 360, label: "DIR-"}
+      ENA-: {side: left, y: 420, label: "ENA-"}
+      A+: {side: right, y: 120, label: "A+"}
+      A-: {side: right, y: 180, label: "A-"}
+      B+: {side: right, y: 240, label: "B+"}
+      B-: {side: right, y: 300, label: "B-"}
+      VDC: {side: right, y: 670, label: "+VDC"}
+      GND: {side: right, y: 750, label: "Power GND / VDC-"}
   - id: stepper
-    label: NEMA 17 Stepper
-    subtitle: 4-wire bipolar motor
-    x: 600
-    y: 600
-    width: 260
-    height: 300
+    label: Bipolar Stepper
+    subtitle: Identify coil pairs with an ohmmeter
+    x: 1740
+    y: 280
+    width: 300
+    height: 360
     fill: "#eef4ec"
     accent: "#39785d"
     pins:
-      A+: {side: left, y: 60, label: "A+"}
-      A-: {side: left, y: 140, label: "A-"}
-      B+: {side: left, y: 220, label: "B+"}
-      B-: {side: left, y: 300, label: "B-"}
+      A+: {side: left, y: 120, label: "Coil A / end 1"}
+      A-: {side: left, y: 180, label: "Coil A / end 2"}
+      B+: {side: left, y: 240, label: "Coil B / end 1"}
+      B-: {side: left, y: 300, label: "Coil B / end 2"}
+  - id: supply
+    label: Motor DC Supply
+    subtitle: e.g. 24V DC, within driver rating
+    x: 1740
+    y: 830
+    width: 300
+    height: 300
+    fill: "#fff0ec"
+    accent: "#9b5729"
+    pins:
+      POS: {side: left, y: 120, label: "+V (fused)"}
+      NEG: {side: left, y: 200, label: "0V / negative"}
 connections:
-  - {from: uno.3V3, to: dm542.+5V, kind: power}
-  - {from: uno.GND, to: dm542.GND, kind: ground}
-  - {from: uno.A4, to: as5600.SDA, kind: sda}
-  - {from: uno.A5, to: as5600.SCL, kind: scl}
-  - {from: uno.D2, to: dm542.DIR+, kind: step}
-  - {from: uno.D3, to: dm542.PUL+, kind: step}
-  - {from: uno.D4, to: dm542.ENA+, kind: step}
-  - {from: uno.D6, to: btn_run.IN, kind: step}
-  - {from: btn_run.GND, to: uno.GND, kind: ground}
-  - {from: uno.D7, to: btn_dir.IN, kind: step}
-  - {from: btn_dir.GND, to: uno.GND, kind: ground}
-  - {from: dm542.A+, to: stepper.A+, kind: step}
-  - {from: dm542.A-, to: stepper.A-, kind: step}
-  - {from: dm542.B+, to: stepper.B+, kind: step}
-  - {from: dm542.B-, to: stepper.B-, kind: step}
+  - {from: uno.5V_SENSOR, to: as5600.VCC, kind: power, via: []}
+  - {from: uno.GND_SENSOR, to: as5600.GND, kind: ground, via: []}
+  - {from: uno.A4, to: as5600.SDA, kind: sda, via: []}
+  - {from: uno.A5, to: as5600.SCL, kind: scl, via: []}
+  - {from: uno.5V_DRIVER, to: dm542.PUL+, kind: power, via: []}
+  - {from: dm542.PUL+, to: dm542.DIR+, kind: power, via: [[1140, 400], [1140, 450]]}
+  - {from: dm542.DIR+, to: dm542.ENA+, kind: power, via: [[1140, 450], [1140, 500]]}
+  - {from: uno.D3, to: dm542.PUL-, kind: control, via: []}
+  - {from: uno.D2, to: dm542.DIR-, kind: control, via: []}
+  - {from: uno.D4, to: dm542.ENA-, kind: control, via: []}
+  - {from: uno.D6, to: btn_run.IN, kind: button, via: []}
+  - {from: uno.GND_RUN, to: btn_run.GND, kind: ground, via: []}
+  - {from: uno.D7, to: btn_dir.IN, kind: button, via: []}
+  - {from: uno.GND_DIR, to: btn_dir.GND, kind: ground, via: []}
+  - {from: dm542.A+, to: stepper.A+, kind: motor, via: []}
+  - {from: dm542.A-, to: stepper.A-, kind: motor, via: []}
+  - {from: dm542.B+, to: stepper.B+, kind: motor, via: []}
+  - {from: dm542.B-, to: stepper.B-, kind: motor, via: []}
+  - {from: supply.POS, to: dm542.VDC, kind: supply, via: []}
+  - {from: supply.NEG, to: dm542.GND, kind: ground, via: []}
+junctions:
+  - {x: 1140, y: 400, kind: power}
+  - {x: 1140, y: 450, kind: power}
 legend:
-  - {kind: power, label: 5V logic power, color: "#d28a25"}
-  - {kind: ground, label: Ground, color: "#46515b"}
-  - {kind: sda, label: SDA data, color: "#27845f"}
-  - {kind: scl, label: SCL clock, color: "#3479b5"}
-  - {kind: step, label: Stepper control, color: "#8e342b"}
+  - {kind: power, label: 5V logic, color: "#c07812"}
+  - {kind: ground, label: Ground / return, color: "#46515b"}
+  - {kind: sda, label: SDA, color: "#27845f"}
+  - {kind: scl, label: SCL, color: "#3479b5"}
+  - {kind: control, label: Driver signals, color: "#8e342b"}
+  - {kind: button, label: Buttons, color: "#9b5729"}
+  - {kind: motor, label: Motor coils, color: "#53713c"}
+  - {kind: supply, label: Motor DC+, color: "#c73535"}
 notes:
-  - DM542 motor power supply (20–50 V DC) connects to driver power terminals — not shown.
-  - Buttons are momentary, wired between Uno pin and GND (INPUT_PULLUP).
-  - A4 is SDA and A5 is SCL on the Uno R3.
-  - Set DM542 microstepping DIP switches and current potentiometer for your motor.
+  - "Source: actuator-angle-control/actuator-angle-control.ino. Pin positions are schematic, not physical header order."
+  - "Repeated Uno 5V and GND labels are shared rails: use distribution terminals. D0/D1 stay free; commands use USB serial (Newline)."
+  - "Both buttons: normally open contacts to GND, INPUT_PULLUP, pressed = LOW. On 4-leg switches use opposite switched contacts."
+  - "DM542: PUL+, DIR+, ENA+ share Uno 5V; D3, D2, D4 sink the negative inputs. No separate driver '+5V logic' terminal."
+  - "Sketch assumes D4 HIGH = enabled, LOW = disabled. Verify ENA behavior and input current on your exact DM542 before running."
+  - "Set current and microstep DIP switches per driver/motor manuals. Sketch assumes 400 input pulses per motor revolution."
+  - "Use a 5V-compatible AS5600 breakout with suitable I2C pull-ups; OUT/PGO are unused. Strap sensor DIR per module documentation."
+  - "Motor power return is separate from the optoisolated signal circuit. E/X are serial hold commands, not additional physical buttons."

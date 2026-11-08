@@ -1,134 +1,166 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1300" viewBox="0 0 1600 1300" role="img" aria-label="AS5600 + Stepper with DM542 Driver">
+<svg xmlns="http://www.w3.org/2000/svg" width="2100" height="1530" viewBox="0 0 2100 1530" role="img" aria-label="Actuator Angle Control - Complete Wiring">
 <defs><marker id="connection-arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#25313b" /></marker></defs>
-<rect x="0" y="0" width="1600" height="1300" fill="#fbfaf7" />
-<text x="100" y="80" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="38" font-weight="bold">AS5600 + Stepper with DM542 Driver</text>
-<text x="102" y="120" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">Arduino Uno · AS5600 encoder · DM542 driver · NEMA stepper · button jog</text>
-<rect x="100" y="165" width="1400" height="60" rx="8" ry="8" fill="#fff0ec" stroke="#d98573" stroke-width="2" />
-<text x="122" y="196" fill="#8e342b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="16" font-weight="bold">DM542 motor supply is typically 20–50 V DC. Keep motor power separate from Arduino 5 V logic.</text>
-<rect x="100" y="100" width="420" height="440" rx="12" ry="12" fill="#edf4ee" stroke="#c4ccd0" stroke-width="2" />
-<rect x="100" y="100" width="420" height="82" rx="12" ry="12" fill="#39785d" />
-<rect x="100" y="148" width="420" height="34" fill="#39785d" />
-<text x="122" y="144" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">Arduino Uno</text>
-<text x="123" y="173" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">I2C + stepper control pins</text>
-<rect x="1080" y="100" width="420" height="420" rx="12" ry="12" fill="#edf2f8" stroke="#c4ccd0" stroke-width="2" />
-<rect x="1080" y="100" width="420" height="82" rx="12" ry="12" fill="#3f759e" />
-<rect x="1080" y="148" width="420" height="34" fill="#3f759e" />
-<text x="1102" y="144" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">AS5600 Breakout</text>
-<text x="1103" y="173" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">Magnetic rotary encoder (I2C 0x36)</text>
-<rect x="550" y="100" width="120" height="60" rx="12" ry="12" fill="#fff0ec" stroke="#c4ccd0" stroke-width="2" />
-<rect x="550" y="100" width="120" height="82" rx="12" ry="12" fill="#d28a25" />
-<rect x="550" y="148" width="120" height="34" fill="#d28a25" />
-<text x="572" y="144" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">RUN Button</text>
-<text x="573" y="173" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">Momentary to GND</text>
-<rect x="550" y="180" width="120" height="60" rx="12" ry="12" fill="#fff0ec" stroke="#c4ccd0" stroke-width="2" />
-<rect x="550" y="180" width="120" height="82" rx="12" ry="12" fill="#d28a25" />
-<rect x="550" y="228" width="120" height="34" fill="#d28a25" />
-<text x="572" y="224" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">DIR Button</text>
-<text x="573" y="253" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">Momentary to GND</text>
-<rect x="100" y="600" width="420" height="560" rx="12" ry="12" fill="#f4eced" stroke="#c4ccd0" stroke-width="2" />
-<rect x="100" y="600" width="420" height="82" rx="12" ry="12" fill="#8e342b" />
-<rect x="100" y="648" width="420" height="34" fill="#8e342b" />
-<text x="122" y="644" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">DM542 Stepper Driver</text>
-<text x="123" y="673" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">Step/Dir/Enable + motor phases</text>
-<rect x="600" y="600" width="260" height="300" rx="12" ry="12" fill="#eef4ec" stroke="#c4ccd0" stroke-width="2" />
-<rect x="600" y="600" width="260" height="82" rx="12" ry="12" fill="#39785d" />
-<rect x="600" y="648" width="260" height="34" fill="#39785d" />
-<text x="622" y="644" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">NEMA 17 Stepper</text>
-<text x="623" y="673" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">4-wire bipolar motor</text>
-<polyline points="520,150 520.0,150 520.0,960 520,960" fill="none" stroke="#d28a25" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="520,210 310.0,210 310.0,960 100,960" fill="none" stroke="#46515b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="520,270 800.0,270 800.0,310 1080,310" fill="none" stroke="#27845f" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="520,330 800.0,330 800.0,390 1080,390" fill="none" stroke="#3479b5" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="520,390 520.0,390 520.0,760 520,760" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="520,450 520.0,450 520.0,660 520,660" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="520,510 520.0,510 520.0,860 520,860" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="100,150 385.0,150 385.0,130 670,130" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="670,160 595.0,160 595.0,210 520,210" fill="none" stroke="#46515b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="100,210 385.0,210 385.0,210 670,210" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="670,240 595.0,240 595.0,210 520,210" fill="none" stroke="#46515b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="520,1060 560.0,1060 560.0,660 600,660" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="100,1060 350.0,1060 350.0,740 600,740" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="520,1140 560.0,1140 560.0,820 600,820" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<polyline points="100,1140 350.0,1140 350.0,900 600,900" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#connection-arrow)" />
-<circle cx="520" cy="150" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="502" y="155" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">3.3V</text>
-<circle cx="520" cy="210" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="502" y="215" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">GND</text>
-<circle cx="520" cy="270" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="502" y="275" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">A4 / SDA</text>
-<circle cx="520" cy="330" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="502" y="335" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">A5 / SCL</text>
-<circle cx="520" cy="390" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="502" y="395" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">D2 / DIR</text>
-<circle cx="520" cy="450" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="502" y="455" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">D3 / STEP</text>
-<circle cx="520" cy="510" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="502" y="515" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">D4 / ENABLE</text>
-<circle cx="100" cy="150" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="118" y="155" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">D6 / RUN BTN</text>
-<circle cx="100" cy="210" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="118" y="215" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">D7 / DIR BTN</text>
-<circle cx="1080" cy="150" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="1098" y="155" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">VCC</text>
-<circle cx="1080" cy="230" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="1098" y="235" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">GND</text>
-<circle cx="1080" cy="310" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="1098" y="315" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">SDA</text>
-<circle cx="1080" cy="390" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="1098" y="395" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">SCL</text>
-<circle cx="670" cy="130" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="652" y="135" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">to D6</text>
-<circle cx="670" cy="160" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="652" y="165" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">to GND</text>
-<circle cx="670" cy="210" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="652" y="215" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">to D7</text>
-<circle cx="670" cy="240" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="652" y="245" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">to GND</text>
-<circle cx="520" cy="660" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="502" y="665" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">PUL+ / STEP</text>
-<circle cx="520" cy="760" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="502" y="765" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">DIR+ / DIR</text>
-<circle cx="520" cy="860" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="502" y="865" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">ENA+ / EN</text>
-<circle cx="520" cy="960" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="502" y="965" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">+5V logic</text>
-<circle cx="520" cy="1060" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="502" y="1065" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">Motor A+</text>
-<circle cx="520" cy="1140" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="502" y="1145" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">Motor B+</text>
-<circle cx="100" cy="660" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="118" y="665" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">PUL- / GND</text>
-<circle cx="100" cy="760" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="118" y="765" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">DIR- / GND</text>
-<circle cx="100" cy="860" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="118" y="865" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">ENA- / GND</text>
-<circle cx="100" cy="960" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="118" y="965" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">GND</text>
-<circle cx="100" cy="1060" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="118" y="1065" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">Motor A-</text>
-<circle cx="100" cy="1140" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="118" y="1145" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">Motor B-</text>
-<circle cx="600" cy="660" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="618" y="665" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">A+</text>
-<circle cx="600" cy="740" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="618" y="745" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">A-</text>
-<circle cx="600" cy="820" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="618" y="825" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">B+</text>
-<circle cx="600" cy="900" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
-<text x="618" y="905" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">B-</text>
-<line x1="100" y1="780" x2="138" y2="780" stroke="#d28a25" stroke-width="5" stroke-linecap="round" />
-<text x="150" y="774" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">5V logic power</text>
-<line x1="339.0" y1="780" x2="377.0" y2="780" stroke="#46515b" stroke-width="5" stroke-linecap="round" />
-<text x="389.0" y="774" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">Ground</text>
-<line x1="510.0" y1="780" x2="548.0" y2="780" stroke="#27845f" stroke-width="5" stroke-linecap="round" />
-<text x="560.0" y="774" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">SDA data</text>
-<line x1="698.0" y1="780" x2="736.0" y2="780" stroke="#3479b5" stroke-width="5" stroke-linecap="round" />
-<text x="748.0" y="774" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">SCL clock</text>
-<line x1="894.5" y1="780" x2="932.5" y2="780" stroke="#8e342b" stroke-width="5" stroke-linecap="round" />
-<text x="944.5" y="774" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">Stepper control</text>
-<text x="100" y="830" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">DM542 motor power supply (20–50 V DC) connects to driver power terminals — not shown.</text>
-<text x="100" y="858" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">Buttons are momentary, wired between Uno pin and GND (INPUT_PULLUP).</text>
-<text x="100" y="886" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">A4 is SDA and A5 is SCL on the Uno R3.</text>
-<text x="100" y="914" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">Set DM542 microstepping DIP switches and current potentiometer for your motor.</text>
+<rect x="0" y="0" width="2100" height="1530" fill="#fbfaf7" />
+<text x="100" y="80" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="38" font-weight="bold">Actuator Angle Control - Complete Wiring</text>
+<text x="102" y="120" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="18">Arduino Uno R3 | AS5600 I2C feedback | DM542 common-anode control | two jog buttons</text>
+<rect x="100" y="165" width="1900" height="60" rx="8" ry="8" fill="#fff0ec" stroke="#d98573" stroke-width="2" />
+<text x="122" y="196" fill="#8e342b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="16" font-weight="bold">Power OFF before wiring. Motor DC supply must NEVER connect to Uno 5V. Verify driver voltage limits and ENA polarity.</text>
+<rect x="100" y="280" width="340" height="300" rx="12" ry="12" fill="#edf2f8" stroke="#c4ccd0" stroke-width="2" />
+<rect x="100" y="280" width="340" height="82" rx="12" ry="12" fill="#3f759e" />
+<rect x="100" y="328" width="340" height="34" fill="#3f759e" />
+<text x="122" y="324" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">AS5600 Breakout</text>
+<text x="123" y="353" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">5V-compatible module | address 0x36</text>
+<rect x="650" y="280" width="380" height="850" rx="12" ry="12" fill="#edf4ee" stroke="#c4ccd0" stroke-width="2" />
+<rect x="650" y="280" width="380" height="82" rx="12" ry="12" fill="#39785d" />
+<rect x="650" y="328" width="380" height="34" fill="#39785d" />
+<text x="672" y="324" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">Arduino Uno R3</text>
+<text x="673" y="353" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">USB power + Serial Monitor: 115200 baud</text>
+<rect x="100" y="650" width="340" height="200" rx="12" ry="12" fill="#fff0ec" stroke="#c4ccd0" stroke-width="2" />
+<rect x="100" y="650" width="340" height="82" rx="12" ry="12" fill="#9b5729" />
+<rect x="100" y="698" width="340" height="34" fill="#9b5729" />
+<text x="122" y="694" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">RUN Button (NO)</text>
+<text x="123" y="723" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">Hold to jog | release to stop jogging</text>
+<rect x="100" y="890" width="340" height="200" rx="12" ry="12" fill="#fff0ec" stroke="#c4ccd0" stroke-width="2" />
+<rect x="100" y="890" width="340" height="82" rx="12" ry="12" fill="#9b5729" />
+<rect x="100" y="938" width="340" height="34" fill="#9b5729" />
+<text x="122" y="934" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">DIRECTION Button (NO)</text>
+<text x="123" y="963" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">Released: CW | held: ACW (code labels)</text>
+<rect x="1240" y="280" width="340" height="850" rx="12" ry="12" fill="#f4eced" stroke="#c4ccd0" stroke-width="2" />
+<rect x="1240" y="280" width="340" height="82" rx="12" ry="12" fill="#8e342b" />
+<rect x="1240" y="328" width="340" height="34" fill="#8e342b" />
+<text x="1262" y="324" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">DM542 Driver</text>
+<text x="1263" y="353" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">Common anode | 5V signal inputs</text>
+<rect x="1740" y="280" width="300" height="360" rx="12" ry="12" fill="#eef4ec" stroke="#c4ccd0" stroke-width="2" />
+<rect x="1740" y="280" width="300" height="82" rx="12" ry="12" fill="#39785d" />
+<rect x="1740" y="328" width="300" height="34" fill="#39785d" />
+<text x="1762" y="324" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">Bipolar Stepper</text>
+<text x="1763" y="353" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">Identify coil pairs with an ohmmeter</text>
+<rect x="1740" y="830" width="300" height="300" rx="12" ry="12" fill="#fff0ec" stroke="#c4ccd0" stroke-width="2" />
+<rect x="1740" y="830" width="300" height="82" rx="12" ry="12" fill="#9b5729" />
+<rect x="1740" y="878" width="300" height="34" fill="#9b5729" />
+<text x="1762" y="874" fill="#ffffff" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="22" font-weight="bold">Motor DC Supply</text>
+<text x="1763" y="903" fill="#e9eef0" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="13">e.g. 24V DC, within driver rating</text>
+<polyline points="650,400 440,400" fill="none" stroke="#c07812" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="650,440 440,440" fill="none" stroke="#46515b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="650,480 440,480" fill="none" stroke="#27845f" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="650,520 440,520" fill="none" stroke="#3479b5" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="1030,400 1240,400" fill="none" stroke="#c07812" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="1240,400 1140,400 1140,450 1240,450" fill="none" stroke="#c07812" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="1240,450 1140,450 1140,500 1240,500" fill="none" stroke="#c07812" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="1030,580 1240,580" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="1030,640 1240,640" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="1030,700 1240,700" fill="none" stroke="#8e342b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="650,770 440,770" fill="none" stroke="#9b5729" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="650,810 440,810" fill="none" stroke="#46515b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="650,1010 440,1010" fill="none" stroke="#9b5729" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="650,1050 440,1050" fill="none" stroke="#46515b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="1580,400 1740,400" fill="none" stroke="#53713c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="1580,460 1740,460" fill="none" stroke="#53713c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="1580,520 1740,520" fill="none" stroke="#53713c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="1580,580 1740,580" fill="none" stroke="#53713c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="1740,950 1580,950" fill="none" stroke="#c73535" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<polyline points="1740,1030 1580,1030" fill="none" stroke="#46515b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" marker-end="none" />
+<circle cx="1140" cy="400" r="6" fill="#c07812" />
+<circle cx="1140" cy="450" r="6" fill="#c07812" />
+<circle cx="440" cy="400" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="422" y="405" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">VCC / 5V</text>
+<circle cx="440" cy="440" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="422" y="445" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">GND</text>
+<circle cx="440" cy="480" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="422" y="485" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">SDA</text>
+<circle cx="440" cy="520" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="422" y="525" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">SCL</text>
+<circle cx="650" cy="400" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="668" y="405" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">5V</text>
+<circle cx="650" cy="440" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="668" y="445" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">GND</text>
+<circle cx="650" cy="480" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="668" y="485" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">A4 / SDA</text>
+<circle cx="650" cy="520" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="668" y="525" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">A5 / SCL</text>
+<circle cx="1030" cy="400" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1012" y="405" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">5V</text>
+<circle cx="1030" cy="580" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1012" y="585" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">D3 / STEP</text>
+<circle cx="1030" cy="640" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1012" y="645" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">D2 / DIR</text>
+<circle cx="1030" cy="700" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1012" y="705" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">D4 / ENABLE</text>
+<circle cx="650" cy="770" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="668" y="775" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">D6 / RUN</text>
+<circle cx="650" cy="810" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="668" y="815" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">GND</text>
+<circle cx="650" cy="1010" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="668" y="1015" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">D7 / DIRECTION</text>
+<circle cx="650" cy="1050" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="668" y="1055" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">GND</text>
+<circle cx="440" cy="770" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="422" y="775" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">Contact 1</text>
+<circle cx="440" cy="810" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="422" y="815" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">Contact 2</text>
+<circle cx="440" cy="1010" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="422" y="1015" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">Contact 1</text>
+<circle cx="440" cy="1050" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="422" y="1055" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">Contact 2</text>
+<circle cx="1240" cy="400" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1258" y="405" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">PUL+</text>
+<circle cx="1240" cy="450" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1258" y="455" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">DIR+</text>
+<circle cx="1240" cy="500" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1258" y="505" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">ENA+</text>
+<circle cx="1240" cy="580" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1258" y="585" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">PUL-</text>
+<circle cx="1240" cy="640" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1258" y="645" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">DIR-</text>
+<circle cx="1240" cy="700" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1258" y="705" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">ENA-</text>
+<circle cx="1580" cy="400" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1562" y="405" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">A+</text>
+<circle cx="1580" cy="460" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1562" y="465" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">A-</text>
+<circle cx="1580" cy="520" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1562" y="525" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">B+</text>
+<circle cx="1580" cy="580" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1562" y="585" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">B-</text>
+<circle cx="1580" cy="950" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1562" y="955" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">+VDC</text>
+<circle cx="1580" cy="1030" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1562" y="1035" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="end" dominant-baseline="middle">Power GND / VDC-</text>
+<circle cx="1740" cy="400" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1758" y="405" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">Coil A / end 1</text>
+<circle cx="1740" cy="460" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1758" y="465" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">Coil A / end 2</text>
+<circle cx="1740" cy="520" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1758" y="525" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">Coil B / end 1</text>
+<circle cx="1740" cy="580" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1758" y="585" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">Coil B / end 2</text>
+<circle cx="1740" cy="950" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1758" y="955" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">+V (fused)</text>
+<circle cx="1740" cy="1030" r="6" fill="#ffffff" stroke="#25313b" stroke-width="2" />
+<text x="1758" y="1035" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" text-anchor="start" dominant-baseline="middle">0V / negative</text>
+<line x1="100" y1="1210" x2="138" y2="1210" stroke="#c07812" stroke-width="5" stroke-linecap="round" />
+<text x="150" y="1204" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">5V logic</text>
+<line x1="288.0" y1="1210" x2="326.0" y2="1210" stroke="#46515b" stroke-width="5" stroke-linecap="round" />
+<text x="338.0" y="1204" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">Ground / return</text>
+<line x1="535.5" y1="1210" x2="573.5" y2="1210" stroke="#27845f" stroke-width="5" stroke-linecap="round" />
+<text x="585.5" y="1204" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">SDA</text>
+<line x1="681.0" y1="1210" x2="719.0" y2="1210" stroke="#3479b5" stroke-width="5" stroke-linecap="round" />
+<text x="731.0" y="1204" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">SCL</text>
+<line x1="826.5" y1="1210" x2="864.5" y2="1210" stroke="#8e342b" stroke-width="5" stroke-linecap="round" />
+<text x="876.5" y="1204" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">Driver signals</text>
+<line x1="1065.5" y1="1210" x2="1103.5" y2="1210" stroke="#9b5729" stroke-width="5" stroke-linecap="round" />
+<text x="1115.5" y="1204" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">Buttons</text>
+<line x1="1245.0" y1="1210" x2="1283.0" y2="1210" stroke="#53713c" stroke-width="5" stroke-linecap="round" />
+<text x="1295.0" y="1204" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">Motor coils</text>
+<line x1="1458.5" y1="1210" x2="1496.5" y2="1210" stroke="#c73535" stroke-width="5" stroke-linecap="round" />
+<text x="1508.5" y="1204" fill="#25313b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="15" font-weight="bold" dominant-baseline="middle">Motor DC+</text>
+<text x="100" y="1260" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">Source: actuator-angle-control/actuator-angle-control.ino. Pin positions are schematic, not physical header order.</text>
+<text x="100" y="1288" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">Repeated Uno 5V and GND labels are shared rails: use distribution terminals. D0/D1 stay free; commands use USB serial (Newline).</text>
+<text x="100" y="1316" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">Both buttons: normally open contacts to GND, INPUT_PULLUP, pressed = LOW. On 4-leg switches use opposite switched contacts.</text>
+<text x="100" y="1344" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">DM542: PUL+, DIR+, ENA+ share Uno 5V; D3, D2, D4 sink the negative inputs. No separate driver '+5V logic' terminal.</text>
+<text x="100" y="1372" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">Sketch assumes D4 HIGH = enabled, LOW = disabled. Verify ENA behavior and input current on your exact DM542 before running.</text>
+<text x="100" y="1400" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">Set current and microstep DIP switches per driver/motor manuals. Sketch assumes 400 input pulses per motor revolution.</text>
+<text x="100" y="1428" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">Use a 5V-compatible AS5600 breakout with suitable I2C pull-ups; OUT/PGO are unused. Strap sensor DIR per module documentation.</text>
+<text x="100" y="1456" fill="#66737b" font-family="DejaVu Sans, Liberation Sans, sans-serif" font-size="14">Motor power return is separate from the optoisolated signal circuit. E/X are serial hold commands, not additional physical buttons.</text>
 </svg>
