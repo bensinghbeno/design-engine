@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="780" viewBox="0 0 1360 780" role="img" aria-labelledby="title description">
+  <title id="title">Arduino Uno R3 to FEETECH STS servo</title>
+  <desc id="description">Conditional wiring plan; verify servo model, voltage and adapter UART compatibility.</desc>
+  <rect width="1360" height="780" fill="#f2f6f7" />
+  <text x="40" y="45" font-size="26" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">Arduino Uno R3 to FEETECH STS servo</text>
+  <text x="40" y="78" font-size="15" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Conditional wiring plan; verify servo model, voltage and adapter UART compatibility.</text>
+  <rect x="40" y="120" width="260" height="260" rx="4" fill="white" stroke="#53656e" stroke-width="2" />
+  <text x="60" y="152" font-size="19" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">Arduino Uno R3</text>
+  <text x="60" y="180" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">USB powered / 5 V UART</text>
+  <rect x="520" y="120" width="320" height="260" rx="4" fill="white" stroke="#53656e" stroke-width="2" />
+  <text x="540" y="152" font-size="19" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">Bus Servo Adapter (A)</text>
+  <text x="540" y="180" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Both jumpers A / UART / no flashing</text>
+  <rect x="1060" y="120" width="260" height="260" rx="4" fill="white" stroke="#53656e" stroke-width="2" />
+  <text x="1080" y="152" font-size="19" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">FEETECH STS servo</text>
+  <text x="1080" y="180" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">TTL serial bus / not PWM</text>
+  <rect x="520" y="540" width="320" height="130" rx="4" fill="white" stroke="#53656e" stroke-width="2" />
+  <text x="540" y="605" font-size="19" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">Regulated servo supply</text>
+  <text x="540" y="633" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Fused and switched output</text>
+  <polyline points="300,220 520,220" fill="none" stroke="#087c96" stroke-width="3" stroke-linejoin="round" />
+  <text x="410" y="206" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">D1 TX -&gt; TX</text>
+  <polyline points="520,270 300,270" fill="none" stroke="#a97900" stroke-width="3" stroke-linejoin="round" />
+  <text x="410" y="256" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">D0 RX &lt;- RX</text>
+  <polyline points="300,320 520,320" fill="none" stroke="#111111" stroke-width="3" stroke-linejoin="round" />
+  <text x="410" y="306" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">Common GND</text>
+  <polyline points="840,220 1060,220" fill="none" stroke="#53656e" stroke-width="7" />
+  <polyline points="840,220 1060,220" fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" />
+  <text x="950" y="206" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">WHITE / DATA</text>
+  <polyline points="840,270 1060,270" fill="none" stroke="#c52e3e" stroke-width="3" stroke-linejoin="round" />
+  <text x="950" y="256" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">RED / V+</text>
+  <polyline points="840,320 1060,320" fill="none" stroke="#111111" stroke-width="3" stroke-linejoin="round" />
+  <text x="950" y="306" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">BLACK / GND</text>
+  <polyline points="600,540 600,380" fill="none" stroke="#c52e3e" stroke-width="3" stroke-linejoin="round" />
+  <text x="580" y="460" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">Supply +</text>
+  <polyline points="760,540 760,380" fill="none" stroke="#111111" stroke-width="3" stroke-linejoin="round" />
+  <text x="780" y="460" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Supply -</text>
+  <circle cx="300" cy="220" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="286" y="225" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">D1 / TX output</text>
+  <circle cx="300" cy="270" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="286" y="275" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">D0 / RX input</text>
+  <circle cx="300" cy="320" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="286" y="325" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">GND / power header</text>
+  <circle cx="520" cy="220" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="534" y="225" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">TX / from Uno</text>
+  <circle cx="520" cy="270" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="534" y="275" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">RX / to Uno</text>
+  <circle cx="520" cy="320" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="534" y="325" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">GND</text>
+  <circle cx="840" cy="220" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="826" y="225" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">DATA</text>
+  <circle cx="840" cy="270" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="826" y="275" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">V+</text>
+  <circle cx="840" cy="320" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="826" y="325" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">GND</text>
+  <circle cx="600" cy="380" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="600" y="362" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">Power +</text>
+  <circle cx="760" cy="380" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="760" y="362" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">Power - / GND</text>
+  <circle cx="1060" cy="220" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="1074" y="225" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">DATA / bidirectional</text>
+  <circle cx="1060" cy="270" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="1074" y="275" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">V+ / servo supply</text>
+  <circle cx="1060" cy="320" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="1074" y="325" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">GND / return</text>
+  <circle cx="600" cy="540" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="600" y="567" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">OUT+</text>
+  <circle cx="760" cy="540" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="760" y="567" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">OUT- / GND</text>
+  <text x="40" y="714" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Pin locations are schematic, not physical connector order. Confirm servo voltage and polarity.</text>
+  <text x="40" y="738" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Adapter labels use host perspective. Connect TX to TX and RX to RX; set both jumpers to A (UART).</text>
+  <text x="40" y="762" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Disconnect D0/D1 during uploads. Never power the servo from Uno 5V or through a breadboard.</text>
+</svg>

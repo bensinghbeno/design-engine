@@ -1,0 +1,119 @@
+schema_version: 1
+title: Arduino Uno R3 to FEETECH STS servo
+subtitle: Conditional wiring plan; verify servo model, voltage and adapter UART compatibility.
+canvas: {width: 1360, height: 780}
+components:
+  uno:
+    label: Arduino Uno R3
+    detail: USB powered / 5 V UART
+    bounds: [40, 120, 260, 260]
+    pins:
+      D1_TX: {label: D1 / TX output, position: [300, 220], side: right}
+      D0_RX: {label: D0 / RX input, position: [300, 270], side: right}
+      GND: {label: GND / power header, position: [300, 320], side: right}
+  adapter:
+    label: Bus Servo Adapter (A)
+    detail: Both jumpers A / UART / no flashing
+    bounds: [520, 120, 320, 260]
+    pins:
+      TX: {label: TX / from Uno, position: [520, 220], side: left}
+      RX: {label: RX / to Uno, position: [520, 270], side: left}
+      GND: {label: GND, position: [520, 320], side: left}
+      DATA: {label: DATA, position: [840, 220], side: right}
+      Vplus: {label: V+, position: [840, 270], side: right}
+      bus_GND: {label: GND, position: [840, 320], side: right}
+      power_positive: {label: Power +, position: [600, 380], side: bottom}
+      power_negative: {label: Power - / GND, position: [760, 380], side: bottom}
+    internal_nets:
+      ground: [GND, bus_GND, power_negative]
+      power: [Vplus, power_positive]
+  servo:
+    label: FEETECH STS servo
+    detail: TTL serial bus / not PWM
+    bounds: [1060, 120, 260, 260]
+    pins:
+      DATA: {label: DATA / bidirectional, position: [1060, 220], side: left}
+      Vplus: {label: V+ / servo supply, position: [1060, 270], side: left}
+      GND: {label: GND / return, position: [1060, 320], side: left}
+  supply:
+    label: Regulated servo supply
+    detail: Fused and switched output
+    bounds: [520, 540, 320, 130]
+    header_offset: 65
+    nominal_voltage_v: 7.4
+    voltage_status: Listing value only; verify actual servo rating
+    current_rating: Size for documented peak/stall current
+    positive_path: Supply positive -> rated fuse -> accessible switch -> OUT+
+    pins:
+      positive: {label: OUT+, position: [600, 540], side: top}
+      negative: {label: OUT- / GND, position: [760, 540], side: top}
+connections:
+  - from: uno.D1_TX
+    to: adapter.TX
+    color: blue
+    label: D1 TX -> TX
+    label_position: [410, 206]
+    route: [[300, 220], [520, 220]]
+  - from: adapter.RX
+    to: uno.D0_RX
+    color: yellow
+    label: D0 RX <- RX
+    label_position: [410, 256]
+    route: [[520, 270], [300, 270]]
+  - from: uno.GND
+    to: adapter.GND
+    color: black
+    label: Common GND
+    label_position: [410, 306]
+    route: [[300, 320], [520, 320]]
+  - from: adapter.DATA
+    to: servo.DATA
+    color: white
+    label: WHITE / DATA
+    label_position: [950, 206]
+    route: [[840, 220], [1060, 220]]
+  - from: adapter.Vplus
+    to: servo.Vplus
+    color: red
+    label: RED / V+
+    label_position: [950, 256]
+    route: [[840, 270], [1060, 270]]
+  - from: adapter.bus_GND
+    to: servo.GND
+    color: black
+    label: BLACK / GND
+    label_position: [950, 306]
+    route: [[840, 320], [1060, 320]]
+  - from: supply.positive
+    to: adapter.power_positive
+    color: red
+    label: Supply +
+    label_position: [580, 460]
+    label_anchor: end
+    route: [[600, 540], [600, 380]]
+  - from: supply.negative
+    to: adapter.power_negative
+    color: black
+    label: Supply -
+    label_position: [780, 460]
+    label_anchor: start
+    route: [[760, 540], [760, 380]]
+notes:
+  - Pin locations are schematic, not physical connector order. Confirm servo voltage and polarity.
+  - Adapter labels use host perspective. Connect TX to TX and RX to RX; set both jumpers to A (UART).
+  - Disconnect D0/D1 during uploads. Never power the servo from Uno 5V or through a breadboard.
+requirements:
+  - No adapter flashing required; upload the sketch to the Arduino Uno only.
+  - Jumper B is for direct USB control from a computer, not Arduino UART control.
+  - Confirm adapter revision, 5 V UART compatibility and logic power requirements before connecting.
+  - Match supply voltage to the servo rating; do not apply 12 V to a 7.4 V servo.
+  - Use SCServo with Serial; confirm protocol, baud rate and servo ID.
+  - Do not use Serial Monitor or Serial.print on the servo UART.
+  - Do not join Uno TX and RX directly to each other or the servo DATA wire.
+  - Supply negative, adapter grounds and Uno GND share a common reference.
+  - Route servo current through rated supply wiring, not through the Uno.
+  - Test without the arm attached; support loads before removing power.
+references:
+  adapter: https://www.amazon.com/dp/B0CTMM4LWK
+  adapter_uart_documentation: https://www.waveshare.com/wiki/Bus_Servo_Adapter_(A)#UART_Control
+  servo: https://www.amazon.com/dp/B0H74FH22Y
