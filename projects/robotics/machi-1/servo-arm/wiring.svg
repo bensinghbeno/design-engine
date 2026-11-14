@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1020" viewBox="0 0 1200 1020" role="img" aria-labelledby="title desc">
+  <title id="title">Arduino Uno to FEETECH serial-bus servo wiring</title>
+  <desc id="desc">Uno D1 TX connects to adapter host RX, adapter host TX to Uno D0 RX, and grounds are common. External fused nominal 7.4 volt power feeds the adapter and servo, never the Uno. A compatible half-duplex TTL adapter connects DATA, power and ground to the servo. Connector positions are schematic only.</desc>
+  <defs>
+    <style>
+      text { font-family: sans-serif; fill: #18252b; font-size: 16px; }
+      .heading { font-size: 27px; font-weight: 700; }
+      .label { font-size: 19px; font-weight: 700; }
+      .small { font-size: 14px; }
+      .box { fill: #ffffff; stroke: #53656e; stroke-width: 2; }
+      .wire { fill: none; stroke-width: 3; stroke-linejoin: round; }
+      .tx { stroke: #087c96; }
+      .rx { stroke: #986117; }
+      .ground { stroke: #111111; }
+      .power { stroke: #c52e3e; }
+      .data { stroke: #ffffff; }
+      .pin-label { font-size: 12px; font-weight: 700; paint-order: stroke; stroke: white; stroke-width: 4px; stroke-linejoin: round; }
+    </style>
+  </defs>
+  <rect width="1200" height="1020" fill="#f2f6f7"/>
+  <text x="40" y="46" class="heading">Arduino Uno + FEETECH STS serial-bus servo</text>
+  <text x="40" y="77">Functional wiring only: confirm servo model and adapter documentation before powering.</text>
+
+  <g transform="translate(0 200)">
+  <rect x="40" y="-70" width="270" height="485" rx="6" class="box"/>
+  <text x="60" y="-35" class="label">Arduino Uno R3</text>
+  <text x="60" y="-10" class="small">5 V logic / USB powered</text>
+  <image href="wiring-assets/arduino-uno.jpg" x="60" y="0" width="240" height="180"/>
+  <path d="M267 19 V-3 H305 V238 H310" class="wire tx"/>
+  <path d="M274 19 H294 V288 H310" class="wire rx"/>
+  <path d="M209 159 V358 H310" class="wire ground"/>
+  <circle cx="267" cy="19" r="3" fill="#087c96"/>
+  <circle cx="274" cy="19" r="3" fill="#986117"/>
+  <circle cx="209" cy="159" r="3" fill="#111111"/>
+  <text x="224" y="12" class="pin-label">D1 / TX</text>
+  <text x="251" y="44" class="pin-label">D0 / RX</text>
+  <text x="215" y="178" class="pin-label">GND</text>
+  <text x="60" y="243">Pin 1 / TX (output)</text>
+  <text x="60" y="293">Pin 0 / RX (input)</text>
+  <text x="60" y="363">GND (power header)</text>
+  <text x="60" y="393" class="small">5V pin: no servo-power connection</text>
+
+  <rect x="470" y="130" width="300" height="285" rx="6" class="box"/>
+  <text x="490" y="165" class="label">STS TTL bus adapter</text>
+  <text x="490" y="190" class="small">Automatic half-duplex direction</text>
+  <text x="490" y="211" class="small">Host UART must accept 5 V logic</text>
+  <text x="490" y="243">Host RX</text>
+  <text x="490" y="293">Host TX</text>
+  <text x="490" y="363">GND</text>
+  <text x="670" y="243">DATA</text>
+  <text x="670" y="293">V+</text>
+  <text x="670" y="363">GND</text>
+  <text x="580" y="393" class="small">Servo power +</text>
+
+  <rect x="960" y="-70" width="200" height="485" rx="6" class="box"/>
+  <text x="980" y="-35" class="label">FEETECH servo</text>
+  <text x="980" y="-10" class="small">Confirm STS variant</text>
+  <image href="wiring-assets/feetech-sts3215.jpg" x="970" y="0" width="180" height="170"/>
+  <text x="975" y="190" class="small">STS3215 reference photo</text>
+  <text x="980" y="243">DATA</text>
+  <text x="980" y="293">V+</text>
+  <text x="980" y="363">GND</text>
+  <text x="980" y="393" class="small">Pin order not shown</text>
+
+  <path d="M310 238 H470" class="wire tx"/>
+  <text x="326" y="226" class="small">TX to RX</text>
+  <path d="M310 288 H470" class="wire rx"/>
+  <text x="326" y="276" class="small">RX from TX</text>
+  <path d="M310 358 H470" class="wire ground"/>
+  <text x="326" y="346" class="small">Common GND</text>
+  <path d="M770 238 H960" fill="none" stroke="#53656e" stroke-width="7"/>
+  <path d="M770 238 H960" class="wire data"/>
+  <text x="788" y="226" class="small">WHITE / TTL data</text>
+  <path d="M770 288 H960" class="wire power"/>
+  <text x="788" y="276" class="small">RED / servo power</text>
+  <path d="M770 358 H960" class="wire ground"/>
+  <text x="788" y="346" class="small">BLACK / GND</text>
+
+  <rect x="40" y="485" width="320" height="115" rx="6" class="box"/>
+  <text x="60" y="515" class="label">External regulated supply</text>
+  <text x="60" y="541">7.4 V nominal: verify servo rating</text>
+  <text x="60" y="567" class="small">Size for documented peak/stall current</text>
+  <text x="60" y="588" class="small">Never feed this rail to Uno 5V or UART</text>
+  <path d="M360 510 H600 V415" class="wire power"/>
+  <text x="385" y="495" class="small">+ via fuse and switch</text>
+  <path d="M360 575 H430 V358" class="wire ground"/>
+  <circle cx="430" cy="358" r="5" fill="#384750"/>
+  <text x="374" y="596" class="small">Supply negative</text>
+  <text x="650" y="468" class="small">Adapter logic power: follow its manual.</text>
+  <text x="650" y="492" class="small">Some adapters derive it from servo power.</text>
+  <text x="650" y="516" class="small">Do not add another supply without checking.</text>
+  <text x="650" y="552" class="small">Use rated power wiring; no servo current</text>
+  <text x="650" y="576" class="small">through the Uno or solderless breadboard.</text>
+
+  <path d="M40 630 H1160" stroke="#b6c4ca"/>
+  <text x="40" y="662" class="label">Uno upload and communication precautions</text>
+  <text x="40" y="692">1. Disconnect BOTH adapter UART wires from D0/D1 before uploading a sketch.</text>
+  <text x="40" y="720">2. Use SCServo with Serial, not Serial1. Confirm baud rate and servo ID (often 1 Mbps / ID 1).</text>
+  <text x="40" y="748">3. No Serial.print or Serial Monitor traffic: Uno USB serial shares these same pins.</text>
+  <text x="40" y="776">4. Verify connector polarity. Test without the arm attached; motion may start unexpectedly.</text>
+  <text x="40" y="804" class="small">Not for PWM servos, RS-485 or RS-232. Vehicle use requires protected automotive DC-DC power.</text>
+  </g>
+</svg>

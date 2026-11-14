@@ -1,0 +1,85 @@
+schema_version: 1
+title: Arduino Uno R3 to FEETECH STS serial-bus servo
+status: Conditional wiring plan; verify actual servo and adapter before powering
+assumptions:
+  arduino: Uno R3 or compatible ATmega328P board with 5 V UART logic
+  servo: FEETECH STS-compatible TTL serial-bus variant from Amazon B0H74FH22Y
+  adapter: STS-compatible half-duplex TTL interface with automatic direction control and 5 V-compatible host UART
+components:
+  uno:
+    power: USB
+    uart: Hardware Serial on D0/RX and D1/TX
+  adapter:
+    host_rx: Input receiving data from Arduino TX
+    host_tx: Output sending data to Arduino RX
+    logic_power: Follow adapter documentation; may be supplied internally from servo power
+    warning: Do not add a separate logic supply unless required by the adapter documentation
+  servo_supply:
+    nominal_voltage_v: 7.4
+    voltage_status: Listing value only; confirm actual servo rating before use
+    current_rating: Size for documented peak/stall current of all connected servos
+    protection: Appropriately rated fuse and accessible power switch
+  servo:
+    connector: Three-wire TTL bus; identify GND, V+ and DATA from documentation
+    pin_order: Unverified; diagram is functional, not a physical connector pinout
+connections:
+  - from: uno.D1_TX
+    to: adapter.host_RX_input
+    signal: UART transmit
+  - from: adapter.host_TX_output
+    to: uno.D0_RX
+    signal: UART receive
+  - from: uno.GND
+    to: adapter.GND
+    signal: Common logic reference
+  - from: servo_supply.positive
+    via: Fuse and power switch
+    to: adapter.servo_power_positive
+    signal: Servo power
+  - from: servo_supply.negative
+    to: adapter.GND
+    signal: Servo power return
+  - from: adapter.bus_DATA
+    to: servo.DATA
+    signal: Bidirectional half-duplex TTL
+    wire_color: white
+  - from: adapter.bus_Vplus
+    to: servo.Vplus
+    signal: Servo power
+    wire_color: red
+  - from: adapter.bus_GND
+    to: servo.GND
+    signal: Servo power return
+    wire_color: black
+software:
+  library: SCServo
+  servo_class: SMS_STS, only after confirming STS protocol compatibility
+  serial_object: Serial
+  baud_rate: 1000000
+  baud_status: Common STS setting; confirm configured baud rate
+  servo_id: 1
+  id_status: Example only; confirm configured ID
+  mode: Position control
+  initialization:
+    - Serial.begin(1000000);
+    - servo.pSerial = &Serial;
+  restrictions:
+    - Disconnect both adapter UART wires from D0 and D1 during sketch uploads
+    - Do not use Serial.print or Serial Monitor on the servo UART
+    - Uno USB serial shares this UART; avoid host serial traffic during operation
+    - SoftwareSerial is not a suitable substitute at 1 Mbps
+safety:
+  - Never connect the nominal 7.4 V servo rail to Uno 5V, D0 or D1
+  - Do not power the servo through the Uno or a solderless breadboard
+  - Route servo current directly through adequately rated supply wiring and adapter
+  - Do not connect Uno TX and RX directly together or directly to the single-wire servo bus
+  - Use a TTL STS adapter, not RS-485, RS-232, PCA9685, L298N or A4988
+  - Verify connector polarity, logic voltage, adapter power requirements and servo voltage before use
+  - Test without the arm attached; support loads before removing servo power
+  - Vehicle power requires a fused automotive-rated protected DC-DC supply, not a direct battery connection
+references:
+  uno_image: https://store.arduino.cc/cdn/shop/files/A000066_03.front_723x543.jpg
+  servo_image: https://www.feetechrc.com/Data/feetechrc/upload/image/20201020/1.jpg
+  image_note: FEETECH STS3215 reference photo only; purchased model and connector order remain unverified
+  product: https://www.amazon.com/dp/B0H74FH22Y
+  library: https://github.com/workloads/scservo
