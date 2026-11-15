@@ -24,7 +24,7 @@ const int BUTTON_RPM = 600; //Working // RPM for button-controlled rotation
 bool accelerationEnabled = true;
 const unsigned long MIN_RPM = 100;
 const unsigned long MAX_RPM = 2000;
-const unsigned long RAMP_DURATION_MS = 4000;
+const unsigned long RAMP_DURATION_MS = 3000;
 
 static_assert(MIN_RPM > 0 && MAX_RPM >= MIN_RPM, "Invalid ramp RPM range");
 static_assert(RAMP_DURATION_MS > 0, "Ramp duration must be positive");
