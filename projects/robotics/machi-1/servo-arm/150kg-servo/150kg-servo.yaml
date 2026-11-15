@@ -1,0 +1,116 @@
+schema_version: 1
+title: Arduino Uno - HOOYIJ RDS51150 150KG servo
+subtitle: D9 PWM signal / external 10-12.6 V power / common ground / nominal 270 degrees at 500-2500 us
+canvas: {width: 1380, height: 820}
+components:
+  uno:
+    label: Arduino Uno R3
+    detail: USB powered / D9 servo signal
+    bounds: [40, 120, 300, 300]
+    pins:
+      D9: {label: D9 / servo signal, position: [340, 220], side: right}
+      GND: {label: GND / logic reference, position: [340, 320], side: right}
+  servo:
+    label: HOOYIJ RDS51150
+    detail: 150KG / 270-degree position servo
+    bounds: [1000, 120, 300, 300]
+    pins:
+      signal: {label: PWM signal, position: [1000, 220], side: left}
+      positive: {label: V+, position: [1120, 420], side: bottom}
+      ground: {label: GND, position: [1220, 420], side: bottom}
+  supply:
+    label: Regulated 12 V supply
+    detail: Fused / switched / rated wiring
+    bounds: [500, 500, 300, 160]
+    pins:
+      positive: {label: OUT+, position: [800, 550], side: right}
+      negative: {label: OUT- / return, position: [800, 600], side: right}
+      logic_ground: {label: GND / Uno, position: [500, 580], side: left}
+    internal_nets:
+      common_ground: [negative, logic_ground]
+    terminal_note: Ground pins represent a rated common-negative terminal block, not isolated outputs.
+    positive_path: Supply positive -> appropriately rated fuse -> accessible switch -> OUT+
+connections:
+  - from: uno.D9
+    to: servo.signal
+    color: white
+    label: WHITE / PWM signal / D9
+    label_position: [670, 206]
+    route: [[340, 220], [1000, 220]]
+  - from: uno.GND
+    to: supply.logic_ground
+    color: black
+    label: Common GND
+    label_position: [420, 306]
+    route: [[340, 320], [460, 320], [460, 580], [500, 580]]
+  - from: supply.positive
+    to: servo.positive
+    color: red
+    label: RED / +12 V servo power
+    label_position: [960, 536]
+    route: [[800, 550], [1120, 550], [1120, 420]]
+  - from: servo.ground
+    to: supply.negative
+    color: black
+    label: BLACK / ground return
+    label_position: [960, 586]
+    route: [[1220, 420], [1220, 600], [800, 600]]
+notes:
+  - External 10-12.6 V only; never use Uno 5V or direct 24 V. White signal, red positive, black ground; verify pinout before power.
+  - Obtain stall current to size supply, fuse and wiring. Keep servo power current out of Uno, USB and breadboard.
+  - Sketch repeats 0-90-180-270-180-90-0 degrees, with 2 seconds per position. Test unloaded with full travel clear.
+servo_profiles:
+  RDS51150:
+    manufacturer: HOOYIJ
+    specification_source: User-provided specifications; not independently verified
+    type: Digital RC PWM position servo
+    supply_voltage_v: {minimum: 10, maximum: 12.6, suggested_regulated: 12}
+    performance:
+      - {voltage_v: 10, torque_kg_cm: 150, seconds_per_60_degrees: 0.24}
+      - {voltage_v: 12, torque_kg_cm: 165, seconds_per_60_degrees: 0.21}
+      - {voltage_v: 12.6, torque_kg_cm: 173, seconds_per_60_degrees: 0.19}
+    rotation_range_degrees: [0, 270]
+    pulse_range_us: [500, 2500]
+    nominal_center: {pulse_us: 1500, angle_degrees: 135}
+    dead_zone_us: 3
+    current_requirement: Stall current not supplied; obtain it before sizing supply, fuse, connectors and wiring
+    construction:
+      gears: Stainless steel
+      housing: CNC aluminum middle shell
+      seals: Waterproof rubber seals on screws; no IP rating supplied
+      shaft: Dual shaft with mounting brackets
+    physical:
+      servo_size_mm: [52, 30, 65]
+      bracket_assembly_mm: [64, 55.6, 20]
+      servo_weight_g: 162
+      wire_length_mm: 320
+software:
+  active_servo_profile: RDS51150
+  sketch: 150kg-servo.ino
+  library: Arduino Servo
+  signal_pin: D9
+  current_sketch:
+    attach: myServo.attach(servoPin, 500, 2500)
+    pulse_range_us: [500, 2500]
+    command_api: writeMicroseconds
+    pulse_commands_us: [500, 1167, 1833, 2500, 1833, 1167]
+    nominal_physical_angles_degrees: [0, 90, 180, 270, 180, 90]
+    delay_between_commands_ms: 2000
+    behavior: Repeats 0-90-180-270-180-90 then returns to 0 at the next loop; no run button or direction switch
+  calibration_reference:
+    attach: myServo.attach(servoPin, 500, 2500)
+    command_api: writeMicroseconds
+    nominal_angle_mapping: pulse_us = 500 + angle_degrees * 2000 / 270
+    nominal_positions:
+      - {angle_degrees: 0, pulse_us: 500}
+      - {angle_degrees: 90, pulse_us: 1167}
+      - {angle_degrees: 135, pulse_us: 1500}
+      - {angle_degrees: 180, pulse_us: 1833}
+      - {angle_degrees: 270, pulse_us: 2500}
+    calibration: Verify direction and mechanical clearance unloaded before using full pulse range
+safety:
+  - The sketch immediately commands an endpoint and repeatedly sweeps full travel; do not treat it as a center-only test.
+  - Arduino has no external position feedback; nominal pulse-to-angle mapping requires physical calibration.
+  - Reset or startup can cause unexpected motion; keep clear of the high-torque mechanism.
+  - Removing servo power can drop a supported load; provide suitable mechanical support.
+  - Use an accessible hardware safety arrangement appropriate to the mechanism.

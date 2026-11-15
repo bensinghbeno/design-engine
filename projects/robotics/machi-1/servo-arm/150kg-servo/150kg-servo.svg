@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="820" viewBox="0 0 1380 820" role="img" aria-labelledby="title description">
+  <title id="title">Arduino Uno - HOOYIJ RDS51150 150KG servo</title>
+  <desc id="description">D9 PWM signal / external 10-12.6 V power / common ground / nominal 270 degrees at 500-2500 us</desc>
+  <rect width="1380" height="820" fill="#f2f6f7" />
+  <text x="40" y="45" font-size="26" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">Arduino Uno - HOOYIJ RDS51150 150KG servo</text>
+  <text x="40" y="78" font-size="15" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">D9 PWM signal / external 10-12.6 V power / common ground / nominal 270 degrees at 500-2500 us</text>
+  <rect x="40" y="120" width="300" height="300" rx="4" fill="white" stroke="#53656e" stroke-width="2" />
+  <text x="60" y="152" font-size="19" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">Arduino Uno R3</text>
+  <text x="60" y="180" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">USB powered / D9 servo signal</text>
+  <rect x="1000" y="120" width="300" height="300" rx="4" fill="white" stroke="#53656e" stroke-width="2" />
+  <text x="1020" y="152" font-size="19" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">HOOYIJ RDS51150</text>
+  <text x="1020" y="180" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">150KG / 270-degree position servo</text>
+  <rect x="500" y="500" width="300" height="160" rx="4" fill="white" stroke="#53656e" stroke-width="2" />
+  <text x="520" y="532" font-size="19" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">Regulated 12 V supply</text>
+  <text x="520" y="560" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Fused / switched / rated wiring</text>
+  <polyline points="340,220 1000,220" fill="none" stroke="#53656e" stroke-width="7" />
+  <polyline points="340,220 1000,220" fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" />
+  <text x="670" y="206" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">WHITE / PWM signal / D9</text>
+  <polyline points="340,320 460,320 460,580 500,580" fill="none" stroke="#111111" stroke-width="3" stroke-linejoin="round" />
+  <text x="420" y="306" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">Common GND</text>
+  <polyline points="800,550 1120,550 1120,420" fill="none" stroke="#c52e3e" stroke-width="3" stroke-linejoin="round" />
+  <text x="960" y="536" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">RED / +12 V servo power</text>
+  <polyline points="1220,420 1220,600 800,600" fill="none" stroke="#111111" stroke-width="3" stroke-linejoin="round" />
+  <text x="960" y="586" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">BLACK / ground return</text>
+  <circle cx="340" cy="220" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="326" y="225" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">D9 / servo signal</text>
+  <circle cx="340" cy="320" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="326" y="325" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">GND / logic reference</text>
+  <circle cx="1000" cy="220" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="1014" y="225" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">PWM signal</text>
+  <circle cx="1120" cy="420" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="1120" y="402" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">V+</text>
+  <circle cx="1220" cy="420" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="1220" y="402" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">GND</text>
+  <circle cx="800" cy="550" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="786" y="555" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">OUT+</text>
+  <circle cx="800" cy="600" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="786" y="605" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">OUT- / return</text>
+  <circle cx="500" cy="580" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="514" y="585" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">GND / Uno</text>
+  <text x="40" y="754" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">External 10-12.6 V only; never use Uno 5V or direct 24 V. White signal, red positive, black ground; verify pinout before power.</text>
+  <text x="40" y="778" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Obtain stall current to size supply, fuse and wiring. Keep servo power current out of Uno, USB and breadboard.</text>
+  <text x="40" y="802" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Sketch repeats 0-90-180-270-180-90-0 degrees, with 2 seconds per position. Test unloaded with full travel clear.</text>
+</svg>
