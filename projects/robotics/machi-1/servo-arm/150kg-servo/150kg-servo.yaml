@@ -145,12 +145,17 @@ software:
     command_api: writeMicroseconds
     initial_pulse_us: 1500
     nominal_limits_degrees: [0, 270]
-    target_increment_us: 4
+    target_increment_us: Variable whole-microsecond steps from elapsed time, retaining fractional remainder
+    button_pulse_period_ms: 13.5
     update_interval_ms: 20
-    nominal_target_speed_degrees_per_second: 27
+    nominal_target_speed_degrees_per_second: 10
+    smoothness_note: Fractional accumulation gives a steady average target rate; the specified 3 us dead zone may still cause intermittent physical motion
+    centering_target_increment_us: 4
+    centering_update_interval_ms: 20
+    centering_nominal_speed_degrees_per_second: 27
     run_button_debounce_ms: 30
     startup_settle_ms: 1000
-    movement_function: rotateServo(direction), where +1 increases target and -1 decreases it
+    movement_function: rotateServo(direction, elapsedMs), where +1 increases target and -1 decreases it
     direction_selection: D7 HIGH selects increasing target; LOW selects decreasing target, latched on accepted D6 press
     behavior: Hold D6 LOW to move; release immediately stops target updates and holds position; targets clamp at endpoints
     startup_interlock: D6 must be HIGH for at least 30 ms after startup settle before a new press can move the target
