@@ -1,15 +1,17 @@
 schema_version: 1
 title: Arduino Uno - HOOYIJ RDS51150 150KG servo
-subtitle: D9 PWM signal / external 10-12.6 V power / common ground / nominal 270 degrees at 500-2500 us
-canvas: {width: 1380, height: 820}
+subtitle: Hold D6 to move / D7 selects direction at press / D9 PWM / external 10-12.6 V / 0-270 degrees
+canvas: {width: 1380, height: 940}
 components:
   uno:
     label: Arduino Uno R3
-    detail: USB powered / D9 servo signal
+    detail: USB powered / INPUT_PULLUP
     bounds: [40, 120, 300, 300]
     pins:
       D9: {label: D9 / servo signal, position: [340, 220], side: right}
       GND: {label: GND / logic reference, position: [340, 320], side: right}
+      D6: {label: D6 / run, position: [100, 420], side: bottom}
+      D7: {label: D7 / direction, position: [280, 420], side: bottom}
   servo:
     label: HOOYIJ RDS51150
     detail: 150KG / 270-degree position servo
@@ -26,10 +28,30 @@ components:
       positive: {label: OUT+, position: [800, 550], side: right}
       negative: {label: OUT- / return, position: [800, 600], side: right}
       logic_ground: {label: GND / Uno, position: [500, 580], side: left}
+      run_ground: {label: GND / D6, position: [700, 660], side: bottom}
+      direction_ground: {label: GND / D7, position: [560, 660], side: bottom}
     internal_nets:
-      common_ground: [negative, logic_ground]
+      common_ground: [negative, logic_ground, run_ground, direction_ground]
     terminal_note: Ground pins represent a rated common-negative terminal block, not isolated outputs.
     positive_path: Supply positive -> appropriately rated fuse -> accessible switch -> OUT+
+  run_button:
+    label: Run button
+    detail: Hold to move / NO contact
+    bounds: [40, 600, 180, 140]
+    header_offset: 52
+    pins:
+      signal: {label: D6, position: [100, 600], side: top}
+      ground: {label: GND, position: [100, 740], side: bottom}
+    action: Press connects D6 to GND; release holds last commanded target.
+  direction_switch:
+    label: Direction switch
+    detail: Open + / closed -
+    bounds: [240, 600, 180, 140]
+    header_offset: 52
+    pins:
+      signal: {label: D7, position: [280, 600], side: top}
+      ground: {label: GND, position: [280, 740], side: bottom}
+    action: Set before pressing D6; open increases target, closed to GND decreases it. A momentary button also works.
 connections:
   - from: uno.D9
     to: servo.signal
@@ -55,10 +77,36 @@ connections:
     label: BLACK / ground return
     label_position: [960, 586]
     route: [[1220, 420], [1220, 600], [800, 600]]
+  - from: uno.D6
+    to: run_button.signal
+    color: blue
+    label: D6
+    label_position: [120, 505]
+    label_anchor: start
+    route: [[100, 420], [100, 600]]
+  - from: uno.D7
+    to: direction_switch.signal
+    color: yellow
+    label: D7
+    label_position: [300, 505]
+    label_anchor: start
+    route: [[280, 420], [280, 600]]
+  - from: run_button.ground
+    to: supply.run_ground
+    color: black
+    label: Run button ground
+    label_position: [380, 806]
+    route: [[100, 740], [100, 820], [700, 820], [700, 660]]
+  - from: direction_switch.ground
+    to: supply.direction_ground
+    color: black
+    label: Direction ground
+    label_position: [410, 766]
+    route: [[280, 740], [280, 780], [560, 780], [560, 660]]
 notes:
   - External 10-12.6 V only; never use Uno 5V or direct 24 V. White signal, red positive, black ground; verify pinout before power.
   - Obtain stall current to size supply, fuse and wiring. Keep servo power current out of Uno, USB and breadboard.
-  - Sketch repeats 0-90-180-270-180-90-0 degrees, with 2 seconds per position. Test unloaded with full travel clear.
+  - Startup centers at 135 degrees; release D6 after 1 second to arm. Hold to move; release holds target, not an emergency stop.
 servo_profiles:
   RDS51150:
     manufacturer: HOOYIJ
@@ -89,14 +137,23 @@ software:
   sketch: 150kg-servo.ino
   library: Arduino Servo
   signal_pin: D9
+  run_pin: D6
+  direction_pin: D7
   current_sketch:
     attach: myServo.attach(servoPin, 500, 2500)
     pulse_range_us: [500, 2500]
     command_api: writeMicroseconds
-    pulse_commands_us: [500, 1167, 1833, 2500, 1833, 1167]
-    nominal_physical_angles_degrees: [0, 90, 180, 270, 180, 90]
-    delay_between_commands_ms: 2000
-    behavior: Repeats 0-90-180-270-180-90 then returns to 0 at the next loop; no run button or direction switch
+    initial_pulse_us: 1500
+    nominal_limits_degrees: [0, 270]
+    target_increment_us: 4
+    update_interval_ms: 20
+    nominal_target_speed_degrees_per_second: 27
+    run_button_debounce_ms: 30
+    startup_settle_ms: 1000
+    movement_function: rotateServo(direction), where +1 increases target and -1 decreases it
+    direction_selection: D7 HIGH selects increasing target; LOW selects decreasing target, latched on accepted D6 press
+    behavior: Hold D6 LOW to move; release immediately stops target updates and holds position; targets clamp at endpoints
+    startup_interlock: D6 must be HIGH for at least 30 ms after startup settle before a new press can move the target
   calibration_reference:
     attach: myServo.attach(servoPin, 500, 2500)
     command_api: writeMicroseconds
@@ -109,7 +166,8 @@ software:
       - {angle_degrees: 270, pulse_us: 2500}
     calibration: Verify direction and mechanical clearance unloaded before using full pulse range
 safety:
-  - The sketch immediately commands an endpoint and repeatedly sweeps full travel; do not treat it as a center-only test.
+  - Startup commands center even before button movement is armed; test unloaded with full travel clear.
+  - Release holds the target, not an emergency stop; the servo may continue moving to reach that target under load.
   - Arduino has no external position feedback; nominal pulse-to-angle mapping requires physical calibration.
   - Reset or startup can cause unexpected motion; keep clear of the high-torque mechanism.
   - Removing servo power can drop a supported load; provide suitable mechanical support.
