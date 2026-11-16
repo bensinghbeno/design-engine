@@ -2,14 +2,19 @@
 <robot name="base_joint_rig" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:arg name="arm_length" default="0.375"/>
   <xacro:arg name="wood_density" default="500"/>
-  <xacro:arg name="servo_width" default="0.048"/>
-  <xacro:arg name="servo_depth" default="0.030"/>
+  <xacro:arg name="servo_width" default="0.030"/>
+  <xacro:arg name="servo_depth" default="0.048"/>
   <xacro:arg name="servo_height" default="0.065"/>
   <xacro:arg name="servo_mass" default="0.350"/>
-  <xacro:arg name="bracket_thickness" default="0.003"/>
-  <xacro:arg name="bracket_reach" default="0.050"/>
-  <xacro:arg name="hub_radius" default="0.012"/>
-  <xacro:arg name="hub_depth" default="0.004"/>
+  <xacro:arg name="bracket_thickness" default="0.002"/>
+  <xacro:arg name="upper_bracket_span" default="0.0655"/>
+  <xacro:arg name="disk_span" default="0.0614"/>
+  <xacro:arg name="assembly_height" default="0.0945"/>
+  <xacro:arg name="shaft_end_setback" default="0.015"/>
+  <xacro:arg name="hub_radius" default="0.015"/>
+  <xacro:arg name="fixed_bracket_thickness" default="0.002"/>
+  <xacro:arg name="fixed_bracket_cheek_height" default="0.035"/>
+  <xacro:arg name="fixed_bracket_hub_clearance" default="0.001"/>
   <xacro:arg name="joint_effort" default="14.7"/>
   <xacro:arg name="joint_velocity" default="1.0"/>
   <xacro:property name="arm_length" value="$(arg arm_length)"/>
@@ -19,10 +24,19 @@
   <xacro:property name="height" value="$(arg servo_height)"/>
   <xacro:property name="servo_mass" value="$(arg servo_mass)"/>
   <xacro:property name="thickness" value="$(arg bracket_thickness)"/>
-  <xacro:property name="reach" value="$(arg bracket_reach)"/>
+  <xacro:property name="upper_span" value="$(arg upper_bracket_span)"/>
+  <xacro:property name="disk_span" value="$(arg disk_span)"/>
+  <xacro:property name="assembly_height" value="$(arg assembly_height)"/>
+  <xacro:property name="shaft_end_setback" value="$(arg shaft_end_setback)"/>
+  <xacro:property name="shaft_offset" value="${height/2-shaft_end_setback}"/>
   <xacro:property name="hub_radius" value="$(arg hub_radius)"/>
-  <xacro:property name="hub_depth" value="$(arg hub_depth)"/>
-  <xacro:property name="span" value="${depth+2*hub_depth+thickness}"/>
+  <xacro:property name="hub_depth" value="${(disk_span-depth)/2}"/>
+  <xacro:property name="span" value="${upper_span-thickness}"/>
+  <xacro:property name="fixed_thickness" value="$(arg fixed_bracket_thickness)"/>
+  <xacro:property name="requested_fixed_cheek_height" value="$(arg fixed_bracket_cheek_height)"/>
+  <xacro:property name="fixed_hub_clearance" value="$(arg fixed_bracket_hub_clearance)"/>
+  <xacro:property name="fixed_cheek_height" value="${min(requested_fixed_cheek_height, height-shaft_end_setback-hub_radius-fixed_hub_clearance)}"/>
+  <xacro:property name="reach" value="${assembly_height-fixed_thickness-(height-shaft_end_setback)-thickness/2}"/>
 
   <material name="wood"><color rgba="0.65 0.43 0.23 1"/></material>
   <material name="steel"><color rgba="0.72 0.75 0.78 1"/></material>
@@ -53,30 +67,46 @@
   <xacro:box_link name="base" x="0.16" y="0.16" z="0.01" center="0 0 0.005"
                   mass="1.0" material="steel" gazebo_material="Gazebo/Grey"/>
   <joint name="world_to_base" type="fixed"><parent link="world"/><child link="base"/></joint>
-  <xacro:box_link name="servo_mount" x="${width}" y="${depth}" z="0.04" center="0 0 0.02"
+  <xacro:box_link name="servo_mount" x="${width}" y="${depth}" z="${0.04-fixed_thickness}" center="0 0 ${(0.04-fixed_thickness)/2}"
                   mass="0.1" material="steel" gazebo_material="Gazebo/Grey"/>
   <joint name="base_to_mount" type="fixed">
     <parent link="base"/><child link="servo_mount"/><origin xyz="0 0 0.01"/>
   </joint>
   <xacro:box_link name="servo_body" x="${width}" y="${depth}" z="${height}" center="0 0 0"
                   mass="${servo_mass}" material="servo_black" gazebo_material="Gazebo/Black"/>
-  <joint name="mount_to_servo" type="fixed">
-    <parent link="servo_mount"/><child link="servo_body"/><origin xyz="0 0 ${0.04+height/2}"/>
+  <xacro:box_link name="fixed_bracket" x="${width}" y="${depth+2*fixed_thickness}" z="${fixed_thickness}"
+                  center="0 0 ${fixed_thickness/2}" mass="${7800*width*(depth+2*fixed_thickness)*fixed_thickness}"
+                  material="steel" gazebo_material="Gazebo/White"/>
+  <joint name="mount_to_fixed_bracket" type="fixed">
+    <parent link="servo_mount"/><child link="fixed_bracket"/><origin xyz="0 0 ${0.04-fixed_thickness}"/>
   </joint>
+  <joint name="fixed_bracket_to_servo" type="fixed">
+    <parent link="fixed_bracket"/><child link="servo_body"/><origin xyz="0 0 ${fixed_thickness+height/2}"/>
+  </joint>
+  <xacro:macro name="fixed_bracket_cheek" params="name side">
+    <xacro:box_link name="${name}" x="${width}" y="${fixed_thickness}" z="${fixed_cheek_height}"
+                    center="0 ${side*(depth+fixed_thickness)/2} ${fixed_thickness+fixed_cheek_height/2}"
+                    mass="${7800*width*fixed_thickness*fixed_cheek_height}"
+                    material="steel" gazebo_material="Gazebo/White"/>
+    <joint name="${name}_mount" type="fixed"><parent link="fixed_bracket"/><child link="${name}"/></joint>
+  </xacro:macro>
+  <xacro:fixed_bracket_cheek name="fixed_bracket_left" side="1"/>
+  <xacro:fixed_bracket_cheek name="fixed_bracket_right" side="-1"/>
 
   <xacro:box_link name="rotating_bracket" x="${width}" y="${span+thickness}" z="${thickness}"
                   center="0 0 ${reach}" mass="${7800*width*(span+thickness)*thickness}"
                   material="steel" gazebo_material="Gazebo/White"/>
   <joint name="base_joint" type="revolute">
     <parent link="servo_body"/><child link="rotating_bracket"/>
+    <origin xyz="0 0 ${shaft_offset}"/>
     <axis xyz="0 1 0"/>
     <limit lower="${-3*pi/4}" upper="${3*pi/4}" effort="$(arg joint_effort)" velocity="$(arg joint_velocity)"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
   <xacro:macro name="bracket_cheek" params="name side">
     <xacro:box_link name="${name}" x="${width}" y="${thickness}" z="${reach}"
-                    center="0 ${side*span/2} ${reach/2}"
-                    mass="${7800*width*thickness*reach}" material="steel" gazebo_material="Gazebo/White"/>
+            center="0 ${side*span/2} ${reach/2}"
+            mass="${7800*width*thickness*reach}" material="steel" gazebo_material="Gazebo/White"/>
     <joint name="${name}_mount" type="fixed"><parent link="rotating_bracket"/><child link="${name}"/></joint>
   </xacro:macro>
   <xacro:bracket_cheek name="bracket_left" side="1"/>
@@ -97,8 +127,8 @@
       <inertial>
         <mass value="${hub_mass}"/>
         <inertia ixx="${hub_mass*(3*hub_radius**2+hub_depth**2)/12}" ixy="0" ixz="0"
-                 iyy="${hub_mass*hub_radius**2/2}" iyz="0"
-                 izz="${hub_mass*(3*hub_radius**2+hub_depth**2)/12}"/>
+           iyy="${hub_mass*hub_radius**2/2}" iyz="0"
+           izz="${hub_mass*(3*hub_radius**2+hub_depth**2)/12}"/>
       </inertial>
     </link>
     <joint name="${name}_mount" type="fixed">
