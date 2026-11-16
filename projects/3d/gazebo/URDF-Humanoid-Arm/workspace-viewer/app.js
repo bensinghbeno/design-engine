@@ -379,10 +379,11 @@ for (const [key,e] of Object.entries(examples)) $('example').add(new Option(e.ti
 $('example').onchange = guard(async () => { const e = examples[$('example').value]; if (e) { load(e.xml,e.tip,e.offset); await generate(); } });
 $('upload').onchange = guard(async () => { const file = $('upload').files[0]; if (!file) return; if (file.size > 5e6) throw Error('File exceeds 5 MB.'); load(await file.text()); $('example').value = ''; });
 async function loadRig() {
-  status('Expanding the current project Xacro…');
-  const response = await fetch('/api/rig'); const text = await response.text();
+  const model = $('rig-model').value;
+  status(model === 'rig2' ? 'Loading Rig 2…' : 'Expanding Rig 1…');
+  const response = await fetch(`/api/${model}`); const text = await response.text();
   if (!response.ok) throw Error(text);
-  load(text); $('example').value = ''; await generate();
+  load(text, model === 'rig2' ? 'wrist_to_gripper_tip' : undefined, model === 'rig2' ? [0,0,0] : undefined); $('example').value = ''; await generate();
 }
 $('rig').onclick = guard(loadRig);
 $('apply').onclick = guard(() => load($('xml').value));

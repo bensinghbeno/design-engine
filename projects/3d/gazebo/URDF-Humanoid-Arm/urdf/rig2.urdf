@@ -1,0 +1,1222 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="rig2_servo_arm">
+  <link name="world" />
+  <link name="Elbow___Frame___fixed_bracket">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Elbow___Frame___fixed_bracket" type="fixed">
+    <parent link="Elbow_mounting_adapter" />
+    <child link="Elbow___Frame___fixed_bracket" />
+    <origin xyz="0.03100013733 3.885780586e-16 -1.679212325e-15" rpy="1.570796251 3.552713679e-15 1.570796371" />
+  </joint>
+  <link name="Elbow___Frame___hub_left">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Elbow___Frame___hub_left" type="fixed">
+    <parent link="elbow_joint" />
+    <child link="Elbow___Frame___hub_left" />
+    <origin xyz="1.657418913e-08 0.02734999359 6.024160726e-09" rpy="0 -0 0" />
+  </joint>
+  <link name="Elbow___Frame___hub_right">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Elbow___Frame___hub_right" type="fixed">
+    <parent link="elbow_joint" />
+    <child link="Elbow___Frame___hub_right" />
+    <origin xyz="1.005344163e-08 -0.02735000104 -4.965867717e-10" rpy="0 -0 0" />
+  </joint>
+  <link name="Elbow___Frame___servo_body">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Elbow___Frame___servo_body" type="fixed">
+    <parent link="Elbow___Frame___fixed_bracket" />
+    <child link="Elbow___Frame___servo_body" />
+    <origin xyz="1.331381405e-08 -7.450580597e-09 0.03449999914" rpy="0 -0 0" />
+  </joint>
+  <link name="Elbow___fixed_bracket">
+    <visual>
+      <origin xyz="1.350417733e-08 -7.450580597e-09 -9.895302355e-10" />
+      <geometry>
+        <box size="0.0299999984 0.0520000048 0.002000014181" />
+      </geometry>
+      <material name="material_Elbow___fixed_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.350417733e-08 -7.450580597e-09 -9.895302355e-10" />
+      <geometry>
+        <box size="0.0299999984 0.0520000048 0.002000014181" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="1.350417733e-08 0.02499999106 0.02050000429" />
+      <geometry>
+        <box size="0.0299999984 0.00200000219 0.03900001023" />
+      </geometry>
+      <material name="material_Elbow___fixed_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.350417733e-08 0.02499999106 0.02050000429" />
+      <geometry>
+        <box size="0.0299999984 0.00200000219 0.03900001023" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="1.024454832e-08 -0.02500000969 0.02049999498" />
+      <geometry>
+        <box size="0.02999999933 0.00200000219 0.03900000721" />
+      </geometry>
+      <material name="material_Elbow___fixed_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.024454832e-08 -0.02500000969 0.02049999498" />
+      <geometry>
+        <box size="0.02999999933 0.00200000219 0.03900000721" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="1.164153218e-08 -7.450580597e-09 0.0195000004" />
+      <mass value="0.07675204712" />
+      <inertia ixx="2.804649077e-05" iyy="1.650809696e-05" izz="2.30512018e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Elbow___fixed_bracket" type="fixed">
+    <parent link="Elbow___servo_body" />
+    <child link="Elbow___fixed_bracket" />
+    <origin xyz="1.331381405e-08 -7.450580597e-09 -0.03849999607" rpy="0 -0 0" />
+  </joint>
+  <link name="Elbow___hub_left">
+    <visual>
+      <origin xyz="4.936009645e-08 4.656612873e-09 -1.373700798e-08" />
+      <geometry>
+        <cylinder radius="0.01500000153" length="0.005000001285" />
+      </geometry>
+      <material name="material_Elbow___hub_left">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="4.936009645e-08 4.656612873e-09 -1.373700798e-08" />
+      <geometry>
+        <cylinder radius="0.01500000153" length="0.005000001285" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="4.936009645e-08 4.656612873e-09 -1.373700798e-08" />
+      <mass value="0.005400002488" />
+      <inertia ixx="4.1625028e-07" iyy="4.1625028e-07" izz="8.100005381e-07" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Elbow___hub_left" type="fixed">
+    <parent link="Elbow___Frame___hub_left" />
+    <child link="Elbow___hub_left" />
+    <origin xyz="-1.332946198e-08 -0.000850006938 5.922832003e-09" rpy="1.570796371 -3.220252438e-07 5.960464122e-08" />
+  </joint>
+  <link name="Elbow___hub_right">
+    <visual>
+      <origin xyz="4.563480616e-08 1.11758709e-08 -6.286427379e-09" />
+      <geometry>
+        <cylinder radius="0.01500000153" length="0.005000001285" />
+      </geometry>
+      <material name="material_Elbow___hub_right">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="4.563480616e-08 1.11758709e-08 -6.286427379e-09" />
+      <geometry>
+        <cylinder radius="0.01500000153" length="0.005000001285" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="4.563480616e-08 1.11758709e-08 -6.286427379e-09" />
+      <mass value="0.005400002488" />
+      <inertia ixx="4.1625028e-07" iyy="4.1625028e-07" izz="8.100005381e-07" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Elbow___hub_right" type="fixed">
+    <parent link="Elbow___Frame___hub_right" />
+    <child link="Elbow___hub_right" />
+    <origin xyz="1.015476947e-08 0.000850006938 7.05532166e-09" rpy="1.570796371 -3.220252438e-07 5.960464122e-08" />
+  </joint>
+  <link name="Elbow___rotating_bracket">
+    <visual>
+      <origin xyz="1.303851604e-08 -7.450580597e-09 -4.656612873e-09" />
+      <geometry>
+        <box size="0.02999999933 0.06549999863 0.002000016393" />
+      </geometry>
+      <material name="material_Elbow___rotating_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.303851604e-08 -7.450580597e-09 -4.656612873e-09" />
+      <geometry>
+        <box size="0.02999999933 0.06549999863 0.002000016393" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="1.676380634e-08 0.03174999356 -0.02074999921" />
+      <geometry>
+        <box size="0.03500000015 0.002000004053 0.04150000434" />
+      </geometry>
+      <material name="material_Elbow___rotating_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.676380634e-08 0.03174999356 -0.02074999921" />
+      <geometry>
+        <box size="0.03500000015 0.002000004053 0.04150000434" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="1.303851604e-08 -0.03175000474 -0.02075001039" />
+      <geometry>
+        <box size="0.03500000015 0.00200000219 0.04150000517" />
+      </geometry>
+      <material name="material_Elbow___rotating_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.303851604e-08 -0.03175000474 -0.02075001039" />
+      <geometry>
+        <box size="0.03500000015 0.00200000219 0.04150000517" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="1.490116119e-08 -5.587935448e-09 -0.02025000565" />
+      <mass value="0.116917566" />
+      <inertia ixx="5.939901557e-05" iyy="2.953387969e-05" izz="5.37358109e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Elbow___rotating_bracket" type="fixed">
+    <parent link="elbow_joint" />
+    <child link="Elbow___rotating_bracket" />
+    <origin xyz="1.331381494e-08 -7.450580597e-09 0.04149999842" rpy="0 -0 0" />
+  </joint>
+  <link name="Elbow___servo_body">
+    <visual>
+      <origin xyz="1.303851604e-08 -7.450580597e-09 -3.725290298e-09" />
+      <geometry>
+        <box size="0.03000000305 0.04800000414 0.06500000507" />
+      </geometry>
+      <material name="material_Elbow___servo_body">
+        <color rgba="0.055 0.055 0.06 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.303851604e-08 -7.450580597e-09 -3.725290298e-09" />
+      <geometry>
+        <box size="0.03000000305 0.04800000414 0.06500000507" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="1.303851604e-08 -7.450580597e-09 -3.725290298e-09" />
+      <mass value="0.1123200299" />
+      <inertia ixx="6.111146615e-05" iyy="4.797002064e-05" izz="2.998945342e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Elbow___servo_body" type="fixed">
+    <parent link="Elbow___Frame___servo_body" />
+    <child link="Elbow___servo_body" />
+    <origin xyz="1.331381405e-08 -7.450580597e-09 -4.686794952e-09" rpy="0 -0 0" />
+  </joint>
+  <link name="Elbow_mounting_adapter">
+    <visual>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.05200000107 0.05200000107 0.04000000283" />
+      </geometry>
+      <material name="material_Elbow_mounting_adapter">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.05200000107 0.05200000107 0.04000000283" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.1297920145" />
+      <inertia ixx="4.655207287e-05" iyy="4.655207287e-05" izz="5.849293697e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Elbow_mounting_adapter" type="fixed">
+    <parent link="wooden_arm" />
+    <child link="Elbow_mounting_adapter" />
+    <origin xyz="1.355052337e-08 2.270220634e-08 0.1549999416" rpy="6.357304017e-08 -3.141592503 3.17865414e-08" />
+  </joint>
+  <link name="Frame___fixed_bracket">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Frame___fixed_bracket" type="fixed">
+    <parent link="T_crossbar" />
+    <child link="Frame___fixed_bracket" />
+    <origin xyz="4.371111806e-10 0.4740000069 -0.0450001955" rpy="-0 3.141592503 -0" />
+  </joint>
+  <link name="Frame___hub_left">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Frame___hub_left" type="fixed">
+    <parent link="base_joint" />
+    <child link="Frame___hub_left" />
+    <origin xyz="2.664535259e-15 0.02734997869 1.221245327e-15" rpy="0 -0 0" />
+  </joint>
+  <link name="Frame___hub_right">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Frame___hub_right" type="fixed">
+    <parent link="base_joint" />
+    <child link="Frame___hub_right" />
+    <origin xyz="2.664535259e-15 -0.02735000849 1.221245327e-15" rpy="0 -0 0" />
+  </joint>
+  <link name="Frame___servo_body">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Frame___servo_body" type="fixed">
+    <parent link="Frame___fixed_bracket" />
+    <child link="Frame___servo_body" />
+    <origin xyz="-3.552713679e-15 0 0.03450000286" rpy="0 -0 0" />
+  </joint>
+  <link name="Frame___wooden_arm">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Frame___wooden_arm" type="fixed">
+    <parent link="shoulder_roll_joint" />
+    <child link="Frame___wooden_arm" />
+    <origin xyz="3.094375955e-08 9.529088629e-09 0.05699991062" rpy="-5.167506437e-14 3.141592264 -2.370444179e-07" />
+  </joint>
+  <link name="Shoulder_roll___Frame___fixed_bracket">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Shoulder_roll___Frame___fixed_bracket" type="fixed">
+    <parent link="base_joint" />
+    <child link="Shoulder_roll___Frame___fixed_bracket" />
+    <origin xyz="1.546116835e-08 0 0.0474998951" rpy="2.384185791e-07 -1.509958309e-07 1.57079649" />
+  </joint>
+  <link name="Shoulder_roll___Frame___hub_left">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Shoulder_roll___Frame___hub_left" type="fixed">
+    <parent link="shoulder_roll_joint" />
+    <child link="Shoulder_roll___Frame___hub_left" />
+    <origin xyz="2.6011719e-08 0.0273500029 -4.416069288e-08" rpy="6.076768524e-15 -1.069097373e-14 1.320047146e-14" />
+  </joint>
+  <link name="Shoulder_roll___Frame___hub_right">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Shoulder_roll___Frame___hub_right" type="fixed">
+    <parent link="shoulder_roll_joint" />
+    <child link="Shoulder_roll___Frame___hub_right" />
+    <origin xyz="1.866228949e-08 -0.0273500029 -3.937866566e-08" rpy="6.076768524e-15 -1.069097373e-14 1.320047146e-14" />
+  </joint>
+  <link name="Shoulder_roll___Frame___servo_body">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Shoulder_roll___Frame___servo_body" type="fixed">
+    <parent link="Shoulder_roll___Frame___fixed_bracket" />
+    <child link="Shoulder_roll___Frame___servo_body" />
+    <origin xyz="4.949689725e-08 -6.883382753e-15 0.03449996188" rpy="6.076768524e-15 -1.069097373e-14 1.320047146e-14" />
+  </joint>
+  <link name="Shoulder_roll___fixed_bracket">
+    <visual>
+      <origin xyz="4.377216101e-08 0 -7.159542292e-08" />
+      <geometry>
+        <box size="0.03000000678 0.05200001225 0.002000000561" />
+      </geometry>
+      <material name="material_Shoulder_roll___fixed_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="4.377216101e-08 0 -7.159542292e-08" />
+      <geometry>
+        <box size="0.03000000678 0.05200001225 0.002000000561" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="4.516914487e-08 0.0250000041 0.02049993724" />
+      <geometry>
+        <box size="0.03000000399 0.002000004053 0.03900001815" />
+      </geometry>
+      <material name="material_Shoulder_roll___fixed_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="4.516914487e-08 0.0250000041 0.02049993724" />
+      <geometry>
+        <box size="0.03000000399 0.002000004053 0.03900001815" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="4.190951586e-08 -0.0250000041 0.02049993724" />
+      <geometry>
+        <box size="0.03000000305 0.002000004053 0.03900001815" />
+      </geometry>
+      <material name="material_Shoulder_roll___fixed_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="4.190951586e-08 -0.0250000041 0.02049993724" />
+      <geometry>
+        <box size="0.03000000305 0.002000004053 0.03900001815" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="4.377216101e-08 0 0.01949993707" />
+      <mass value="0.07675207241" />
+      <inertia ixx="2.804650497e-05" iyy="1.650810454e-05" izz="2.30512165e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Shoulder_roll___fixed_bracket" type="fixed">
+    <parent link="Shoulder_roll___servo_body" />
+    <child link="Shoulder_roll___fixed_bracket" />
+    <origin xyz="1.388124815e-08 1.204591982e-14 -0.03849999234" rpy="6.076768524e-15 -1.069097373e-14 1.320047146e-14" />
+  </joint>
+  <link name="Shoulder_roll___hub_left">
+    <visual>
+      <origin xyz="9.313225746e-09 -1.11758709e-08 1.164153218e-10" />
+      <geometry>
+        <cylinder radius="0.01499999966" length="0.005000001052" />
+      </geometry>
+      <material name="material_Shoulder_roll___hub_left">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="9.313225746e-09 -1.11758709e-08 1.164153218e-10" />
+      <geometry>
+        <cylinder radius="0.01499999966" length="0.005000001052" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="9.313225746e-09 -1.11758709e-08 1.164153218e-10" />
+      <mass value="0.005400001314" />
+      <inertia ixx="4.162501875e-07" iyy="4.162500869e-07" izz="8.100002615e-07" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Shoulder_roll___hub_left" type="fixed">
+    <parent link="Shoulder_roll___Frame___hub_left" />
+    <child link="Shoulder_roll___hub_left" />
+    <origin xyz="2.589751347e-08 -0.0008499984979 -4.408638432e-08" rpy="1.570796132 6.158880694e-08 -1.432112811e-07" />
+  </joint>
+  <link name="Shoulder_roll___hub_right">
+    <visual>
+      <origin xyz="4.656612873e-09 -1.396983862e-08 1.164153218e-10" />
+      <geometry>
+        <cylinder radius="0.01499999966" length="0.005000001052" />
+      </geometry>
+      <material name="material_Shoulder_roll___hub_right">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="4.656612873e-09 -1.396983862e-08 1.164153218e-10" />
+      <geometry>
+        <cylinder radius="0.01499999966" length="0.005000001052" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="4.656612873e-09 -1.396983862e-08 1.164153218e-10" />
+      <mass value="0.005400001314" />
+      <inertia ixx="4.162501875e-07" iyy="4.162500869e-07" izz="8.100002615e-07" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Shoulder_roll___hub_right" type="fixed">
+    <parent link="Shoulder_roll___Frame___hub_right" />
+    <child link="Shoulder_roll___hub_right" />
+    <origin xyz="1.877649503e-08 0.0008500004769 -3.945297777e-08" rpy="1.570796132 6.158880694e-08 -1.432112811e-07" />
+  </joint>
+  <link name="Shoulder_roll___rotating_bracket">
+    <visual>
+      <origin xyz="2.887099981e-08 0 -7.159542292e-08" />
+      <geometry>
+        <box size="0.03000000678 0.06550001353 0.002000000561" />
+      </geometry>
+      <material name="material_Shoulder_roll___rotating_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.887099981e-08 0 -7.159542292e-08" />
+      <geometry>
+        <box size="0.03000000678 0.06550001353 0.002000000561" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="2.980232239e-08 0.03175000474 -0.0207500793" />
+      <geometry>
+        <box size="0.03500000387 0.002000004053 0.04150001067" />
+      </geometry>
+      <material name="material_Shoulder_roll___rotating_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.980232239e-08 0.03175000474 -0.0207500793" />
+      <geometry>
+        <box size="0.03500000387 0.002000004053 0.04150001067" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="2.607703209e-08 -0.03175000474 -0.0207500793" />
+      <geometry>
+        <box size="0.03500000387 0.002000004053 0.04150001067" />
+      </geometry>
+      <material name="material_Shoulder_roll___rotating_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.607703209e-08 -0.03175000474 -0.0207500793" />
+      <geometry>
+        <box size="0.03500000387 0.002000004053 0.04150001067" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="2.793967724e-08 0 -0.02025007829" />
+      <mass value="0.1169175815" />
+      <inertia ixx="5.939902987e-05" iyy="2.953388306e-05" izz="5.373583007e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Shoulder_roll___rotating_bracket" type="fixed">
+    <parent link="shoulder_roll_joint" />
+    <child link="Shoulder_roll___rotating_bracket" />
+    <origin xyz="2.860332948e-08 -8.881784197e-15 0.04149996117" rpy="6.076768524e-15 -1.069097373e-14 1.320047146e-14" />
+  </joint>
+  <link name="Shoulder_roll___servo_body">
+    <visual>
+      <origin xyz="2.002343535e-08 0 -4.097819328e-08" />
+      <geometry>
+        <box size="0.03000000585 0.04800001159 0.06500001252" />
+      </geometry>
+      <material name="material_Shoulder_roll___servo_body">
+        <color rgba="0.055 0.055 0.06 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.002343535e-08 0 -4.097819328e-08" />
+      <geometry>
+        <box size="0.03000000585 0.04800001159 0.06500001252" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="2.002343535e-08 0 -4.097819328e-08" />
+      <mass value="0.1123200672" />
+      <inertia ixx="6.111150219e-05" iyy="4.797004668e-05" izz="2.998947111e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Shoulder_roll___servo_body" type="fixed">
+    <parent link="Shoulder_roll___Frame___servo_body" />
+    <child link="Shoulder_roll___servo_body" />
+    <origin xyz="1.969457486e-08 7.327471963e-15 -4.176968105e-08" rpy="6.076768524e-15 -1.069097373e-14 1.320047146e-14" />
+  </joint>
+  <link name="T_crossbar">
+    <visual>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.07999999821 1 0.08000000566" />
+      </geometry>
+      <material name="material_T_crossbar">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.07999999821 1 0.08000000566" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="7.680000372" />
+      <inertia ixx="0.6440960318" iyy="0.008192000793" izz="0.644096031" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_T_crossbar" type="fixed">
+    <parent link="T_stem" />
+    <child link="T_crossbar" />
+    <origin xyz="0 0 0.7900000811" rpy="0 -0 0" />
+  </joint>
+  <link name="T_stem">
+    <visual>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.1000000015 0.1000000015 1.500000238" />
+      </geometry>
+      <material name="material_T_stem">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.1000000015 0.1000000015 1.500000238" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="18.0000034" />
+      <inertia ixx="3.390001713" iyy="3.390001713" izz="0.03000000656" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_T_stem" type="fixed">
+    <parent link="world" />
+    <child link="T_stem" />
+    <origin xyz="0 0 -0.1493157148" rpy="0 -0 0" />
+  </joint>
+  <link name="Wrist___Frame___fixed_bracket">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Wrist___Frame___fixed_bracket" type="fixed">
+    <parent link="Wrist_mounting_adapter" />
+    <child link="Wrist___Frame___fixed_bracket" />
+    <origin xyz="0 4.996003611e-16 -0.01770013571" rpy="-3.141592503 1.509958025e-07 1.570796132" />
+  </joint>
+  <link name="Wrist___Frame___hub_left">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Wrist___Frame___hub_left" type="fixed">
+    <parent link="wrist_roll_joint" />
+    <child link="Wrist___Frame___hub_left" />
+    <origin xyz="2.738982907e-08 0.02735002711 -4.876451243e-09" rpy="6.076768524e-15 -1.069097712e-14 1.320046977e-14" />
+  </joint>
+  <link name="Wrist___Frame___hub_right">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Wrist___Frame___hub_right" type="fixed">
+    <parent link="wrist_roll_joint" />
+    <child link="Wrist___Frame___hub_right" />
+    <origin xyz="2.004039246e-08 -0.02734998986 -7.545004621e-09" rpy="6.076768524e-15 -1.069097712e-14 1.320046977e-14" />
+  </joint>
+  <link name="Wrist___Frame___servo_body">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Wrist___Frame___servo_body" type="fixed">
+    <parent link="Wrist___Frame___fixed_bracket" />
+    <child link="Wrist___Frame___servo_body" />
+    <origin xyz="2.10726796e-08 1.787424964e-08 0.03449999541" rpy="6.076768524e-15 -1.069097712e-14 1.320046977e-14" />
+  </joint>
+  <link name="Wrist___fixed_bracket">
+    <visual>
+      <origin xyz="1.536682248e-08 1.490116119e-08 -1.362059265e-08" />
+      <geometry>
+        <box size="0.03000000585 0.05200001225 0.002000000561" />
+      </geometry>
+      <material name="material_Wrist___fixed_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.536682248e-08 1.490116119e-08 -1.362059265e-08" />
+      <geometry>
+        <box size="0.03000000585 0.05200001225 0.002000000561" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="1.676380634e-08 0.025000019 0.02049999498" />
+      <geometry>
+        <box size="0.03000000305 0.002000004053 0.03900001606" />
+      </geometry>
+      <material name="material_Wrist___fixed_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.676380634e-08 0.025000019 0.02049999498" />
+      <geometry>
+        <box size="0.03000000305 0.002000004053 0.03900001606" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="1.396983862e-08 -0.0249999892 0.02049999498" />
+      <geometry>
+        <box size="0.03000000305 0.002000004053 0.03900001606" />
+      </geometry>
+      <material name="material_Wrist___fixed_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.396983862e-08 -0.0249999892 0.02049999498" />
+      <geometry>
+        <box size="0.03000000305 0.002000004053 0.03900001606" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="1.536682248e-08 1.490116119e-08 0.01949999481" />
+      <mass value="0.07675206067" />
+      <inertia ixx="2.804649873e-05" iyy="1.650809935e-05" izz="2.305121226e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Wrist___fixed_bracket" type="fixed">
+    <parent link="Wrist___servo_body" />
+    <child link="Wrist___fixed_bracket" />
+    <origin xyz="1.525934223e-08 1.450847265e-08 -0.03850002587" rpy="6.076768524e-15 -1.069097712e-14 1.320046977e-14" />
+  </joint>
+  <link name="Wrist___hub_left">
+    <visual>
+      <origin xyz="7.450580597e-09 -2.793967724e-09 -2.793967724e-09" />
+      <geometry>
+        <cylinder radius="0.01499999966" length="0.005000001285" />
+      </geometry>
+      <material name="material_Wrist___hub_left">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="7.450580597e-09 -2.793967724e-09 -2.793967724e-09" />
+      <geometry>
+        <cylinder radius="0.01499999966" length="0.005000001285" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="7.450580597e-09 -2.793967724e-09 -2.793967724e-09" />
+      <mass value="0.005400001817" />
+      <inertia ixx="4.162502283e-07" iyy="4.162501278e-07" izz="8.10000337e-07" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Wrist___hub_left" type="fixed">
+    <parent link="Wrist___Frame___hub_left" />
+    <child link="Wrist___hub_left" />
+    <origin xyz="2.727562354e-08 -0.0008499726537 -4.802142684e-09" rpy="1.570796132 6.158880694e-08 -1.432112811e-07" />
+  </joint>
+  <link name="Wrist___hub_right">
+    <visual>
+      <origin xyz="2.793967724e-09 -2.328306437e-09 -2.793967724e-09" />
+      <geometry>
+        <cylinder radius="0.01499999966" length="0.005000001285" />
+      </geometry>
+      <material name="material_Wrist___hub_right">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.793967724e-09 -2.328306437e-09 -2.793967724e-09" />
+      <geometry>
+        <cylinder radius="0.01499999966" length="0.005000001285" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="2.793967724e-09 -2.328306437e-09 -2.793967724e-09" />
+      <mass value="0.005400002152" />
+      <inertia ixx="4.162503045e-07" iyy="4.162501536e-07" izz="8.100004375e-07" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Wrist___hub_right" type="fixed">
+    <parent link="Wrist___Frame___hub_right" />
+    <child link="Wrist___hub_right" />
+    <origin xyz="2.015459444e-08 0.00085001142 -3.894022882e-09" rpy="1.570796132 6.158880694e-08 -1.432112811e-07" />
+  </joint>
+  <link name="Wrist___rotating_bracket">
+    <visual>
+      <origin xyz="2.980232239e-08 2.421438694e-08 0" />
+      <geometry>
+        <box size="0.03000000678 0.0655000098 0.002000000561" />
+      </geometry>
+      <material name="material_Wrist___rotating_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.980232239e-08 2.421438694e-08 0" />
+      <geometry>
+        <box size="0.03000000678 0.0655000098 0.002000000561" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="3.166496754e-08 0.03175002709 -0.02075000852" />
+      <geometry>
+        <box size="0.03500000387 0.002000004053 0.04150001142" />
+      </geometry>
+      <material name="material_Wrist___rotating_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="3.166496754e-08 0.03175002709 -0.02075000852" />
+      <geometry>
+        <box size="0.03500000387 0.002000004053 0.04150001142" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="2.793967724e-08 -0.03174997866 -0.02075000852" />
+      <geometry>
+        <box size="0.03500000387 0.00200000219 0.04150001142" />
+      </geometry>
+      <material name="material_Wrist___rotating_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.793967724e-08 -0.03174997866 -0.02075000852" />
+      <geometry>
+        <box size="0.03500000387 0.00200000219 0.04150001142" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="2.980232239e-08 2.421438694e-08 -0.02025000565" />
+      <mass value="0.1169175785" />
+      <inertia ixx="5.939902189e-05" iyy="2.953388537e-05" izz="5.373581916e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Wrist___rotating_bracket" type="fixed">
+    <parent link="wrist_roll_joint" />
+    <child link="Wrist___rotating_bracket" />
+    <origin xyz="2.998143245e-08 2.303219304e-08 0.04149999842" rpy="6.076768524e-15 -1.069097712e-14 1.320046977e-14" />
+  </joint>
+  <link name="Wrist___servo_body">
+    <visual>
+      <origin xyz="2.095475793e-08 1.862645149e-08 -7.450580597e-09" />
+      <geometry>
+        <box size="0.03000000585 0.04800001159 0.06500001252" />
+      </geometry>
+      <material name="material_Wrist___servo_body">
+        <color rgba="0.055 0.055 0.06 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.095475793e-08 1.862645149e-08 -7.450580597e-09" />
+      <geometry>
+        <box size="0.03000000585 0.04800001159 0.06500001252" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="2.095475793e-08 1.862645149e-08 -7.450580597e-09" />
+      <mass value="0.1123200672" />
+      <inertia ixx="6.111150219e-05" iyy="4.797004668e-05" izz="2.998947111e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Wrist___servo_body" type="fixed">
+    <parent link="Wrist___Frame___servo_body" />
+    <child link="Wrist___servo_body" />
+    <origin xyz="2.10726796e-08 1.787424964e-08 -6.210726156e-09" rpy="6.076768524e-15 -1.069097712e-14 1.320046977e-14" />
+  </joint>
+  <link name="Wrist_mounting_adapter">
+    <visual>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.03999999911 0.05200000107 0.02540000342" />
+      </geometry>
+      <material name="material_Wrist_mounting_adapter">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.03999999911 0.05200000107 0.02540000342" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.06339840842" />
+      <inertia ixx="1.769428597e-05" iyy="1.186163143e-05" izz="2.273889603e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Wrist_mounting_adapter" type="fixed">
+    <parent link="wooden_forearm" />
+    <child link="Wrist_mounting_adapter" />
+    <origin xyz="0.1699999869 6.106226635e-16 -2.525757381e-15" rpy="0 -0 0" />
+  </joint>
+  <link name="Wrist2Gripper">
+    <visual>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.03999999911 0.05200000107 0.08000000566" />
+      </geometry>
+      <material name="material_Wrist2Gripper">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.03999999911 0.05200000107 0.08000000566" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.1996800138" />
+      <inertia ixx="0.0001514905874" iyy="0.0001331200231" izz="7.161856561e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_Wrist2Gripper" type="fixed">
+    <parent link="Wrist___rotating_bracket" />
+    <child link="Wrist2Gripper" />
+    <origin xyz="3.059172471e-08 0.05330823734 -0.04339289293" rpy="-3.141592503 8.742278368e-08 1.570796251" />
+  </joint>
+  <link name="base_joint">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="shoulder_joint" type="revolute">
+    <parent link="Frame___servo_body" />
+    <child link="base_joint" />
+    <origin xyz="2.664535259e-15 0 0.01749998331" rpy="0 -0 0" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.35619449" upper="2.35619449" effort="14.7" velocity="1" />
+    <dynamics damping="0.2" friction="0.1" />
+  </joint>
+  <link name="elbow_joint">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="elbow_joint" type="revolute">
+    <parent link="Elbow___Frame___servo_body" />
+    <child link="elbow_joint" />
+    <origin xyz="1.331381494e-08 1.387778781e-17 0.01749999262" rpy="0 -0 0" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.35619449" upper="2.35619449" effort="14.7" velocity="1" />
+    <dynamics damping="0.2" friction="0.1" />
+  </joint>
+  <link name="fixed_bracket">
+    <visual>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.02999999933 0.05200000107 0.002000000328" />
+      </geometry>
+      <material name="material_fixed_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.02999999933 0.05200000107 0.002000000328" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0.02500000037 0.02050000615" />
+      <geometry>
+        <box size="0.02999999933 0.002000000328 0.03900001" />
+      </geometry>
+      <material name="material_fixed_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0.02500000037 0.02050000615" />
+      <geometry>
+        <box size="0.02999999933 0.002000000328 0.03900001" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 -0.02500000037 0.02050000615" />
+      <geometry>
+        <box size="0.02999999933 0.002000000328 0.03900001" />
+      </geometry>
+      <material name="material_fixed_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.02500000037 0.02050000615" />
+      <geometry>
+        <box size="0.02999999933 0.002000000328 0.03900001" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.01950000599" />
+      <mass value="0.07675201594" />
+      <inertia ixx="2.804647104e-05" iyy="1.650808367e-05" izz="2.305118924e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_fixed_bracket" type="fixed">
+    <parent link="servo_body" />
+    <child link="fixed_bracket" />
+    <origin xyz="1.421085472e-14 0 -0.03849995136" rpy="0 -0 0" />
+  </joint>
+  <link name="hub_left">
+    <visual>
+      <origin xyz="0 -7.683411241e-08 -7.823109627e-08" />
+      <geometry>
+        <cylinder radius="0.01500000153" length="0.005000001751" />
+      </geometry>
+      <material name="material_hub_left">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 -7.683411241e-08 -7.823109627e-08" />
+      <geometry>
+        <cylinder radius="0.01500000153" length="0.005000001751" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 -7.683411241e-08 -7.823109627e-08" />
+      <mass value="0.005400003996" />
+      <inertia ixx="4.162505493e-07" iyy="4.162503984e-07" izz="8.100009153e-07" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_hub_left" type="fixed">
+    <parent link="Frame___hub_left" />
+    <child link="hub_left" />
+    <origin xyz="2.664535259e-15 -0.0008500218391 1.221245327e-15" rpy="1.570796371 -1.421085641e-14 -2.009718482e-14" />
+  </joint>
+  <link name="hub_right">
+    <visual>
+      <origin xyz="0 -7.497146726e-08 -1.862645149e-08" />
+      <geometry>
+        <cylinder radius="0.01500000153" length="0.005000001751" />
+      </geometry>
+      <material name="material_hub_right">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 -7.497146726e-08 -1.862645149e-08" />
+      <geometry>
+        <cylinder radius="0.01500000153" length="0.005000001751" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 -7.497146726e-08 -1.862645149e-08" />
+      <mass value="0.005400003996" />
+      <inertia ixx="4.162505493e-07" iyy="4.162503984e-07" izz="8.100009153e-07" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_hub_right" type="fixed">
+    <parent link="Frame___hub_right" />
+    <child link="hub_right" />
+    <origin xyz="2.664535259e-15 0.0008499920368 1.221245327e-15" rpy="1.570796371 -1.421085641e-14 -2.009718482e-14" />
+  </joint>
+  <link name="rotating_bracket">
+    <visual>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.02999999933 0.06549999863 0.002000000328" />
+      </geometry>
+      <material name="material_rotating_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.02999999933 0.06549999863 0.002000000328" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0.03175000101 -0.02075000294" />
+      <geometry>
+        <box size="0.03500000015 0.001999998465 0.04150000401" />
+      </geometry>
+      <material name="material_rotating_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0.03175000101 -0.02075000294" />
+      <geometry>
+        <box size="0.03500000015 0.001999998465 0.04150000401" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 -0.03175000101 -0.02075000294" />
+      <geometry>
+        <box size="0.03500000015 0.001999998465 0.04150000401" />
+      </geometry>
+      <material name="material_rotating_bracket">
+        <color rgba="0.65 0.7 0.74 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.03175000101 -0.02075000294" />
+      <geometry>
+        <box size="0.03500000015 0.001999998465 0.04150000401" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 -0.02025000378" />
+      <mass value="0.1169175095" />
+      <inertia ixx="5.939896811e-05" iyy="2.953385362e-05" izz="5.373577289e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_rotating_bracket" type="fixed">
+    <parent link="base_joint" />
+    <child link="rotating_bracket" />
+    <origin xyz="1.065814104e-14 0 0.04150003195" rpy="0 -0 0" />
+  </joint>
+  <link name="servo_body">
+    <visual>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.02999999933 0.04800000042 0.06500000507" />
+      </geometry>
+      <material name="material_servo_body">
+        <color rgba="0.055 0.055 0.06 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.02999999933 0.04800000042 0.06500000507" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.1123200072" />
+      <inertia ixx="6.111145047e-05" iyy="4.797000887e-05" izz="2.998944193e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_servo_body" type="fixed">
+    <parent link="Frame___servo_body" />
+    <child link="servo_body" />
+    <origin xyz="3.552713679e-15 0 8.881784197e-16" rpy="0 -0 0" />
+  </joint>
+  <link name="shoulder_roll_joint">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="shoulder_roll_joint" type="revolute">
+    <parent link="Shoulder_roll___Frame___servo_body" />
+    <child link="shoulder_roll_joint" />
+    <origin xyz="2.233700513e-08 2.042810365e-14 0.01749997213" rpy="6.076768524e-15 -1.069097373e-14 1.320047146e-14" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.35619449" upper="2.35619449" effort="14.7" velocity="1" />
+    <dynamics damping="0.2" friction="0.1" />
+  </joint>
+  <link name="wooden_arm">
+    <visual>
+      <origin xyz="0 1.303851604e-08 0" />
+      <geometry>
+        <box size="0.02539999969 0.02539999969 0.2700000405" />
+      </geometry>
+      <material name="material_wooden_arm">
+        <color rgba="0.65 0.43 0.23 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 1.303851604e-08 0" />
+      <geometry>
+        <box size="0.02539999969 0.02539999969 0.2700000405" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 1.303851604e-08 0" />
+      <mass value="0.08709661097" />
+      <inertia ixx="0.0005337946745" iyy="0.0005337946745" izz="9.365208029e-06" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_wooden_arm" type="fixed">
+    <parent link="Frame___wooden_arm" />
+    <child link="wooden_arm" />
+    <origin xyz="-8.781161398e-08 1.053445331e-08 -0.1204999909" rpy="3.141592264 1.7484561e-07 -1.570796251" />
+  </joint>
+  <link name="wooden_forearm">
+    <visual>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.3000000119 0.02539999969 0.02540000342" />
+      </geometry>
+      <material name="material_wooden_forearm">
+        <color rgba="0.65 0.43 0.23 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.3000000119 0.02539999969 0.02540000342" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.0967740157" />
+      <inertia ixx="1.04057886e-05" iyy="0.0007310080705" izz="0.000731008069" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="fixed_wooden_forearm" type="fixed">
+    <parent link="elbow_joint" />
+    <child link="wooden_forearm" />
+    <origin xyz="1.331381405e-08 -1.490116119e-08 0.1924998462" rpy="-1.570796371 -1.570796371 0" />
+  </joint>
+  <link name="wrist_roll_joint">
+    <inertial>
+      <mass value="0.000001" />
+      <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="wrist_roll_joint" type="revolute">
+    <parent link="Wrist___Frame___servo_body" />
+    <child link="wrist_roll_joint" />
+    <origin xyz="2.371510632e-08 1.940414762e-08 0.01750000007" rpy="6.076768524e-15 -1.069097712e-14 1.320046977e-14" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.35619449" upper="2.35619449" effort="14.7" velocity="1" />
+    <dynamics damping="0.2" friction="0.1" />
+  </joint>
+  <link name="wrist_to_gripper_tip" />
+  <joint name="wrist_connector_to_tip" type="fixed">
+    <parent link="Wrist2Gripper" />
+    <child link="wrist_to_gripper_tip" />
+    <origin xyz="0.01999999955 0 0" />
+  </joint>
+</robot>

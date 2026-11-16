@@ -11,7 +11,8 @@
   <main>
     <aside>
       <section><div class="eyebrow">01 / ROBOT</div><h1>Explore the possible.</h1><p>See where your arm can reach, one joint at a time.</p>
-        <button id="rig" class="primary">Load current rig</button>
+        <label for="rig-model">Project rig</label><select id="rig-model"><option value="rig">Rig 1</option><option value="rig2" selected>Rig 2 · servo arm</option></select>
+        <button id="rig" class="primary">Load selected rig</button>
         <label class="file-button">Open a URDF file<input type="file" id="upload" accept=".urdf,.xml"></label>
         <label for="example">Or try a mechanism</label><select id="example"><option value="">Choose an example…</option></select>
         <div id="robot-name" class="robot-name">No model loaded</div>

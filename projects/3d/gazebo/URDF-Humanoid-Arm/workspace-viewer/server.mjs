@@ -31,6 +31,9 @@ const server = http.createServer(async (req, res) => {
   }
   const route = new URL(req.url, `http://127.0.0.1:${port}`).pathname.slice(1) || 'index.html';
   try {
+    if (route === 'api/rig2') {
+      return send(200, 'application/xml', await readFile(path.join(here, '../urdf/rig2.urdf'), 'utf8'));
+    }
     if (route === 'api/rig') {
       const env = {...process.env,
         PATH: '/opt/ros/noetic/bin:/usr/bin:/bin',
