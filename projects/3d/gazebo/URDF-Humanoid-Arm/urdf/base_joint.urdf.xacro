@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<robot name="base_joint_rig" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="arm_length" default="0.375"/>
+  <xacro:arg name="wood_density" default="500"/>
+  <xacro:arg name="servo_width" default="0.048"/>
+  <xacro:arg name="servo_depth" default="0.030"/>
+  <xacro:arg name="servo_height" default="0.065"/>
+  <xacro:arg name="servo_mass" default="0.350"/>
+  <xacro:arg name="bracket_thickness" default="0.003"/>
+  <xacro:arg name="bracket_reach" default="0.050"/>
+  <xacro:arg name="hub_radius" default="0.012"/>
+  <xacro:arg name="hub_depth" default="0.004"/>
+  <xacro:arg name="joint_effort" default="14.7"/>
+  <xacro:arg name="joint_velocity" default="1.0"/>
+  <xacro:property name="arm_length" value="$(arg arm_length)"/>
+  <xacro:property name="wood_density" value="$(arg wood_density)"/>
+  <xacro:property name="width" value="$(arg servo_width)"/>
+  <xacro:property name="depth" value="$(arg servo_depth)"/>
+  <xacro:property name="height" value="$(arg servo_height)"/>
+  <xacro:property name="servo_mass" value="$(arg servo_mass)"/>
+  <xacro:property name="thickness" value="$(arg bracket_thickness)"/>
+  <xacro:property name="reach" value="$(arg bracket_reach)"/>
+  <xacro:property name="hub_radius" value="$(arg hub_radius)"/>
+  <xacro:property name="hub_depth" value="$(arg hub_depth)"/>
+  <xacro:property name="span" value="${depth+2*hub_depth+thickness}"/>
+
+  <material name="wood"><color rgba="0.65 0.43 0.23 1"/></material>
+  <material name="steel"><color rgba="0.72 0.75 0.78 1"/></material>
+  <material name="servo_black"><color rgba="0.055 0.055 0.06 1"/></material>
+
+  <xacro:macro name="box_link" params="name x y z center mass material gazebo_material">
+    <link name="${name}">
+      <visual>
+        <origin xyz="${center}"/>
+        <geometry><box size="${x} ${y} ${z}"/></geometry>
+        <material name="${material}"/>
+      </visual>
+      <collision>
+        <origin xyz="${center}"/>
+        <geometry><box size="${x} ${y} ${z}"/></geometry>
+      </collision>
+      <inertial>
+        <origin xyz="${center}"/>
+        <mass value="${mass}"/>
+        <inertia ixx="${mass*(y*y+z*z)/12}" ixy="0" ixz="0"
+                 iyy="${mass*(x*x+z*z)/12}" iyz="0" izz="${mass*(x*x+y*y)/12}"/>
+      </inertial>
+    </link>
+    <gazebo reference="${name}"><material>${gazebo_material}</material></gazebo>
+  </xacro:macro>
+
+  <link name="world"/>
+  <xacro:box_link name="base" x="0.16" y="0.16" z="0.01" center="0 0 0.005"
+                  mass="1.0" material="steel" gazebo_material="Gazebo/Grey"/>
+  <joint name="world_to_base" type="fixed"><parent link="world"/><child link="base"/></joint>
+  <xacro:box_link name="servo_mount" x="${width}" y="${depth}" z="0.04" center="0 0 0.02"
+                  mass="0.1" material="steel" gazebo_material="Gazebo/Grey"/>
+  <joint name="base_to_mount" type="fixed">
+    <parent link="base"/><child link="servo_mount"/><origin xyz="0 0 0.01"/>
+  </joint>
+  <xacro:box_link name="servo_body" x="${width}" y="${depth}" z="${height}" center="0 0 0"
+                  mass="${servo_mass}" material="servo_black" gazebo_material="Gazebo/Black"/>
+  <joint name="mount_to_servo" type="fixed">
+    <parent link="servo_mount"/><child link="servo_body"/><origin xyz="0 0 ${0.04+height/2}"/>
+  </joint>
+
+  <xacro:box_link name="rotating_bracket" x="${width}" y="${span+thickness}" z="${thickness}"
+                  center="0 0 ${reach}" mass="${7800*width*(span+thickness)*thickness}"
+                  material="steel" gazebo_material="Gazebo/White"/>
+  <joint name="base_joint" type="revolute">
+    <parent link="servo_body"/><child link="rotating_bracket"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="${-3*pi/4}" upper="${3*pi/4}" effort="$(arg joint_effort)" velocity="$(arg joint_velocity)"/>
+    <dynamics damping="0.2" friction="0.1"/>
+  </joint>
+  <xacro:macro name="bracket_cheek" params="name side">
+    <xacro:box_link name="${name}" x="${width}" y="${thickness}" z="${reach}"
+                    center="0 ${side*span/2} ${reach/2}"
+                    mass="${7800*width*thickness*reach}" material="steel" gazebo_material="Gazebo/White"/>
+    <joint name="${name}_mount" type="fixed"><parent link="rotating_bracket"/><child link="${name}"/></joint>
+  </xacro:macro>
+  <xacro:bracket_cheek name="bracket_left" side="1"/>
+  <xacro:bracket_cheek name="bracket_right" side="-1"/>
+
+  <xacro:macro name="output_hub" params="name side">
+    <xacro:property name="hub_mass" value="${7800*pi*hub_radius**2*hub_depth}"/>
+    <link name="${name}">
+      <visual>
+        <origin rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${hub_radius}" length="${hub_depth}"/></geometry>
+        <material name="steel"/>
+      </visual>
+      <collision>
+        <origin rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${hub_radius}" length="${hub_depth}"/></geometry>
+      </collision>
+      <inertial>
+        <mass value="${hub_mass}"/>
+        <inertia ixx="${hub_mass*(3*hub_radius**2+hub_depth**2)/12}" ixy="0" ixz="0"
+                 iyy="${hub_mass*hub_radius**2/2}" iyz="0"
+                 izz="${hub_mass*(3*hub_radius**2+hub_depth**2)/12}"/>
+      </inertial>
+    </link>
+    <joint name="${name}_mount" type="fixed">
+      <parent link="rotating_bracket"/><child link="${name}"/>
+      <origin xyz="0 ${side*(depth+hub_depth)/2} 0"/>
+    </joint>
+    <gazebo reference="${name}"><material>Gazebo/White</material></gazebo>
+  </xacro:macro>
+  <xacro:output_hub name="hub_left" side="1"/>
+  <xacro:output_hub name="hub_right" side="-1"/>
+
+  <xacro:box_link name="wooden_arm" x="0.0254" y="0.0254" z="${arm_length}"
+                  center="0 0 ${arm_length/2}" mass="${wood_density*0.0254**2*arm_length}"
+                  material="wood" gazebo_material="Gazebo/Wood"/>
+  <joint name="bracket_to_wood" type="fixed">
+    <parent link="rotating_bracket"/><child link="wooden_arm"/>
+    <origin xyz="0 0 ${reach+thickness/2}"/>
+  </joint>
+  <gazebo>
+    <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
+      <robotNamespace>/</robotNamespace><updateRate>50.0</updateRate>
+    </plugin>
+  </gazebo>
+</robot>
