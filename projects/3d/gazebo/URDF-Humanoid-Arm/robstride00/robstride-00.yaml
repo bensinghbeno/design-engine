@@ -1,0 +1,80 @@
+schema: robstride-bench-wiring-v1
+purpose: Documentation only; not an executable motor configuration
+status: Signal-level diagram; verify hardware before connecting power
+motor:
+  model: RobStride 00
+  rated_voltage_v: 48
+  published_supply_range_v: [24, 60]
+  connector_pin_numbers: null
+  wire_colors: null
+debugger:
+  model: RobStride USB-C CAN adapter, SKU 100012096, CH340/GD32
+  switch_1: OFF for normal operation; ON enters bootloader
+  switch_2: ON adds 120-ohm termination; avoid duplicate endpoint termination
+  required_function: USB to CAN interface compatible with this motor revision
+  warning: A USB UART or SWD debugger is not a substitute for a CAN interface
+  isolated: null
+communication:
+  protocol_variant: null
+  bitrate: null
+  documented_can_bitrate: 1000000
+  adapter_max_serial_baud: 921600
+  adapter_frame_header_hex: "41 54"
+  adapter_frame_trailer_hex: "0D 0A"
+  motor_id: null
+  note: Confirm CAN 2.0 or CAN FD and firmware protocol from the matching manual
+connections:
+  - from: computer.USB
+    to: debugger.USB
+  - from: external_DC_supply.positive
+    via: Appropriately rated fuse and accessible DC power disconnect
+    to: motor.power_positive
+  - from: external_DC_supply.negative
+    to: motor.power_negative
+  - from: debugger.CAN_H
+    to: motor.CAN_H
+  - from: debugger.CAN_L
+    to: motor.CAN_L
+conditional_connections:
+  - connection: debugger.CAN_reference_ground to motor.signal_reference
+    condition: Only as specified by both hardware manuals; preserve interface isolation
+    warning: Do not assume USB ground, chassis, signal ground and power negative are interchangeable
+termination:
+  topology: Short twisted-pair CAN_H and CAN_L bus
+  standard_bus_ends_ohms: 120
+  expected_unpowered_parallel_resistance_ohms: 60
+  instruction: Check built-in termination before adding resistors; two 120-ohm ends total
+first_rotation:
+  prerequisites:
+    - Confirm connector pinout, polarity, debugger model and power supply rating
+    - Secure motor housing; remove arm, load and loose attachments; keep shaft clear
+    - Use current-limited DC power and a suitable regeneration or discharge arrangement
+    - Never connect motor supply voltage to USB, CAN pins or debugger logic-power pins
+  sequence:
+    - With power off, wire and verify polarity and bus termination
+    - Connect USB, then apply motor power with the output disabled
+    - Open compatible manufacturer software; select the adapter and documented bus settings
+    - Discover the motor; read identity, voltage and fault status before enabling
+    - With motor disabled, select velocity mode and a zero speed target
+    - Set a conservative motor current or torque limit and gentle acceleration using the matching manual
+    - Configure and verify communication-loss stopping if supported; keep hardware disconnect reachable
+    - Enable, then request a low output speed such as 0.2 rad/s if the software uses output rad/s
+    - Set target speed to zero, wait for rest, then disable
+    - Test the opposite direction only after stopping, with the same small negative speed
+  example_output_speed_rad_s: 0.2
+  approximate_output_speed_rpm: 1.91
+  warning: Example speed is not a verified register value; confirm units and motor/output shaft convention
+linux:
+  note: Adapter identity determines the driver and software; do not assume SocketCAN support
+  identify_usb_command: lsusb
+  identify_serial_command: ls -l /dev/serial/by-id/
+  identify_network_command: ip -details link show
+  caution: A ttyUSB device may be a serial CAN bridge, not a native can0 interface
+sources:
+  - https://raw.githubusercontent.com/RobStride/Product_Information/main/Product%20Literature/CAN2.0/RS00/RS00User%20Manual260713.pdf
+  - https://www.mouser.com/datasheet/3/1361/1/100012096.pdf
+  - https://wiki.seeedstudio.com/rebot_b601_rs_getting_started/
+  - https://robstride.com/products/robStride00
+  - https://github.com/RobStride/Product_Information
+  - https://github.com/RobStride/Product_Information/tree/main/Product%20Literature
+  - https://github.com/RobStride/MotorStudio/releases
