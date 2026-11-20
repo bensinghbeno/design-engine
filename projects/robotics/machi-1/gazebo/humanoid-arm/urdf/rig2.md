@@ -21,9 +21,12 @@ This is sampled positional reach, not proof of safe motion or arbitrary tool
 orientation. No gripper or finger motion is modeled.
 
 For Gazebo, close any existing simulation and run `bash 7-launch-rig2.sh`.
-The model starts paused and has no servo-holding controller. Inertias and effort
-limits are approximations, suitable for layout inspection rather than dynamics
-validation. The old Rig 1 GUI is not used.
+The model starts paused and has no physical servo-holding controller. Start
+`bash rig2/2-arm-gui.sh` in another terminal for the dedicated four-joint
+kinematic GUI. It starts released and has no gripper controls. Inertias and
+effort limits are approximations, suitable for layout inspection rather than
+dynamics validation. The old Rig 1 GUI is not used. See
+[Rig 2 launchers](../rig2/README.md) for workspace, motion, sensor and camera tools.
 
 URDF geometry preserves connected box components and cylindrical hubs from the
 Blender meshes, baking scale into geometry and rigid transforms into joints.

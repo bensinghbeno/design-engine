@@ -1,0 +1,8 @@
+{
+  "folders": [
+    { "name": "Humanoid Arm - Gazebo and Viewers", "path": "gazebo/humanoid-arm" },
+    { "name": "RobStride 00 - Control and Wiring", "path": "actuators/robstride00" },
+    { "name": "Blender", "path": "blender" },
+    { "name": "Servo Arm", "path": "servo-arm" }
+  ]
+}

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" viewBox="0 0 210 297">
+  <title>RS00 output hub drilling template - A4 actual size</title>
+  <rect width="210" height="297" fill="white"/>
+  <g font-family="sans-serif" fill="black" text-anchor="middle">
+    <text x="105" y="23" font-size="6">RS00 OUTPUT HUB</text>
+    <text x="105" y="32" font-size="4">A4 drilling template - print at 100% / Actual Size</text>
+    <text x="105" y="42" font-size="3.5">6 holes on a 27 mm bolt circle, spaced 60 degrees apart</text>
+    <text x="105" y="49" font-size="3.5">Adapter clearance holes shown: diameter 3.4 mm for M3 screws</text>
+    <text x="105" y="56" font-size="3.5">Mark the six crosshair centres. Do not drill the motor.</text>
+  </g>
+  <g transform="translate(105 125)">
+    <circle r="13.5" fill="none" stroke="black" stroke-width="0.12" stroke-dasharray="1.2 1"/>
+    <path d="M -23,0 H 23 M 0,-23 V 23" fill="none" stroke="black" stroke-width="0.12" stroke-dasharray="3 1 0.5 1"/>
+    <g fill="none" stroke="black" stroke-width="0.25">
+      <g transform="translate(0 -13.5)">
+        <circle r="1.7"/>
+        <path d="M -3,0 H 3 M 0,-3 V 3"/>
+      </g>
+      <g transform="translate(11.691342951 -6.75)">
+        <circle r="1.7"/>
+        <path d="M -3,0 H 3 M 0,-3 V 3"/>
+      </g>
+      <g transform="translate(11.691342951 6.75)">
+        <circle r="1.7"/>
+        <path d="M -3,0 H 3 M 0,-3 V 3"/>
+      </g>
+      <g transform="translate(0 13.5)">
+        <circle r="1.7"/>
+        <path d="M -3,0 H 3 M 0,-3 V 3"/>
+      </g>
+      <g transform="translate(-11.691342951 6.75)">
+        <circle r="1.7"/>
+        <path d="M -3,0 H 3 M 0,-3 V 3"/>
+      </g>
+      <g transform="translate(-11.691342951 -6.75)">
+        <circle r="1.7"/>
+        <path d="M -3,0 H 3 M 0,-3 V 3"/>
+      </g>
+    </g>
+  </g>
+  <g font-family="sans-serif" fill="black" text-anchor="middle" font-size="3.5">
+    <text x="105" y="161">Adjacent centres: 13.5 mm. Opposite centres: 27 mm.</text>
+    <text x="105" y="169">Central axis crosshair is a reference, not a seventh drilling hole.</text>
+    <text x="105" y="190">VERIFY BOTH SCALE CHECKS BEFORE MARKING</text>
+  </g>
+  <g fill="none" stroke="black" stroke-width="0.2">
+    <path d="M 55,207 H 155 M 55,204 V 210 M 155,204 V 210"/>
+    <rect x="80" y="220" width="50" height="50"/>
+  </g>
+  <g font-family="sans-serif" fill="black" text-anchor="middle" font-size="3.5">
+    <text x="105" y="202">This line must measure exactly 100 mm</text>
+    <text x="105" y="244">50 x 50 mm</text>
+    <text x="105" y="251">scale-check square</text>
+    <text x="105" y="280" font-size="3">Disable Fit to Page / Shrink. Verify hole pattern against your hub.</text>
+    <text x="105" y="286" font-size="3">Source: RS00 User Manual 251112, page 2. Nominal PCD 27 +/-0.1 mm.</text>
+  </g>
+</svg>
