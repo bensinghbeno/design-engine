@@ -16,6 +16,7 @@ import yaml
 COLORS = {
     "blue": "#087c96", "yellow": "#a97900", "black": "#111111",
     "white": "#ffffff", "red": "#c52e3e",
+    "orange": "#e87516", "brown": "#80502c",
 }
 
 

@@ -1,0 +1,77 @@
+schema_version: 1
+title: Actuator angle control - connection diagram
+subtitle: "Assumed board: classic Arduino Uno/Nano (5 V logic). Servo signal on D9; AS5600 remains on 3.3 V and I2C."
+canvas: {width: 2100, height: 1140}
+components:
+  arduino:
+    label: Arduino Uno / Nano
+    detail: "USB power + serial: 115200 baud"
+    bounds: [430, 150, 330, 600]
+    pins:
+      vcc: {label: 3.3V, position: [760, 250], side: right}
+      sensor_ground: {label: GND, position: [760, 285], side: right}
+      sda: {label: A4 / SDA, position: [760, 320], side: right}
+      scl: {label: A5 / SCL, position: [760, 355], side: right}
+      servo: {label: D9 / Servo signal, position: [760, 510], side: right}
+      supply_ground: {label: GND, position: [760, 630], side: right}
+      run: {label: D6 / INPUT_PULLUP, position: [430, 420], side: left}
+      run_ground: {label: GND, position: [430, 465], side: left}
+      direction: {label: D7 / INPUT_PULLUP, position: [430, 620], side: left}
+      direction_ground: {label: GND, position: [430, 665], side: left}
+  sensor:
+    label: AS5600 breakout
+    detail: "3.3 V supply / I2C address 0x36"
+    bounds: [1040, 150, 360, 240]
+    pins:
+      vcc: {label: VCC, position: [1040, 250], side: left}
+      ground: {label: GND, position: [1040, 285], side: left}
+      sda: {label: SDA, position: [1040, 320], side: left}
+      scl: {label: SCL, position: [1040, 355], side: left}
+  servo:
+    label: Positional servo
+    detail: "500-2352 us / permitted 0-250 degrees"
+    bounds: [1040, 410, 420, 340]
+    pins:
+      signal: {label: Signal, position: [1040, 510], side: left}
+      power: {label: V+, position: [1140, 750], side: bottom}
+      ground: {label: GND, position: [1340, 750], side: bottom}
+  run_button:
+    label: RUN button (NO)
+    detail: Hold to move / release to hold
+    bounds: [40, 330, 290, 170]
+    pins:
+      signal: {label: Contact 1, position: [330, 420], side: right}
+      ground: {label: Contact 2, position: [330, 465], side: right}
+  direction_button:
+    label: Direction button (NO)
+    detail: "At run start: released + / pressed -"
+    bounds: [40, 530, 290, 170]
+    pins:
+      signal: {label: Contact 1, position: [330, 620], side: right}
+      ground: {label: Contact 2, position: [330, 665], side: right}
+  supply:
+    label: External servo power supply
+    detail: "Servo-rated voltage + stall current"
+    bounds: [1040, 850, 420, 145]
+    header_offset: 105
+    pins:
+      positive: {label: + (fused), position: [1140, 850], side: top}
+      negative: {label: -, position: [1340, 850], side: top}
+      common: {label: "- / common GND", position: [1040, 930], side: left}
+connections:
+  - {from: arduino.vcc, to: sensor.vcc, color: red, label: 3.3 V, label_position: [900, 240], route: [[760, 250], [1040, 250]]}
+  - {from: arduino.sensor_ground, to: sensor.ground, color: black, label: GND, label_position: [900, 275], route: [[760, 285], [1040, 285]]}
+  - {from: arduino.sda, to: sensor.sda, color: blue, label: SDA, label_position: [900, 310], route: [[760, 320], [1040, 320]]}
+  - {from: arduino.scl, to: sensor.scl, color: yellow, label: SCL, label_position: [900, 345], route: [[760, 355], [1040, 355]]}
+  - {from: arduino.servo, to: servo.signal, color: orange, label: 500-2352 us, label_position: [900, 500], route: [[760, 510], [1040, 510]]}
+  - {from: arduino.supply_ground, to: supply.common, color: black, label: Common ground, label_position: [945, 920], route: [[760, 630], [850, 630], [850, 930], [1040, 930]]}
+  - {from: run_button.signal, to: arduino.run, color: orange, label: D6, label_position: [380, 410], route: [[330, 420], [430, 420]]}
+  - {from: run_button.ground, to: arduino.run_ground, color: black, label: GND, label_position: [380, 455], route: [[330, 465], [430, 465]]}
+  - {from: direction_button.signal, to: arduino.direction, color: blue, label: D7, label_position: [380, 610], route: [[330, 620], [430, 620]]}
+  - {from: direction_button.ground, to: arduino.direction_ground, color: black, label: GND, label_position: [380, 655], route: [[330, 665], [430, 665]]}
+  - {from: supply.positive, to: servo.power, color: red, label: +V servo, label_position: [1120, 805], label_anchor: end, route: [[1140, 850], [1140, 750]]}
+  - {from: supply.negative, to: servo.ground, color: black, label: Return, label_position: [1360, 805], label_anchor: start, route: [[1340, 850], [1340, 750]]}
+notes:
+  - "Automatic mode: load EEPROM or calibrate near center; wait for BUTTONS ARMED. D6 runs, D7 selects direction; Z/z centers. Commands limited to 0..250 degrees."
+  - "AS5600 supply: 3.3 V. Keep I2C pull-ups at 3.3 V; check board/Wire pull-ups and use level shifting if needed. Align its magnet with the measured shaft."
+  - "Supply - pins are one net, joined to Arduino GND and servo GND. Buttons use internal pull-ups. Do not power the servo from Arduino; disconnect power before rewiring."
