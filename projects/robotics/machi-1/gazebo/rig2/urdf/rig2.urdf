@@ -8,7 +8,7 @@
     </inertial>
   </link>
   <joint name="fixed_Elbow___Frame___bracket_left" type="fixed">
-    <parent link="elbow_joint" />
+    <parent link="elbow_joint_link" />
     <child link="Elbow___Frame___bracket_left" />
     <origin xyz="-2.89859514169e-09 5.72205038907e-09 -2.87202084337e-09" rpy="6.77626357803e-21 -1.06581410364e-14 0" />
   </joint>
@@ -19,7 +19,7 @@
     </inertial>
   </link>
   <joint name="fixed_Elbow___Frame___bracket_right" type="fixed">
-    <parent link="elbow_joint" />
+    <parent link="elbow_joint_link" />
     <child link="Elbow___Frame___bracket_right" />
     <origin xyz="-2.89859514169e-09 5.72205038907e-09 -2.87202084337e-09" rpy="6.77626357803e-21 -1.06581410364e-14 0" />
   </joint>
@@ -63,7 +63,7 @@
     </inertial>
   </link>
   <joint name="fixed_Elbow___Frame___hub_left" type="fixed">
-    <parent link="elbow_joint" />
+    <parent link="elbow_joint_link" />
     <child link="Elbow___Frame___hub_left" />
     <origin xyz="3.6177993934e-10 0.0273500140756 -4.50220838388e-09" rpy="6.77626357803e-21 -1.06581410364e-14 0" />
   </joint>
@@ -74,7 +74,7 @@
     </inertial>
   </link>
   <joint name="fixed_Elbow___Frame___hub_right" type="fixed">
-    <parent link="elbow_joint" />
+    <parent link="elbow_joint_link" />
     <child link="Elbow___Frame___hub_right" />
     <origin xyz="-6.15897022271e-09 -0.0273500028998 -1.24183330286e-09" rpy="6.77626357803e-21 -1.06581410364e-14 0" />
   </joint>
@@ -90,56 +90,24 @@
     <origin xyz="-8.11400191481e-09 3.63588803509e-09 0.034500002861" rpy="6.77626357803e-21 -1.06581410364e-14 0" />
   </joint>
   <link name="Elbow___fixed_bracket">
-    <visual>
-      <origin xyz="-1.95577740669e-08 -9.31322574615e-10 8.73114913702e-10" />
-      <geometry>
-        <box size="0.0300000011921 0.0520000010729 0.00200000498444" />
-      </geometry>
-      <material name="material_Elbow___fixed_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="-1.95577740669e-08 -9.31322574615e-10 8.73114913702e-10" />
-      <geometry>
-        <box size="0.0300000011921 0.0520000010729 0.00200000498444" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin xyz="-2.09547579288e-08 0.0250000003725 0.0205000061542" />
-      <geometry>
-        <box size="0.0300000011921 0.00200000405312 0.0390000082552" />
-      </geometry>
-      <material name="material_Elbow___fixed_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="-2.09547579288e-08 0.0250000003725 0.0205000061542" />
-      <geometry>
-        <box size="0.0300000011921 0.00200000405312 0.0390000082552" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin xyz="-1.86264514923e-08 -0.0250000003725 0.0205000024289" />
-      <geometry>
-        <box size="0.0299999993294 0.00200000405312 0.0390000082552" />
-      </geometry>
-      <material name="material_Elbow___fixed_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="-1.86264514923e-08 -0.0250000003725 0.0205000024289" />
-      <geometry>
-        <box size="0.0299999993294 0.00200000405312 0.0390000082552" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="-2.00234353542e-08 0 0.0195000041276" />
       <mass value="0.0767520331732" />
       <inertia ixx="2.8046481769106185e-05" iyy="1.6508090047875168e-05" izz="2.3051197612167586e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Elbow___fixed_bracket.stl" />
+      </geometry>
+      <material name="material_Elbow___fixed_bracket">
+        <color rgba="0.7 0.7 0.7 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Elbow___fixed_bracket.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Elbow___fixed_bracket" type="fixed">
     <parent link="Elbow___servo_body" />
@@ -147,26 +115,24 @@
     <origin xyz="-1.95878957499e-08 -9.53669587744e-10 -0.0384999997914" rpy="6.77626357803e-21 -1.06581410364e-14 0" />
   </joint>
   <link name="Elbow___hub_left">
-    <visual>
-      <origin xyz="7.45058059692e-08 2.79396772385e-09 -2.67755240202e-08" />
-      <geometry>
-        <cylinder radius="0.0150000015274" length="0.00500000128523" />
-      </geometry>
-      <material name="material_Elbow___hub_left">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="7.45058059692e-08 2.79396772385e-09 -2.67755240202e-08" />
-      <geometry>
-        <cylinder radius="0.0150000015274" length="0.00500000128523" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="7.45058059692e-08 2.79396772385e-09 -2.67755240202e-08" />
       <mass value="0.00540000248775" />
       <inertia ixx="4.162502800254868e-07" iyy="4.162502800254868e-07" izz="8.100005381183187e-07" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Elbow___hub_left.stl" />
+      </geometry>
+      <material name="material_Elbow___hub_left">
+        <color rgba="0.7 0.7 0.7 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Elbow___hub_left.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Elbow___hub_left" type="fixed">
     <parent link="Elbow___Frame___hub_left" />
@@ -174,26 +140,24 @@
     <origin xyz="2.60452992507e-10 -0.000849986332469 -4.45154491047e-09" rpy="1.57079637051 -1.3298476631e-07 1.07284414241e-07" />
   </joint>
   <link name="Elbow___hub_right">
-    <visual>
-      <origin xyz="6.51925802231e-08 3.72529029846e-09 -1.18743628263e-08" />
-      <geometry>
-        <cylinder radius="0.0150000015274" length="0.00500000128523" />
-      </geometry>
-      <material name="material_Elbow___hub_right">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="6.51925802231e-08 3.72529029846e-09 -1.18743628263e-08" />
-      <geometry>
-        <cylinder radius="0.0150000015274" length="0.00500000128523" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="6.51925802231e-08 3.72529029846e-09 -1.18743628263e-08" />
       <mass value="0.00540000248775" />
       <inertia ixx="4.162502800254868e-07" iyy="4.162502800254868e-07" izz="8.100005381183187e-07" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Elbow___hub_right.stl" />
+      </geometry>
+      <material name="material_Elbow___hub_right">
+        <color rgba="0.7 0.7 0.7 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Elbow___hub_right.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Elbow___hub_right" type="fixed">
     <parent link="Elbow___Frame___hub_right" />
@@ -201,83 +165,49 @@
     <origin xyz="5.35470050522e-08 0.00084999774117 -1.29249766445e-09" rpy="1.57079637051 -1.3298476631e-07 1.07284414241e-07" />
   </joint>
   <link name="Elbow___rotating_bracket">
-    <visual>
-      <origin xyz="-5.02914190292e-08 9.31322574615e-09 -2.91038304567e-09" />
-      <geometry>
-        <box size="0.0300000030547 0.0655000060797 0.0020000054501" />
-      </geometry>
-      <material name="material_Elbow___rotating_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="-5.02914190292e-08 9.31322574615e-09 -2.91038304567e-09" />
-      <geometry>
-        <box size="0.0300000030547 0.0655000060797 0.0020000054501" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin xyz="-5.12227416039e-08 0.0317500084639 -0.0207500029355" />
-      <geometry>
-        <box size="0.0350000038743 0.00200000219047 0.0415000058711" />
-      </geometry>
-      <material name="material_Elbow___rotating_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="-5.12227416039e-08 0.0317500084639 -0.0207500029355" />
-      <geometry>
-        <box size="0.0350000038743 0.00200000219047 0.0415000058711" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin xyz="-4.842877388e-08 -0.0317499898374 -0.0207500066608" />
-      <geometry>
-        <box size="0.035000000149 0.00200000405312 0.0415000058711" />
-      </geometry>
-      <material name="material_Elbow___rotating_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="-4.842877388e-08 -0.0317499898374 -0.0207500066608" />
-      <geometry>
-        <box size="0.035000000149 0.00200000405312 0.0415000058711" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="-5.02914190292e-08 9.31322574615e-09 -0.0202500056475" />
       <mass value="0.116917545521" />
       <inertia ixx="5.939899898922446e-05" iyy="2.9533868337845126e-05" izz="5.373580147987801e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Elbow___rotating_bracket.stl" />
+      </geometry>
+      <material name="material_Elbow___rotating_bracket">
+        <color rgba="0.7 0.7 0.7 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Elbow___rotating_bracket.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Elbow___rotating_bracket" type="fixed">
-    <parent link="elbow_joint" />
+    <parent link="elbow_joint_link" />
     <child link="Elbow___rotating_bracket" />
     <origin xyz="9.46936751234e-09 1.06692361612e-08 0.0414999909699" rpy="6.77626357803e-21 -1.06581410364e-14 0" />
   </joint>
   <link name="Elbow___servo_body">
-    <visual>
-      <origin xyz="-7.91624188423e-09 3.72529029846e-09 -1.86264514923e-09" />
-      <geometry>
-        <box size="0.0300000011921 0.0480000041425 0.0649999976158" />
-      </geometry>
-      <material name="material_Elbow___servo_body">
-        <color rgba="0.054999999702 0.054999999702 0.0599999986589 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="-7.91624188423e-09 3.72529029846e-09 -1.86264514923e-09" />
-      <geometry>
-        <box size="0.0300000011921 0.0480000041425 0.0649999976158" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="-7.91624188423e-09 3.72529029846e-09 -1.86264514923e-09" />
       <mass value="0.112320010037" />
       <inertia ixx="6.111144628209807e-05" iyy="4.7970002054963075e-05" izz="2.998944707161778e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Elbow___servo_body.stl" />
+      </geometry>
+      <material name="material_Elbow___servo_body">
+        <color rgba="0.2 0.2 0.2 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Elbow___servo_body.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Elbow___servo_body" type="fixed">
     <parent link="Elbow___Frame___servo_body" />
@@ -285,26 +215,24 @@
     <origin xyz="-8.11400191481e-09 3.63588803509e-09 -2.87202084337e-09" rpy="6.77626357803e-21 -1.06581410364e-14 0" />
   </joint>
   <link name="Elbow_mounting_adapter">
-    <visual>
-      <origin xyz="0 2.79396772385e-08 -1.86264514923e-09" />
-      <geometry>
-        <box size="0.0520000010729 0.0520000010729 0.0400000028312" />
-      </geometry>
-      <material name="material_Elbow_mounting_adapter">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 2.79396772385e-08 -1.86264514923e-09" />
-      <geometry>
-        <box size="0.0520000010729 0.0520000010729 0.0400000028312" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="0 2.79396772385e-08 -1.86264514923e-09" />
       <mass value="0.129792014543" />
       <inertia ixx="4.655207287258597e-05" iyy="4.655207287258597e-05" izz="5.849293696755269e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Elbow_mounting_adapter.stl" />
+      </geometry>
+      <material name="material_Elbow_mounting_adapter">
+        <color rgba="1 1 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Elbow_mounting_adapter.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Elbow_mounting_adapter" type="fixed">
     <parent link="wooden_arm" />
@@ -318,46 +246,29 @@
     </inertial>
   </link>
   <joint name="fixed_Frame___wooden_arm" type="fixed">
-    <parent link="shoulder_roll_joint" />
+    <parent link="shoulder_roll_joint_link" />
     <child link="Frame___wooden_arm" />
     <origin xyz="3.58394380839e-08 9.52910994556e-09 0.0569998957217" rpy="-1.32421912249e-14 3.14159226418 -6.84569059217e-08" />
   </joint>
   <link name="Robstride_shoulder_mounting_adapter">
-    <visual>
-      <origin xyz="0 0 0" />
-      <geometry>
-        <box size="0.0520000010729 0.00300000002608 0.0399998985231" />
-      </geometry>
-      <material name="material_Robstride_shoulder_mounting_adapter">
-        <color rgba="0.600000023842 0.639999985695 0.680000007153 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" />
-      <geometry>
-        <box size="0.0520000010729 0.00300000002608 0.0399998985231" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin xyz="0 0.0164999961853 0.0184999704361" />
-      <geometry>
-        <box size="0.0520000010729 0.0299999937415 0.00299999862909" />
-      </geometry>
-      <material name="material_Robstride_shoulder_mounting_adapter">
-        <color rgba="0.600000023842 0.639999985695 0.680000007153 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0.0164999961853 0.0184999704361" />
-      <geometry>
-        <box size="0.0520000010729 0.0299999937415 0.00299999862909" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="0 0.0149999968708 1.02445483208e-08" />
       <mass value="0.0823678120509" />
       <inertia ixx="1.8457204932746933e-05" iyy="2.954254386009769e-05" izz="2.6035089901999847e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Robstride_shoulder_mounting_adapter.stl" />
+      </geometry>
+      <material name="material_Robstride_shoulder_mounting_adapter">
+        <color rgba="1 1 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Robstride_shoulder_mounting_adapter.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Robstride_shoulder_mounting_adapter" type="fixed">
     <parent link="Robstride00___output_flange" />
@@ -376,26 +287,24 @@
     <origin xyz="0 0.5 0" rpy="-1.5707962513 -0 0" />
   </joint>
   <link name="Robstride00___front_cover">
-    <visual>
-      <origin xyz="0 -4.09781932831e-08 8.15489329398e-08" />
-      <geometry>
-        <cylinder radius="0.0285000074655" length="0.00100000249222" />
-      </geometry>
-      <material name="material_Robstride00___front_cover">
-        <color rgba="0.0599999986589 0.0649999976158 0.070000000298 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 -4.09781932831e-08 8.15489329398e-08" />
-      <geometry>
-        <cylinder radius="0.0285000074655" length="0.00100000249222" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="0 -4.09781932831e-08 8.15489329398e-08" />
       <mass value="0.00389881073998" />
       <inertia ixx="1.0559284633884787e-06" iyy="1.0559279114687369e-06" izz="2.111206569828317e-06" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Robstride00___front_cover.stl" />
+      </geometry>
+      <material name="material_Robstride00___front_cover">
+        <color rgba="0.2 0.2 0.2 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Robstride00___front_cover.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Robstride00___front_cover" type="fixed">
     <parent link="Robstride00" />
@@ -403,26 +312,24 @@
     <origin xyz="0 -4.076183302e-08 0.050499998033" rpy="3.5527136788e-15 -0 0" />
   </joint>
   <link name="Robstride00___housing">
-    <visual>
-      <origin xyz="0 -4.19095158577e-08 8.10250639915e-08" />
-      <geometry>
-        <cylinder radius="0.0285000093281" length="0.0500000119209" />
-      </geometry>
-      <material name="material_Robstride00___housing">
-        <color rgba="0.0599999986589 0.0649999976158 0.070000000298 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 -4.19095158577e-08 8.10250639915e-08" />
-      <geometry>
-        <cylinder radius="0.0285000093281" length="0.0500000119209" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="0 -4.19095158577e-08 8.10250639915e-08" />
       <mass value="0.31" />
       <inertia ixx="0.00014851591907174663" iyy="0.00014851586421683798" izz="0.00016786505503044432" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Robstride00___housing.stl" />
+      </geometry>
+      <material name="material_Robstride00___housing">
+        <color rgba="0.2 0.2 0.2 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Robstride00___housing.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Robstride00___housing" type="fixed">
     <parent link="Robstride00" />
@@ -430,26 +337,24 @@
     <origin xyz="0 -4.16346601639e-08 0.0249999985099" rpy="3.5527136788e-15 -0 0" />
   </joint>
   <link name="Robstride00___output_flange">
-    <visual>
-      <origin xyz="0 -4.09781932831e-08 8.15198291093e-08" />
-      <geometry>
-        <cylinder radius="0.0175000037998" length="0.0010000015609" />
-      </geometry>
-      <material name="material_Robstride00___output_flange">
-        <color rgba="0.600000023842 0.639999985695 0.680000007153 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 -4.09781932831e-08 8.15198291093e-08" />
-      <geometry>
-        <cylinder radius="0.0175000037998" length="0.0010000015609" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="0 -4.09781932831e-08 8.15198291093e-08" />
       <mass value="0.00147000261996" />
       <inertia ixx="1.5018533322161924e-07" iyy="1.501852693327697e-07" izz="3.0012560135288764e-07" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Robstride00___output_flange.stl" />
+      </geometry>
+      <material name="material_Robstride00___output_flange">
+        <color rgba="0.7 0.7 0.7 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Robstride00___output_flange.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Robstride00___output_flange" type="fixed">
     <parent link="Robstride00___output_joint" />
@@ -477,7 +382,7 @@
     </inertial>
   </link>
   <joint name="fixed_Shoulder_roll___Frame___bracket_left" type="fixed">
-    <parent link="shoulder_roll_joint" />
+    <parent link="shoulder_roll_joint_link" />
     <child link="Shoulder_roll___Frame___bracket_left" />
     <origin xyz="3.33478915593e-08 1.02140518266e-14 -8.45201100219e-08" rpy="1.32421903778e-14 -4.31578533219e-15 6.34436554399e-14" />
   </joint>
@@ -488,7 +393,7 @@
     </inertial>
   </link>
   <joint name="fixed_Shoulder_roll___Frame___bracket_right" type="fixed">
-    <parent link="shoulder_roll_joint" />
+    <parent link="shoulder_roll_joint_link" />
     <child link="Shoulder_roll___Frame___bracket_right" />
     <origin xyz="3.33478915593e-08 1.02140518266e-14 -8.45201100219e-08" rpy="1.32421903778e-14 -4.31578533219e-15 6.34436554399e-14" />
   </joint>
@@ -532,7 +437,7 @@
     </inertial>
   </link>
   <joint name="fixed_Shoulder_roll___Frame___hub_left" type="fixed">
-    <parent link="shoulder_roll_joint" />
+    <parent link="shoulder_roll_joint_link" />
     <child link="Shoulder_roll___Frame___hub_left" />
     <origin xyz="4.16334700049e-08 0.0273500028998 -8.8649848351e-08" rpy="1.32421903778e-14 -4.31578533219e-15 6.34436554399e-14" />
   </joint>
@@ -543,7 +448,7 @@
     </inertial>
   </link>
   <joint name="fixed_Shoulder_roll___Frame___hub_right" type="fixed">
-    <parent link="shoulder_roll_joint" />
+    <parent link="shoulder_roll_joint_link" />
     <child link="Shoulder_roll___Frame___hub_right" />
     <origin xyz="2.5062309561e-08 -0.0273500028998 -8.03903787983e-08" rpy="1.32421903778e-14 -4.31578533219e-15 6.34436554399e-14" />
   </joint>
@@ -559,56 +464,24 @@
     <origin xyz="3.25829425663e-08 8.32667268469e-15 0.0344999171793" rpy="1.32421903778e-14 -4.31578533219e-15 6.34436554399e-14" />
   </joint>
   <link name="Shoulder_roll___fixed_bracket">
-    <visual>
-      <origin xyz="3.07336449623e-08 0 -8.45175236464e-08" />
-      <geometry>
-        <box size="0.0300000030547 0.0520000085235 0.00200000056066" />
-      </geometry>
-      <material name="material_Shoulder_roll___fixed_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="3.07336449623e-08 0 -8.45175236464e-08" />
-      <geometry>
-        <box size="0.0300000030547 0.0520000085235 0.00200000056066" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin xyz="3.07336449623e-08 0.0250000040978 0.0204999241978" />
-      <geometry>
-        <box size="0.0300000030547 0.00200000032783 0.0390000157058" />
-      </geometry>
-      <material name="material_Shoulder_roll___fixed_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="3.07336449623e-08 0.0250000040978 0.0204999241978" />
-      <geometry>
-        <box size="0.0300000030547 0.00200000032783 0.0390000157058" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin xyz="3.07336449623e-08 -0.0250000040978 0.0204999241978" />
-      <geometry>
-        <box size="0.0300000030547 0.00200000032783 0.0390000157058" />
-      </geometry>
-      <material name="material_Shoulder_roll___fixed_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="3.07336449623e-08 -0.0250000040978 0.0204999241978" />
-      <geometry>
-        <box size="0.0300000030547 0.00200000032783 0.0390000157058" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="3.07336449623e-08 0 0.0194999240339" />
       <mass value="0.0767520504109" />
       <inertia ixx="2.804649249985783e-05" iyy="1.6508096424033707e-05" izz="2.305120598202973e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Shoulder_roll___fixed_bracket.stl" />
+      </geometry>
+      <material name="material_Shoulder_roll___fixed_bracket">
+        <color rgba="0.7 0.7 0.7 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Shoulder_roll___fixed_bracket.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Shoulder_roll___fixed_bracket" type="fixed">
     <parent link="Shoulder_roll___servo_body" />
@@ -616,26 +489,24 @@
     <origin xyz="3.09000576237e-08 1.42108547152e-14 -0.0385000370443" rpy="1.32421903778e-14 -4.31578533219e-15 6.34436554399e-14" />
   </joint>
   <link name="Shoulder_roll___hub_left">
-    <visual>
-      <origin xyz="6.98491930962e-08 -8.14907252789e-08 -2.32830643654e-09" />
-      <geometry>
-        <cylinder radius="0.0150000024587" length="0.00500000407919" />
-      </geometry>
-      <material name="material_Shoulder_roll___hub_left">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="6.98491930962e-08 -8.14907252789e-08 -2.32830643654e-09" />
-      <geometry>
-        <cylinder radius="0.0150000024587" length="0.00500000407919" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="6.98491930962e-08 -8.14907252789e-08 -2.32830643654e-09" />
       <mass value="0.00540000584051" />
       <inertia ixx="4.1625060133198233e-07" iyy="4.1625055104050223e-07" izz="8.100010913242299e-07" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Shoulder_roll___hub_left.stl" />
+      </geometry>
+      <material name="material_Shoulder_roll___hub_left">
+        <color rgba="0.7 0.7 0.7 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Shoulder_roll___hub_left.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Shoulder_roll___hub_left" type="fixed">
     <parent link="Shoulder_roll___Frame___hub_left" />
@@ -643,26 +514,24 @@
     <origin xyz="4.13759693174e-08 -0.000849998265039 -8.85215030166e-08" rpy="1.5707962513 1.39090508e-08 4.58292426231e-08" />
   </joint>
   <link name="Shoulder_roll___hub_right">
-    <visual>
-      <origin xyz="4.93600964546e-08 -7.17118382454e-08 1.39698386192e-09" />
-      <geometry>
-        <cylinder radius="0.0150000015274" length="0.00500000407919" />
-      </geometry>
-      <material name="material_Shoulder_roll___hub_right">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="4.93600964546e-08 -7.17118382454e-08 1.39698386192e-09" />
-      <geometry>
-        <cylinder radius="0.0150000015274" length="0.00500000407919" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="4.93600964546e-08 -7.17118382454e-08 1.39698386192e-09" />
       <mass value="0.00540000550523" />
       <inertia ixx="4.1625052519627086e-07" iyy="4.1625052519627086e-07" izz="8.100009907412745e-07" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Shoulder_roll___hub_right.stl" />
+      </geometry>
+      <material name="material_Shoulder_roll___hub_right">
+        <color rgba="0.7 0.7 0.7 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Shoulder_roll___hub_right.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Shoulder_roll___hub_right" type="fixed">
     <parent link="Shoulder_roll___Frame___hub_right" />
@@ -670,83 +539,49 @@
     <origin xyz="2.53198138012e-08 0.000850000709761 -8.05187241326e-08" rpy="1.5707962513 1.39090508e-08 4.58292426231e-08" />
   </joint>
   <link name="Shoulder_roll___rotating_bracket">
-    <visual>
-      <origin xyz="3.49245965481e-08 0 -8.45175236464e-08" />
-      <geometry>
-        <box size="0.0300000049174 0.0655000060797 0.00200000056066" />
-      </geometry>
-      <material name="material_Shoulder_roll___rotating_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="3.49245965481e-08 0 -8.45175236464e-08" />
-      <geometry>
-        <box size="0.0300000049174 0.0655000060797 0.00200000056066" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin xyz="3.53902578354e-08 0.0317500010133 -0.0207500923425" />
-      <geometry>
-        <box size="0.0350000038743 0.00200000032783 0.0415000133216" />
-      </geometry>
-      <material name="material_Shoulder_roll___rotating_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="3.53902578354e-08 0.0317500010133 -0.0207500923425" />
-      <geometry>
-        <box size="0.0350000038743 0.00200000032783 0.0415000133216" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin xyz="3.53902578354e-08 -0.0317500010133 -0.0207500923425" />
-      <geometry>
-        <box size="0.0350000038743 0.00200000032783 0.0415000133216" />
-      </geometry>
-      <material name="material_Shoulder_roll___rotating_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="3.53902578354e-08 -0.0317500010133 -0.0207500923425" />
-      <geometry>
-        <box size="0.0350000038743 0.00200000032783 0.0415000133216" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="3.53902578354e-08 0 -0.0202500913292" />
       <mass value="0.116917566017" />
       <inertia ixx="5.9399015572649004e-05" iyy="2.9533879685680924e-05" izz="5.373581090018024e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Shoulder_roll___rotating_bracket.stl" />
+      </geometry>
+      <material name="material_Shoulder_roll___rotating_bracket">
+        <color rgba="0.7 0.7 0.7 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Shoulder_roll___rotating_bracket.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Shoulder_roll___rotating_bracket" type="fixed">
-    <parent link="shoulder_roll_joint" />
+    <parent link="shoulder_roll_joint_link" />
     <child link="Shoulder_roll___rotating_bracket" />
     <origin xyz="3.51619142691e-08 1.68753899743e-14 0.0414999462664" rpy="1.32421903778e-14 -4.31578533219e-15 6.34436554399e-14" />
   </joint>
   <link name="Shoulder_roll___servo_body">
-    <visual>
-      <origin xyz="3.25962901115e-08 0 -8.56816768646e-08" />
-      <geometry>
-        <box size="0.0300000030547 0.0480000078678 0.065000012517" />
-      </geometry>
-      <material name="material_Shoulder_roll___servo_body">
-        <color rgba="0.054999999702 0.054999999702 0.0599999986589 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="3.25962901115e-08 0 -8.56816768646e-08" />
-      <geometry>
-        <box size="0.0300000030547 0.0480000078678 0.065000012517" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="3.25962901115e-08 0 -8.56816768646e-08" />
       <mass value="0.112320051477" />
       <inertia ixx="6.111149030812772e-05" iyy="4.7970038931158844e-05" izz="2.9989462529596858e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Shoulder_roll___servo_body.stl" />
+      </geometry>
+      <material name="material_Shoulder_roll___servo_body">
+        <color rgba="0.2 0.2 0.2 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Shoulder_roll___servo_body.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Shoulder_roll___servo_body" type="fixed">
     <parent link="Shoulder_roll___Frame___servo_body" />
@@ -754,26 +589,24 @@
     <origin xyz="3.25829425663e-08 8.32667268469e-15 -8.45201100219e-08" rpy="1.32421903778e-14 -4.31578533219e-15 6.34436554399e-14" />
   </joint>
   <link name="T_crossbar">
-    <visual>
-      <origin xyz="0 0 0" />
-      <geometry>
-        <box size="0.0799999982119 1 0.0800000056624" />
-      </geometry>
-      <material name="material_T_crossbar">
-        <color rgba="0.239999994636 0.289999991655 0.310000002384 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" />
-      <geometry>
-        <box size="0.0799999982119 1 0.0800000056624" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="0 0 0" />
       <mass value="3.52000017047" />
       <inertia ixx="0.29521068122911404" iyy="0.003754667030334486" izz="0.2952106808794335" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/T_crossbar.stl" />
+      </geometry>
+      <material name="material_T_crossbar">
+        <color rgba="0 0 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/T_crossbar.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_T_crossbar" type="fixed">
     <parent link="T_stem" />
@@ -781,26 +614,24 @@
     <origin xyz="0 0 0.790000081062" rpy="0 -0 0" />
   </joint>
   <link name="T_stem">
-    <visual>
-      <origin xyz="0 0 0" />
-      <geometry>
-        <box size="0.10000000149 0.10000000149 1.50000023842" />
-      </geometry>
-      <material name="material_T_stem">
-        <color rgba="0.239999994636 0.289999991655 0.310000002384 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" />
-      <geometry>
-        <box size="0.10000000149 0.10000000149 1.50000023842" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="0 0 0" />
       <mass value="8.25000155717" />
       <inertia ixx="1.5537507852106198" iyy="1.5537507852106198" izz="0.013750003005067657" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/T_stem.stl" />
+      </geometry>
+      <material name="material_T_stem">
+        <color rgba="0 0 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/T_stem.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_T_stem" type="fixed">
     <parent link="world" />
@@ -814,7 +645,7 @@
     </inertial>
   </link>
   <joint name="fixed_Wrist___Frame___bracket_left" type="fixed">
-    <parent link="wrist_roll_joint" />
+    <parent link="wrist_roll_joint_link" />
     <child link="Wrist___Frame___bracket_left" />
     <origin xyz="6.66819062189e-08 2.65507509312e-08 -1.76782890549e-08" rpy="1.32421912249e-14 -4.31579549659e-15 6.34436554399e-14" />
   </joint>
@@ -825,7 +656,7 @@
     </inertial>
   </link>
   <joint name="fixed_Wrist___Frame___bracket_right" type="fixed">
-    <parent link="wrist_roll_joint" />
+    <parent link="wrist_roll_joint_link" />
     <child link="Wrist___Frame___bracket_right" />
     <origin xyz="6.66819062189e-08 2.65507509312e-08 -1.76782890549e-08" rpy="1.32421912249e-14 -4.31579549659e-15 6.34436554399e-14" />
   </joint>
@@ -869,7 +700,7 @@
     </inertial>
   </link>
   <joint name="fixed_Wrist___Frame___hub_left" type="fixed">
-    <parent link="wrist_roll_joint" />
+    <parent link="wrist_roll_joint_link" />
     <child link="Wrist___Frame___hub_left" />
     <origin xyz="7.49674882172e-08 0.0273500345647 -2.18080202785e-08" rpy="1.32421912249e-14 -4.31579549659e-15 6.34436554399e-14" />
   </joint>
@@ -880,7 +711,7 @@
     </inertial>
   </link>
   <joint name="fixed_Wrist___Frame___hub_right" type="fixed">
-    <parent link="wrist_roll_joint" />
+    <parent link="wrist_roll_joint_link" />
     <child link="Wrist___Frame___hub_right" />
     <origin xyz="5.8396320668e-08 -0.0273499824107 -1.35485507258e-08" rpy="1.32421912249e-14 -4.31579549659e-15 6.34436554399e-14" />
   </joint>
@@ -896,56 +727,24 @@
     <origin xyz="6.59169572259e-08 2.39083242093e-08 0.0344999693334" rpy="1.32421912249e-14 -4.31579549659e-15 6.34436554399e-14" />
   </joint>
   <link name="Wrist___fixed_bracket">
-    <visual>
-      <origin xyz="6.42612576485e-08 1.76951289177e-08 -3.25962901115e-08" />
-      <geometry>
-        <box size="0.0300000030547 0.0520000085235 0.00200000056066" />
-      </geometry>
-      <material name="material_Wrist___fixed_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="6.42612576485e-08 1.76951289177e-08 -3.25962901115e-08" />
-      <geometry>
-        <box size="0.0300000030547 0.0520000085235 0.00200000056066" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin xyz="6.42612576485e-08 0.0250000208616 0.0204999763519" />
-      <geometry>
-        <box size="0.0300000030547 0.00200000219047 0.0390000157058" />
-      </geometry>
-      <material name="material_Wrist___fixed_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="6.42612576485e-08 0.0250000208616 0.0204999763519" />
-      <geometry>
-        <box size="0.0300000030547 0.00200000219047 0.0390000157058" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin xyz="6.42612576485e-08 -0.024999987334 0.0204999763519" />
-      <geometry>
-        <box size="0.0300000030547 0.00200000219047 0.0390000157058" />
-      </geometry>
-      <material name="material_Wrist___fixed_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="6.42612576485e-08 -0.024999987334 0.0204999763519" />
-      <geometry>
-        <box size="0.0300000030547 0.00200000219047 0.0390000157058" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="6.42612576485e-08 1.76951289177e-08 0.0194999761879" />
       <mass value="0.0767520504109" />
       <inertia ixx="2.804649249985783e-05" iyy="1.6508096424033707e-05" izz="2.305120598202973e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist___fixed_bracket.stl" />
+      </geometry>
+      <material name="material_Wrist___fixed_bracket">
+        <color rgba="0.7 0.7 0.7 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist___fixed_bracket.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Wrist___fixed_bracket" type="fixed">
     <parent link="Wrist___servo_body" />
@@ -953,26 +752,24 @@
     <origin xyz="6.4234065178e-08 1.80949832895e-08 -0.0385000146925" rpy="1.32421912249e-14 -4.31579549659e-15 6.34436554399e-14" />
   </joint>
   <link name="Wrist___hub_left">
-    <visual>
-      <origin xyz="6.37955963612e-08 2.79396772385e-09 -3.06172296405e-08" />
-      <geometry>
-        <cylinder radius="0.0150000024587" length="0.00500000454485" />
-      </geometry>
-      <material name="material_Wrist___hub_left">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="6.37955963612e-08 2.79396772385e-09 -3.06172296405e-08" />
-      <geometry>
-        <cylinder radius="0.0150000024587" length="0.00500000454485" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="6.37955963612e-08 2.79396772385e-09 -3.06172296405e-08" />
       <mass value="0.00540000634343" />
       <inertia ixx="4.162505919023042e-07" iyy="4.1625064219378895e-07" izz="8.100011667613985e-07" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist___hub_left.stl" />
+      </geometry>
+      <material name="material_Wrist___hub_left">
+        <color rgba="0.7 0.7 0.7 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist___hub_left.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Wrist___hub_left" type="fixed">
     <parent link="Wrist___Frame___hub_left" />
@@ -980,26 +777,24 @@
     <origin xyz="7.47099875298e-08 -0.000849965494126 -2.16796820496e-08" rpy="1.5707962513 1.39090543527e-08 4.58292426231e-08" />
   </joint>
   <link name="Wrist___hub_right">
-    <visual>
-      <origin xyz="4.33064997196e-08 -2.32830643654e-09 -3.06172296405e-08" />
-      <geometry>
-        <cylinder radius="0.0150000024587" length="0.00500000454485" />
-      </geometry>
-      <material name="material_Wrist___hub_right">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="4.33064997196e-08 -2.32830643654e-09 -3.06172296405e-08" />
-      <geometry>
-        <cylinder radius="0.0150000024587" length="0.00500000454485" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="4.33064997196e-08 -2.32830643654e-09 -3.06172296405e-08" />
       <mass value="0.0054000066787" />
       <inertia ixx="4.162506680380277e-07" iyy="4.162506680380277e-07" izz="8.100012673443727e-07" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist___hub_right.stl" />
+      </geometry>
+      <material name="material_Wrist___hub_right">
+        <color rgba="0.7 0.7 0.7 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist___hub_right.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Wrist___hub_right" type="fixed">
     <parent link="Wrist___Frame___hub_right" />
@@ -1007,83 +802,49 @@
     <origin xyz="5.86538213554e-08 0.000850018579513 -2.8578057254e-08" rpy="1.5707962513 1.39090543527e-08 4.58292426231e-08" />
   </joint>
   <link name="Wrist___rotating_bracket">
-    <visual>
-      <origin xyz="6.84522092342e-08 3.35276126862e-08 -2.79396772385e-09" />
-      <geometry>
-        <box size="0.0300000049174 0.0655000060797 0.00200000056066" />
-      </geometry>
-      <material name="material_Wrist___rotating_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="6.84522092342e-08 3.35276126862e-08 -2.79396772385e-09" />
-      <geometry>
-        <box size="0.0300000049174 0.0655000060797 0.00200000056066" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin xyz="6.89178705215e-08 0.0317500382662 -0.0207500103861" />
-      <geometry>
-        <box size="0.0350000038743 0.00200000032783 0.0415000133216" />
-      </geometry>
-      <material name="material_Wrist___rotating_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="6.89178705215e-08 0.0317500382662 -0.0207500103861" />
-      <geometry>
-        <box size="0.0350000038743 0.00200000032783 0.0415000133216" />
-      </geometry>
-    </collision>
-    <visual>
-      <origin xyz="6.89178705215e-08 -0.031749971211 -0.0207500103861" />
-      <geometry>
-        <box size="0.0350000038743 0.00199999846518 0.0415000133216" />
-      </geometry>
-      <material name="material_Wrist___rotating_bracket">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="6.89178705215e-08 -0.031749971211 -0.0207500103861" />
-      <geometry>
-        <box size="0.0350000038743 0.00199999846518 0.0415000133216" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="6.89178705215e-08 3.35276126862e-08 -0.0202500093728" />
       <mass value="0.116917566017" />
       <inertia ixx="5.9399015572649004e-05" iyy="2.9533879685680924e-05" izz="5.373581090018024e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist___rotating_bracket.stl" />
+      </geometry>
+      <material name="material_Wrist___rotating_bracket">
+        <color rgba="0.7 0.7 0.7 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist___rotating_bracket.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Wrist___rotating_bracket" type="fixed">
-    <parent link="wrist_roll_joint" />
+    <parent link="wrist_roll_joint_link" />
     <child link="Wrist___rotating_bracket" />
     <origin xyz="6.84959289288e-08 3.28170770558e-08 0.0414999984205" rpy="1.32421912249e-14 -4.31579549659e-15 6.34436554399e-14" />
   </joint>
   <link name="Wrist___servo_body">
-    <visual>
-      <origin xyz="6.56582415104e-08 2.32830643654e-08 -3.72529029846e-09" />
-      <geometry>
-        <box size="0.0300000049174 0.0480000078678 0.065000012517" />
-      </geometry>
-      <material name="material_Wrist___servo_body">
-        <color rgba="0.054999999702 0.054999999702 0.0599999986589 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="6.56582415104e-08 2.32830643654e-08 -3.72529029846e-09" />
-      <geometry>
-        <box size="0.0300000049174 0.0480000078678 0.065000012517" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="6.56582415104e-08 2.32830643654e-08 -3.72529029846e-09" />
       <mass value="0.112320058451" />
       <inertia ixx="6.111149410242804e-05" iyy="4.797004295559275e-05" izz="2.9989465437649766e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist___servo_body.stl" />
+      </geometry>
+      <material name="material_Wrist___servo_body">
+        <color rgba="0.2 0.2 0.2 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist___servo_body.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Wrist___servo_body" type="fixed">
     <parent link="Wrist___Frame___servo_body" />
@@ -1091,26 +852,24 @@
     <origin xyz="6.59169572259e-08 2.39083242093e-08 -2.77712786101e-09" rpy="1.32421912249e-14 -4.31579549659e-15 6.34436554399e-14" />
   </joint>
   <link name="Wrist_mounting_adapter">
-    <visual>
-      <origin xyz="2.60770320892e-08 1.49011611938e-08 -2.79396772385e-09" />
-      <geometry>
-        <box size="0.0399999991059 0.0520000010729 0.0254000034183" />
-      </geometry>
-      <material name="material_Wrist_mounting_adapter">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="2.60770320892e-08 1.49011611938e-08 -2.79396772385e-09" />
-      <geometry>
-        <box size="0.0399999991059 0.0520000010729 0.0254000034183" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="2.60770320892e-08 1.49011611938e-08 -2.79396772385e-09" />
       <mass value="0.0633984084231" />
       <inertia ixx="1.7694285969801662e-05" iyy="1.1861631427490056e-05" izz="2.2738896032713723e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist_mounting_adapter.stl" />
+      </geometry>
+      <material name="material_Wrist_mounting_adapter">
+        <color rgba="1 1 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist_mounting_adapter.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Wrist_mounting_adapter" type="fixed">
     <parent link="wooden_forearm" />
@@ -1118,33 +877,31 @@
     <origin xyz="0.170000016689 1.57781876453e-08 -3.02802938279e-09" rpy="9.46125637688e-16 2.84311013317e-15 -6.82039272404e-15" />
   </joint>
   <link name="Wrist2Gripper">
-    <visual>
-      <origin xyz="0 2.04890966415e-08 0" />
-      <geometry>
-        <box size="0.0399999991059 0.0520000010729 0.0800000056624" />
-      </geometry>
-      <material name="material_Wrist2Gripper">
-        <color rgba="0.72000002861 0.75 0.77999997139 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 2.04890966415e-08 0" />
-      <geometry>
-        <box size="0.0399999991059 0.0520000010729 0.0800000056624" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="0 2.04890966415e-08 0" />
       <mass value="0.19968001379" />
       <inertia ixx="0.0001514905873944871" iyy="0.0001331200230789199" izz="7.161856561256413e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist2Gripper.stl" />
+      </geometry>
+      <material name="material_Wrist2Gripper">
+        <color rgba="1 1 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/Wrist2Gripper.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_Wrist2Gripper" type="fixed">
     <parent link="Wrist___rotating_bracket" />
     <child link="Wrist2Gripper" />
     <origin xyz="8.27486914545e-08 0.0533082447946 -0.0433929078281" rpy="-3.14159250259 8.74227836789e-08 1.5707962513" />
   </joint>
-  <link name="elbow_joint">
+  <link name="elbow_joint_link">
     <inertial>
       <mass value="1e-06" />
       <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
@@ -1152,13 +909,13 @@
   </link>
   <joint name="elbow_joint" type="revolute">
     <parent link="Elbow___Frame___servo_body" />
-    <child link="elbow_joint" />
+    <child link="elbow_joint_link" />
     <origin xyz="-2.89859514169e-09 5.72205038907e-09 0.0174999944866" rpy="6.77626357803e-21 -1.06581410364e-14 0" />
     <axis xyz="0 1 0" />
     <limit effort="14.7" velocity="1" lower="-2.356194490192345" upper="2.356194490192345" />
     <dynamics damping="0.2" friction="0.1" />
   </joint>
-  <link name="shoulder_roll_joint">
+  <link name="shoulder_roll_joint_link">
     <inertial>
       <mass value="1e-06" />
       <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
@@ -1166,33 +923,31 @@
   </link>
   <joint name="shoulder_roll_joint" type="revolute">
     <parent link="Shoulder_roll___Frame___servo_body" />
-    <child link="shoulder_roll_joint" />
+    <child link="shoulder_roll_joint_link" />
     <origin xyz="3.33478915593e-08 1.02140518266e-14 0.0174998994917" rpy="1.32421903778e-14 -4.31578533219e-15 6.34436554399e-14" />
     <axis xyz="0 1 0" />
     <limit effort="14.7" velocity="1" lower="-2.356194490192345" upper="2.356194490192345" />
     <dynamics damping="0.2" friction="0.1" />
   </joint>
   <link name="wooden_arm">
-    <visual>
-      <origin xyz="0 1.86264514923e-08 0" />
-      <geometry>
-        <box size="0.025399999693 0.025399999693 0.270000040531" />
-      </geometry>
-      <material name="material_wooden_arm">
-        <color rgba="0.649999976158 0.430000007153 0.230000004172 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 1.86264514923e-08 0" />
-      <geometry>
-        <box size="0.025399999693 0.025399999693 0.270000040531" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="0 1.86264514923e-08 0" />
       <mass value="0.0958062720663" />
       <inertia ixx="0.0005871741419602006" iyy="0.0005871741419602006" izz="1.0301728832054435e-05" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/wooden_arm.stl" />
+      </geometry>
+      <material name="material_wooden_arm">
+        <color rgba="1 0.5 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/wooden_arm.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_wooden_arm" type="fixed">
     <parent link="Frame___wooden_arm" />
@@ -1200,33 +955,31 @@
     <origin xyz="-9.2122476758e-08 1.05344390988e-08 -0.120499923825" rpy="3.14159226418 1.74845581569e-07 -1.5707962513" />
   </joint>
   <link name="wooden_forearm">
-    <visual>
-      <origin xyz="2.98023223877e-08 3.44589352608e-08 -1.39698386192e-08" />
-      <geometry>
-        <box size="0.300000011921 0.025399999693 0.0254000034183" />
-      </geometry>
-      <material name="material_wooden_forearm">
-        <color rgba="0.649999976158 0.430000007153 0.230000004172 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="2.98023223877e-08 3.44589352608e-08 -1.39698386192e-08" />
-      <geometry>
-        <box size="0.300000011921 0.025399999693 0.0254000034183" />
-      </geometry>
-    </collision>
     <inertial>
       <origin xyz="2.98023223877e-08 3.44589352608e-08 -1.39698386192e-08" />
       <mass value="0.10645141727" />
       <inertia ixx="1.1446367463073282e-05" iyy="0.0008041088775438101" izz="0.0008041088758650289" ixy="0" ixz="0" iyz="0" />
     </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/wooden_forearm.stl" />
+      </geometry>
+      <material name="material_wooden_forearm">
+        <color rgba="1 0.5 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://urdf_humanoid_arm/urdf/meshes/rig2/wooden_forearm.stl" />
+      </geometry>
+    </collision>
   </link>
   <joint name="fixed_wooden_forearm" type="fixed">
-    <parent link="elbow_joint" />
+    <parent link="elbow_joint_link" />
     <child link="wooden_forearm" />
     <origin xyz="-5.13380626899e-09 -6.07371362094e-08 0.192499876022" rpy="-1.5707962513 -1.5707962513 0" />
   </joint>
-  <link name="wrist_roll_joint">
+  <link name="wrist_roll_joint_link">
     <inertial>
       <mass value="1e-06" />
       <inertia ixx="1e-12" iyy="1e-12" izz="1e-12" ixy="0" ixz="0" iyz="0" />
@@ -1234,7 +987,7 @@
   </link>
   <joint name="wrist_roll_joint" type="revolute">
     <parent link="Wrist___Frame___servo_body" />
-    <child link="wrist_roll_joint" />
+    <child link="wrist_roll_joint_link" />
     <origin xyz="6.66819062189e-08 2.65507509312e-08 0.0174999963492" rpy="1.32421912249e-14 -4.31579549659e-15 6.34436554399e-14" />
     <axis xyz="0 1 0" />
     <limit effort="14.7" velocity="1" lower="-2.356194490192345" upper="2.356194490192345" />
@@ -1246,4 +999,82 @@
     <child link="wrist_to_gripper_tip" />
     <origin xyz="0.0199999809265 2.59815706727e-08 1.63238311757e-09" />
   </joint>
+  <gazebo reference="Robstride_shoulder_mounting_adapter">
+    <material>Gazebo/Yellow</material>
+  </gazebo>
+  <gazebo reference="wooden_arm">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="T_stem">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <gazebo reference="T_crossbar">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <gazebo reference="Shoulder_roll___hub_left">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="Shoulder_roll___hub_right">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="Shoulder_roll___rotating_bracket">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="Shoulder_roll___servo_body">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+  <gazebo reference="Shoulder_roll___fixed_bracket">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="Elbow_mounting_adapter">
+    <material>Gazebo/Yellow</material>
+  </gazebo>
+  <gazebo reference="Elbow___hub_left">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="Elbow___hub_right">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="Elbow___rotating_bracket">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="Elbow___servo_body">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+  <gazebo reference="Elbow___fixed_bracket">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="wooden_forearm">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="Wrist_mounting_adapter">
+    <material>Gazebo/Yellow</material>
+  </gazebo>
+  <gazebo reference="Wrist___hub_left">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="Wrist___hub_right">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="Wrist___rotating_bracket">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="Wrist___servo_body">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+  <gazebo reference="Wrist___fixed_bracket">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="Wrist2Gripper">
+    <material>Gazebo/Yellow</material>
+  </gazebo>
+  <gazebo reference="Robstride00___housing">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+  <gazebo reference="Robstride00___front_cover">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+  <gazebo reference="Robstride00___output_flange">
+    <material>Gazebo/Grey</material>
+  </gazebo>
 </robot>

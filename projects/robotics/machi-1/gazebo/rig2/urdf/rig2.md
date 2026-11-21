@@ -1,7 +1,7 @@
 # Rig 2
 
 Rig 2 is a neutral-pose snapshot of the edited Blender assembly in
-`../base-joint.blend`, including the user's lowered stand, RobStride 00 shoulder
+`../../../blender/rig-2.blend`, including the user's lowered stand, RobStride 00 shoulder
 pitch actuator, right-angle shoulder mounting adapter, and Wrist2Gripper.
 It is independent of Rig 1 and the earlier single-servo Xacro.
 
@@ -28,8 +28,20 @@ effort limits are approximations, suitable for layout inspection rather than
 dynamics validation. The old Rig 1 GUI is not used. See
 [Rig 2 launchers](../rig2/README.md) for workspace, motion, sensor and camera tools.
 
-URDF geometry preserves connected box components and cylindrical hubs from the
-Blender meshes, baking scale into geometry and rigid transforms into joints.
+URDF visuals and collisions use evaluated Blender meshes exported as binary STL,
+baking mesh scale and placement into the existing neutral link frames. Gazebo
+spawns the assembly 0.899315834 m above its source origin so the stand bottom
+meets the ground; override `spawn_z` if required. The source contains a T-shaped
+stand, not a separate table. Joint controls and approximate inertias are retained.
+
+Re-export from the repository root with:
+
+```sh
+blender --background blender/rig-2.blend --python-exit-code 1 --python gazebo/rig2/export_rig2.py
+```
+
+The export manifest `rig2.export.json` records source geometry and required spawn
+height. Update the launch `spawn_z` when changing stand height.
 Text labels are omitted. `rig2.reference.json` records neutral Blender link
 positions, dimensions, axes, and endpoint for regression checks. Blender edits
 do not automatically update this exported snapshot.

@@ -1,0 +1,138 @@
+{
+  "source": "/home/ben/dev/design-engine/projects/robotics/machi-1/blender/rig-2.blend",
+  "scene": "Single Servo Rig",
+  "meshes": [
+    {
+      "object": "Robstride shoulder mounting adapter",
+      "link": "Robstride_shoulder_mounting_adapter",
+      "triangles": 24
+    },
+    {
+      "object": "wooden_arm",
+      "link": "wooden_arm",
+      "triangles": 12
+    },
+    {
+      "object": "T_stem",
+      "link": "T_stem",
+      "triangles": 12
+    },
+    {
+      "object": "T_crossbar",
+      "link": "T_crossbar",
+      "triangles": 12
+    },
+    {
+      "object": "Shoulder roll - hub_left",
+      "link": "Shoulder_roll___hub_left",
+      "triangles": 380
+    },
+    {
+      "object": "Shoulder roll - hub_right",
+      "link": "Shoulder_roll___hub_right",
+      "triangles": 380
+    },
+    {
+      "object": "Shoulder roll - rotating_bracket",
+      "link": "Shoulder_roll___rotating_bracket",
+      "triangles": 36
+    },
+    {
+      "object": "Shoulder roll - servo_body",
+      "link": "Shoulder_roll___servo_body",
+      "triangles": 12
+    },
+    {
+      "object": "Shoulder roll - fixed_bracket",
+      "link": "Shoulder_roll___fixed_bracket",
+      "triangles": 36
+    },
+    {
+      "object": "Elbow mounting adapter",
+      "link": "Elbow_mounting_adapter",
+      "triangles": 12
+    },
+    {
+      "object": "Elbow - hub_left",
+      "link": "Elbow___hub_left",
+      "triangles": 380
+    },
+    {
+      "object": "Elbow - hub_right",
+      "link": "Elbow___hub_right",
+      "triangles": 380
+    },
+    {
+      "object": "Elbow - rotating_bracket",
+      "link": "Elbow___rotating_bracket",
+      "triangles": 36
+    },
+    {
+      "object": "Elbow - servo_body",
+      "link": "Elbow___servo_body",
+      "triangles": 12
+    },
+    {
+      "object": "Elbow - fixed_bracket",
+      "link": "Elbow___fixed_bracket",
+      "triangles": 36
+    },
+    {
+      "object": "wooden_forearm",
+      "link": "wooden_forearm",
+      "triangles": 12
+    },
+    {
+      "object": "Wrist mounting adapter",
+      "link": "Wrist_mounting_adapter",
+      "triangles": 12
+    },
+    {
+      "object": "Wrist - hub_left",
+      "link": "Wrist___hub_left",
+      "triangles": 380
+    },
+    {
+      "object": "Wrist - hub_right",
+      "link": "Wrist___hub_right",
+      "triangles": 380
+    },
+    {
+      "object": "Wrist - rotating_bracket",
+      "link": "Wrist___rotating_bracket",
+      "triangles": 36
+    },
+    {
+      "object": "Wrist - servo_body",
+      "link": "Wrist___servo_body",
+      "triangles": 12
+    },
+    {
+      "object": "Wrist - fixed_bracket",
+      "link": "Wrist___fixed_bracket",
+      "triangles": 36
+    },
+    {
+      "object": "Wrist2Gripper",
+      "link": "Wrist2Gripper",
+      "triangles": 12
+    },
+    {
+      "object": "Robstride00 - housing",
+      "link": "Robstride00___housing",
+      "triangles": 380
+    },
+    {
+      "object": "Robstride00 - front cover",
+      "link": "Robstride00___front_cover",
+      "triangles": 380
+    },
+    {
+      "object": "Robstride00 - output flange",
+      "link": "Robstride00___output_flange",
+      "triangles": 380
+    }
+  ],
+  "minimum_source_z": -0.8993158340454102,
+  "spawn_height": 0.8993158340454102
+}
