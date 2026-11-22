@@ -1,8 +1,6 @@
 #include <Wire.h>
 #include <Servo.h>
-#include <EEPROM.h>
 #include <math.h>
-#include <stddef.h>
 #include <stdlib.h>
 
 const uint8_t AS5600_ADDRESS = 0x36;
@@ -10,6 +8,10 @@ const uint8_t ANGLE_REGISTER = 0x0E;
 const uint16_t COUNTS_PER_REVOLUTION = 4096;
 const unsigned long DISPLAY_INTERVAL_MS = 250;
 const bool manualTestMode = false;
+const bool potentiometerMode = true;
+const int potentiometerPin = A0;
+const int potentiometerDeadbandUs = 6;
+const int potentiometerZeroAdc = 115;
 char testCommand[24];
 size_t testCommandLength = 0;
 bool testCommandOverflow = false;
@@ -31,19 +33,10 @@ const unsigned long debounceMs = 30;
 const unsigned long startupSettleMs = 1000;
 const unsigned long positionLogIntervalMs = 250;
 
-struct ServoCalibration {
-  uint32_t magic;
-  uint16_t version;
-  float centerAngle;
-  float degreesPerUs;
-  uint16_t checksum;
-};
-
-const uint32_t calibrationMagic = 0x4D314341UL;
-const uint16_t calibrationVersion = 1;
-const int calibrationOffsetUs = 100;
-ServoCalibration calibration = {};
 bool controlReady = false;
+bool potControlling = false;
+int potTakeoverReading = 0;
+unsigned long lastPotUpdateMs = 0;
 
 int currentPulse = centerPulseUs;
 int lastRunState = HIGH;
@@ -80,99 +73,6 @@ bool readRawAngle(uint16_t &rawAngle) {
   return true;
 }
 
-float angleDifference(float angle, float reference) {
-  float difference = angle - reference;
-  while (difference > 180.0f) difference -= 360.0f;
-  while (difference <= -180.0f) difference += 360.0f;
-  return difference;
-}
-
-uint16_t calibrationChecksum(const ServoCalibration &record) {
-  const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&record);
-  uint16_t checksum = 0xFFFF;
-  for (size_t index = 0; index < offsetof(ServoCalibration, checksum); ++index) {
-    checksum ^= static_cast<uint16_t>(bytes[index]) << 8;
-    for (uint8_t bit = 0; bit < 8; ++bit) {
-      checksum = (checksum & 0x8000) ? (checksum << 1) ^ 0x1021 : checksum << 1;
-    }
-  }
-  return checksum;
-}
-
-bool validCalibration(const ServoCalibration &record) {
-  const float slope = fabs(record.degreesPerUs);
-  return record.magic == calibrationMagic && record.version == calibrationVersion &&
-      record.checksum == calibrationChecksum(record) &&
-      isfinite(record.centerAngle) && record.centerAngle >= 0.0f && record.centerAngle < 360.0f &&
-      isfinite(slope) && slope >= 0.08f && slope <= 0.17f;
-}
-
-bool magnetHealthy() {
-  Wire.beginTransmission(AS5600_ADDRESS);
-  Wire.write(0x0B);
-  if (Wire.endTransmission(false) != 0 ||
-      Wire.requestFrom(AS5600_ADDRESS, (uint8_t)1) != 1) {
-    Serial.println(F("FAIL: I2C status read."));
-    return false;
-  }
-  const uint8_t status = Wire.read();
-  if ((status & 0x38) != 0x20) {
-    Serial.print(F("FAIL: magnet status=0x"));
-    Serial.print(status, HEX);
-    Serial.println(F(" (expected MD=1, ML=0, MH=0)."));
-  }
-  return (status & 0x38) == 0x20;
-}
-
-bool readStableAngle(float &angle) {
-  uint16_t rawAngle;
-  if (!magnetHealthy()) return false;
-  if (!readRawAngle(rawAngle)) {
-    Serial.println(F("FAIL: initial angle I2C read."));
-    return false;
-  }
-  float reference = rawAngle * (360.0f / COUNTS_PER_REVOLUTION);
-  const unsigned long started = millis();
-  unsigned long windowStarted = started;
-  unsigned int sampleCount = 1;
-  float lowestDifference = 0.0f;
-  float highestDifference = 0.0f;
-  float totalDifference = 0.0f;
-  while (millis() - started < 10000UL) {
-    delay(20);
-    if (!magnetHealthy()) return false;
-    if (!readRawAngle(rawAngle)) {
-      Serial.println(F("FAIL: sampled angle I2C read."));
-      return false;
-    }
-    const float difference = angleDifference(rawAngle * (360.0f / COUNTS_PER_REVOLUTION), reference);
-    lowestDifference = min(lowestDifference, difference);
-    highestDifference = max(highestDifference, difference);
-    if (highestDifference - lowestDifference > 0.5f) {
-      reference = rawAngle * (360.0f / COUNTS_PER_REVOLUTION);
-      windowStarted = millis();
-      sampleCount = 1;
-      lowestDifference = 0.0f;
-      highestDifference = 0.0f;
-      totalDifference = 0.0f;
-      continue;
-    }
-    totalDifference += difference;
-    ++sampleCount;
-    if (millis() - windowStarted < 1000UL) continue;
-    angle = reference + totalDifference / sampleCount;
-    if (angle < 0.0f) angle += 360.0f;
-    if (angle >= 360.0f) angle -= 360.0f;
-    Serial.print(F("Stable angle_deg="));
-    Serial.print(angle, 3);
-    Serial.print(F(" wait_ms="));
-    Serial.println(millis() - started);
-    return true;
-  }
-  Serial.println(F("FAIL: no stable 1000 ms window within 10000 ms (range limit 0.5 deg)."));
-  return false;
-}
-
 void attachAtPulse(int pulse) {
   pulse = constrain(pulse, minPulseUs, maxCommandPulseUs);
   noInterrupts();
@@ -182,88 +82,37 @@ void attachAtPulse(int pulse) {
   currentPulse = pulse;
 }
 
-bool calibrateServo() {
-  float initialAngle;
-  Serial.println(F("CAL: initial sensor check; EEPROM not written yet."));
-  if (!readStableAngle(initialAngle)) return false;
-  Serial.println(F("Calibrating: moving near center (1400-1600 us). Buttons disabled."));
-  attachAtPulse(centerPulseUs);
-  if (!readStableAngle(initialAngle)) return false;
-  Serial.println(F("CAL: command 1400 us, wait for stable angle."));
-  myServo.writeMicroseconds(centerPulseUs - calibrationOffsetUs);
-  float lowAngle;
-  if (!readStableAngle(lowAngle)) return false;
-  Serial.println(F("CAL: command 1600 us, wait for stable angle."));
-  myServo.writeMicroseconds(centerPulseUs + calibrationOffsetUs);
-  float highAngle;
-  if (!readStableAngle(highAngle)) return false;
-  Serial.println(F("CAL: command 1500 us, wait for stable angle."));
-  myServo.writeMicroseconds(centerPulseUs);
-  float centerAngle;
-  if (!readStableAngle(centerAngle)) return false;
+int lastPotAverage = -1;
+int lastPotTargetPulse = -1;
 
-  const float span = angleDifference(highAngle, lowAngle);
-  const float centerError = fabs(angleDifference(centerAngle, lowAngle) - span / 2.0f);
-  Serial.print(F("CAL: span_deg="));
-  Serial.print(span, 3);
-  Serial.print(F(" center_error_deg="));
-  Serial.println(centerError, 3);
-  if (centerError > 2.0f) {
-    Serial.println(F("FAIL: center consistency exceeds 2 degrees; EEPROM not written."));
-    return false;
-  }
-  calibration = {};
-  calibration.magic = calibrationMagic;
-  calibration.version = calibrationVersion;
-  calibration.centerAngle = centerAngle;
-  calibration.degreesPerUs = span / (2.0f * calibrationOffsetUs);
-  calibration.checksum = calibrationChecksum(calibration);
-  Serial.print(F("CAL: degrees_per_us="));
-  Serial.println(calibration.degreesPerUs, 6);
-  if (!validCalibration(calibration)) {
-    Serial.println(F("FAIL: invalid mapping; expected absolute slope 0.08..0.17. EEPROM not written."));
-    return false;
-  }
-
-  Serial.println(F("EEPROM: writing calibration at address 0."));
-  EEPROM.put(0, calibration);
-  ServoCalibration stored = {};
-  EEPROM.get(0, stored);
-  if (!validCalibration(stored) || stored.checksum != calibration.checksum) {
-    Serial.println(F("FAIL: EEPROM read-back verification."));
-    return false;
-  }
-  currentPulse = centerPulseUs;
-  Serial.println(F("Calibration saved to EEPROM."));
-  return true;
-}
-
-bool initializeServo() {
-  EEPROM.get(0, calibration);
-  if (!validCalibration(calibration)) {
-    Serial.println(F("EEPROM: no valid calibration record; starting calibration."));
-    return calibrateServo();
-  }
-
-  Serial.println(F("Using EEPROM calibration; matching current AS5600 angle."));
-  float angle;
-  if (!readStableAngle(angle)) return false;
-  const float pulse = centerPulseUs + angleDifference(angle, calibration.centerAngle) /
-      calibration.degreesPerUs;
-  Serial.print(F("STARTUP: matched pulse_us="));
-  Serial.println(pulse, 2);
-  if (!isfinite(pulse) || pulse < minPulseUs || pulse > maxCommandPulseUs) {
-    Serial.println(F("FAIL: startup pulse outside permitted 0..250 degree range."));
-    return false;
-  }
-  attachAtPulse(static_cast<int>(pulse + 0.5f));
-  return true;
+void logPotentiometer() {
+  Serial.print(F("POT ms="));
+  Serial.print(millis());
+  Serial.print(F(" raw="));
+  Serial.print(analogRead(potentiometerPin));
+  Serial.print(F(" average="));
+  Serial.print(lastPotAverage);
+  Serial.print(F(" requested_us="));
+  Serial.print(lastPotTargetPulse);
+  Serial.print(F(" commanded_us="));
+  Serial.print(currentPulse);
+  Serial.print(F(" ready="));
+  Serial.print(controlReady);
+  Serial.print(F(" attached="));
+  Serial.print(myServo.attached());
+  Serial.print(F(" pot_mode="));
+  Serial.print(potentiometerMode);
+  Serial.print(F(" pot_active="));
+  Serial.print(potControlling);
+  Serial.print(F(" manual_mode="));
+  Serial.println(manualTestMode);
 }
 
 void displayAngle() {
   const unsigned long now = millis();
   if (now - lastDisplayTime < DISPLAY_INTERVAL_MS) return;
   lastDisplayTime = now;
+  logPotentiometer();
   uint16_t rawAngle;
   Serial.print(F("SAMPLE ms="));
   Serial.print(now);
@@ -340,13 +189,13 @@ void setup() {
   Serial.begin(115200);
   pinMode(buttonPinRun, INPUT_PULLUP);
   pinMode(buttonPinDirection, INPUT_PULLUP);
+  pinMode(potentiometerPin, INPUT);
   Wire.begin();
-
-  Serial.println("Waiting for AS5600 at I2C address 0x36...");
-  while (!as5600Detected()) {
-    delay(1000);
-  }
-  Serial.println("AS5600 detected.");
+  Wire.setWireTimeout(25000, true);
+  Serial.println(F("STARTUP: commanding center 135 deg / 1500 us. No calibration."));
+  attachAtPulse(centerPulseUs);
+  Serial.println(as5600Detected() ? F("AS5600 detected (logging only).") :
+      F("AS5600 missing; controls remain available."));
 
   if (manualTestMode) {
     Serial.println(F("MANUAL TEST: EEPROM unchanged; buttons disabled. Commanding center 135 deg / 1500 us."));
@@ -359,13 +208,6 @@ void setup() {
     return;
   }
 
-  if (!initializeServo()) {
-    myServo.detach();
-    pinMode(servoPin, OUTPUT);
-    digitalWrite(servoPin, LOW);
-    Serial.println(F("Calibration/startup failed. Servo signal off; buttons disabled. Check sensor and mechanism, then reset."));
-    return;
-  }
   controlReady = true;
   while (Serial.available() > 0) Serial.read();
   Serial.println(F("Ready. Release D6 for one second before running."));
@@ -384,6 +226,28 @@ void loop() {
 
   const unsigned long now = millis();
   const int runState = digitalRead(buttonPinRun);
+  bool potSampled = false;
+  if (potentiometerMode) {
+    if (now - lastPotUpdateMs >= updateIntervalMs) {
+      lastPotUpdateMs = now;
+      potSampled = true;
+      long readingTotal = 0;
+      for (uint8_t sample = 0; sample < 8; ++sample) {
+        readingTotal += analogRead(potentiometerPin);
+      }
+      lastPotAverage = readingTotal / 8;
+      const int targetPulse = map(constrain(lastPotAverage, potentiometerZeroAdc, 1023),
+                  potentiometerZeroAdc, 1023, minPulseUs, maxCommandPulseUs);
+      lastPotTargetPulse = targetPulse;
+      if (!armed || runState == LOW || moving || centering) {
+        potControlling = false;
+        potTakeoverReading = lastPotAverage;
+      } else if (!potControlling && abs(lastPotAverage - potTakeoverReading) >= 8) {
+        potControlling = true;
+        Serial.println(F("POT ACTIVE"));
+      }
+    }
+  }
   if (runState != lastRunState) {
     lastRunState = runState;
     runChangedMs = now;
@@ -408,6 +272,7 @@ void loop() {
     if (command == 'Z' || command == 'z') {
       if (armed && runState == HIGH) {
         centering = true;
+        potControlling = false;
         moving = false;
         lastUpdateMs = now;
         Serial.println(F("Moving to 135 degrees. Press D6 to cancel."));
@@ -438,12 +303,21 @@ void loop() {
   if (runState == HIGH) {
     if (moving) {
       logPosition("HOLD");
+      potControlling = false;
+      potTakeoverReading = lastPotAverage;
     }
     moving = false;
     lastUpdateMs = now;
     if (!armed && now - startupMs >= startupSettleMs && now - runChangedMs >= debounceMs) {
       armed = true;
-      Serial.println(F("BUTTONS ARMED. Hold D6 to move; D7 selects direction at run start."));
+      potTakeoverReading = lastPotAverage;
+      Serial.println(F("BUTTONS ARMED. D6 moves; D7 sets direction. Turn A0 pot to take control."));
+    }
+    if (armed && potentiometerMode && potControlling && potSampled &&
+        (abs(lastPotTargetPulse - currentPulse) > potentiometerDeadbandUs ||
+         (lastPotTargetPulse == minPulseUs && currentPulse != minPulseUs))) {
+      currentPulse += constrain(lastPotTargetPulse - currentPulse, -stepPulseUs, stepPulseUs);
+      myServo.writeMicroseconds(currentPulse);
     }
     return;
   }
@@ -453,6 +327,7 @@ void loop() {
   }
 
   if (!moving) {
+    potControlling = false;
     movementDirection = digitalRead(buttonPinDirection) == HIGH ? 1 : -1;
     moving = true;
     lastUpdateMs = now;

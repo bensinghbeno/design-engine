@@ -1,6 +1,6 @@
 schema_version: 1
 title: Actuator angle control - connection diagram
-subtitle: "Assumed board: classic Arduino Uno/Nano (5 V logic). Servo signal on D9; AS5600 remains on 3.3 V and I2C."
+subtitle: "Classic Arduino Uno/Nano (5 V logic). A0 potentiometer sets position; D9 drives servo; AS5600 uses 3.3 V and I2C."
 canvas: {width: 2100, height: 1140}
 components:
   arduino:
@@ -8,6 +8,9 @@ components:
     detail: "USB power + serial: 115200 baud"
     bounds: [430, 150, 330, 600]
     pins:
+      pot_supply: {label: 5V, position: [430, 240], side: left}
+      pot_input: {label: A0 / Analog input, position: [430, 275], side: left}
+      pot_ground: {label: GND, position: [430, 310], side: left}
       vcc: {label: 3.3V, position: [760, 250], side: right}
       sensor_ground: {label: GND, position: [760, 285], side: right}
       sda: {label: A4 / SDA, position: [760, 320], side: right}
@@ -18,6 +21,14 @@ components:
       run_ground: {label: GND, position: [430, 465], side: left}
       direction: {label: D7 / INPUT_PULLUP, position: [430, 620], side: left}
       direction_ground: {label: GND, position: [430, 665], side: left}
+  potentiometer:
+    label: 10 kohm potentiometer
+    detail: "Linear / A0: 0..250 degrees"
+    bounds: [40, 150, 290, 170]
+    pins:
+      supply: {label: Outer terminal / 5V, position: [330, 240], side: right}
+      wiper: {label: Center / Wiper, position: [330, 275], side: right}
+      ground: {label: Outer terminal / GND, position: [330, 310], side: right}
   sensor:
     label: AS5600 breakout
     detail: "3.3 V supply / I2C address 0x36"
@@ -37,7 +48,7 @@ components:
       ground: {label: GND, position: [1340, 750], side: bottom}
   run_button:
     label: RUN button (NO)
-    detail: Hold to move / release to hold
+    detail: "Hold to move / overrides pot"
     bounds: [40, 330, 290, 170]
     pins:
       signal: {label: Contact 1, position: [330, 420], side: right}
@@ -59,6 +70,9 @@ components:
       negative: {label: -, position: [1340, 850], side: top}
       common: {label: "- / common GND", position: [1040, 930], side: left}
 connections:
+  - {from: potentiometer.supply, to: arduino.pot_supply, color: red, label: 5 V, label_position: [380, 230], route: [[330, 240], [430, 240]]}
+  - {from: potentiometer.wiper, to: arduino.pot_input, color: orange, label: A0, label_position: [380, 265], route: [[330, 275], [430, 275]]}
+  - {from: potentiometer.ground, to: arduino.pot_ground, color: black, label: GND, label_position: [380, 300], route: [[330, 310], [430, 310]]}
   - {from: arduino.vcc, to: sensor.vcc, color: red, label: 3.3 V, label_position: [900, 240], route: [[760, 250], [1040, 250]]}
   - {from: arduino.sensor_ground, to: sensor.ground, color: black, label: GND, label_position: [900, 275], route: [[760, 285], [1040, 285]]}
   - {from: arduino.sda, to: sensor.sda, color: blue, label: SDA, label_position: [900, 310], route: [[760, 320], [1040, 320]]}
@@ -72,6 +86,6 @@ connections:
   - {from: supply.positive, to: servo.power, color: red, label: +V servo, label_position: [1120, 805], label_anchor: end, route: [[1140, 850], [1140, 750]]}
   - {from: supply.negative, to: servo.ground, color: black, label: Return, label_position: [1360, 805], label_anchor: start, route: [[1340, 850], [1340, 750]]}
 notes:
-  - "Automatic mode: load EEPROM or calibrate near center; wait for BUTTONS ARMED. D6 runs, D7 selects direction; Z/z centers. Commands limited to 0..250 degrees."
+  - "Startup: center at 1500 us; no calibration. Release D6 to arm. D6/D7 override pot; release holds until knob moves. Z/z centers. Range: 0..250 degrees."
   - "AS5600 supply: 3.3 V. Keep I2C pull-ups at 3.3 V; check board/Wire pull-ups and use level shifting if needed. Align its magnet with the measured shaft."
   - "Supply - pins are one net, joined to Arduino GND and servo GND. Buttons use internal pull-ups. Do not power the servo from Arduino; disconnect power before rewiring."

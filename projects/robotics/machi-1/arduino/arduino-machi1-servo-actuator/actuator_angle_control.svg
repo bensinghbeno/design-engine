@@ -1,13 +1,16 @@
 <?xml version='1.0' encoding='utf-8'?>
 <svg xmlns="http://www.w3.org/2000/svg" width="2100" height="1140" viewBox="0 0 2100 1140" role="img" aria-labelledby="title description">
   <title id="title">Actuator angle control - connection diagram</title>
-  <desc id="description">Assumed board: classic Arduino Uno/Nano (5 V logic). Servo signal on D9; AS5600 remains on 3.3 V and I2C.</desc>
+  <desc id="description">Classic Arduino Uno/Nano (5 V logic). A0 potentiometer sets position; D9 drives servo; AS5600 uses 3.3 V and I2C.</desc>
   <rect width="2100" height="1140" fill="#f2f6f7" />
   <text x="40" y="45" font-size="26" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">Actuator angle control - connection diagram</text>
-  <text x="40" y="78" font-size="15" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Assumed board: classic Arduino Uno/Nano (5 V logic). Servo signal on D9; AS5600 remains on 3.3 V and I2C.</text>
+  <text x="40" y="78" font-size="15" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Classic Arduino Uno/Nano (5 V logic). A0 potentiometer sets position; D9 drives servo; AS5600 uses 3.3 V and I2C.</text>
   <rect x="430" y="150" width="330" height="600" rx="4" fill="white" stroke="#53656e" stroke-width="2" />
   <text x="450" y="182" font-size="19" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">Arduino Uno / Nano</text>
   <text x="450" y="210" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">USB power + serial: 115200 baud</text>
+  <rect x="40" y="150" width="290" height="170" rx="4" fill="white" stroke="#53656e" stroke-width="2" />
+  <text x="60" y="182" font-size="19" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">10 kohm potentiometer</text>
+  <text x="60" y="210" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Linear / A0: 0..250 degrees</text>
   <rect x="1040" y="150" width="360" height="240" rx="4" fill="white" stroke="#53656e" stroke-width="2" />
   <text x="1060" y="182" font-size="19" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">AS5600 breakout</text>
   <text x="1060" y="210" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">3.3 V supply / I2C address 0x36</text>
@@ -16,13 +19,19 @@
   <text x="1060" y="470" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">500-2352 us / permitted 0-250 degrees</text>
   <rect x="40" y="330" width="290" height="170" rx="4" fill="white" stroke="#53656e" stroke-width="2" />
   <text x="60" y="362" font-size="19" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">RUN button (NO)</text>
-  <text x="60" y="390" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Hold to move / release to hold</text>
+  <text x="60" y="390" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Hold to move / overrides pot</text>
   <rect x="40" y="530" width="290" height="170" rx="4" fill="white" stroke="#53656e" stroke-width="2" />
   <text x="60" y="562" font-size="19" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">Direction button (NO)</text>
   <text x="60" y="590" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">At run start: released + / pressed -</text>
   <rect x="1040" y="850" width="420" height="145" rx="4" fill="white" stroke="#53656e" stroke-width="2" />
   <text x="1060" y="955" font-size="19" text-anchor="start" font-weight="bold" font-family="sans-serif" fill="#18252b">External servo power supply</text>
   <text x="1060" y="983" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Servo-rated voltage + stall current</text>
+  <polyline points="330,240 430,240" fill="none" stroke="#c52e3e" stroke-width="3" stroke-linejoin="round" />
+  <text x="380" y="230" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">5 V</text>
+  <polyline points="330,275 430,275" fill="none" stroke="#e87516" stroke-width="3" stroke-linejoin="round" />
+  <text x="380" y="265" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">A0</text>
+  <polyline points="330,310 430,310" fill="none" stroke="#111111" stroke-width="3" stroke-linejoin="round" />
+  <text x="380" y="300" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">GND</text>
   <polyline points="760,250 1040,250" fill="none" stroke="#c52e3e" stroke-width="3" stroke-linejoin="round" />
   <text x="900" y="240" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">3.3 V</text>
   <polyline points="760,285 1040,285" fill="none" stroke="#111111" stroke-width="3" stroke-linejoin="round" />
@@ -47,6 +56,12 @@
   <text x="1120" y="805" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">+V servo</text>
   <polyline points="1340,850 1340,750" fill="none" stroke="#111111" stroke-width="3" stroke-linejoin="round" />
   <text x="1360" y="805" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Return</text>
+  <circle cx="430" cy="240" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="444" y="245" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">5V</text>
+  <circle cx="430" cy="275" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="444" y="280" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">A0 / Analog input</text>
+  <circle cx="430" cy="310" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="444" y="315" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">GND</text>
   <circle cx="760" cy="250" r="5" fill="white" stroke="#18252b" stroke-width="2" />
   <text x="746" y="255" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">3.3V</text>
   <circle cx="760" cy="285" r="5" fill="white" stroke="#18252b" stroke-width="2" />
@@ -67,6 +82,12 @@
   <text x="444" y="625" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">D7 / INPUT_PULLUP</text>
   <circle cx="430" cy="665" r="5" fill="white" stroke="#18252b" stroke-width="2" />
   <text x="444" y="670" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">GND</text>
+  <circle cx="330" cy="240" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="316" y="245" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">Outer terminal / 5V</text>
+  <circle cx="330" cy="275" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="316" y="280" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">Center / Wiper</text>
+  <circle cx="330" cy="310" r="5" fill="white" stroke="#18252b" stroke-width="2" />
+  <text x="316" y="315" font-size="14" text-anchor="end" font-weight="normal" font-family="sans-serif" fill="#18252b">Outer terminal / GND</text>
   <circle cx="1040" cy="250" r="5" fill="white" stroke="#18252b" stroke-width="2" />
   <text x="1054" y="255" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">VCC</text>
   <circle cx="1040" cy="285" r="5" fill="white" stroke="#18252b" stroke-width="2" />
@@ -95,7 +116,7 @@
   <text x="1340" y="877" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif" fill="#18252b">-</text>
   <circle cx="1040" cy="930" r="5" fill="white" stroke="#18252b" stroke-width="2" />
   <text x="1054" y="935" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">- / common GND</text>
-  <text x="40" y="1074" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Automatic mode: load EEPROM or calibrate near center; wait for BUTTONS ARMED. D6 runs, D7 selects direction; Z/z centers. Commands limited to 0..250 degrees.</text>
+  <text x="40" y="1074" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Startup: center at 1500 us; no calibration. Release D6 to arm. D6/D7 override pot; release holds until knob moves. Z/z centers. Range: 0..250 degrees.</text>
   <text x="40" y="1098" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">AS5600 supply: 3.3 V. Keep I2C pull-ups at 3.3 V; check board/Wire pull-ups and use level shifting if needed. Align its magnet with the measured shaft.</text>
   <text x="40" y="1122" font-size="14" text-anchor="start" font-weight="normal" font-family="sans-serif" fill="#18252b">Supply - pins are one net, joined to Arduino GND and servo GND. Buttons use internal pull-ups. Do not power the servo from Arduino; disconnect power before rewiring.</text>
 </svg>
